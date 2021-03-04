@@ -33,7 +33,7 @@ public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStatus
 				new HttpEntity<>(httpHeaders), GraduationStatus.class).getBody();
 		 return graduationDataStatus;
 		}catch(Exception e) {
-			return item;
+			return null;
 		}
 		
 	}

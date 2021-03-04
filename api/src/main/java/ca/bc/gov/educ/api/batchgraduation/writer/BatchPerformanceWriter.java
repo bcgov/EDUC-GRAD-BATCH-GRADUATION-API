@@ -20,8 +20,10 @@ public class BatchPerformanceWriter implements ItemWriter<GraduationStatus> {
     @Override
     public void write(List<? extends GraduationStatus> list) throws Exception {
         LOGGER.info("Recording Algorithm Processed Data");
-        GraduationStatus gradStatus = list.get(0);
-        gradDataStore.addProgram(gradStatus.getProgram());
-        gradDataStore.addProcessedItem(gradStatus);
+        if(list != null && list.size() > 0) {
+	        GraduationStatus gradStatus = list.get(0);
+	        gradDataStore.addProgram(gradStatus.getProgram());
+	        gradDataStore.addProcessedItem(gradStatus);
+        }
     }
 }
