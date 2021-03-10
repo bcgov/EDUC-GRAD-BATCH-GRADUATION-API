@@ -48,6 +48,9 @@ objects:
               ports:
                 - containerPort: ${{CONTAINER_PORT}}
                   protocol: TCP
+              envFrom:
+                - secretRef:
+                    name: grad-client-secret
               resources: {}
       test: false
       triggers:

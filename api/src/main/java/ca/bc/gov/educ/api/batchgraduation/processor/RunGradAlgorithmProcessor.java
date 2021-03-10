@@ -26,11 +26,16 @@ public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStatus
     
 	@Override
 	public GraduationStatus process(GraduationStatus item) throws Exception {
-		LOGGER.info(" Processing  "+item.getPen());
-		 HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(item.getAccess_token());
-		GraduationStatus graduationDataStatus = restTemplate.exchange(String.format(graduateStudent,item.getPen()), HttpMethod.GET,
+		LOGGER.info(" Processing  **** PEN: ****" + item.getPen().substring(5));
+		HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(item.getAccess_token());
+		try {
+		 GraduationStatus graduationDataStatus = restTemplate.exchange(String.format(graduateStudent,item.getPen()), HttpMethod.GET,
 				new HttpEntity<>(httpHeaders), GraduationStatus.class).getBody();
-		return graduationDataStatus;
+		 return graduationDataStatus;
+		}catch(Exception e) {
+			return null;
+		}
+		
 	}
 
     
