@@ -2,12 +2,15 @@ package ca.bc.gov.educ.api.batchgraduation.config;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -25,6 +28,9 @@ public class BatchJobConfig {
 
 	private static final String ENDPOINT_STUDENT_FOR_GRADUATION_LIST_URL = "endpoint.grad-graduation-status-api.student-for-grad-list.url";
 
+	@Autowired
+	JobRegistry jobRegistry;
+	  
     @Bean
     public ItemReader<GraduationStatus> itemReader(Environment environment, RestTemplate restTemplate) {
         return new RecalculateStudentReader(environment.getRequiredProperty(ENDPOINT_STUDENT_FOR_GRADUATION_LIST_URL), restTemplate);
@@ -76,5 +82,12 @@ public class BatchJobConfig {
                 .flow(graduationJobStep)               
                 .end()
                 .build();
+    }
+
+    @Bean
+    public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {
+        JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();
+        postProcessor.setJobRegistry(jobRegistry);
+        return postProcessor;
     }
 }

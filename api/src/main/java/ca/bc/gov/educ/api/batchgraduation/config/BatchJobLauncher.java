@@ -35,7 +35,7 @@ public class BatchJobLauncher {
         this.jobLauncher = jobLauncher;
     }
 
-    @Scheduled(cron = "* */10 * ? * *")
+    @Scheduled(cron = "* 0 19 * * ?")
     public void runSpringBatchExampleJob() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
         LOGGER.info("Batch Job was started");
         jobLauncher.run(job, newExecution());
