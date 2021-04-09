@@ -55,7 +55,7 @@ objects:
                     name: educ-grad-db-secret
                 - secretRef:
                     name: grad-keycloak-pk-secret
-		- secretRef:
+                - secretRef:
                     name: grad-client-secret
               resources: {}
       test: false
