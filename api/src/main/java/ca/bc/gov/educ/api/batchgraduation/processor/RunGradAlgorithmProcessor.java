@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
+import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmResponse;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
@@ -29,9 +30,9 @@ public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStatus
 		LOGGER.info(" Processing  **** PEN: ****" + item.getPen().substring(5));
 		HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(item.getAccess_token());
 		try {
-		 GraduationStatus graduationDataStatus = restTemplate.exchange(String.format(graduateStudent,item.getPen()), HttpMethod.GET,
-				new HttpEntity<>(httpHeaders), GraduationStatus.class).getBody();
-		 return graduationDataStatus;
+		AlgorithmResponse algorithmResponse = restTemplate.exchange(String.format(graduateStudent,item.getPen()), HttpMethod.GET,
+				new HttpEntity<>(httpHeaders), AlgorithmResponse.class).getBody();
+		 return algorithmResponse.getGraduationStatus();
 		}catch(Exception e) {
 			return null;
 		}
