@@ -1,5 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -11,16 +13,26 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ca.bc.gov.educ.api.batchgraduation.model.LoadStudentData;
+import ca.bc.gov.educ.api.batchgraduation.service.GradStudentService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import ca.bc.gov.educ.api.batchgraduation.util.PermissionsContants;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
 @CrossOrigin
+@EnableResourceServer
 public class JobLauncherController {
 
     private static Logger logger = LoggerFactory.getLogger(JobLauncherController.class);
@@ -32,6 +44,9 @@ public class JobLauncherController {
     
     @Autowired
     private JobRegistry jobRegistry;
+    
+    @Autowired
+    private GradStudentService gradStudentService;
     
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_BATCH_JOB)
     public void launchJob( ) {
@@ -46,6 +61,16 @@ public class JobLauncherController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+    	
+    }
+    
+    @PostMapping(EducGradBatchGraduationApiConstants.LOAD_STUDENT_IDS)
+    @PreAuthorize(PermissionsContants.LOAD_STUDENT_IDS)
+    public void loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData) {
+    	logger.info("Inside loadStudentIDs");
+    	OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails(); 
+    	String accessToken = auth.getTokenValue();
+    	gradStudentService.getStudentByPenFromStudentAPI(loadStudentData,accessToken);
     	
     }
 }

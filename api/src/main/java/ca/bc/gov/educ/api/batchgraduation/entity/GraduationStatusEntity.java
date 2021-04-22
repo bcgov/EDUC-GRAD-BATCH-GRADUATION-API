@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.entity;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -54,7 +55,7 @@ public class GraduationStatusEntity  {
     private String studentStatus;
     
     @Column(name = "STUDENT_ID", nullable = false)
-    private String studentID;
+    private UUID studentID;
     
     @Column(name = "created_by", nullable = false)
     private String createdBy;
