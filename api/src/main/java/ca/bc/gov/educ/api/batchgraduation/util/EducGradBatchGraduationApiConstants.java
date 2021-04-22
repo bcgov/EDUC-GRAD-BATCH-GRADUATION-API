@@ -6,6 +6,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String API_VERSION = "v1";
     public static final String GRAD_BATCH_API_ROOT_MAPPING = "/api/" + API_VERSION + "/batch";
     public static final String EXECUTE_BATCH_JOB = "/executebatchjob";
+    public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
        
     //Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";

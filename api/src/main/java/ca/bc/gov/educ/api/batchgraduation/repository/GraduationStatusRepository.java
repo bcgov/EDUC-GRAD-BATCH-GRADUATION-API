@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.GraduationStatusEntity;
@@ -13,4 +14,6 @@ public interface GraduationStatusRepository extends JpaRepository<GraduationStat
     List<GraduationStatusEntity> findAll();
 
 	List<GraduationStatusEntity> findByRecalculateGradStatus(String recalulateFlag);
+	@Query(value="select * from grad_student where student_id is null",nativeQuery=true)
+	List<GraduationStatusEntity> findByStudentID();
 }
