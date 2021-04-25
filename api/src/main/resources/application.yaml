@@ -85,9 +85,9 @@ endpoint:
  keycloack: 
   getToken: https://soam-tools.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/token
  graduation-status-api: 
-  update-grad-status: https://educ-grad-graduation-status-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/gradstatus/pen/%s
+  update-grad-status: https://educ-grad-graduation-status-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/gradstatus/studentid/%s
   read-grad-status:
-      url: https://educ-grad-graduation-status-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/gradstatus/pen/%s
+      url: https://educ-grad-graduation-status-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/gradstatus/studentid/%s
  pen-student-api:
   by-pen:
    url: https://student-api-75e61b-tools.apps.silver.devops.gov.bc.ca/api/v1/student?pen=%s
