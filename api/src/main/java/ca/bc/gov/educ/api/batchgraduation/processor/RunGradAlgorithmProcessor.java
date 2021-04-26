@@ -30,7 +30,7 @@ public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStatus
 		LOGGER.info(" Processing  **** PEN: ****" + item.getPen().substring(5));
 		HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(item.getAccess_token());
 		try {
-		AlgorithmResponse algorithmResponse = restTemplate.exchange(String.format(graduateStudent,item.getPen()), HttpMethod.GET,
+		AlgorithmResponse algorithmResponse = restTemplate.exchange(String.format(graduateStudent,item.getStudentID()), HttpMethod.GET,
 				new HttpEntity<>(httpHeaders), AlgorithmResponse.class).getBody();
 		 return algorithmResponse.getGraduationStatus();
 		}catch(Exception e) {
