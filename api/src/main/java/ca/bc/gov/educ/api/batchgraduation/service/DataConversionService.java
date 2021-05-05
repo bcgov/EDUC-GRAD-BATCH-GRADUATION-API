@@ -90,8 +90,8 @@ public class DataConversionService {
     public void loadInitialRawGradStudentData(boolean purge) throws Exception {
 			if (purge) {
 				convGradStudentRepository.deleteAll();
-				convGradStudentRepository.loadInitialRawData();
 			}
+			convGradStudentRepository.loadInitialRawData();
 		}
 
 		@Transactional
@@ -126,7 +126,7 @@ public class DataConversionService {
 		public void loadInitialRawGradCourseRestrictionsData(boolean purge) throws Exception {
 			if (purge) {
 				convCourseRestrictionRepository.deleteAll();
-				convCourseRestrictionRepository.loadInitialRawData();
 			}
+			convCourseRestrictionRepository.loadInitialRawData();
 		}
 }

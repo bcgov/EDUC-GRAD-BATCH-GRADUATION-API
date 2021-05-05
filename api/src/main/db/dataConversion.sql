@@ -117,3 +117,4 @@ join tab_crse c2
 on c1.restriction_code = c2.restriction_code
 and (c1.crse_code  <> c2.crse_code
  or  c1.crse_level <> c2.crse_level)
+and c1.restriction_code <> ' '

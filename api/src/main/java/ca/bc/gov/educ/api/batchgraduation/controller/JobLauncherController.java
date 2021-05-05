@@ -77,7 +77,7 @@ public class JobLauncherController {
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_CONVERSION_JOB)
     @PreAuthorize(PermissionsContants.LOAD_STUDENT_IDS)
-    public void runDataConversionJob(@RequestParam(defaultValue = "false") boolean purge) throws Exception {
+    public void runDataConversionJob(@RequestParam(defaultValue = "true") boolean purge) throws Exception {
       logger.info("Inside runDataConversionJob");
       OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
       String accessToken = auth.getTokenValue();

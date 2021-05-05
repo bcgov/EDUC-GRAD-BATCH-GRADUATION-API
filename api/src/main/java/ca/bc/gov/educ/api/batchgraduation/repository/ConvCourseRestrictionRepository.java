@@ -29,8 +29,8 @@ public interface ConvCourseRestrictionRepository extends JpaRepository<ConvCours
 					"from tab_crse c1\n" +
 					"join tab_crse c2\n" +
 					"on c1.restriction_code = c2.restriction_code\n" +
-					"and (c1.crse_code  <> c2.crse_code\n" +
-					" or  c1.crse_level <> c2.crse_level)", nativeQuery=true)
+					"and (c1.crse_code  <> c2.crse_code or c1.crse_level <> c2.crse_level)\n" +
+					"and c1.restriction_code <> ' '", nativeQuery=true)
 	@Transactional
 	void loadInitialRawData();
 }
