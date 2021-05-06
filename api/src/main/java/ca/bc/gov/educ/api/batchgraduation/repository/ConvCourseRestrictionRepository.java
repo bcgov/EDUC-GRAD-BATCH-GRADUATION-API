@@ -15,10 +15,6 @@ public interface ConvCourseRestrictionRepository extends JpaRepository<ConvCours
 
     List<ConvCourseRestrictionsEntity> findAll();
 
-    @Query(value="select cr from ConvCourseRestrictionsEntity cr\n" +
-						"where cr.restrictionStartDateStr is not null or cr.restrictionEndDateStr is not null")
-    List<ConvCourseRestrictionsEntity> findAllWithStartDateOrEndDate();
-
 	List<ConvCourseRestrictionsEntity> findByMainCourseAndMainCourseLevel(String courseCode, String courseLevel);
 
 	@Modifying

@@ -12,9 +12,9 @@ public class DateConversionUtils {
       SimpleDateFormat formatter = null;
       try {
         if (dateStr.trim().length() == 6) {
-          formatter = new SimpleDateFormat("yyyymm");
+          formatter = new SimpleDateFormat("yyyyMM");
         } else if (dateStr.trim().length() == 8) {
-          formatter = new SimpleDateFormat("yyyymmdd");
+          formatter = new SimpleDateFormat("yyyyMMdd");
         }
         return formatter.parse(dateStr);
       } catch (ParseException pe) {

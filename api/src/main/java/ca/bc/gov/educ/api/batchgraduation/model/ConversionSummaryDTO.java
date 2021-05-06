@@ -7,15 +7,16 @@ import java.util.List;
 
 @Data
 public class ConversionSummaryDTO {
-  // GRAD_STUDENT
-  private long gradStudentReadCount = 0;
-  private long gradStudentAddedCount = 0;
-  private long gradStudentUpdatedCount = 0;
+
+  private String tableName;
+
+  private long readCount = 0;
+  private long processedCount = 0;
+
+  private long addedCount = 0;
+  private long updatedCount = 0;
 
   private List<ConversionError> errors = new ArrayList<>();
-
-  // Code Tables
-  // GRAD_COURSE_RESTRICTIONS
-  private long courseRestrictionsCount = 0;
+  private String exception;
 
 }

@@ -45,9 +45,6 @@ public class JobLauncherController {
     
     @Autowired
     private GradStudentService gradStudentService;
-
-    @Autowired
-    private DataConversionService dataConversionService;
     
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_BATCH_JOB)
     public void launchJob( ) {
@@ -75,39 +72,4 @@ public class JobLauncherController {
     	
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_CONVERSION_JOB)
-    @PreAuthorize(PermissionsContants.LOAD_STUDENT_IDS)
-    public void runDataConversionJob(@RequestParam(defaultValue = "true") boolean purge) throws Exception {
-      logger.info("Inside runDataConversionJob");
-      OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
-      String accessToken = auth.getTokenValue();
-
-      ConversionSummaryDTO summary = new ConversionSummaryDTO();
-
-      try {
-        dataConversionService.loadInitialRawGradStudentData(purge);
-      } catch (Exception e) {
-        logger.info("01. Initial Raw Data Loading is failed: " + e.getLocalizedMessage());
-        e.printStackTrace();
-        throw e;
-      }
-
-      List<String> penNumbers = dataConversionService.findAll();
-      summary.setGradStudentReadCount(penNumbers.size());
-      logger.info("01. Initial Raw Data Load is done successfully: number of records = " + summary.getGradStudentReadCount());
-
-      penNumbers.forEach(pen -> {
-        dataConversionService.updateStudent(pen, accessToken, summary);
-      });
-      logger.info("02. Update Data with the related APIs is done successfully");
-
-      logger.info("02. GRAD COURSE RESTRICTIONS");
-      try {
-        dataConversionService.loadInitialRawGradCourseRestrictionsData(purge);
-        dataConversionService.updateCourseRestrictions();
-      } catch (Exception e) {
-        e.printStackTrace();
-        throw e;
-      }
-    }
 }
