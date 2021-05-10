@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvCourseRestrictionsEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentEntity;
+import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
 import ca.bc.gov.educ.api.batchgraduation.model.ConversionError;
 import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
@@ -23,10 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class DataConversionService {
@@ -41,7 +39,7 @@ public class DataConversionService {
     RestTemplate restTemplate;
     
     @Autowired
-    RestTemplateBuilder restTemplateBuilder;
+		RestTemplateBuilder restTemplateBuilder;
     
     @Value(EducGradBatchGraduationApiConstants.ENDPOINT_PEN_STUDENT_API_BY_PEN_URL)
     private String getPenStudentAPIByPenURL;
@@ -58,50 +56,68 @@ public class DataConversionService {
 		}
     
     @Transactional
-    public void updateStudent(String pen, String accessToken, ConversionSummaryDTO summary) {
+    public void convertGradStudent(ConvGradStudent convGradStudent, String accessToken, ConversionSummaryDTO summary) {
 			HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(accessToken);
 			try {
-				List<Student> students = restTemplate.exchange(String.format(getPenStudentAPIByPenURL, pen), HttpMethod.GET, new HttpEntity<>(httpHeaders), new ParameterizedTypeReference<List<Student>>() {
-				}).getBody();
-
-				if (students.isEmpty()) {
-					ConversionError error = new ConversionError();
-					error.setPen(pen);
-					error.setReason("PEN does not exist: PEN Student API returns empty response.");
-					summary.getErrors().add(error);
-					convGradStudentRepository.deleteById(pen);
+				Optional<ConvGradStudentEntity> stuOptional = convGradStudentRepository.findById(convGradStudent.getPen());
+				if (stuOptional.isPresent()) {
+					ConvGradStudentEntity gradStudentEntity = stuOptional.get();
+					populate(convGradStudent, gradStudentEntity);
+					gradStudentEntity.setUpdatedTimestamp(new Date());
+					convGradStudentRepository.save(gradStudentEntity);
+					summary.setUpdatedCount(summary.getUpdatedCount() + 1L);
 				} else {
-					students.forEach(st -> {
-						Optional<ConvGradStudentEntity> stuOptional = convGradStudentRepository.findById(pen);
-						if (stuOptional.isPresent()) {
-							ConvGradStudentEntity gradStu = stuOptional.get();
-							gradStu.setStudentID(UUID.fromString(st.getStudentID()));
-							convGradStudentRepository.save(gradStu);
+					ConvGradStudentEntity gradStudentEntity = new ConvGradStudentEntity();
+					gradStudentEntity.setPen(convGradStudent.getPen());
+					// Call PEN Student API
+					List<Student> students = restTemplate.exchange(String.format(getPenStudentAPIByPenURL, convGradStudent.getPen()), HttpMethod.GET, new HttpEntity<>(httpHeaders), new ParameterizedTypeReference<List<Student>>() {
+					}).getBody();
+					if (students.isEmpty()) {
+						ConversionError error = new ConversionError();
+						error.setPen(convGradStudent.getPen());
+						error.setReason("PEN does not exist: PEN Student API returns empty response.");
+						summary.getErrors().add(error);
+					} else {
+						students.forEach(st -> {
+							gradStudentEntity.setStudentID(UUID.fromString(st.getStudentID()));
+							populate(convGradStudent, gradStudentEntity);
+							convGradStudentRepository.save(gradStudentEntity);
 							summary.setAddedCount(summary.getAddedCount() + 1L);
-						} else {
-							ConversionError error = new ConversionError();
-							error.setPen(pen);
-							error.setReason("PEN does not exist in database.");
-							summary.getErrors().add(error);
-						}
-					});
+						});
+					}
 				}
 			} catch (RestClientException re) {
 				ConversionError error = new ConversionError();
-				error.setPen(pen);
+				error.setPen(convGradStudent.getPen());
 				error.setReason("PEN Student API is failed: " + re.getLocalizedMessage());
 				summary.getErrors().add(error);
 			}
     }
 
 		@Transactional
-    public void loadInitialRawGradStudentData(boolean purge) throws Exception {
+    public List<ConvGradStudent> loadInitialRawGradStudentData(boolean purge) throws Exception {
 			if (purge) {
 				convGradStudentRepository.deleteAll();
 				convGradStudentRepository.flush();
 			}
-			convGradStudentRepository.loadInitialRawData();
-			convGradStudentRepository.flush();
+			List<ConvGradStudent> students = new ArrayList<>();
+			List<Object[]> results = convGradStudentRepository.loadInitialRawData();
+			results.forEach(result -> {
+				String pen = (String) result[0];
+				String schoolOfRecord = (String) result[1];
+				String schoolAtGrad = (String) result[2];
+				String studentGrade = (String) result[3];
+				Character studentStatus = (Character) result[4];
+				String graduationRequestYear = (String) result[5];
+				Character recalculateGradStatus = (Character) result[6];
+				ConvGradStudent student = new ConvGradStudent(
+					pen, null, null, null, null,
+					recalculateGradStatus.toString(), null, schoolOfRecord, schoolAtGrad, studentGrade,
+					studentStatus != null? studentStatus.toString() : null, graduationRequestYear);
+				students.add(student);
+			});
+
+			return students;
 		}
 
 		@Transactional(readOnly = true)
@@ -145,5 +161,54 @@ public class DataConversionService {
 			}
 			convCourseRestrictionRepository.loadInitialRawData();
 			convCourseRestrictionRepository.flush();
+		}
+
+		private void populate(ConvGradStudent student, ConvGradStudentEntity studentEntity) {
+			studentEntity.setGpa(student.getGpa());
+			studentEntity.setHonoursStanding(student.getHonoursStanding());
+			determineProgram(student);
+			studentEntity.setProgram(student.getProgram());
+			studentEntity.setProgramCompletionDate(student.getProgramCompletionDate());
+			studentEntity.setSchoolOfRecord(student.getSchoolOfRecord());
+			studentEntity.setSchoolAtGrad(student.getSchoolAtGrad());
+			studentEntity.setRecalculateGradStatus(student.getRecalculateGradStatus());
+			studentEntity.setStudentGradData(student.getStudentGradData());
+			studentEntity.setStudentGrade(student.getStudentGrade());
+			studentEntity.setStudentStatus(student.getStudentStatus());
+		}
+
+		private void determineProgram(ConvGradStudent student) {
+			switch(student.getGraduationRequestYear()) {
+				case "2018":
+					if (student.getSchoolOfRecord().startsWith("093")) {
+						student.setProgram("2018-PF");
+					} else {
+						student.setProgram("2018-EN");
+					}
+					break;
+				case "2004":
+					student.setProgram("2004");
+					break;
+				case "1996":
+					student.setProgram("1996");
+					break;
+				case "1986":
+					student.setProgram("1986");
+					break;
+				case "1950":
+					if (StringUtils.equals(student.getStudentGrade(), "AD")) {
+						student.setProgram("1950-EN");
+					} else if (StringUtils.equals(student.getStudentGrade(), "AN")) {
+						student.setProgram("NOPROG");
+					} else {
+						// error
+					}
+					break;
+				case "SCCP":
+					student.setProgram("SCCP");
+					break;
+				default:
+					break;
+			}
 		}
 }

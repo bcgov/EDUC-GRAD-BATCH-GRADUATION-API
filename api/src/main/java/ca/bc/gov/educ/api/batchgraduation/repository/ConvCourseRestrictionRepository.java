@@ -19,8 +19,8 @@ public interface ConvCourseRestrictionRepository extends JpaRepository<ConvCours
 
 	@Modifying
 	@Query(value="insert into CONV_GRAD_COURSE_RESTRICTIONS(ID, CRSE_MAIN, CRSE_MAIN_LVL, CRSE_RESTRICTED, CRSE_RESTRICTED_LVL, RESTRICTION_START_DT_STR, RESTRICTION_END_DT_STR)\n" +
-					"select sys_guid() as ID, c1.crse_code as CRSE_MAIN, c1.crse_level as CRSE_MAIN_LVL,\n" +
-					" c2.crse_code as CRSE_RESTRICTED, c2.crse_level as CRSE_RESTRICTED_LVL,\n" +
+					"select sys_guid() as ID, trim(c1.crse_code) as CRSE_MAIN, trim(c1.crse_level) as CRSE_MAIN_LVL,\n" +
+					" trim(c2.crse_code) as CRSE_RESTRICTED, trim(c2.crse_level) as CRSE_RESTRICTED_LVL,\n" +
 					" trim(c1.start_restrict_session) as RESTRICTION_START_DT, trim(c1.end_restrict_session) as RESTRICTION_END_DT\n" +
 					"from tab_crse c1\n" +
 					"join tab_crse c2\n" +

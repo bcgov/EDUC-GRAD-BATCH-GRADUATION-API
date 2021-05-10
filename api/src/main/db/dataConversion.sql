@@ -95,22 +95,21 @@ CREATE TABLE "GRADUATION"."CONV_GRAD_STUDENT"
      BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
      TABLESPACE "GRADUATION_DATA"  ENABLE;
 
+------------------------------
 -- Initial data set from TRAX
+------------------------------
 -- GRAD_STUDENT
-insert into CONV_GRAD_STUDENT(pen, school_of_record, school_at_grad, stud_grade, FK_GRAD_STUDENT_STUDENT_STATUS, FK_GRAD_PROGRAM_CODE, RECALCULATE_GRAD_STATUS)
 select  trim(m.stud_no) as PEN, m.mincode as SCHOOL_OF_RECORD, m.mincode_grad as SCHOOL_AT_GRAD, m.stud_grade as STUD_GRADE, m.stud_status as STUD_STATUS, '2018-EN', 'Y'
 from trax_students_load l, student_master m
 where 1 = 1
 and l.stud_no = m.stud_no
-and m.grad_reqt_year = 2018
 and m.grad_date = 0
 and m.archive_flag = 'A'
-and m.mincode not like '093%'
 
 --
 insert into CONV_GRAD_COURSE_RESTRICTIONS(ID, CRSE_MAIN, CRSE_MAIN_LVL, CRSE_RESTRICTED, CRSE_RESTRICTED_LVL, RESTRICTION_START_DT_STR, RESTRICTION_END_DT_STR)
-select sys_guid() as ID,  c1.crse_code as CRSE_MAIN, c1.crse_level as CRSE_MAIN_LVL,
- c2.crse_code as CRSE_RESTRICTED, c2.crse_level as CRSE_RESTRICTED_LVL,
+select sys_guid() as ID,  trim(c1.crse_code) as CRSE_MAIN, trim(c1.crse_level) as CRSE_MAIN_LVL,
+ trim(c2.crse_code) as CRSE_RESTRICTED, trim(c2.crse_level) as CRSE_RESTRICTED_LVL,
  trim(c1.start_restrict_session) as RESTRICTION_START_DT, trim(c1.end_restrict_session) as RESTRICTION_END_DT
 from tab_crse c1
 join tab_crse c2
@@ -118,3 +117,11 @@ on c1.restriction_code = c2.restriction_code
 and (c1.crse_code  <> c2.crse_code
  or  c1.crse_level <> c2.crse_level)
 and c1.restriction_code <> ' '
+
+-------------------------------
+-- Transfer conv to real table
+-------------------------------
+-- CONV_GRAD_COURSE_RESTRICTIONS
+insert into Grad_Course_Restrictions (id, crse_main, crse_main_lvl, crse_restricted, crse_restricted_lvl, start_dt, end_dt, created_by, created_timestamp, updated_by, updated_timestamp)
+select id, crse_main, crse_main_lvl, crse_restricted, crse_restricted_lvl, restriction_start_dt, restriction_end_dt, created_by, created_timestamp, updated_by, updated_timestamp
+from Conv_Grad_Course_Restrictions

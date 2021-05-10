@@ -23,13 +23,13 @@ public class ConvCourseRestrictionsEntity extends BaseEntity  {
 	@Column(name = "CRSE_MAIN", nullable = false)
     private String mainCourse;  
 	
-	@Column(name = "CRSE_MAIN_LVL", nullable = false)
+	@Column(name = "CRSE_MAIN_LVL", nullable = true)
     private String mainCourseLevel;
 	
 	@Column(name = "CRSE_RESTRICTED", nullable = false)
     private String restrictedCourse; 
 	
-	@Column(name = "CRSE_RESTRICTED_LVL", nullable = false)
+	@Column(name = "CRSE_RESTRICTED_LVL", nullable = true)
     private String restrictedCourseLevel;   
 	
 	@Column(name = "RESTRICTION_START_DT", nullable = true)
