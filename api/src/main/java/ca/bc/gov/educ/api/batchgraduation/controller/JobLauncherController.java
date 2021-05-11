@@ -61,8 +61,24 @@ public class JobLauncherController {
       }
     	
     }
-    
-    @PostMapping(EducGradBatchGraduationApiConstants.LOAD_STUDENT_IDS)
+
+  @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_DATA_CONVERSION_BATCH_JOB)
+  public void launchDataConversionJob( ) {
+    logger.info("Inside Launch Data Conversion Job");
+    JobParametersBuilder builder = new JobParametersBuilder();
+    builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+    builder.addString(JOB_PARAM, "dataConversionBatchJob");
+    try {
+      jobLauncher.run(jobRegistry.getJob("dataConversionBatchJob"), builder.toJobParameters());
+    } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+            | JobParametersInvalidException | NoSuchJobException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+
+  }
+
+  @PostMapping(EducGradBatchGraduationApiConstants.LOAD_STUDENT_IDS)
     @PreAuthorize(PermissionsContants.LOAD_STUDENT_IDS)
     public void loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData) {
     	logger.info("Inside loadStudentIDs");

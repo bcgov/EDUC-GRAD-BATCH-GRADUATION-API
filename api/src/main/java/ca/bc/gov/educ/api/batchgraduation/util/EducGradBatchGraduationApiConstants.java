@@ -9,8 +9,8 @@ public class EducGradBatchGraduationApiConstants {
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
 
     // Data Conversion
+    public static final String EXECUTE_DATA_CONVERSION_BATCH_JOB = "/executeGradStudentDataConversionJob";
     public static final String GRAD_CONVERSION_API_MAPPING = "/dataconversion";
-    public static final String EXECUTE_GRAD_STUDENT_CONVERSION_JOB = "/gradStudent";
     public static final String EXECUTE_COURSE_RESTRICTIONS_CONVERSION_JOB = "/courseRestrictions";
        
     //Default Date format constants
