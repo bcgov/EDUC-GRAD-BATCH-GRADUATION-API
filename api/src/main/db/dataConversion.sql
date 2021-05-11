@@ -167,6 +167,14 @@ and (c1.crse_code  <> c2.crse_code
  or  c1.crse_level <> c2.crse_level)
 and c1.restriction_code <> ' '
 
+-- French immersion validation by pen
+select count(*) from STUD_XCRSE sx, GRAD_COURSE_REQUIREMENT gcr
+where 1 = 1
+  and sx.stud_no = '131493553'  -- pen
+  and trim(sx.crse_code) = gcr.crse_code
+  and trim(sx.crse_level) = gcr.crse_lvl
+  and gcr.rule_code = 202
+
 -------------------------------
 -- Transfer conv to real table
 -------------------------------
