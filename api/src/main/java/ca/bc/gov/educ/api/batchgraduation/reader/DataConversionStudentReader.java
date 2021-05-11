@@ -23,12 +23,13 @@ public class DataConversionStudentReader implements ItemReader<ConvGradStudent> 
 
     private int nxtStudentForProcessing;
     private List<ConvGradStudent> studentList;
+    private ConversionSummaryDTO summaryDTO;
 
     @BeforeStep
     public void initializeSummaryDto(StepExecution stepExecution) {
         JobExecution jobExecution = stepExecution.getJobExecution();
         ExecutionContext jobContext = jobExecution.getExecutionContext();
-        ConversionSummaryDTO summaryDTO = new ConversionSummaryDTO();
+        summaryDTO = new ConversionSummaryDTO();
         jobContext.put("summaryDTO", summaryDTO);
     }
 
@@ -42,13 +43,14 @@ public class DataConversionStudentReader implements ItemReader<ConvGradStudent> 
 
         if (studentDataIsNotInitialized()) {
         	studentList = loadRawStudentData();
+        	summaryDTO.setReadCount(studentList.size());
         }
 
         ConvGradStudent nextStudent = null;
         
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
-            LOGGER.info("Found student[{}] - PEN: {}", nxtStudentForProcessing + 1, nextStudent.getPen());
+            LOGGER.info("Found student[{}] - PEN: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getPen(), summaryDTO.getReadCount());
             nxtStudentForProcessing++;
         }
         else {

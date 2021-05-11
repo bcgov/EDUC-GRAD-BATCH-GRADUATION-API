@@ -28,9 +28,8 @@ public class DataConversionStudentWriter implements ItemWriter<ConvGradStudent> 
     @Override
     public void write(List<? extends ConvGradStudent> list) throws Exception {
         if(list != null && list.size() > 0) {
-            summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
             ConvGradStudent gradStudent = list.get(0);
-            LOGGER.info("Processed student[{}] - PEN: {}  in total : {}", summaryDTO.getProcessedCount(), gradStudent.getPen());
+            LOGGER.info("Processed student[{}] - PEN: {} in total {}", summaryDTO.getProcessedCount(), gradStudent.getPen(), summaryDTO.getReadCount());
         }
     }
 }

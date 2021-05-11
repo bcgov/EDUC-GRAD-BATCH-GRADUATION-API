@@ -13,11 +13,11 @@ import java.util.UUID;
 public class ConvGradStudentEntity extends BaseEntity {
 
     @Id
+    @Column(name = "STUDENT_ID", nullable = false)
+    private UUID studentID;
+
     @Column(name = "pen", nullable = false)
     private String pen;
-
-    @Column(name = "STUDENT_ID", nullable = true)
-    private UUID studentID;
 
     @Column(name = "FK_GRAD_PROGRAM_CODE", nullable = true)
     private String program;

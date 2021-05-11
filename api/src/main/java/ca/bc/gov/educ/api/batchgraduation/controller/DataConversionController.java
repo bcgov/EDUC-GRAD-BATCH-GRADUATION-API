@@ -1,38 +1,33 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
-import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
 import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.PermissionsContants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING + EducGradBatchGraduationApiConstants.GRAD_CONVERSION_API_MAPPING)
 @CrossOrigin
 @EnableResourceServer
 public class DataConversionController {
-  private static Logger logger = LoggerFactory.getLogger(DataConversionController.class);
+  private static final Logger logger = LoggerFactory.getLogger(DataConversionController.class);
 
-  @Autowired
-  private DataConversionService dataConversionService;
+  private final DataConversionService dataConversionService;
+
+  public DataConversionController(DataConversionService dataConversionService) {
+    this.dataConversionService = dataConversionService;
+  }
 
   @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_COURSE_RESTRICTIONS_CONVERSION_JOB)
   @PreAuthorize(PermissionsContants.LOAD_STUDENT_IDS)
-  public ResponseEntity<ConversionSummaryDTO> runCourseRestrictionsDataConversionJob(@RequestParam(defaultValue = "true") boolean purge) throws Exception {
+  public ResponseEntity<ConversionSummaryDTO> runCourseRestrictionsDataConversionJob(@RequestParam(defaultValue = "true") boolean purge) {
     logger.info("Inside runDataConversionJob");
-    OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
-    String accessToken = auth.getTokenValue();
 
     ConversionSummaryDTO summary = new ConversionSummaryDTO();
     summary.setTableName("COURSE RESTRICTIONS");

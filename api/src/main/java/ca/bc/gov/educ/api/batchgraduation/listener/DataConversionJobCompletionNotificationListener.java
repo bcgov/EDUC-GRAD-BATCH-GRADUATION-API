@@ -32,7 +32,8 @@ public class DataConversionJobCompletionNotificationListener extends JobExecutio
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			ConversionSummaryDTO summaryDTO = (ConversionSummaryDTO)jobContext.get("summaryDTO");
 
-			LOGGER.info(" Records read :	{}", summaryDTO.getReadCount());
+			LOGGER.info(" Records read:		{}", summaryDTO.getReadCount());
+			LOGGER.info(" Processed count:	{}", summaryDTO.getReadCount());
 			LOGGER.info(" Created count:	{}", summaryDTO.getAddedCount());
 			LOGGER.info(" Updated count:	{}", summaryDTO.getUpdatedCount());
 			LOGGER.info(" -----------------------------------------------------------------------------------------------");
@@ -40,6 +41,11 @@ public class DataConversionJobCompletionNotificationListener extends JobExecutio
 			summaryDTO.getErrors().forEach(e ->
 				LOGGER.info("	Pen: {}, Reason: {}", e.getPen(), e.getReason())
 			);
+			LOGGER.info(" -----------------------------------------------------------------------------------------------");
+			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
+				String key = e.getKey();
+				LOGGER.info(" {} count:	{}", key, summaryDTO.getProgramCountMap().get(key));
+			});
 			LOGGER.info("=================================================================================================");
 		}
     }
