@@ -26,4 +26,5 @@ public class BatchPerformanceWriter implements ItemWriter<GraduationStatus> {
 	        gradDataStore.addProcessedItem(gradStatus);
         }
     }
+
 }
