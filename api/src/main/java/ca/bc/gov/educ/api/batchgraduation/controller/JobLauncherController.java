@@ -2,8 +2,10 @@ package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import java.util.List;
 
+import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -12,6 +14,8 @@ import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.batch.item.ExecutionContext;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -59,23 +63,7 @@ public class JobLauncherController {
     	
     }
 
-  @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_DATA_CONVERSION_BATCH_JOB)
-  public void launchDataConversionJob( ) {
-    logger.info("Inside Launch Data Conversion Job");
-    JobParametersBuilder builder = new JobParametersBuilder();
-    builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-    builder.addString(JOB_PARAM, "dataConversionBatchJob");
-    try {
-      jobLauncher.run(jobRegistry.getJob("dataConversionBatchJob"), builder.toJobParameters());
-    } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-            | JobParametersInvalidException | NoSuchJobException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
-
-  }
-
-  @PostMapping(EducGradBatchGraduationApiConstants.LOAD_STUDENT_IDS)
+    @PostMapping(EducGradBatchGraduationApiConstants.LOAD_STUDENT_IDS)
     @PreAuthorize(PermissionsContants.LOAD_STUDENT_IDS)
     public void loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData) {
     	logger.info("Inside loadStudentIDs");
@@ -85,4 +73,23 @@ public class JobLauncherController {
     	
     }
 
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_DATA_CONVERSION_BATCH_JOB)
+    public ResponseEntity<ConversionSummaryDTO> launchDataConversionJob( ) {
+        logger.info("Inside Launch Data Conversion Job");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_PARAM, "dataConversionBatchJob");
+        try {
+            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("dataConversionBatchJob"), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            ConversionSummaryDTO summaryDTO = (ConversionSummaryDTO)jobContext.get("summaryDTO");
+            return ResponseEntity.ok(summaryDTO);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | NoSuchJobException e) {
+            e.printStackTrace();
+            ConversionSummaryDTO summaryDTO = new ConversionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
+        }
+    }
 }

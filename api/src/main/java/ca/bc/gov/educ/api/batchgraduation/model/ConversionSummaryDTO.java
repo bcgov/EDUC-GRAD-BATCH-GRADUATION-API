@@ -35,7 +35,9 @@ public class ConversionSummaryDTO {
 
   public void increment(String programCode) {
     Long count = programCountMap.get(programCode);
-    count++;
-    programCountMap.put(programCode, count);
+    if (count != null) {
+      count++;
+      programCountMap.put(programCode, count);
+    }
   }
 }

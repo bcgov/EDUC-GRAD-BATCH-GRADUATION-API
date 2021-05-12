@@ -39,7 +39,7 @@ public class DataConversionController {
       logger.info("01. Initial Raw Data Loading is failed: " + e.getLocalizedMessage());
       e.printStackTrace();
       summary.setException(e.getLocalizedMessage());
-      ResponseEntity.status(500).body(summary);
+      return ResponseEntity.status(500).body(summary);
     }
 
     try {
@@ -49,7 +49,7 @@ public class DataConversionController {
       logger.info("02. Update Data for date conversion is failed: " + e.getLocalizedMessage());
       e.printStackTrace();
       summary.setException(e.getLocalizedMessage());
-      ResponseEntity.status(500).body(summary);
+      return ResponseEntity.status(500).body(summary);
     }
     return ResponseEntity.ok(summary);
   }
