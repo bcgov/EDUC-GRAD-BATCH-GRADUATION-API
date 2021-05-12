@@ -1,5 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
+import ca.bc.gov.educ.api.batchgraduation.listener.DataConversionJobCompletionNotificationListener;
+import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
+import ca.bc.gov.educ.api.batchgraduation.processor.DataConversionProcessor;
+import ca.bc.gov.educ.api.batchgraduation.reader.DataConversionStudentReader;
+import ca.bc.gov.educ.api.batchgraduation.writer.DataConversionStudentWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -48,21 +53,21 @@ public class BatchJobConfig {
 
     /**
      * Creates a bean that represents the only step of our batch job.
-     * @param reader
-     * @param writer
+     * @param itemReader
+     * @param itemWriter
      * @param stepBuilderFactory
      * @return
      */
     @Bean
-    public Step graduationJobStep(ItemReader<GraduationStatus> reader,
-    						   org.springframework.batch.item.ItemProcessor<? super GraduationStatus, ? extends GraduationStatus> processor,
-                               ItemWriter<GraduationStatus> writer,
+    public Step graduationJobStep(ItemReader<GraduationStatus> itemReader,
+    						   org.springframework.batch.item.ItemProcessor<? super GraduationStatus, ? extends GraduationStatus> itemProcessor,
+                               ItemWriter<GraduationStatus> itemWriter,
                                StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("graduationJobStep")
                 .<GraduationStatus, GraduationStatus>chunk(1)
-                .reader(reader)
-                .processor(processor)
-                .writer(writer)
+                .reader(itemReader)
+                .processor(itemProcessor)
+                .writer(itemWriter)
                 .build();
     }
 
@@ -84,7 +89,60 @@ public class BatchJobConfig {
                 .build();
     }
 
-    @Bean
+  @Bean
+  public ItemReader<ConvGradStudent> dataConversionReader() {
+    return new DataConversionStudentReader();
+  }
+
+  @Bean
+  public ItemWriter<ConvGradStudent> dataConversionWriter() {
+    return new DataConversionStudentWriter();
+  }
+
+  @Bean
+  public ItemProcessor<ConvGradStudent,ConvGradStudent> dataConversionProcessor() {
+    return new DataConversionProcessor();
+  }
+
+  /**
+   * Creates a bean that represents the only step of our batch job.
+   * @param dataConversionReader
+   * @param dataConversionWriter
+   * @param stepBuilderFactory
+   * @return
+   */
+  @Bean
+  public Step dataConversionJobStep(ItemReader<ConvGradStudent> dataConversionReader,
+                                    ItemProcessor<? super ConvGradStudent, ? extends ConvGradStudent> dataConversionProcessor,
+                                    ItemWriter<ConvGradStudent> dataConversionWriter,
+                                    StepBuilderFactory stepBuilderFactory) {
+    return stepBuilderFactory.get("dataConversionJobStep")
+            .<ConvGradStudent, ConvGradStudent>chunk(1)
+            .reader(dataConversionReader)
+            .processor(dataConversionProcessor)
+            .writer(dataConversionWriter)
+            .build();
+  }
+
+  /**
+   * Creates a bean that represents our batch job.
+   * @param dataConversionJobStep
+   * @param jobBuilderFactory
+   * @param listener
+   * @return
+   */
+  @Bean(name="dataConversionJob")
+  public Job dataConversionBatchJob(Step dataConversionJobStep, DataConversionJobCompletionNotificationListener listener,
+                                    JobBuilderFactory jobBuilderFactory) {
+    return jobBuilderFactory.get("dataConversionBatchJob")
+            .incrementer(new RunIdIncrementer())
+            .listener(listener)
+            .flow(dataConversionJobStep)
+            .end()
+            .build();
+  }
+
+  @Bean
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {
         JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();
         postProcessor.setJobRegistry(jobRegistry);

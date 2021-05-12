@@ -60,7 +60,7 @@ public class GraduationStatusEntity  {
     @Column(name = "created_by", nullable = false)
     private String createdBy;
 
-	@Temporal(TemporalType.TIMESTAMP)
+	  @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_timestamp", nullable = false)
     private Date createdTimestamp;
 
