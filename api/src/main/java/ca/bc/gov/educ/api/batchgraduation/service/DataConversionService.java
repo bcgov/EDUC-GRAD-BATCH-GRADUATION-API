@@ -147,7 +147,7 @@ public class DataConversionService {
 		List<ConvCourseRestrictionsEntity> entities =  convCourseRestrictionRepository.findAll();
 		summary.setReadCount(entities.size());
 		entities.forEach(cr -> {
-			summary.setAddedCount(summary.getAddedCount() + 1L);
+			summary.setProcessedCount(summary.getProcessedCount() + 1L);
 			boolean isUpdated = false;
 			// data conversion
 			if (StringUtils.isNotBlank(cr.getRestrictionStartDateStr())) {
@@ -167,6 +167,7 @@ public class DataConversionService {
 			if (isUpdated) {
 				convCourseRestrictionRepository.save(cr);
 			}
+			summary.setAddedCount(summary.getAddedCount() + 1L);
 		});
 		convCourseRestrictionRepository.flush();
 	}
@@ -179,6 +180,15 @@ public class DataConversionService {
 		}
 		convCourseRestrictionRepository.loadInitialRawData();
 		convCourseRestrictionRepository.flush();
+	}
+
+	@Transactional
+	public void removeGradCourseRestriction(String mainCourseCode, String restrictedCourseCode, ConversionSummaryDTO summary) {
+		List<ConvCourseRestrictionsEntity> removalList = convCourseRestrictionRepository.findByMainCourseAndRestrictedCourse(mainCourseCode, restrictedCourseCode);
+		removalList.forEach(c -> {
+			convCourseRestrictionRepository.delete(c);
+			summary.setAddedCount(summary.getAddedCount() - 1L);
+		});
 	}
 
 	private void convertStudentData(ConvGradStudent student, ConvGradStudentEntity studentEntity, ConversionSummaryDTO summary) {
