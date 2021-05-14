@@ -3,31 +3,19 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvCourseRestrictionsEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentSpecialProgramEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.GradSpecialProgramEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
-import ca.bc.gov.educ.api.batchgraduation.model.ConversionError;
-import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.Student;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvCourseRestrictionRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentSpecialProgramRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.GradSpecialProgramRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.DateConversionUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
 
@@ -37,9 +25,7 @@ public class DataConversionService {
     private final ConvGradStudentRepository convGradStudentRepository;
 	private final ConvCourseRestrictionRepository convCourseRestrictionRepository;
 	private final ConvGradStudentSpecialProgramRepository convGradStudentSpecialProgramRepository;
-	private final GradSpecialProgramRepository gradSpecialProgramRepository;
-	private final RestTemplate restTemplate;
-	private final RestTemplateBuilder restTemplateBuilder;
+	private final WebClient webClient;
     
     @Value(EducGradBatchGraduationApiConstants.ENDPOINT_PEN_STUDENT_API_BY_PEN_URL)
     private String getPenStudentAPIByPenURL;
@@ -50,24 +36,23 @@ public class DataConversionService {
     @Value(EducGradBatchGraduationApiConstants.ENDPOINT_GRAD_STUDENT_API_URL)
     private String getGradStatusForStudent;
 
-	public DataConversionService(ConvGradStudentRepository convGradStudentRepository, ConvCourseRestrictionRepository convCourseRestrictionRepository, ConvGradStudentSpecialProgramRepository convGradStudentSpecialProgramRepository, GradSpecialProgramRepository gradSpecialProgramRepository, RestTemplate restTemplate, RestTemplateBuilder restTemplateBuilder) {
+    @Value(EducGradBatchGraduationApiConstants.ENDPOINT_GRAD_PROGRAM_MANAGEMENT_URL)
+	private String getGradProgramManagementAPIForSpecialProgram;
+
+	public DataConversionService(ConvGradStudentRepository convGradStudentRepository, ConvCourseRestrictionRepository convCourseRestrictionRepository, ConvGradStudentSpecialProgramRepository convGradStudentSpecialProgramRepository, WebClient webClient) {
 		this.convGradStudentRepository = convGradStudentRepository;
 		this.convCourseRestrictionRepository = convCourseRestrictionRepository;
 		this.convGradStudentSpecialProgramRepository = convGradStudentSpecialProgramRepository;
-		this.gradSpecialProgramRepository = gradSpecialProgramRepository;
-		this.restTemplate = restTemplate;
-		this.restTemplateBuilder = restTemplateBuilder;
-	}
-
-	@Transactional(readOnly = true)
-	public List<String> findAll() {
-		return convGradStudentRepository.findAllStudents();
+		this.webClient = webClient;
 	}
 
 	@Transactional
 	public ConvGradStudent convertStudent(ConvGradStudent convGradStudent, ConversionSummaryDTO summary) {
 		summary.setProcessedCount(summary.getProcessedCount() + 1L);
 		try {
+			OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
+			String accessToken = auth.getTokenValue();
+
 			Optional<ConvGradStudentEntity> stuOptional = convGradStudentRepository.findByPen(convGradStudent.getPen());
 			if (stuOptional.isPresent()) {
 				ConvGradStudentEntity gradStudentEntity = stuOptional.get();
@@ -76,16 +61,27 @@ public class DataConversionService {
 				gradStudentEntity = convGradStudentRepository.save(gradStudentEntity);
 				summary.setUpdatedCount(summary.getUpdatedCount() + 1L);
 				// process dependencies
-				processSpecialPrograms(gradStudentEntity);
+				try {
+					processSpecialPrograms(gradStudentEntity, accessToken);
+				} catch (Exception e) {
+					ConversionError error = new ConversionError();
+					error.setPen(convGradStudent.getPen());
+					error.setReason("Grad Program Management API is failed: " + e.getLocalizedMessage());
+					summary.getErrors().add(error);
+				}
 			} else {
 				ConvGradStudentEntity gradStudentEntity = new ConvGradStudentEntity();
 				gradStudentEntity.setPen(convGradStudent.getPen());
-				// Call PEN Student API
-				OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
-				String accessToken = auth.getTokenValue();
-				HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(accessToken);
-				List<Student> students = restTemplate.exchange(String.format(getPenStudentAPIByPenURL, convGradStudent.getPen()), HttpMethod.GET, new HttpEntity<>(httpHeaders), new ParameterizedTypeReference<List<Student>>() {
-				}).getBody();
+				List<Student> students;
+				try {
+					students = getStudentsByPen(convGradStudent.getPen(), accessToken);
+				} catch (Exception e) {
+					ConversionError error = new ConversionError();
+					error.setPen(convGradStudent.getPen());
+					error.setReason("PEN Student API is failed: " + e.getLocalizedMessage());
+					summary.getErrors().add(error);
+					return null;
+				}
 				if (students == null || students.isEmpty()) {
 					ConversionError error = new ConversionError();
 					error.setPen(convGradStudent.getPen());
@@ -99,15 +95,22 @@ public class DataConversionService {
 						convGradStudentRepository.save(gradStudentEntity);
 						summary.setAddedCount(summary.getAddedCount() + 1L);
 						// process dependencies
-						processSpecialPrograms(gradStudentEntity);
+						try {
+							processSpecialPrograms(gradStudentEntity, accessToken);
+						} catch (Exception e) {
+							ConversionError error = new ConversionError();
+							error.setPen(convGradStudent.getPen());
+							error.setReason("Grad Program Management API is failed: " + e.getLocalizedMessage());
+							summary.getErrors().add(error);
+						}
 					});
 				}
 			}
 			return convGradStudent;
-		} catch (RestClientException re) {
+		} catch (Exception e) {
 			ConversionError error = new ConversionError();
 			error.setPen(convGradStudent.getPen());
-			error.setReason("PEN Student API is failed: " + re.getLocalizedMessage());
+			error.setReason("Unexpected Exception is occurred: " + e.getLocalizedMessage());
 			summary.getErrors().add(error);
 			return null;
 		}
@@ -138,9 +141,6 @@ public class DataConversionService {
 
 		return students;
 	}
-
-	@Transactional(readOnly = true)
-	public List<ConvCourseRestrictionsEntity> findAllCourseRestrictions() { return convCourseRestrictionRepository.findAll(); }
 
 	@Transactional
 	public void updateCourseRestrictions(ConversionSummaryDTO summary) {
@@ -205,18 +205,20 @@ public class DataConversionService {
 		studentEntity.setStudentStatus(student.getStudentStatus());
 	}
 
-	private void processSpecialPrograms(ConvGradStudentEntity student) {
+	private void processSpecialPrograms(ConvGradStudentEntity student, String accessToken) {
 		if (StringUtils.equals(student.getProgram(), "2018-EN")) {
 			long count = convGradStudentRepository.countFrenchImmersionCourses(student.getPen());
 			if (count > 0) {
 				ConvGradStudentSpecialProgramEntity entity = new ConvGradStudentSpecialProgramEntity();
 				entity.setPen(student.getPen());
 				entity.setStudentID(student.getStudentID());
-				Optional<GradSpecialProgramEntity> specialProgramOptional = gradSpecialProgramRepository.findByProgramCodeAndSpecialProgramCode("2018-EN", "FI");
-				if (specialProgramOptional.isPresent()) {
-					GradSpecialProgramEntity specialProgram = specialProgramOptional.get();
-					entity.setSpecialProgramID(specialProgram.getId());
-					convGradStudentSpecialProgramRepository.save(entity);
+				GradSpecialProgram gradSpecialProgram = getGradSpecialProgram("2018-EN", "FI", accessToken);
+				if (gradSpecialProgram != null && gradSpecialProgram.getId() != null) {
+					entity.setSpecialProgramID(gradSpecialProgram.getId());
+					Optional<ConvGradStudentSpecialProgramEntity> stdSpecialProgramOptional = convGradStudentSpecialProgramRepository.findByStudentIDAndSpecialProgramID(student.getStudentID(), gradSpecialProgram.getId());
+					if (stdSpecialProgramOptional.isEmpty()) {
+						convGradStudentSpecialProgramRepository.save(entity);
+					}
 				}
 			}
 		}
@@ -254,6 +256,10 @@ public class DataConversionService {
 					summary.increment("NOPROG");
 				} else {
 					// error
+					ConversionError error = new ConversionError();
+					error.setPen(student.getPen());
+					error.setReason("Program is not found for 1950 / " + student.getStudentGrade());
+					summary.getErrors().add(error);
 				}
 				break;
 			case "SCCP":
@@ -263,5 +269,21 @@ public class DataConversionService {
 			default:
 				break;
 		}
+	}
+
+	// Call PEN Student API
+	private List<Student> getStudentsByPen(String pen, String accessToken) {
+		return webClient.get()
+				.uri(String.format(getPenStudentAPIByPenURL, pen))
+				.headers(h -> h.setBearerAuth(accessToken))
+				.retrieve().bodyToFlux(Student.class).collectList().block();
+	}
+
+	// Call Grad Program Management API
+	private GradSpecialProgram getGradSpecialProgram(String programCode, String specialProgramCode, String accessToken) {
+		return webClient.get()
+				.uri(String.format(getGradProgramManagementAPIForSpecialProgram, programCode, specialProgramCode))
+				.headers(h -> h.setBearerAuth(accessToken))
+				.retrieve().bodyToMono(GradSpecialProgram.class).block();
 	}
 }

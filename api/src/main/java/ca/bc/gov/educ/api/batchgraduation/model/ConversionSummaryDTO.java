@@ -23,14 +23,14 @@ public class ConversionSummaryDTO {
 
   // stats
   private Map<String, Long> programCountMap = new HashMap<>() {{
-    put("2018-EN", Long.valueOf(0L));
-    put("2018-PF", Long.valueOf(0L));
-    put("2004", Long.valueOf(0L));
-    put("1996", Long.valueOf(0L));
-    put("1986", Long.valueOf(0L));
-    put("1950-EN", Long.valueOf(0L));
-    put("NOPROG", Long.valueOf(0L));
-    put("SCCP", Long.valueOf(0L));
+    put("2018-EN", 0L);
+    put("2018-PF", 0L);
+    put("2004", 0L);
+    put("1996", 0L);
+    put("1986", 0L);
+    put("1950-EN", 0L);
+    put("NOPROG", 0L);
+    put("SCCP", 0L);
   }};
 
   public void increment(String programCode) {
