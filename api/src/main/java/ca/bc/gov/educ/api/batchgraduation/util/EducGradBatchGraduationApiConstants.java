@@ -22,4 +22,5 @@ public class EducGradBatchGraduationApiConstants {
 	 public static final String ENDPOINT_PEN_STUDENT_API_BY_PEN_URL="${endpoint.pen-student-api.by-pen.url}";
 	 public static final String ENDPOINT_GRAD_STUDENT_API_URL="${endpoint.graduation-status-api.read-grad-status.url}";
 	 public static final String ENDPOINT_GRAD_STATUS_UPDATE_URL = "${endpoint.graduation-status-api.update-grad-status}";
+	 public static final String ENDPOINT_GRAD_PROGRAM_MANAGEMENT_URL = "${endpoint.grad-program-management-api.special-program.url}";
 }
