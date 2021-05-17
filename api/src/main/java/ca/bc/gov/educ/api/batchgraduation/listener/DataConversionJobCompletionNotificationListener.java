@@ -26,7 +26,7 @@ public class DataConversionJobCompletionNotificationListener extends JobExecutio
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
-			LOGGER.info("=================================================================================================");
+			LOGGER.info("=======================================================================================");
 	    	LOGGER.info("Data Conversion Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
 
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
@@ -36,17 +36,17 @@ public class DataConversionJobCompletionNotificationListener extends JobExecutio
 			LOGGER.info(" Processed count:	{}", summaryDTO.getReadCount());
 			LOGGER.info(" Created count:	{}", summaryDTO.getAddedCount());
 			LOGGER.info(" Updated count:	{}", summaryDTO.getUpdatedCount());
-			LOGGER.info(" -----------------------------------------------------------------------------------------------");
+			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info(" Errors: 			{}", summaryDTO.getErrors().size());
 			summaryDTO.getErrors().forEach(e ->
 				LOGGER.info("	Pen: {}, Reason: {}", e.getPen(), e.getReason())
 			);
-			LOGGER.info(" -----------------------------------------------------------------------------------------------");
+			LOGGER.info(" --------------------------------------------------------------------------------------");
 			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
 				String key = e.getKey();
 				LOGGER.info(" {} count:	{}", key, summaryDTO.getProgramCountMap().get(key));
 			});
-			LOGGER.info("=================================================================================================");
+			LOGGER.info("=======================================================================================");
 		}
     }
 }
