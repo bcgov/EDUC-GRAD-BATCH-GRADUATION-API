@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,15 +10,16 @@ import java.util.List;
 import java.util.Map;
 
 @Data
+@NoArgsConstructor
 public class ConversionSummaryDTO {
 
   private String tableName;
 
-  private long readCount = 0;
-  private long processedCount = 0;
+  private long readCount = 0L;
+  private long processedCount = 0L;
 
-  private long addedCount = 0;
-  private long updatedCount = 0;
+  private long addedCount = 0L;
+  private long updatedCount = 0L;
 
   private List<ConversionError> errors = new ArrayList<>();
   private String exception;
@@ -32,6 +35,9 @@ public class ConversionSummaryDTO {
     put("NOPROG", 0L);
     put("SCCP", 0L);
   }};
+
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  private String accessToken;
 
   public void increment(String programCode) {
     Long count = programCountMap.get(programCode);

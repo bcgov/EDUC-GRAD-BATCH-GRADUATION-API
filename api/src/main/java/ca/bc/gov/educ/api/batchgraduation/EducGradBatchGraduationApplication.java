@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
 
 @SpringBootApplication
 @EnableBatchProcessing
@@ -22,7 +23,9 @@ public class EducGradBatchGraduationApplication {
 
     @Bean
     public WebClient webClient() {
-        return WebClient.create();
+        HttpClient client = HttpClient.create();
+        client.warmup().block();
+        return WebClient.builder().build();
     }
 
     public static void main(String[] args) {
