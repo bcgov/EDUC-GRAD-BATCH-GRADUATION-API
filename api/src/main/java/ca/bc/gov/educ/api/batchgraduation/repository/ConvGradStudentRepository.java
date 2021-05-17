@@ -1,9 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.repository;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,9 +14,6 @@ import java.util.UUID;
 public interface ConvGradStudentRepository extends JpaRepository<ConvGradStudentEntity, UUID> {
 
 	List<ConvGradStudentEntity> findAll();
-
-	@Query(value="select pen from conv_grad_student where student_id is null", nativeQuery=true)
-	List<String> findAllStudents();
 
 	Optional<ConvGradStudentEntity> findByPen(String pen);
 

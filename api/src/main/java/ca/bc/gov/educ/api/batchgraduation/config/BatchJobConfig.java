@@ -4,6 +4,8 @@ import ca.bc.gov.educ.api.batchgraduation.listener.DataConversionJobCompletionNo
 import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
 import ca.bc.gov.educ.api.batchgraduation.processor.DataConversionProcessor;
 import ca.bc.gov.educ.api.batchgraduation.reader.DataConversionStudentReader;
+import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
+import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.writer.DataConversionStudentWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -26,7 +28,6 @@ import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
 import ca.bc.gov.educ.api.batchgraduation.processor.RunGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.reader.RecalculateStudentReader;
 import ca.bc.gov.educ.api.batchgraduation.writer.BatchPerformanceWriter;
-
 
 @Configuration
 public class BatchJobConfig {
@@ -53,10 +54,6 @@ public class BatchJobConfig {
 
     /**
      * Creates a bean that represents the only step of our batch job.
-     * @param itemReader
-     * @param itemWriter
-     * @param stepBuilderFactory
-     * @return
      */
     @Bean
     public Step graduationJobStep(ItemReader<GraduationStatus> itemReader,
@@ -73,10 +70,6 @@ public class BatchJobConfig {
 
     /**
      * Creates a bean that represents our batch job.
-     * @param graduationJobStep
-     * @param jobBuilderFactory
-     * @param listener
-     * @return
      */
     @Bean
     public Job graduationBatchJob(Step graduationJobStep,JobCompletionNotificationListener listener,
@@ -90,8 +83,8 @@ public class BatchJobConfig {
     }
 
   @Bean
-  public ItemReader<ConvGradStudent> dataConversionReader() {
-    return new DataConversionStudentReader();
+  public ItemReader<ConvGradStudent> dataConversionReader(DataConversionService dataConversionService, RestUtils restUtils) {
+    return new DataConversionStudentReader(dataConversionService, restUtils);
   }
 
   @Bean
@@ -106,10 +99,6 @@ public class BatchJobConfig {
 
   /**
    * Creates a bean that represents the only step of our batch job.
-   * @param dataConversionReader
-   * @param dataConversionWriter
-   * @param stepBuilderFactory
-   * @return
    */
   @Bean
   public Step dataConversionJobStep(ItemReader<ConvGradStudent> dataConversionReader,
@@ -126,10 +115,6 @@ public class BatchJobConfig {
 
   /**
    * Creates a bean that represents our batch job.
-   * @param dataConversionJobStep
-   * @param jobBuilderFactory
-   * @param listener
-   * @return
    */
   @Bean(name="dataConversionJob")
   public Job dataConversionBatchJob(Step dataConversionJobStep, DataConversionJobCompletionNotificationListener listener,
