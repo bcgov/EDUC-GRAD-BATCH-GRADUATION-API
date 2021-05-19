@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
+import ca.bc.gov.educ.api.batchgraduation.model.ConvCourseRestrictions;
 import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
@@ -41,14 +42,16 @@ public class DataConversionController {
 
   @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_COURSE_RESTRICTIONS_CONVERSION_JOB)
   @PreAuthorize(PermissionsContants.LOAD_STUDENT_IDS)
-  public ResponseEntity<ConversionSummaryDTO> runCourseRestrictionsDataConversionJob() {
+  public ResponseEntity<ConversionSummaryDTO> runCourseRestrictionsDataConversionJob(@RequestParam(defaultValue = "false") boolean purge) {
     logger.info("Inside runDataConversionJob");
 
     ConversionSummaryDTO summary = new ConversionSummaryDTO();
     summary.setTableName("COURSE RESTRICTIONS");
 
+    List<ConvCourseRestrictions> courseRestrictions;
     try {
-      dataConversionService.loadInitialRawGradCourseRestrictionsData(true);
+      courseRestrictions = dataConversionService.loadInitialRawGradCourseRestrictionsData(purge);
+      summary.setReadCount(courseRestrictions.size());
       logger.info("01. Course Restrictions - Initial Raw Data Load is done successfully");
     } catch (Exception e) {
       logger.info("01. Initial Raw Data Loading is failed: " + e.getLocalizedMessage());
@@ -57,11 +60,17 @@ public class DataConversionController {
       return ResponseEntity.status(500).body(summary);
     }
 
+    logger.info("02. Convert Course Restrictions started");
+    int i = 1;
     try {
-      dataConversionService.updateCourseRestrictions(summary);
-      logger.info("02. Update Data for date conversion is done successfully");
+      for (ConvCourseRestrictions c : courseRestrictions) {
+        logger.info(" Found courseRestriction[{}] in total {}", i++, summary.getReadCount());
+        dataConversionService.convertCourseRestriction(c, summary);
+      }
+
+      logger.info("02. Convert Course Restrictions done successfully");
     } catch (Exception e) {
-      logger.info("02. Update Data for date conversion is failed: " + e.getLocalizedMessage());
+      logger.info("02. Convert Course Restrictions failed: " + e.getLocalizedMessage());
       e.printStackTrace();
       summary.setException(e.getLocalizedMessage());
       return ResponseEntity.status(500).body(summary);
