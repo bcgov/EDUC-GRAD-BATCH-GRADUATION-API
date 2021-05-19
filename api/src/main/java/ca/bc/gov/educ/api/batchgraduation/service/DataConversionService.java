@@ -127,43 +127,41 @@ public class DataConversionService {
 	}
 
 	@Transactional
-	public void updateCourseRestrictions(ConversionSummaryDTO summary) {
-		List<ConvCourseRestrictionsEntity> entities =  convCourseRestrictionRepository.findAll();
-		summary.setReadCount(entities.size());
-		entities.forEach(cr -> {
-			summary.setProcessedCount(summary.getProcessedCount() + 1L);
-			boolean isUpdated = false;
-			// data conversion
-			if (StringUtils.isNotBlank(cr.getRestrictionStartDateStr())) {
-				Date start = DateConversionUtils.convertStringToDate(cr.getRestrictionStartDateStr());
-				if (start != null) {
-					cr.setRestrictionStartDate(start);
-					isUpdated = true;
-				}
-			}
-			if (StringUtils.isNotBlank(cr.getRestrictionEndDateStr())) {
-				Date end = DateConversionUtils.convertStringToDate(cr.getRestrictionEndDateStr());
-				if (end != null) {
-					cr.setRestrictionEndDate(end);
-					isUpdated = true;
-				}
-			}
-			if (isUpdated) {
-				convCourseRestrictionRepository.save(cr);
-			}
+	public void convertCourseRestriction(ConvCourseRestrictions courseRestriction, ConversionSummaryDTO summary) {
+		summary.setProcessedCount(summary.getProcessedCount() + 1L);
+		Optional<ConvCourseRestrictionsEntity> optional =  convCourseRestrictionRepository.findByMainCourseAndMainCourseLevelAndRestrictedCourseAndRestrictedCourseLevel(
+			courseRestriction.getMainCourse(), courseRestriction.getMainCourseLevel(), courseRestriction.getRestrictedCourse(), courseRestriction.getRestrictedCourseLevel());
+
+		ConvCourseRestrictionsEntity entity = optional.orElseGet(ConvCourseRestrictionsEntity::new);
+		convertCourseRestrictionData(courseRestriction, entity);
+		convCourseRestrictionRepository.save(entity);
+		if (optional.isPresent()) {
+			summary.setUpdatedCount(summary.getUpdatedCount() + 1L);
+		} else {
 			summary.setAddedCount(summary.getAddedCount() + 1L);
-		});
-		convCourseRestrictionRepository.flush();
+		}
 	}
 
 	@Transactional
-	public void loadInitialRawGradCourseRestrictionsData(boolean purge) {
+	public List<ConvCourseRestrictions> loadInitialRawGradCourseRestrictionsData(boolean purge) {
 		if (purge) {
 			convCourseRestrictionRepository.deleteAll();
 			convCourseRestrictionRepository.flush();
 		}
-		convCourseRestrictionRepository.loadInitialRawData();
-		convCourseRestrictionRepository.flush();
+		List<ConvCourseRestrictions> courseRestrictions = new ArrayList<>();
+		List<Object[]> results = convCourseRestrictionRepository.loadInitialRawData();
+		results.forEach(result -> {
+			String mainCourse = (String) result[0];
+			String mainCourseLevel = (String) result[1];
+			String restrictedCourse = (String) result[2];
+			String restrictedCourseLevel = (String) result[3];
+			String startDate = (String) result[4];
+			String endDate = (String) result[5];
+			ConvCourseRestrictions courseRestriction = new ConvCourseRestrictions(
+					mainCourse, mainCourseLevel, restrictedCourse, restrictedCourseLevel, startDate, endDate);
+			courseRestrictions.add(courseRestriction);
+		});
+		return courseRestrictions;
 	}
 
 	@Transactional
@@ -173,6 +171,31 @@ public class DataConversionService {
 			convCourseRestrictionRepository.delete(c);
 			summary.setAddedCount(summary.getAddedCount() - 1L);
 		});
+	}
+
+	private void convertCourseRestrictionData(ConvCourseRestrictions courseRestriction, ConvCourseRestrictionsEntity courseRestrictionEntity) {
+		if (courseRestrictionEntity.getCourseRestrictionId() == null) {
+			courseRestrictionEntity.setCourseRestrictionId(UUID.randomUUID());
+		}
+		courseRestrictionEntity.setMainCourse(courseRestriction.getMainCourse());
+		courseRestrictionEntity.setMainCourseLevel(courseRestriction.getMainCourseLevel());
+		courseRestrictionEntity.setRestrictedCourse(courseRestriction.getRestrictedCourse());
+		courseRestrictionEntity.setRestrictedCourseLevel(courseRestriction.getRestrictedCourseLevel());
+		// data conversion
+		if (StringUtils.isNotBlank(courseRestriction.getRestrictionStartDate())) {
+			courseRestrictionEntity.setRestrictionEndDateStr(courseRestriction.getRestrictionStartDate());
+			Date start = DateConversionUtils.convertStringToDate(courseRestriction.getRestrictionStartDate());
+			if (start != null) {
+				courseRestrictionEntity.setRestrictionStartDate(start);
+			}
+		}
+		if (StringUtils.isNotBlank(courseRestriction.getRestrictionEndDate())) {
+			courseRestrictionEntity.setRestrictionEndDateStr(courseRestriction.getRestrictionEndDate());
+			Date end = DateConversionUtils.convertStringToDate(courseRestriction.getRestrictionEndDate());
+			if (end != null) {
+				courseRestrictionEntity.setRestrictionEndDate(end);
+			}
+		}
 	}
 
 	private void convertStudentData(ConvGradStudent student, ConvGradStudentEntity studentEntity, ConversionSummaryDTO summary) {
