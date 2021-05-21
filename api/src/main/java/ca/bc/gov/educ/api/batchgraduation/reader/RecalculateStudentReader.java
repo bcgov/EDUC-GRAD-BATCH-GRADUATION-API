@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,21 +26,15 @@ public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
     
     private final RestTemplate restTemplate;
 
+    private final EducGradBatchGraduationApiConstants constants;
+
     private int nxtStudentForProcessing;
     private List<GraduationStatus> studentList;
-    
-    @Value("${authorization.user}")
-   	private String uName;
 
-   	@Value("${authorization.password}")
-   	private String pass;
-   	
-   	@Value(EducGradBatchGraduationApiConstants.ENDPOINT_GET_TOKEN_URL)
-    private String getToken;
-
-    public RecalculateStudentReader(String apiUrl, RestTemplate restTemplate) {
-        this.apiUrl = apiUrl;
+    public RecalculateStudentReader(RestTemplate restTemplate, EducGradBatchGraduationApiConstants constants) {
+        this.apiUrl = constants.getGradStudentForGradListUrl();
         this.restTemplate = restTemplate;
+        this.constants = constants;
         nxtStudentForProcessing = 0;
     }
 
@@ -73,11 +66,12 @@ public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
 
     private List<GraduationStatus> fetchStudentDataFromAPI() {
         LOGGER.info("Fetching Student List that need Processing");
-        HttpHeaders httpHeadersKC = EducGradBatchGraduationApiUtils.getHeaders(uName,pass);
+        HttpHeaders httpHeadersKC = EducGradBatchGraduationApiUtils.getHeaders(
+                constants.getUserName(), constants.getPassword());
 		MultiValueMap<String, String> map= new LinkedMultiValueMap<String, String>();
 		map.add("grant_type", "client_credentials");
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, httpHeadersKC);
-		ResponseObj res = restTemplate.exchange(getToken, HttpMethod.POST,
+		ResponseObj res = restTemplate.exchange(constants.getTokenUrl(), HttpMethod.POST,
 				request, ResponseObj.class).getBody();
         HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(res.getAccess_token());			
 		List<GraduationStatus> gradStudentList = restTemplate.exchange(apiUrl, HttpMethod.GET,

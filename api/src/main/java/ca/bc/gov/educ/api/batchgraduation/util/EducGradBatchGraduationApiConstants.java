@@ -1,5 +1,13 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
+@Getter
+@Setter
 public class EducGradBatchGraduationApiConstants {
 
 	public static final String API_ROOT_MAPPING = "";
@@ -17,10 +25,33 @@ public class EducGradBatchGraduationApiConstants {
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     
     public static final String TRAX_DATE_FORMAT = "yyyyMM";
-	public static final String ENDPOINT_GET_TOKEN_URL = "${endpoint.keycloack.getToken}";
-	public static final String ENDPOINT_RUN_GRADUATION_API_URL="${endpoint.grad-graduation-api.url}";
-	 public static final String ENDPOINT_PEN_STUDENT_API_BY_PEN_URL="${endpoint.pen-student-api.by-pen.url}";
-	 public static final String ENDPOINT_GRAD_STUDENT_API_URL="${endpoint.graduation-status-api.read-grad-status.url}";
-	 public static final String ENDPOINT_GRAD_STATUS_UPDATE_URL = "${endpoint.graduation-status-api.update-grad-status}";
-	 public static final String ENDPOINT_GRAD_PROGRAM_MANAGEMENT_URL = "${endpoint.grad-program-management-api.special-program.url}";
+
+    @Value("${authorization.user}")
+    private String userName;
+
+    @Value("${authorization.password}")
+    private String password;
+
+    @Value("${endpoint.keycloack.getToken}")
+    private String tokenUrl;
+
+    @Value("${endpoint.grad-graduation-api.url}")
+    private String graduationApiUrl;
+
+    @Value("${endpoint.pen-student-api.by-pen.url}")
+    private String penStudentApiByPenUrl;
+
+    @Value("${endpoint.graduation-status-api.read-grad-status.url}")
+    private String gradStudentApiUrl;
+
+    @Value("${endpoint.graduation-status-api.update-grad-status}")
+    private String gradStatusUpdateUrl;
+
+    @Value("${endpoint.grad-program-management-api.special-program.url}")
+    private String gradProgramManagementUrl;
+
+    @Value("${endpoint.grad-graduation-status-api.student-for-grad-list.url}")
+    private String gradStudentForGradListUrl;
+
+    public static final String ENDPOINT_GRAD_STUDENT_API="endpoint.graduation-status-api.read-grad-status.url";
 }

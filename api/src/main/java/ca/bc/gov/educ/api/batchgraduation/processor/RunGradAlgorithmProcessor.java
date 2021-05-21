@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -21,16 +20,16 @@ public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStatus
 
     @Autowired
     RestTemplate restTemplate;
-    
-    @Value(EducGradBatchGraduationApiConstants.ENDPOINT_RUN_GRADUATION_API_URL)
-    private String graduateStudent;
+
+	@Autowired
+	EducGradBatchGraduationApiConstants constants;
     
 	@Override
 	public GraduationStatus process(GraduationStatus item) throws Exception {
 		LOGGER.info(" Processing  **** PEN: ****" + item.getPen().substring(5));
 		HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(item.getAccess_token());
 		try {
-		AlgorithmResponse algorithmResponse = restTemplate.exchange(String.format(graduateStudent,item.getStudentID()), HttpMethod.GET,
+		AlgorithmResponse algorithmResponse = restTemplate.exchange(String.format(constants.getGraduationApiUrl(),item.getStudentID()), HttpMethod.GET,
 				new HttpEntity<>(httpHeaders), AlgorithmResponse.class).getBody();
 		 return algorithmResponse.getGraduationStatus();
 		}catch(Exception e) {
