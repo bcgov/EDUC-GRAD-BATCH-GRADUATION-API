@@ -7,9 +7,10 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.web.reactive.function.client.WebClient;
 
-@Profile("test")
+@Profile("testWebClient")
 @Configuration
-public class MockConfiguration {
+public class WebClientMockConfiguration {
+
     @Bean
     @Primary
     public WebClient webClient() { return Mockito.mock(WebClient.class); }
