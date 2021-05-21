@@ -52,6 +52,4 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-status-api.student-for-grad-list.url}")
     private String gradStudentForGradListUrl;
-
-    public static final String ENDPOINT_GRAD_STUDENT_API="endpoint.graduation-status-api.read-grad-status.url";
 }

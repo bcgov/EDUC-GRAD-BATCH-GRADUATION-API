@@ -4,38 +4,39 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 
+import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
+import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
 
 public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecalculateStudentReader.class);
-
-    private final String apiUrl;
     
-    private final RestTemplate restTemplate;
-
-    private final EducGradBatchGraduationApiConstants constants;
+    private final RestUtils restUtils;
+    
+    private AlgorithmSummaryDTO summaryDTO;
 
     private int nxtStudentForProcessing;
     private List<GraduationStatus> studentList;
 
-    public RecalculateStudentReader(RestTemplate restTemplate, EducGradBatchGraduationApiConstants constants) {
-        this.apiUrl = constants.getGradStudentForGradListUrl();
-        this.restTemplate = restTemplate;
-        this.constants = constants;
+    public RecalculateStudentReader(RestUtils restUtils) {
         nxtStudentForProcessing = 0;
+        this.restUtils = restUtils;
+    }
+    
+    @BeforeStep
+    public void initializeSummaryDto(StepExecution stepExecution) {
+        JobExecution jobExecution = stepExecution.getJobExecution();
+        ExecutionContext jobContext = jobExecution.getExecutionContext();
+        summaryDTO = new AlgorithmSummaryDTO();
+        jobContext.put("summaryDTO", summaryDTO);
     }
 
     @Override
@@ -44,13 +45,14 @@ public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
 
         if (studentDataIsNotInitialized()) {
         	studentList = fetchStudentDataFromAPI();
+        	summaryDTO.setReadCount(studentList.size());
         }
 
         GraduationStatus nextStudent = null;
         
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
-            LOGGER.info("Found student: **** PEN: **** {}", nextStudent.getPen().substring(5));
+            LOGGER.info("Found student[{}] - PEN: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getPen(), summaryDTO.getReadCount());
             nxtStudentForProcessing++;
         }
         else {
@@ -66,19 +68,16 @@ public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
 
     private List<GraduationStatus> fetchStudentDataFromAPI() {
         LOGGER.info("Fetching Student List that need Processing");
-        HttpHeaders httpHeadersKC = EducGradBatchGraduationApiUtils.getHeaders(
-                constants.getUserName(), constants.getPassword());
-		MultiValueMap<String, String> map= new LinkedMultiValueMap<String, String>();
-		map.add("grant_type", "client_credentials");
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<MultiValueMap<String, String>>(map, httpHeadersKC);
-		ResponseObj res = restTemplate.exchange(constants.getTokenUrl(), HttpMethod.POST,
-				request, ResponseObj.class).getBody();
-        HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(res.getAccess_token());			
-		List<GraduationStatus> gradStudentList = restTemplate.exchange(apiUrl, HttpMethod.GET,
-					new HttpEntity<>(httpHeaders), new ParameterizedTypeReference<List<GraduationStatus>>() {}).getBody();
-		gradStudentList.forEach(gS-> {
-			gS.setAccess_token(res.getAccess_token());
-		});
-		return gradStudentList;
+        fetchAccessToken();			
+		return restUtils.getStudentsForAlgorithm(summaryDTO.getAccessToken());
+    }
+    
+    private void fetchAccessToken() {
+        LOGGER.info("Fetching the access token from KeyCloak API");
+        ResponseObj res = restUtils.getTokenResponseObject();
+        if (res != null) {
+            summaryDTO.setAccessToken(res.getAccess_token());
+            LOGGER.info("Setting the new access token in summaryDTO.");
+        }
     }
 }

@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
+import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmResponse;
 import ca.bc.gov.educ.api.batchgraduation.model.GradSpecialProgram;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class RestUtils {
@@ -57,5 +60,21 @@ public class RestUtils {
                 .uri(constants.getGradProgramManagementUrl(), uri -> uri.path("/{programCode}/{specialProgramCode}").build(programCode, specialProgramCode))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(GradSpecialProgram.class).block();
+    }
+    
+    public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken) {
+        return this.webClient.get()
+        		.uri(String.format(constants.getGraduationApiUrl(), studentID))
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve().bodyToMono(AlgorithmResponse.class).block();
+    }
+    
+    public List<GraduationStatus> getStudentsForAlgorithm(String accessToken) {
+        final ParameterizedTypeReference<List<GraduationStatus>> responseType = new ParameterizedTypeReference<>() {
+        };
+        return this.webClient.get()
+                .uri(constants.getGradStudentForGradListUrl())
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve().bodyToMono(responseType).block();
     }
 }

@@ -1,13 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
-import ca.bc.gov.educ.api.batchgraduation.listener.DataConversionJobCompletionNotificationListener;
-import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
-import ca.bc.gov.educ.api.batchgraduation.processor.DataConversionProcessor;
-import ca.bc.gov.educ.api.batchgraduation.reader.DataConversionStudentReader;
-import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.writer.DataConversionStudentWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -21,13 +13,19 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 
+import ca.bc.gov.educ.api.batchgraduation.listener.DataConversionJobCompletionNotificationListener;
 import ca.bc.gov.educ.api.batchgraduation.listener.JobCompletionNotificationListener;
+import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.processor.DataConversionProcessor;
 import ca.bc.gov.educ.api.batchgraduation.processor.RunGradAlgorithmProcessor;
+import ca.bc.gov.educ.api.batchgraduation.reader.DataConversionStudentReader;
 import ca.bc.gov.educ.api.batchgraduation.reader.RecalculateStudentReader;
+import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
+import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.writer.BatchPerformanceWriter;
+import ca.bc.gov.educ.api.batchgraduation.writer.DataConversionStudentWriter;
 
 @Configuration
 public class BatchJobConfig {
@@ -36,8 +34,8 @@ public class BatchJobConfig {
 	JobRegistry jobRegistry;
 	  
     @Bean
-    public ItemReader<GraduationStatus> itemReader(EducGradBatchGraduationApiConstants constants, RestTemplate restTemplate) {
-        return new RecalculateStudentReader(restTemplate, constants);
+    public ItemReader<GraduationStatus> itemReader(RestUtils restUtils) {
+        return new RecalculateStudentReader(restUtils);
     }
 
     @Bean
