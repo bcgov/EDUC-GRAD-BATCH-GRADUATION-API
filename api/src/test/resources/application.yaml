@@ -11,7 +11,8 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
+    generate-ddl: true
   mvc:
     log-request-details: true
   jackson:
