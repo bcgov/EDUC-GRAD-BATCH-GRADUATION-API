@@ -7,9 +7,7 @@ import java.util.UUID;
 
 import javax.transaction.Transactional;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -36,22 +34,15 @@ public class GradStudentService {
     
     @Autowired
     RestTemplateBuilder restTemplateBuilder;
-    
-    @Value(EducGradBatchGraduationApiConstants.ENDPOINT_PEN_STUDENT_API_BY_PEN_URL)
-    private String getPenStudentAPIByPenURL;
-    
-    @Value(EducGradBatchGraduationApiConstants.ENDPOINT_GRAD_STATUS_UPDATE_URL)
-    private String updateGradStatusForStudent;
-    
-    @Value(EducGradBatchGraduationApiConstants.ENDPOINT_GRAD_STUDENT_API_URL)
-    private String getGradStatusForStudent;  
-    
-    
+
+    @Autowired
+	EducGradBatchGraduationApiConstants constants;
+
     @Transactional
     public void getStudentByPenFromStudentAPI(List<LoadStudentData> loadStudentData, String accessToken) {
     	loadStudentData.forEach(student -> {
     		HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(accessToken);
-        	List<Student> stuDataList = restTemplate.exchange(String.format(getPenStudentAPIByPenURL, student.getPen()), HttpMethod.GET,
+        	List<Student> stuDataList = restTemplate.exchange(String.format(constants.getPenStudentApiByPenUrl(), student.getPen()), HttpMethod.GET,
     				new HttpEntity<>(httpHeaders), new ParameterizedTypeReference<List<Student>>() {}).getBody();
         	stuDataList.forEach(st-> {
     			GraduationStatusEntity gradStu = new GraduationStatusEntity();			
