@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.util;
 import ca.bc.gov.educ.api.batchgraduation.model.GradSpecialProgram;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,6 +22,7 @@ public class RestUtils {
 
     private final WebClient webClient;
 
+    @Autowired
     public RestUtils(final EducGradBatchGraduationApiConstants constants, final WebClient webClient) {
         this.constants = constants;
         this.webClient = webClient;
