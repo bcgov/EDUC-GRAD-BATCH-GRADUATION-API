@@ -225,7 +225,7 @@ public class DataConversionService {
 				if (gradSpecialProgram != null && gradSpecialProgram.getId() != null) {
 					entity.setSpecialProgramID(gradSpecialProgram.getId());
 					Optional<ConvGradStudentSpecialProgramEntity> stdSpecialProgramOptional = convGradStudentSpecialProgramRepository.findByStudentIDAndSpecialProgramID(student.getStudentID(), gradSpecialProgram.getId());
-					if (stdSpecialProgramOptional.isEmpty()) {
+					if (!stdSpecialProgramOptional.isPresent()) {
 						convGradStudentSpecialProgramRepository.save(entity);
 					}
 				}

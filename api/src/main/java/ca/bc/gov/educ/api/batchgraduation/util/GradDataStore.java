@@ -17,6 +17,7 @@ public class GradDataStore {
 
 	private static final ThreadLocal<Map<String,Integer>> mapProgram = ThreadLocal.<Map<String,Integer>>withInitial(() -> {return new HashMap<String,Integer>();});
 	private static final ThreadLocal<List<GraduationStatus>> processedList = ThreadLocal.<List<GraduationStatus>>withInitial(() -> {return new LinkedList<GraduationStatus>();});
+	private static final ThreadLocal<List<String>> erroredPenList = ThreadLocal.<List<String>>withInitial(() -> {return new LinkedList<String>();});
 	public void addProgram(String program) {
 		 if(mapProgram != null) {
 		        if(mapProgram.get().get(program) != null) {
@@ -39,6 +40,14 @@ public class GradDataStore {
 	
 	public ThreadLocal<Map<String, Integer>> getProgramMap() {
 		return mapProgram;
+	}
+	
+	public void addErroredPen(String item) {
+		erroredPenList.get().add(item);
+	}
+	
+	public int getSizeOfErroredPen() {
+		return erroredPenList.get().size();
 	}
 	
     public void clear() {

@@ -1,41 +1,41 @@
 package ca.bc.gov.educ.api.batchgraduation.processor;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmResponse;
+import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.service.GradAlgorithmService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 
 public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStatus,GraduationStatus> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RunGradAlgorithmProcessor.class);
-
     @Autowired
     RestTemplate restTemplate;
-    
-    @Value(EducGradBatchGraduationApiConstants.ENDPOINT_RUN_GRADUATION_API_URL)
-    private String graduateStudent;
+
+	@Autowired
+	EducGradBatchGraduationApiConstants constants;
+	
+	@Autowired
+	private GradAlgorithmService gradAlgorithmService;
+
+	private AlgorithmSummaryDTO summaryDTO;
+
+	@BeforeStep
+	public void retrieveSummaryDto(StepExecution stepExecution) {
+		JobExecution jobExecution = stepExecution.getJobExecution();
+		ExecutionContext jobContext = jobExecution.getExecutionContext();
+		summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
+	}
     
 	@Override
 	public GraduationStatus process(GraduationStatus item) throws Exception {
-		LOGGER.info(" Processing  **** PEN: ****" + item.getPen().substring(5));
-		HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(item.getAccess_token());
-		try {
-		AlgorithmResponse algorithmResponse = restTemplate.exchange(String.format(graduateStudent,item.getStudentID()), HttpMethod.GET,
-				new HttpEntity<>(httpHeaders), AlgorithmResponse.class).getBody();
-		 return algorithmResponse.getGraduationStatus();
-		}catch(Exception e) {
-			return null;
-		}
+		return gradAlgorithmService.processStudent(item, summaryDTO);
 		
 	}
 
