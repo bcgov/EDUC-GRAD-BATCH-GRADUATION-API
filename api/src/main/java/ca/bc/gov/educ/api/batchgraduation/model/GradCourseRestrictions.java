@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ConvCourseRestrictions {
+public class GradCourseRestrictions {
     private String mainCourse;
     private String mainCourseLevel;
     private String restrictedCourse;

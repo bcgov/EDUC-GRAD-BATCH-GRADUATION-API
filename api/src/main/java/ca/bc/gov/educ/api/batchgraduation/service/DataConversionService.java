@@ -1,15 +1,16 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.ConvCourseRestrictionsEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.GradCourseRestrictionsEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentSpecialProgramEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.ConvCourseRestrictionRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.GradCourseRestrictionRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentSpecialProgramRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.DateConversionUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +20,14 @@ import java.util.*;
 public class DataConversionService {
 
     private final ConvGradStudentRepository convGradStudentRepository;
-	private final ConvCourseRestrictionRepository convCourseRestrictionRepository;
+	private final GradCourseRestrictionRepository gradCourseRestrictionRepository;
 	private final ConvGradStudentSpecialProgramRepository convGradStudentSpecialProgramRepository;
 	private final RestUtils restUtils;
 
-	public DataConversionService(ConvGradStudentRepository convGradStudentRepository, ConvCourseRestrictionRepository convCourseRestrictionRepository, ConvGradStudentSpecialProgramRepository convGradStudentSpecialProgramRepository, RestUtils restUtils) {
+	@Autowired
+	public DataConversionService(ConvGradStudentRepository convGradStudentRepository, GradCourseRestrictionRepository gradCourseRestrictionRepository, ConvGradStudentSpecialProgramRepository convGradStudentSpecialProgramRepository, RestUtils restUtils) {
 		this.convGradStudentRepository = convGradStudentRepository;
-		this.convCourseRestrictionRepository = convCourseRestrictionRepository;
+		this.gradCourseRestrictionRepository = gradCourseRestrictionRepository;
 		this.convGradStudentSpecialProgramRepository = convGradStudentSpecialProgramRepository;
 		this.restUtils = restUtils;
 	}
@@ -127,14 +129,14 @@ public class DataConversionService {
 	}
 
 	@Transactional
-	public void convertCourseRestriction(ConvCourseRestrictions courseRestriction, ConversionSummaryDTO summary) {
+	public void convertCourseRestriction(GradCourseRestrictions courseRestriction, ConversionSummaryDTO summary) {
 		summary.setProcessedCount(summary.getProcessedCount() + 1L);
-		Optional<ConvCourseRestrictionsEntity> optional =  convCourseRestrictionRepository.findByMainCourseAndMainCourseLevelAndRestrictedCourseAndRestrictedCourseLevel(
+		Optional<GradCourseRestrictionsEntity> optional =  gradCourseRestrictionRepository.findByMainCourseAndMainCourseLevelAndRestrictedCourseAndRestrictedCourseLevel(
 			courseRestriction.getMainCourse(), courseRestriction.getMainCourseLevel(), courseRestriction.getRestrictedCourse(), courseRestriction.getRestrictedCourseLevel());
 
-		ConvCourseRestrictionsEntity entity = optional.orElseGet(ConvCourseRestrictionsEntity::new);
+		GradCourseRestrictionsEntity entity = optional.orElseGet(GradCourseRestrictionsEntity::new);
 		convertCourseRestrictionData(courseRestriction, entity);
-		convCourseRestrictionRepository.save(entity);
+		gradCourseRestrictionRepository.save(entity);
 		if (optional.isPresent()) {
 			summary.setUpdatedCount(summary.getUpdatedCount() + 1L);
 		} else {
@@ -143,13 +145,13 @@ public class DataConversionService {
 	}
 
 	@Transactional
-	public List<ConvCourseRestrictions> loadInitialRawGradCourseRestrictionsData(boolean purge) {
+	public List<GradCourseRestrictions> loadInitialRawGradCourseRestrictionsData(boolean purge) {
 		if (purge) {
-			convCourseRestrictionRepository.deleteAll();
-			convCourseRestrictionRepository.flush();
+			gradCourseRestrictionRepository.deleteAll();
+			gradCourseRestrictionRepository.flush();
 		}
-		List<ConvCourseRestrictions> courseRestrictions = new ArrayList<>();
-		List<Object[]> results = convCourseRestrictionRepository.loadInitialRawData();
+		List<GradCourseRestrictions> courseRestrictions = new ArrayList<>();
+		List<Object[]> results = gradCourseRestrictionRepository.loadInitialRawData();
 		results.forEach(result -> {
 			String mainCourse = (String) result[0];
 			String mainCourseLevel = (String) result[1];
@@ -157,7 +159,7 @@ public class DataConversionService {
 			String restrictedCourseLevel = (String) result[3];
 			String startDate = (String) result[4];
 			String endDate = (String) result[5];
-			ConvCourseRestrictions courseRestriction = new ConvCourseRestrictions(
+			GradCourseRestrictions courseRestriction = new GradCourseRestrictions(
 					mainCourse, mainCourseLevel, restrictedCourse, restrictedCourseLevel, startDate, endDate);
 			courseRestrictions.add(courseRestriction);
 		});
@@ -166,14 +168,14 @@ public class DataConversionService {
 
 	@Transactional
 	public void removeGradCourseRestriction(String mainCourseCode, String restrictedCourseCode, ConversionSummaryDTO summary) {
-		List<ConvCourseRestrictionsEntity> removalList = convCourseRestrictionRepository.findByMainCourseAndRestrictedCourse(mainCourseCode, restrictedCourseCode);
+		List<GradCourseRestrictionsEntity> removalList = gradCourseRestrictionRepository.findByMainCourseAndRestrictedCourse(mainCourseCode, restrictedCourseCode);
 		removalList.forEach(c -> {
-			convCourseRestrictionRepository.delete(c);
+			gradCourseRestrictionRepository.delete(c);
 			summary.setAddedCount(summary.getAddedCount() - 1L);
 		});
 	}
 
-	private void convertCourseRestrictionData(ConvCourseRestrictions courseRestriction, ConvCourseRestrictionsEntity courseRestrictionEntity) {
+	private void convertCourseRestrictionData(GradCourseRestrictions courseRestriction, GradCourseRestrictionsEntity courseRestrictionEntity) {
 		if (courseRestrictionEntity.getCourseRestrictionId() == null) {
 			courseRestrictionEntity.setCourseRestrictionId(UUID.randomUUID());
 		}
@@ -183,14 +185,12 @@ public class DataConversionService {
 		courseRestrictionEntity.setRestrictedCourseLevel(courseRestriction.getRestrictedCourseLevel());
 		// data conversion
 		if (StringUtils.isNotBlank(courseRestriction.getRestrictionStartDate())) {
-			courseRestrictionEntity.setRestrictionEndDateStr(courseRestriction.getRestrictionStartDate());
 			Date start = DateConversionUtils.convertStringToDate(courseRestriction.getRestrictionStartDate());
 			if (start != null) {
 				courseRestrictionEntity.setRestrictionStartDate(start);
 			}
 		}
 		if (StringUtils.isNotBlank(courseRestriction.getRestrictionEndDate())) {
-			courseRestrictionEntity.setRestrictionEndDateStr(courseRestriction.getRestrictionEndDate());
 			Date end = DateConversionUtils.convertStringToDate(courseRestriction.getRestrictionEndDate());
 			if (end != null) {
 				courseRestrictionEntity.setRestrictionEndDate(end);
@@ -215,8 +215,7 @@ public class DataConversionService {
 	private void processSpecialPrograms(ConvGradStudentEntity student, String accessToken) {
 		// French Immersion for 2018-EN
 		if (StringUtils.equals(student.getProgram(), "2018-EN")) {
-			long count = convGradStudentRepository.countFrenchImmersionCourses(student.getPen());
-			if (count > 0) {
+			if (isFrenchImmersionCourse(student.getPen())) {
 				ConvGradStudentSpecialProgramEntity entity = new ConvGradStudentSpecialProgramEntity();
 				entity.setPen(student.getPen());
 				entity.setStudentID(student.getStudentID());
@@ -278,5 +277,13 @@ public class DataConversionService {
 			default:
 				break;
 		}
+	}
+
+	@Transactional(readOnly = true)
+	public boolean isFrenchImmersionCourse(String pen) {
+		if (this.convGradStudentRepository.countFrenchImmersionCourses(pen) > 0L) {
+			return true;
+		}
+		return false;
 	}
 }

@@ -47,6 +47,7 @@ public class DataConversionStudentReader implements ItemReader<ConvGradStudent> 
         JobExecution jobExecution = stepExecution.getJobExecution();
         ExecutionContext jobContext = jobExecution.getExecutionContext();
         summaryDTO = new ConversionSummaryDTO();
+        summaryDTO.setTableName("GRAD_STUDENT");
         jobContext.put("summaryDTO", summaryDTO);
     }
 

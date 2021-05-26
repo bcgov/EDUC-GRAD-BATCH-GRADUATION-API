@@ -13,8 +13,8 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "CONV_GRAD_COURSE_RESTRICTIONS")
-public class ConvCourseRestrictionsEntity extends BaseEntity  {
+@Table(name = "GRAD_COURSE_RESTRICTIONS")
+public class GradCourseRestrictionsEntity extends BaseEntity  {
    
 	@Id
 	@Column(name = "ID", nullable = false)
@@ -32,16 +32,10 @@ public class ConvCourseRestrictionsEntity extends BaseEntity  {
 	@Column(name = "CRSE_RESTRICTED_LVL", nullable = true)
     private String restrictedCourseLevel;   
 	
-	@Column(name = "RESTRICTION_START_DT", nullable = true)
+	@Column(name = "START_DT", nullable = true)
     private Date restrictionStartDate; 
 	
-	@Column(name = "RESTRICTION_END_DT", nullable = true)
+	@Column(name = "END_DT", nullable = true)
     private Date restrictionEndDate;
-
-	@Column(name = "RESTRICTION_START_DT_STR", nullable = true)
-	private String restrictionStartDateStr;
-
-	@Column(name = "RESTRICTION_END_DT_STR", nullable = true)
-	private String restrictionEndDateStr;
 
 }
