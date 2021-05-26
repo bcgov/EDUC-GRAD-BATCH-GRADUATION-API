@@ -50,45 +50,6 @@ CREATE TABLE "GRADUATION"."CONV_GRAD_STUDENT"
    ALTER TABLE "GRADUATION"."CONV_GRAD_STUDENT" MODIFY ("UPDATED_BY" NOT NULL ENABLE);
    ALTER TABLE "GRADUATION"."CONV_GRAD_STUDENT" MODIFY ("UPDATED_TIMESTAMP" NOT NULL ENABLE);
 
- DROP TABLE IF EXISTS "GRADUATION"."CONV_GRAD_COURSE_RESTRICTIONS";
- CREATE TABLE "GRADUATION"."CONV_GRAD_COURSE_RESTRICTIONS"
-   (	"ID" RAW(16) DEFAULT SYS_GUID (),
-	"CRSE_MAIN" VARCHAR2(7 BYTE),
-	"CRSE_MAIN_LVL" VARCHAR2(150 CHAR),
-	"CRSE_RESTRICTED" VARCHAR2(7 BYTE),
-	"CRSE_RESTRICTED_LVL" VARCHAR2(150 CHAR),
-	"RESTRICTION_START_DT" DATE,
-	"RESTRICTION_END_DT"  DATE,
-	"RESTRICTION_START_DT_STR" VARCHAR2(8),
-	"RESTRICTION_END_DT_STR" VARCHAR2(8),
-	"CREATED_BY" VARCHAR2(20 BYTE) DEFAULT USER,
-	"CREATED_TIMESTAMP" TIMESTAMP (6) DEFAULT systimestamp,
-	"UPDATED_BY" VARCHAR2(20 BYTE) DEFAULT USER,
-	"UPDATED_TIMESTAMP" TIMESTAMP (6) DEFAULT systimestamp
-   ) SEGMENT CREATION IMMEDIATE
-     PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255
-    NOCOMPRESS LOGGING
-     STORAGE(INITIAL 131072 NEXT 131072 MINEXTENTS 1 MAXEXTENTS 2147483645
-     PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
-     BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
-     TABLESPACE "GRADUATION_DATA"   NO INMEMORY ;
-   --------------------------------------------------------
-   --  Constraints for Table CONV_GRAD_COURSE_RESTRICTIONS
-   --------------------------------------------------------
-
-     ALTER TABLE "GRADUATION"."CONV_GRAD_COURSE_RESTRICTIONS" MODIFY ("CRSE_MAIN" NOT NULL ENABLE);
-     ALTER TABLE "GRADUATION"."CONV_GRAD_COURSE_RESTRICTIONS" MODIFY ("CRSE_RESTRICTED" NOT NULL ENABLE);
-     ALTER TABLE "GRADUATION"."CONV_GRAD_COURSE_RESTRICTIONS" MODIFY ("CREATED_BY" NOT NULL ENABLE);
-     ALTER TABLE "GRADUATION"."CONV_GRAD_COURSE_RESTRICTIONS" MODIFY ("CREATED_TIMESTAMP" NOT NULL ENABLE);
-     ALTER TABLE "GRADUATION"."CONV_GRAD_COURSE_RESTRICTIONS" MODIFY ("UPDATED_BY" NOT NULL ENABLE);
-     ALTER TABLE "GRADUATION"."CONV_GRAD_COURSE_RESTRICTIONS" MODIFY ("UPDATED_TIMESTAMP" NOT NULL ENABLE);
-     ALTER TABLE "GRADUATION"."CONV_GRAD_COURSE_RESTRICTIONS" ADD PRIMARY KEY ("ID")
-     USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS
-     STORAGE(INITIAL 131072 NEXT 131072 MINEXTENTS 1 MAXEXTENTS 2147483645
-     PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
-     BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
-     TABLESPACE "GRADUATION_DATA"  ENABLE;
-
 --------------------------------------------------------
 --  DDL for Table GRAD_STUDENT_SPECIAL_PROGRAMS
 --------------------------------------------------------
@@ -155,9 +116,8 @@ and l.stud_no = m.stud_no
 and m.grad_date = 0
 and m.archive_flag = 'A'
 
---
-insert into CONV_GRAD_COURSE_RESTRICTIONS(ID, CRSE_MAIN, CRSE_MAIN_LVL, CRSE_RESTRICTED, CRSE_RESTRICTED_LVL, RESTRICTION_START_DT_STR, RESTRICTION_END_DT_STR)
-select sys_guid() as ID,  trim(c1.crse_code) as CRSE_MAIN, trim(c1.crse_level) as CRSE_MAIN_LVL,
+-- GRAD_COURSE_RESTRICTIONS
+select trim(c1.crse_code) as CRSE_MAIN, trim(c1.crse_level) as CRSE_MAIN_LVL,
  trim(c2.crse_code) as CRSE_RESTRICTED, trim(c2.crse_level) as CRSE_RESTRICTED_LVL,
  trim(c1.start_restrict_session) as RESTRICTION_START_DT, trim(c1.end_restrict_session) as RESTRICTION_END_DT
 from tab_crse c1
@@ -167,6 +127,9 @@ and (c1.crse_code  <> c2.crse_code
  or  c1.crse_level <> c2.crse_level)
 and c1.restriction_code <> ' '
 
+------------------------------
+-- Validation Queries
+------------------------------
 -- French immersion validation by pen
 select count(*) from STUD_XCRSE sx, GRAD_COURSE_REQUIREMENT gcr
 where 1 = 1
@@ -174,11 +137,3 @@ where 1 = 1
   and trim(sx.crse_code) = gcr.crse_code
   and trim(sx.crse_level) = gcr.crse_lvl
   and gcr.rule_code = 202
-
--------------------------------
--- Transfer conv to real table
--------------------------------
--- CONV_GRAD_COURSE_RESTRICTIONS
-insert into Grad_Course_Restrictions (id, crse_main, crse_main_lvl, crse_restricted, crse_restricted_lvl, start_dt, end_dt, created_by, created_timestamp, updated_by, updated_timestamp)
-select id, crse_main, crse_main_lvl, crse_restricted, crse_restricted_lvl, restriction_start_dt, restriction_end_dt, created_by, created_timestamp, updated_by, updated_timestamp
-from Conv_Grad_Course_Restrictions
