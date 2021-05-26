@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
-import ca.bc.gov.educ.api.batchgraduation.model.ConvCourseRestrictions;
+import ca.bc.gov.educ.api.batchgraduation.model.GradCourseRestrictions;
 import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
@@ -46,9 +46,9 @@ public class DataConversionController {
     logger.info("Inside runDataConversionJob");
 
     ConversionSummaryDTO summary = new ConversionSummaryDTO();
-    summary.setTableName("COURSE RESTRICTIONS");
+    summary.setTableName("GRAD_COURSE_RESTRICTIONS");
 
-    List<ConvCourseRestrictions> courseRestrictions;
+    List<GradCourseRestrictions> courseRestrictions;
     try {
       courseRestrictions = dataConversionService.loadInitialRawGradCourseRestrictionsData(purge);
       summary.setReadCount(courseRestrictions.size());
@@ -63,7 +63,7 @@ public class DataConversionController {
     logger.info("02. Convert Course Restrictions started");
     int i = 1;
     try {
-      for (ConvCourseRestrictions c : courseRestrictions) {
+      for (GradCourseRestrictions c : courseRestrictions) {
         logger.info(" Found courseRestriction[{}] in total {}", i++, summary.getReadCount());
         dataConversionService.convertCourseRestriction(c, summary);
       }
