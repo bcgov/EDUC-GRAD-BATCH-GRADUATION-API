@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.repository;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.GradCourseRestrictionsEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.GradCourseRestrictionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -11,15 +11,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface GradCourseRestrictionRepository extends JpaRepository<GradCourseRestrictionsEntity, UUID> {
+public interface GradCourseRestrictionRepository extends JpaRepository<GradCourseRestrictionEntity, UUID> {
 
-    List<GradCourseRestrictionsEntity> findAll();
+    List<GradCourseRestrictionEntity> findAll();
 
-	List<GradCourseRestrictionsEntity> findByMainCourseAndMainCourseLevel(String courseCode, String courseLevel);
+	List<GradCourseRestrictionEntity> findByMainCourseAndMainCourseLevel(String courseCode, String courseLevel);
 
-	List<GradCourseRestrictionsEntity> findByMainCourseAndRestrictedCourse(String mainCourseCode, String restrictedCourseCode);
+	List<GradCourseRestrictionEntity> findByMainCourseAndRestrictedCourse(String mainCourseCode, String restrictedCourseCode);
 
-	Optional<GradCourseRestrictionsEntity> findByMainCourseAndMainCourseLevelAndRestrictedCourseAndRestrictedCourseLevel(
+	Optional<GradCourseRestrictionEntity> findByMainCourseAndMainCourseLevelAndRestrictedCourseAndRestrictedCourseLevel(
 			String courseCode, String courseLevel, String restrictedCourseCode, String restrictedCourseCodeLevel);
 
 	@Query(value="select trim(c1.crse_code) as CRSE_MAIN, trim(c1.crse_level) as CRSE_MAIN_LVL,\n" +

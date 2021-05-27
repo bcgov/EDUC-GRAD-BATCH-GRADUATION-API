@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.GradCourseRestrictionsEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.GradCourseRestrictionEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentSpecialProgramEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
@@ -129,12 +129,12 @@ public class DataConversionService {
 	}
 
 	@Transactional
-	public void convertCourseRestriction(GradCourseRestrictions courseRestriction, ConversionSummaryDTO summary) {
+	public void convertCourseRestriction(GradCourseRestriction courseRestriction, ConversionSummaryDTO summary) {
 		summary.setProcessedCount(summary.getProcessedCount() + 1L);
-		Optional<GradCourseRestrictionsEntity> optional =  gradCourseRestrictionRepository.findByMainCourseAndMainCourseLevelAndRestrictedCourseAndRestrictedCourseLevel(
+		Optional<GradCourseRestrictionEntity> optional =  gradCourseRestrictionRepository.findByMainCourseAndMainCourseLevelAndRestrictedCourseAndRestrictedCourseLevel(
 			courseRestriction.getMainCourse(), courseRestriction.getMainCourseLevel(), courseRestriction.getRestrictedCourse(), courseRestriction.getRestrictedCourseLevel());
 
-		GradCourseRestrictionsEntity entity = optional.orElseGet(GradCourseRestrictionsEntity::new);
+		GradCourseRestrictionEntity entity = optional.orElseGet(GradCourseRestrictionEntity::new);
 		convertCourseRestrictionData(courseRestriction, entity);
 		gradCourseRestrictionRepository.save(entity);
 		if (optional.isPresent()) {
@@ -145,12 +145,12 @@ public class DataConversionService {
 	}
 
 	@Transactional
-	public List<GradCourseRestrictions> loadInitialRawGradCourseRestrictionsData(boolean purge) {
+	public List<GradCourseRestriction> loadInitialRawGradCourseRestrictionsData(boolean purge) {
 		if (purge) {
 			gradCourseRestrictionRepository.deleteAll();
 			gradCourseRestrictionRepository.flush();
 		}
-		List<GradCourseRestrictions> courseRestrictions = new ArrayList<>();
+		List<GradCourseRestriction> courseRestrictions = new ArrayList<>();
 		List<Object[]> results = gradCourseRestrictionRepository.loadInitialRawData();
 		results.forEach(result -> {
 			String mainCourse = (String) result[0];
@@ -159,7 +159,7 @@ public class DataConversionService {
 			String restrictedCourseLevel = (String) result[3];
 			String startDate = (String) result[4];
 			String endDate = (String) result[5];
-			GradCourseRestrictions courseRestriction = new GradCourseRestrictions(
+			GradCourseRestriction courseRestriction = new GradCourseRestriction(
 					mainCourse, mainCourseLevel, restrictedCourse, restrictedCourseLevel, startDate, endDate);
 			courseRestrictions.add(courseRestriction);
 		});
@@ -168,14 +168,14 @@ public class DataConversionService {
 
 	@Transactional
 	public void removeGradCourseRestriction(String mainCourseCode, String restrictedCourseCode, ConversionSummaryDTO summary) {
-		List<GradCourseRestrictionsEntity> removalList = gradCourseRestrictionRepository.findByMainCourseAndRestrictedCourse(mainCourseCode, restrictedCourseCode);
+		List<GradCourseRestrictionEntity> removalList = gradCourseRestrictionRepository.findByMainCourseAndRestrictedCourse(mainCourseCode, restrictedCourseCode);
 		removalList.forEach(c -> {
 			gradCourseRestrictionRepository.delete(c);
 			summary.setAddedCount(summary.getAddedCount() - 1L);
 		});
 	}
 
-	private void convertCourseRestrictionData(GradCourseRestrictions courseRestriction, GradCourseRestrictionsEntity courseRestrictionEntity) {
+	private void convertCourseRestrictionData(GradCourseRestriction courseRestriction, GradCourseRestrictionEntity courseRestrictionEntity) {
 		if (courseRestrictionEntity.getCourseRestrictionId() == null) {
 			courseRestrictionEntity.setCourseRestrictionId(UUID.randomUUID());
 		}
