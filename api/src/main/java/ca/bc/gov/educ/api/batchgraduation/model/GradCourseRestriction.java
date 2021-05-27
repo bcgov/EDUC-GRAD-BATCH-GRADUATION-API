@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class GradCourseRestrictions {
+public class GradCourseRestriction {
     private String mainCourse;
     private String mainCourseLevel;
     private String restrictedCourse;
