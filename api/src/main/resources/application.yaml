@@ -54,7 +54,7 @@ logging:
         gov:
           educ:
             api:
-              batchgraduationapi: ${APP_LOG_LEVEL}
+              batchgraduation: ${APP_LOG_LEVEL}
     org:
       springframework:
         web: ${SPRING_WEB_LOG_LEVEL}
