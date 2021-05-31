@@ -39,7 +39,7 @@ logging:
         gov:
           educ:
             api:
-              batchgraduationapi: INFO
+              batchgraduation: INFO
     org:
       springframework:
         web: INFO
