@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,8 +13,6 @@ import java.util.UUID;
 
 @Repository
 public interface ConvGradStudentRepository extends JpaRepository<ConvGradStudentEntity, UUID> {
-
-	List<ConvGradStudentEntity> findAll();
 
 	Optional<ConvGradStudentEntity> findByPen(String pen);
 
@@ -24,6 +23,7 @@ public interface ConvGradStudentRepository extends JpaRepository<ConvGradStudent
 					"and l.stud_no = m.stud_no\n" +
 					"and m.grad_date = 0\n" +
 					"and m.archive_flag = 'A'\n" , nativeQuery=true)
+	@Transactional(readOnly = true)
 	List<Object[]> loadInitialRawData();
 
 	@Query(value="select count(*) from STUD_XCRSE sx, GRAD_COURSE_REQUIREMENT gcr\n" +

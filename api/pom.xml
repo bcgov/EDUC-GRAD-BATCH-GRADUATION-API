@@ -13,7 +13,9 @@
 
     <properties>
         <sonar.language>java</sonar.language>
-        <sonar.exclusions>src/main/resources/**,src/main/java/ca/bc/gov/educ/api/codes/exception/**,src/main/java/ca/bc/gov/educ/api/codes/model/**
+        <sonar.exclusions>
+            src/main/resources/**,src/main/java/ca/bc/gov/educ/api/batchgraduation/config/**,src/main/java/ca/bc/gov/educ/api/batchgraduation/model/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/util/**
         </sonar.exclusions>
         <java.version>11</java.version>
         <maven.compiler.version>3.8.0</maven.compiler.version>
