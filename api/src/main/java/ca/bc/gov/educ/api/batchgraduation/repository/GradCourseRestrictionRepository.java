@@ -13,8 +13,6 @@ import java.util.UUID;
 @Repository
 public interface GradCourseRestrictionRepository extends JpaRepository<GradCourseRestrictionEntity, UUID> {
 
-    List<GradCourseRestrictionEntity> findAll();
-
 	List<GradCourseRestrictionEntity> findByMainCourseAndMainCourseLevel(String courseCode, String courseLevel);
 
 	List<GradCourseRestrictionEntity> findByMainCourseAndRestrictedCourse(String mainCourseCode, String restrictedCourseCode);
@@ -30,6 +28,6 @@ public interface GradCourseRestrictionRepository extends JpaRepository<GradCours
 					"on c1.restriction_code = c2.restriction_code\n" +
 					"and (c1.crse_code  <> c2.crse_code or c1.crse_level <> c2.crse_level)\n" +
 					"and c1.restriction_code <> ' '", nativeQuery=true)
-	@Transactional
+	@Transactional(readOnly = true)
 	List<Object[]> loadInitialRawData();
 }
