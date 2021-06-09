@@ -1,30 +1,56 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
-import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.GradCourseRestriction;
+import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.mockito.Mockito.when;
+import java.util.Arrays;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
+import static org.assertj.core.api.Assertions.assertThat;
+
+@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DataConversionControllerTest {
 
-    @Autowired
+    @Mock
+    private DataConversionService dataConversionService;
+
+    @InjectMocks
     DataConversionController dataConversionController;
 
-    @MockBean
-    RestUtils restUtils;
-
     @Test
-    public void dataConversion_when_thenReturn() {
-        // TODO (jsung)
-        //when(webClientMock.get())
+    public void testRunCourseRestrictionsDataConversionJob() {
+        GradCourseRestriction gradCourseRestriction1 = new GradCourseRestriction();
+        gradCourseRestriction1.setMainCourse("main");
+        gradCourseRestriction1.setMainCourseLevel("12");
+        gradCourseRestriction1.setRestrictedCourse("rest");
+        gradCourseRestriction1.setRestrictedCourseLevel("12");
+
+        GradCourseRestriction gradCourseRestriction2 = new GradCourseRestriction();
+        gradCourseRestriction2.setMainCourse("CLEA");
+        gradCourseRestriction2.setMainCourseLevel("12");
+        gradCourseRestriction2.setRestrictedCourse("CLEB");
+        gradCourseRestriction2.setRestrictedCourseLevel("12");
+
+        ConversionSummaryDTO summary = new ConversionSummaryDTO();
+        summary.setTableName("GRAD_COURSE_RESTRICTIONS");
+
+        Mockito.when(dataConversionService.loadInitialRawGradCourseRestrictionsData(true)).thenReturn(Arrays.asList(gradCourseRestriction1, gradCourseRestriction2));
+        var result = dataConversionController.runCourseRestrictionsDataConversionJob(true);
+        Mockito.verify(dataConversionService).loadInitialRawGradCourseRestrictionsData(true);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getBody()).isNotNull();
+        ConversionSummaryDTO responseSummary = result.getBody();
+        assertThat(responseSummary.getReadCount()).isEqualTo(2L);
     }
+
 }

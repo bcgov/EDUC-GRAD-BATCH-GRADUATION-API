@@ -8,7 +8,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmResponse;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ConversionError;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
-import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
 @Service
 public class GradAlgorithmService {

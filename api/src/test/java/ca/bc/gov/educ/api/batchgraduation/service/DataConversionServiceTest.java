@@ -7,7 +7,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.Student;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.GradBatchTestUtils;
-import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
