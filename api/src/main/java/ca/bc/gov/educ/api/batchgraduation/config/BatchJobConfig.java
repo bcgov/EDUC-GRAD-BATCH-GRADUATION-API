@@ -23,7 +23,7 @@ import ca.bc.gov.educ.api.batchgraduation.processor.RunGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.reader.DataConversionStudentReader;
 import ca.bc.gov.educ.api.batchgraduation.reader.RecalculateStudentReader;
 import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
-import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.writer.BatchPerformanceWriter;
 import ca.bc.gov.educ.api.batchgraduation.writer.DataConversionStudentWriter;
 

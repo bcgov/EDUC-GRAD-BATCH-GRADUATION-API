@@ -13,7 +13,7 @@ import org.springframework.batch.item.ItemReader;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
 public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
 

@@ -1,10 +1,12 @@
-package ca.bc.gov.educ.api.batchgraduation.util;
+package ca.bc.gov.educ.api.batchgraduation.rest;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmResponse;
 import ca.bc.gov.educ.api.batchgraduation.model.GradSpecialProgram;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
