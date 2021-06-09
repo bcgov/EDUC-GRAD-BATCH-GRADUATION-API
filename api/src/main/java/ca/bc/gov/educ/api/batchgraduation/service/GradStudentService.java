@@ -7,43 +7,32 @@ import java.util.UUID;
 
 import javax.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.GraduationStatusEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.LoadStudentData;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
 import ca.bc.gov.educ.api.batchgraduation.repository.GraduationStatusRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 
 @Service
 public class GradStudentService {
 
-    @Autowired
-    GraduationStatusRepository graduationStatusRepository;
-    
-    @Autowired
-    RestTemplate restTemplate;
-    
-    @Autowired
-    RestTemplateBuilder restTemplateBuilder;
+    private final GraduationStatusRepository graduationStatusRepository;
+	private final EducGradBatchGraduationApiConstants constants;
+	private final RestUtils restUtils;
 
-    @Autowired
-	EducGradBatchGraduationApiConstants constants;
+    public GradStudentService(GraduationStatusRepository graduationStatusRepository, RestUtils restUtils, EducGradBatchGraduationApiConstants constants) {
+    	this.graduationStatusRepository = graduationStatusRepository;
+    	this.restUtils = restUtils;
+    	this.constants = constants;
+	}
 
     @Transactional
     public void getStudentByPenFromStudentAPI(List<LoadStudentData> loadStudentData, String accessToken) {
     	loadStudentData.forEach(student -> {
-    		HttpHeaders httpHeaders = EducGradBatchGraduationApiUtils.getHeaders(accessToken);
-        	List<Student> stuDataList = restTemplate.exchange(String.format(constants.getPenStudentApiByPenUrl(), student.getPen()), HttpMethod.GET,
-    				new HttpEntity<>(httpHeaders), new ParameterizedTypeReference<List<Student>>() {}).getBody();
+        	List<Student> stuDataList = restUtils.getStudentsByPen(student.getPen(), accessToken);
         	stuDataList.forEach(st-> {
     			GraduationStatusEntity gradStu = new GraduationStatusEntity();			
     			Optional<GraduationStatusEntity> existingStu = graduationStatusRepository.findById(student.getPen());

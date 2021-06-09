@@ -6,7 +6,6 @@ import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.client.RestTemplate;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
@@ -14,9 +13,6 @@ import ca.bc.gov.educ.api.batchgraduation.service.GradAlgorithmService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 
 public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStatus,GraduationStatus> {
-
-    @Autowired
-    RestTemplate restTemplate;
 
 	@Autowired
 	EducGradBatchGraduationApiConstants constants;

@@ -8,7 +8,7 @@ import ca.bc.gov.educ.api.batchgraduation.repository.GradCourseRestrictionReposi
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentSpecialProgramRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.DateConversionUtils;
-import ca.bc.gov.educ.api.batchgraduation.util.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
