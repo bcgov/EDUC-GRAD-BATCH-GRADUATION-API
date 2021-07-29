@@ -1,12 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.GradCourseRestrictionEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentSpecialProgramEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.GradCourseRestrictionRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentSpecialProgramRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.DateConversionUtils;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -20,15 +15,11 @@ import java.util.*;
 public class DataConversionService {
 
     private final ConvGradStudentRepository convGradStudentRepository;
-	private final GradCourseRestrictionRepository gradCourseRestrictionRepository;
-	private final ConvGradStudentSpecialProgramRepository convGradStudentSpecialProgramRepository;
 	private final RestUtils restUtils;
 
 	@Autowired
-	public DataConversionService(ConvGradStudentRepository convGradStudentRepository, GradCourseRestrictionRepository gradCourseRestrictionRepository, ConvGradStudentSpecialProgramRepository convGradStudentSpecialProgramRepository, RestUtils restUtils) {
+	public DataConversionService(ConvGradStudentRepository convGradStudentRepository, RestUtils restUtils) {
 		this.convGradStudentRepository = convGradStudentRepository;
-		this.gradCourseRestrictionRepository = gradCourseRestrictionRepository;
-		this.convGradStudentSpecialProgramRepository = convGradStudentSpecialProgramRepository;
 		this.restUtils = restUtils;
 	}
 
@@ -38,16 +29,15 @@ public class DataConversionService {
 		try {
 			String accessToken = summary.getAccessToken();
 
-			Optional<ConvGradStudentEntity> stuOptional = convGradStudentRepository.findByPen(convGradStudent.getPen());
-			if (stuOptional.isPresent()) {
-				ConvGradStudentEntity gradStudentEntity = stuOptional.get();
-				convertStudentData(convGradStudent, gradStudentEntity, summary);
-				gradStudentEntity.setUpdatedTimestamp(new Date());
-				gradStudentEntity = convGradStudentRepository.save(gradStudentEntity);
+			GraduationStatus graduationStatus = restUtils.getGraduationStatus(convGradStudent.getPen(), accessToken);
+			if (graduationStatus != null && graduationStatus.getStudentID() != null) {
+				convertStudentData(convGradStudent, graduationStatus, summary);
+				graduationStatus.setUpdatedTimestamp(new Date());
+				GraduationStatus studentResponse = restUtils.saveGraduationStatus(graduationStatus, accessToken);
 				summary.setUpdatedCount(summary.getUpdatedCount() + 1L);
 				// process dependencies
 				try {
-					processSpecialPrograms(gradStudentEntity, accessToken);
+					processSpecialPrograms(studentResponse, accessToken);
 				} catch (Exception e) {
 					ConversionError error = new ConversionError();
 					error.setPen(convGradStudent.getPen());
@@ -55,8 +45,6 @@ public class DataConversionService {
 					summary.getErrors().add(error);
 				}
 			} else {
-				ConvGradStudentEntity gradStudentEntity = new ConvGradStudentEntity();
-				gradStudentEntity.setPen(convGradStudent.getPen());
 				List<Student> students;
 				try {
 					// Call PEN Student API
@@ -76,13 +64,15 @@ public class DataConversionService {
 					return null;
 				} else {
 					students.forEach(st -> {
-						gradStudentEntity.setStudentID(UUID.fromString(st.getStudentID()));
-						convertStudentData(convGradStudent, gradStudentEntity, summary);
-						convGradStudentRepository.save(gradStudentEntity);
+						GraduationStatus newGraduationStatus = new GraduationStatus();
+						newGraduationStatus.setPen(convGradStudent.getPen());
+						newGraduationStatus.setStudentID(UUID.fromString(st.getStudentID()));
+						convertStudentData(convGradStudent, newGraduationStatus, summary);
+						GraduationStatus studentResponse = restUtils.saveGraduationStatus(newGraduationStatus, accessToken);
 						summary.setAddedCount(summary.getAddedCount() + 1L);
 						// process dependencies
 						try {
-							processSpecialPrograms(gradStudentEntity, accessToken);
+							processSpecialPrograms(studentResponse, accessToken);
 						} catch (Exception e) {
 							ConversionError error = new ConversionError();
 							error.setPen(convGradStudent.getPen());
@@ -105,8 +95,8 @@ public class DataConversionService {
 	@Transactional
     public List<ConvGradStudent> loadInitialRawGradStudentData(boolean purge) {
 		if (purge) {
-			convGradStudentRepository.deleteAll();
-			convGradStudentRepository.flush();
+//			dataConversionRepository.deleteAll();
+//			dataConversionRepository.flush();
 		}
 		List<ConvGradStudent> students = new ArrayList<>();
 		List<Object[]> results = convGradStudentRepository.loadInitialRawData();
@@ -131,13 +121,15 @@ public class DataConversionService {
 	@Transactional
 	public void convertCourseRestriction(GradCourseRestriction courseRestriction, ConversionSummaryDTO summary) {
 		summary.setProcessedCount(summary.getProcessedCount() + 1L);
-		Optional<GradCourseRestrictionEntity> optional =  gradCourseRestrictionRepository.findByMainCourseAndMainCourseLevelAndRestrictedCourseAndRestrictedCourseLevel(
-			courseRestriction.getMainCourse(), courseRestriction.getMainCourseLevel(), courseRestriction.getRestrictedCourse(), courseRestriction.getRestrictedCourseLevel());
+		GradCourseRestriction currentCourseRestriction =  restUtils.getCourseRestriction(
+			courseRestriction.getMainCourse(), courseRestriction.getMainCourseLevel(), courseRestriction.getRestrictedCourse(), courseRestriction.getRestrictedCourseLevel(), summary.getAccessToken());
 
-		GradCourseRestrictionEntity entity = optional.orElseGet(GradCourseRestrictionEntity::new);
-		convertCourseRestrictionData(courseRestriction, entity);
-		gradCourseRestrictionRepository.save(entity);
-		if (optional.isPresent()) {
+		if (currentCourseRestriction == null) {
+			currentCourseRestriction = new GradCourseRestriction();
+		}
+		convertCourseRestrictionData(courseRestriction, currentCourseRestriction);
+		restUtils.saveCourseRestriction(currentCourseRestriction, summary.getAccessToken());
+		if (currentCourseRestriction.getCourseRestrictionId() != null) {
 			summary.setUpdatedCount(summary.getUpdatedCount() + 1L);
 		} else {
 			summary.setAddedCount(summary.getAddedCount() + 1L);
@@ -147,11 +139,11 @@ public class DataConversionService {
 	@Transactional
 	public List<GradCourseRestriction> loadInitialRawGradCourseRestrictionsData(boolean purge) {
 		if (purge) {
-			gradCourseRestrictionRepository.deleteAll();
-			gradCourseRestrictionRepository.flush();
+//			gradCourseRestrictionRepository.deleteAll();
+//			gradCourseRestrictionRepository.flush();
 		}
 		List<GradCourseRestriction> courseRestrictions = new ArrayList<>();
-		List<Object[]> results = gradCourseRestrictionRepository.loadInitialRawData();
+		List<Object[]> results = convGradStudentRepository.loadInitialRawCourseRestrictionData();
 		results.forEach(result -> {
 			String mainCourse = (String) result[0];
 			String mainCourseLevel = (String) result[1];
@@ -160,7 +152,7 @@ public class DataConversionService {
 			String startDate = (String) result[4];
 			String endDate = (String) result[5];
 			GradCourseRestriction courseRestriction = new GradCourseRestriction(
-					mainCourse, mainCourseLevel, restrictedCourse, restrictedCourseLevel, startDate, endDate);
+					null, mainCourse, mainCourseLevel, restrictedCourse, restrictedCourseLevel, startDate, endDate);
 			courseRestrictions.add(courseRestriction);
 		});
 		return courseRestrictions;
@@ -168,64 +160,64 @@ public class DataConversionService {
 
 	@Transactional
 	public void removeGradCourseRestriction(String mainCourseCode, String restrictedCourseCode, ConversionSummaryDTO summary) {
-		List<GradCourseRestrictionEntity> removalList = gradCourseRestrictionRepository.findByMainCourseAndRestrictedCourse(mainCourseCode, restrictedCourseCode);
+		List<GradCourseRestriction> removalList = restUtils.getCourseRestrictions(mainCourseCode, restrictedCourseCode, summary.getAccessToken());
 		removalList.forEach(c -> {
-			gradCourseRestrictionRepository.delete(c);
+			// TODO (jsung) : rest api call to delete course restriction
+			//gradCourseRestrictionRepository.delete(c);
 			summary.setAddedCount(summary.getAddedCount() - 1L);
 		});
 	}
 
-	private void convertCourseRestrictionData(GradCourseRestriction courseRestriction, GradCourseRestrictionEntity courseRestrictionEntity) {
-		if (courseRestrictionEntity.getCourseRestrictionId() == null) {
-			courseRestrictionEntity.setCourseRestrictionId(UUID.randomUUID());
-		}
+	private void convertCourseRestrictionData(GradCourseRestriction courseRestriction, GradCourseRestriction courseRestrictionEntity) {
 		courseRestrictionEntity.setMainCourse(courseRestriction.getMainCourse());
 		courseRestrictionEntity.setMainCourseLevel(courseRestriction.getMainCourseLevel());
 		courseRestrictionEntity.setRestrictedCourse(courseRestriction.getRestrictedCourse());
 		courseRestrictionEntity.setRestrictedCourseLevel(courseRestriction.getRestrictedCourseLevel());
 		// data conversion
 		if (StringUtils.isNotBlank(courseRestriction.getRestrictionStartDate())) {
-			Date start = DateConversionUtils.convertStringToDate(courseRestriction.getRestrictionStartDate());
-			if (start != null) {
-				courseRestrictionEntity.setRestrictionStartDate(start);
-			}
+			courseRestrictionEntity.setRestrictionStartDate(courseRestriction.getRestrictionStartDate());
+//			Date start = DateConversionUtils.convertStringToDate(courseRestriction.getRestrictionStartDate());
+//			if (start != null) {
+//				courseRestrictionEntity.setRestrictionStartDate(start);
+//			}
 		}
 		if (StringUtils.isNotBlank(courseRestriction.getRestrictionEndDate())) {
-			Date end = DateConversionUtils.convertStringToDate(courseRestriction.getRestrictionEndDate());
-			if (end != null) {
-				courseRestrictionEntity.setRestrictionEndDate(end);
-			}
+			courseRestrictionEntity.setRestrictionEndDate(courseRestriction.getRestrictionEndDate());
+//			Date end = DateConversionUtils.convertStringToDate(courseRestriction.getRestrictionEndDate());
+//			if (end != null) {
+//				courseRestrictionEntity.setRestrictionEndDate(end);
+//			}
 		}
 	}
 
-	private void convertStudentData(ConvGradStudent student, ConvGradStudentEntity studentEntity, ConversionSummaryDTO summary) {
-		studentEntity.setGpa(student.getGpa());
-		studentEntity.setHonoursStanding(student.getHonoursStanding());
-		determineProgram(student, summary);
-		studentEntity.setProgram(student.getProgram());
-		studentEntity.setProgramCompletionDate(student.getProgramCompletionDate());
-		studentEntity.setSchoolOfRecord(student.getSchoolOfRecord());
-		studentEntity.setSchoolAtGrad(student.getSchoolAtGrad());
-		studentEntity.setRecalculateGradStatus(student.getRecalculateGradStatus());
-		studentEntity.setStudentGradData(student.getStudentGradData());
-		studentEntity.setStudentGrade(student.getStudentGrade());
-		studentEntity.setStudentStatus(student.getStudentStatus());
+	private void convertStudentData(ConvGradStudent convStudent, GraduationStatus student, ConversionSummaryDTO summary) {
+		student.setGpa(convStudent.getGpa());
+		student.setHonoursStanding(convStudent.getHonoursStanding());
+		determineProgram(convStudent, summary);
+		student.setProgram(convStudent.getProgram());
+		student.setProgramCompletionDate(convStudent.getProgramCompletionDate() != null? DateConversionUtils.formatDate(convStudent.getProgramCompletionDate(),"yyyy/MM") : null);
+		student.setSchoolOfRecord(convStudent.getSchoolOfRecord());
+		student.setSchoolAtGrad(convStudent.getSchoolAtGrad());
+		student.setRecalculateGradStatus(convStudent.getRecalculateGradStatus());
+		student.setStudentGradData(convStudent.getStudentGradData());
+		student.setStudentGrade(convStudent.getStudentGrade());
+		student.setStudentStatus(convStudent.getStudentStatus());
 	}
 
-	private void processSpecialPrograms(ConvGradStudentEntity student, String accessToken) {
+	private void processSpecialPrograms(GraduationStatus student, String accessToken) {
 		// French Immersion for 2018-EN
 		if (StringUtils.equals(student.getProgram(), "2018-EN")) {
 			if (isFrenchImmersionCourse(student.getPen())) {
-				ConvGradStudentSpecialProgramEntity entity = new ConvGradStudentSpecialProgramEntity();
+				GradStudentSpecialProgram entity = new GradStudentSpecialProgram();
 				entity.setPen(student.getPen());
-				entity.setStudentID(student.getStudentID());
+				entity.setId(student.getStudentID());
 				// Call Grad Program Management API
 				GradSpecialProgram gradSpecialProgram = restUtils.getGradSpecialProgram("2018-EN", "FI", accessToken);
 				if (gradSpecialProgram != null && gradSpecialProgram.getId() != null) {
 					entity.setSpecialProgramID(gradSpecialProgram.getId());
-					Optional<ConvGradStudentSpecialProgramEntity> stdSpecialProgramOptional = convGradStudentSpecialProgramRepository.findByStudentIDAndSpecialProgramID(student.getStudentID(), gradSpecialProgram.getId());
-					if (!stdSpecialProgramOptional.isPresent()) {
-						convGradStudentSpecialProgramRepository.save(entity);
+					GradStudentSpecialProgram studentSpecialProgramResponse = restUtils.getStudentSpecialProgram(student.getStudentID(), gradSpecialProgram.getId(), accessToken);
+					if (studentSpecialProgramResponse == null) {
+						restUtils.saveStudentSpecialProgram(entity, accessToken);
 					}
 				}
 			}
@@ -257,8 +249,8 @@ public class DataConversionService {
 				break;
 			case "1950":
 				if (StringUtils.equals(student.getStudentGrade(), "AD")) {
-					student.setProgram("1950-EN");
-					summary.increment("1950-EN");
+					student.setProgram("1950");
+					summary.increment("1950");
 				} else if (StringUtils.equals(student.getStudentGrade(), "AN")) {
 					student.setProgram("NOPROG");
 					summary.increment("NOPROG");
@@ -281,7 +273,8 @@ public class DataConversionService {
 
 	@Transactional(readOnly = true)
 	public boolean isFrenchImmersionCourse(String pen) {
-		if (this.convGradStudentRepository.countFrenchImmersionCourses(pen) > 0L) {
+		if (this.restUtils.getCountOfFrenchImmersionCourses(pen) > 0L) {
+		//if (this.dataConversionRepository.countFrenchImmersionCourses(pen) > 0L) {
 			return true;
 		}
 		return false;

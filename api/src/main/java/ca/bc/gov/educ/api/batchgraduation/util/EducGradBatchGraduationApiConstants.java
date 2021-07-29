@@ -52,4 +52,18 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-status-api.student-for-grad-list.url}")
     private String gradStudentForGradListUrl;
+
+    private String gradStudentUrl;
+
+    private String saveGradStudentUrl;
+
+    private String studentSpecialProgramUrl;
+
+    private String saveStudentSpecialProgramUrl;
+
+    private String courseRestrictionUrl;
+
+    private String saveCourseRestrictionUrl;
+
+    private String getCountOfFrenchImmersionCoursesUrl;
 }

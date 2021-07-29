@@ -1,12 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentSpecialProgramEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.GradCourseRestrictionEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentSpecialProgramRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.GradCourseRestrictionRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.GradBatchTestUtils;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -24,6 +19,8 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 @RunWith(SpringRunner.class)
@@ -36,12 +33,6 @@ public class DataConversionServiceWithMockRepositoryTest {
 
     @MockBean
     ConvGradStudentRepository convGradStudentRepository;
-
-    @MockBean
-    ConvGradStudentSpecialProgramRepository convGradStudentSpecialProgramRepository;
-
-    @MockBean
-    GradCourseRestrictionRepository gradCourseRestrictionRepository;
 
     @MockBean
     RestUtils restUtils;
@@ -58,9 +49,7 @@ public class DataConversionServiceWithMockRepositoryTest {
     }
 
     @After
-    public void tearDown() {
-        convGradStudentRepository.deleteAll();
-    }
+    public void tearDown() { }
 
     @Test
     public void convertStudent_forExistingGradStudent_whenGivenData_withFrechImmersionSpecialProgram_thenReturnSuccess() throws Exception {
@@ -72,9 +61,9 @@ public class DataConversionServiceWithMockRepositoryTest {
         penStudent.setStudentID(studentID.toString());
         penStudent.setPen(pen);
 
-        ConvGradStudentEntity penStudentEntity = new ConvGradStudentEntity();
-        penStudentEntity.setStudentID(studentID);
-        penStudentEntity.setPen(pen);
+        GraduationStatus graduationStatus = new GraduationStatus();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
 
         GradSpecialProgram specialProgram = new GradSpecialProgram();
         specialProgram.setId(UUID.randomUUID());
@@ -82,23 +71,23 @@ public class DataConversionServiceWithMockRepositoryTest {
         specialProgram.setSpecialProgramCode("FI");
         specialProgram.setSpecialProgramName("French Immersion");
 
-        ConvGradStudentSpecialProgramEntity specialProgramEntity = new ConvGradStudentSpecialProgramEntity();
-        specialProgramEntity.setId(UUID.randomUUID());
-        specialProgramEntity.setStudentID(studentID);
-        specialProgramEntity.setSpecialProgramID(specialProgram.getId());
-        specialProgramEntity.setPen(pen);
-
-        when(this.convGradStudentRepository.findByPen(pen)).thenReturn(Optional.of(penStudentEntity));
-        when(this.convGradStudentRepository.save(penStudentEntity)).thenReturn(penStudentEntity);
-        when(this.convGradStudentRepository.countFrenchImmersionCourses(pen)).thenReturn(1L);
-        when(this.convGradStudentSpecialProgramRepository.save(specialProgramEntity)).thenReturn(specialProgramEntity);
-        when(this.restUtils.getStudentsByPen(pen, "123")).thenReturn(Arrays.asList(penStudent));
-        when(this.restUtils.getGradSpecialProgram("2018-EN", "FI", "123")).thenReturn(specialProgram);
+        GradStudentSpecialProgram gradStudentSpecialProgram = new GradStudentSpecialProgram();
+        gradStudentSpecialProgram.setId(UUID.randomUUID());
+        gradStudentSpecialProgram.setSpecialProgramID(specialProgram.getId());
+        gradStudentSpecialProgram.setPen(pen);
 
         ConvGradStudent student = ConvGradStudent.builder().pen("111222333").program("2018-EN").recalculateGradStatus("Y")
                 .studentStatus("A").schoolOfRecord("222333").graduationRequestYear("2018").build();
         ConversionSummaryDTO summary = new ConversionSummaryDTO();
         summary.setAccessToken("123");
+
+        when(this.restUtils.getStudentByPen(eq(pen), eq(summary.getAccessToken()))).thenReturn(penStudent);
+        when(this.restUtils.saveGraduationStatus(any(GraduationStatus.class), eq(summary.getAccessToken()))).thenReturn(graduationStatus);
+        when(this.restUtils.getCountOfFrenchImmersionCourses(eq(pen))).thenReturn(Integer.valueOf(1));
+        when(this.restUtils.saveStudentSpecialProgram(eq(gradStudentSpecialProgram), eq(summary.getAccessToken()))).thenReturn(gradStudentSpecialProgram);
+        when(this.restUtils.getStudentsByPen(eq(pen), eq(summary.getAccessToken()))).thenReturn(Arrays.asList(penStudent));
+        when(this.restUtils.getGradSpecialProgram(eq("2018-EN"), eq("FI"), eq(summary.getAccessToken()))).thenReturn(specialProgram);
+
         var result = dataConversionService.convertStudent(student, summary);
 
         assertThat(result).isNotNull();
@@ -118,9 +107,9 @@ public class DataConversionServiceWithMockRepositoryTest {
         penStudent.setStudentID(studentID.toString());
         penStudent.setPen(pen);
 
-        ConvGradStudentEntity penStudentEntity = new ConvGradStudentEntity();
-        penStudentEntity.setStudentID(studentID);
-        penStudentEntity.setPen(pen);
+        GraduationStatus graduationStatus = new GraduationStatus();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
 
         GradSpecialProgram specialProgram = new GradSpecialProgram();
         specialProgram.setId(UUID.randomUUID());
@@ -128,23 +117,23 @@ public class DataConversionServiceWithMockRepositoryTest {
         specialProgram.setSpecialProgramCode("FI");
         specialProgram.setSpecialProgramName("French Immersion");
 
-        ConvGradStudentSpecialProgramEntity specialProgramEntity = new ConvGradStudentSpecialProgramEntity();
-        specialProgramEntity.setId(UUID.randomUUID());
-        specialProgramEntity.setStudentID(studentID);
-        specialProgramEntity.setSpecialProgramID(specialProgram.getId());
-        specialProgramEntity.setPen(pen);
-
-        when(this.convGradStudentRepository.findByPen(pen)).thenReturn(Optional.empty());
-        when(this.convGradStudentRepository.save(penStudentEntity)).thenReturn(penStudentEntity);
-        when(this.convGradStudentRepository.countFrenchImmersionCourses(pen)).thenReturn(1L);
-        when(this.convGradStudentSpecialProgramRepository.save(specialProgramEntity)).thenReturn(specialProgramEntity);
-        when(this.restUtils.getStudentsByPen(pen, "123")).thenReturn(Arrays.asList(penStudent));
-        when(this.restUtils.getGradSpecialProgram("2018-EN", "FI", "123")).thenReturn(specialProgram);
+        GradStudentSpecialProgram gradStudentSpecialProgram = new GradStudentSpecialProgram();
+        gradStudentSpecialProgram.setId(UUID.randomUUID());
+        gradStudentSpecialProgram.setSpecialProgramID(specialProgram.getId());
+        gradStudentSpecialProgram.setPen(pen);
 
         ConvGradStudent student = ConvGradStudent.builder().pen("111222333").program("2018-EN").recalculateGradStatus("Y")
                 .studentStatus("A").schoolOfRecord("222333").graduationRequestYear("2018").build();
         ConversionSummaryDTO summary = new ConversionSummaryDTO();
         summary.setAccessToken("123");
+
+        when(this.restUtils.getStudentByPen(eq(pen), eq(summary.getAccessToken()))).thenReturn(penStudent);
+        when(this.restUtils.saveGraduationStatus(any(GraduationStatus.class), eq(summary.getAccessToken()))).thenReturn(graduationStatus);
+        when(this.restUtils.getCountOfFrenchImmersionCourses(eq(pen))).thenReturn(Integer.valueOf(1));
+        when(this.restUtils.saveStudentSpecialProgram(eq(gradStudentSpecialProgram), eq(summary.getAccessToken()))).thenReturn(gradStudentSpecialProgram);
+        when(this.restUtils.getStudentsByPen(eq(pen), eq(summary.getAccessToken()))).thenReturn(Arrays.asList(penStudent));
+        when(this.restUtils.getGradSpecialProgram(eq("2018-EN"), eq("FI"), eq(summary.getAccessToken()))).thenReturn(specialProgram);
+
         var result = dataConversionService.convertStudent(student, summary);
 
         assertThat(result).isNotNull();
@@ -177,18 +166,18 @@ public class DataConversionServiceWithMockRepositoryTest {
         summary.setAccessToken("123");
 
         GradCourseRestriction courseRestriction = new GradCourseRestriction(
-                "main", "12", "rest", "12", null, null
+                UUID.randomUUID(),  "main", "12", "rest", "12", null, null
         );
 
-        GradCourseRestrictionEntity gradCourseRestrictionEntity = new GradCourseRestrictionEntity();
-        gradCourseRestrictionEntity.setCourseRestrictionId(UUID.randomUUID());
-        gradCourseRestrictionEntity.setMainCourse("main");
-        gradCourseRestrictionEntity.setMainCourseLevel("12");
-        gradCourseRestrictionEntity.setRestrictedCourse("rest");
-        gradCourseRestrictionEntity.setRestrictedCourseLevel("12");
+        GradCourseRestriction gradCourseRestriction = new GradCourseRestriction();
+        gradCourseRestriction.setCourseRestrictionId(UUID.randomUUID());
+        gradCourseRestriction.setMainCourse("main");
+        gradCourseRestriction.setMainCourseLevel("12");
+        gradCourseRestriction.setRestrictedCourse("rest");
+        gradCourseRestriction.setRestrictedCourseLevel("12");
 
-        when(this.gradCourseRestrictionRepository.findByMainCourseAndMainCourseLevelAndRestrictedCourseAndRestrictedCourseLevel("main", "12", "rest", "12")).thenReturn(Optional.empty());
-        when(this.gradCourseRestrictionRepository.save(gradCourseRestrictionEntity)).thenReturn(gradCourseRestrictionEntity);
+        when(this.restUtils.getCourseRestriction(eq("main"), eq("12"), eq("rest"), eq("12"), eq(summary.getAccessToken()))).thenReturn(null);
+        when(this.restUtils.saveCourseRestriction(eq(gradCourseRestriction), eq(summary.getAccessToken()))).thenReturn(gradCourseRestriction);
         dataConversionService.convertCourseRestriction(courseRestriction, summary);
         assertThat(summary.getAddedCount()).isEqualTo(1L);
     }
@@ -199,18 +188,18 @@ public class DataConversionServiceWithMockRepositoryTest {
         summary.setAccessToken("123");
 
         GradCourseRestriction courseRestriction = new GradCourseRestriction(
-                "main", "12", "rest", "12", null, null
+                UUID.randomUUID(), "main", "12", "rest", "12", null, null
         );
 
-        GradCourseRestrictionEntity gradCourseRestrictionEntity = new GradCourseRestrictionEntity();
-        gradCourseRestrictionEntity.setCourseRestrictionId(UUID.randomUUID());
-        gradCourseRestrictionEntity.setMainCourse("main");
-        gradCourseRestrictionEntity.setMainCourseLevel("12");
-        gradCourseRestrictionEntity.setRestrictedCourse("rest");
-        gradCourseRestrictionEntity.setRestrictedCourseLevel("12");
+        GradCourseRestriction gradCourseRestriction = new GradCourseRestriction();
+        gradCourseRestriction.setCourseRestrictionId(UUID.randomUUID());
+        gradCourseRestriction.setMainCourse("main");
+        gradCourseRestriction.setMainCourseLevel("12");
+        gradCourseRestriction.setRestrictedCourse("rest");
+        gradCourseRestriction.setRestrictedCourseLevel("12");
 
-        when(this.gradCourseRestrictionRepository.findByMainCourseAndMainCourseLevelAndRestrictedCourseAndRestrictedCourseLevel("main", "12", "rest", "12")).thenReturn(Optional.of(gradCourseRestrictionEntity));
-        when(this.gradCourseRestrictionRepository.save(gradCourseRestrictionEntity)).thenReturn(gradCourseRestrictionEntity);
+        when(this.restUtils.getCourseRestriction(eq("main"), eq("12"), eq("rest"), eq("12"), eq(summary.getAccessToken()))).thenReturn(gradCourseRestriction);
+        when(this.restUtils.saveCourseRestriction(eq(gradCourseRestriction), eq(summary.getAccessToken()))).thenReturn(gradCourseRestriction);
         dataConversionService.convertCourseRestriction(courseRestriction, summary);
         assertThat(summary.getUpdatedCount()).isEqualTo(1L);
     }
@@ -223,7 +212,7 @@ public class DataConversionServiceWithMockRepositoryTest {
         List<Object[]> results = new ArrayList<>();
         results.add(obj);
 
-        when(this.gradCourseRestrictionRepository.loadInitialRawData()).thenReturn(results);
+        when(this.convGradStudentRepository.loadInitialRawCourseRestrictionData()).thenReturn(results);
 
         var result = dataConversionService.loadInitialRawGradCourseRestrictionsData(true);
         assertThat(result).isNotNull();

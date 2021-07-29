@@ -4,7 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.GradCourseRestriction;
 import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.PermissionsContants;
+import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class DataConversionController {
   }
 
   @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_COURSE_RESTRICTIONS_CONVERSION_JOB)
-  @PreAuthorize(PermissionsContants.LOAD_STUDENT_IDS)
+  @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
   public ResponseEntity<ConversionSummaryDTO> runCourseRestrictionsDataConversionJob(@RequestParam(defaultValue = "false") boolean purge) {
     logger.info("Inside runDataConversionJob");
 

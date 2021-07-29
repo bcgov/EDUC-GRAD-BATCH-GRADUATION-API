@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import ca.bc.gov.educ.api.batchgraduation.model.LoadStudentData;
 import ca.bc.gov.educ.api.batchgraduation.service.GradStudentService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.PermissionsContants;
+import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
@@ -64,7 +64,7 @@ public class JobLauncherController {
     }
 
     @PostMapping(EducGradBatchGraduationApiConstants.LOAD_STUDENT_IDS)
-    @PreAuthorize(PermissionsContants.LOAD_STUDENT_IDS)
+    @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
     public void loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData) {
     	logger.info("Inside loadStudentIDs");
     	OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails(); 
