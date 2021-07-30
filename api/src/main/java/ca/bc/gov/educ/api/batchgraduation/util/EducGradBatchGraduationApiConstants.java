@@ -38,32 +38,21 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-api.url}")
     private String graduationApiUrl;
 
-    @Value("${endpoint.pen-student-api.by-pen.url}")
+    @Value("${endpoint.grad-student-api.pen-student-by-pen}")
     private String penStudentApiByPenUrl;
 
-    @Value("${endpoint.graduation-status-api.read-grad-status.url}")
-    private String gradStudentApiUrl;
+    @Value("${endpoint.grad-student-api.grad-status}")
+    private String gradStudentApiGradStatusUrl;
 
-    @Value("${endpoint.graduation-status-api.update-grad-status}")
-    private String gradStatusUpdateUrl;
+    @Value("${endpoint.grad-program-api.optional-program}")
+    private String gradProgramApiOptionalProgramUrl;
 
-    @Value("${endpoint.grad-program-management-api.special-program.url}")
-    private String gradProgramManagementUrl;
+    @Value("${endpoint.grad-student-api.student-for-grad-list}")
+    private String gradStudentApiStudentForGradListUrl;
 
-    @Value("${endpoint.grad-graduation-status-api.student-for-grad-list.url}")
-    private String gradStudentForGradListUrl;
-
-    private String gradStudentUrl;
-
-    private String saveGradStudentUrl;
-
-    private String studentSpecialProgramUrl;
-
-    private String saveStudentSpecialProgramUrl;
-
+    @Value("${endpoint.grad-course-api.course-restriction}")
     private String courseRestrictionUrl;
 
-    private String saveCourseRestrictionUrl;
-
+    @Value("${endpoint.grad-course-api.check-french-immersion-course}")
     private String getCountOfFrenchImmersionCoursesUrl;
 }

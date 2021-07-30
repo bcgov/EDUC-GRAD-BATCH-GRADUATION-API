@@ -63,7 +63,7 @@ public class RestUtils {
 
     public GradSpecialProgram getGradSpecialProgram(String programCode, String specialProgramCode, String accessToken) {
         return this.webClient.get()
-                .uri(constants.getGradProgramManagementUrl(), uri -> uri.path("/{programCode}/{specialProgramCode}").build(programCode, specialProgramCode))
+                .uri(constants.getGradProgramApiOptionalProgramUrl(), uri -> uri.path("/{programCode}/{specialProgramCode}").build(programCode, specialProgramCode))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(GradSpecialProgram.class).block();
     }
@@ -79,7 +79,7 @@ public class RestUtils {
         final ParameterizedTypeReference<List<GraduationStatus>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.get()
-                .uri(constants.getGradStudentForGradListUrl())
+                .uri(constants.getGradStudentApiStudentForGradListUrl())
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(responseType).block();
     }
@@ -87,14 +87,14 @@ public class RestUtils {
     // EDUC-GRAD-STUDENT-API
     public GraduationStatus getGraduationStatus(String pen, String accessToken) {
         return this.webClient.get()
-                .uri(constants.getGradStudentUrl(), uri -> uri.path("/pen/{pen}").build(pen))
+                .uri(constants.getGradStudentApiGradStatusUrl(), uri -> uri.path("/pen/{pen}").build(pen))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(GraduationStatus.class).block();
     }
 
     public GraduationStatus saveGraduationStatus(GraduationStatus graduationStatus, String accessToken) {
         return this.webClient.post()
-                .uri(constants.getSaveGradStudentUrl(), uri -> uri.path("/{studentID}").build(graduationStatus.getStudentID()))
+                .uri(constants.getGradStudentApiGradStatusUrl(), uri -> uri.path("/{studentID}").build(graduationStatus.getStudentID()))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .body(BodyInserters.fromValue(graduationStatus))
                 .retrieve().bodyToMono(GraduationStatus.class).block();
@@ -103,7 +103,7 @@ public class RestUtils {
     // EDUC-GRAD-PROGRAM-API
     public GradStudentSpecialProgram getStudentSpecialProgram(UUID studentID, UUID specialProgramID, String accessToken) {
         return this.webClient.get()
-                .uri(constants.getStudentSpecialProgramUrl(), uri -> uri.path("/{studentID}/{specialProgramID}")
+                .uri(constants.getGradProgramApiOptionalProgramUrl(), uri -> uri.path("/{studentID}/{specialProgramID}")
                         .build(studentID, specialProgramID))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(GradStudentSpecialProgram.class).block();
@@ -111,18 +111,19 @@ public class RestUtils {
 
     public GradStudentSpecialProgram saveStudentSpecialProgram(GradStudentSpecialProgram gradStudentSpecialProgram, String accessToken) {
         return this.webClient.post()
-                .uri(constants.getSaveStudentSpecialProgramUrl(), uri -> uri.path("/{studentID}/{specialProgramID}").build(gradStudentSpecialProgram.getId(), gradStudentSpecialProgram.getSpecialProgramID()))
+                .uri(constants.getGradProgramApiOptionalProgramUrl(), uri -> uri.path("/{studentID}/{specialProgramID}").build(gradStudentSpecialProgram.getId(), gradStudentSpecialProgram.getSpecialProgramID()))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .body(BodyInserters.fromValue(gradStudentSpecialProgram))
                 .retrieve().bodyToMono(GradStudentSpecialProgram.class).block();
     }
 
     // EDUC-GRAD-COURSE-API
+    // TODO: new endpoint
     public Integer getCountOfFrenchImmersionCourses(String pen) {
         return 0;
     }
 
-    // EDUC-GRAD-COURSE-API
+    // TODO: new endpoint
     public GradCourseRestriction getCourseRestriction(String mainCourse, String mainCourseLevel, String restrictedCourse, String restrictedCourseLevel, String accessToken) {
         return this.webClient.get()
                 .uri(constants.getCourseRestrictionUrl(), uri -> uri.path("/{mainCourse}/{mainCourseLevel}/{restrictedCourse}/{restrictedCourseLevel}")
@@ -141,9 +142,10 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
+    // TODO: new endpoint
     public GradCourseRestriction saveCourseRestriction(GradCourseRestriction gradCourseRestriction, String accessToken) {
         return this.webClient.post()
-                .uri(constants.getSaveCourseRestrictionUrl())
+                .uri(constants.getCourseRestrictionUrl())
                 .headers(h -> h.setBearerAuth(accessToken))
                 .body(BodyInserters.fromValue(gradCourseRestriction))
                 .retrieve().bodyToMono(GradCourseRestriction.class).block();
