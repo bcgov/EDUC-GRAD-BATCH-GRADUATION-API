@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentEntity;
-import ca.bc.gov.educ.api.batchgraduation.mappers.ConvGradStudentMapper;
 import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,12 +21,6 @@ import java.util.UUID;
 public class GradBatchTestUtils {
     @Autowired
     ConvGradStudentRepository convGradStudentRepository;
-
-//    @Autowired
-//    GradCourseRestrictionRepository gradCourseRestrictionRepository;
-
-    @Autowired
-    private ConvGradStudentMapper mapper;
 
     public static ConvGradStudentEntity populateIdAndAuditColumns(final ConvGradStudentEntity entity) {
         if (entity.getStudentID() == null) {
@@ -52,10 +45,6 @@ public class GradBatchTestUtils {
         );
         final List<ConvGradStudent> models = new ObjectMapper().readValue(file, new TypeReference<>() {
         });
-//        final var entities = models.stream().map(mapper::toEntity)
-//                .collect(toList()).stream().map(GradBatchTestUtils::populateIdAndAuditColumns).collect(toList());
-
-//        dataConversionRepository.saveAll(entities);
         return models;
     }
 

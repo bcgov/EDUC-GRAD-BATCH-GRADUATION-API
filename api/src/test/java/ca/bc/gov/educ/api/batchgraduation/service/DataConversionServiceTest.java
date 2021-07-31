@@ -4,7 +4,6 @@ import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
 import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.GradBatchTestUtils;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.After;
@@ -38,9 +37,6 @@ public class DataConversionServiceTest {
 
     @MockBean
     RestUtils restUtils;
-
-    @Autowired
-    private EducGradBatchGraduationApiConstants constants;
 
     @Autowired
     GradBatchTestUtils gradBatchTestUtils;

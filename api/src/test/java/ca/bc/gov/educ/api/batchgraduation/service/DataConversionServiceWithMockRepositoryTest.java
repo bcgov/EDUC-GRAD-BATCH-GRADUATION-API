@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.GradBatchTestUtils;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.After;
@@ -36,9 +35,6 @@ public class DataConversionServiceWithMockRepositoryTest {
 
     @MockBean
     RestUtils restUtils;
-
-    @Autowired
-    private EducGradBatchGraduationApiConstants constants;
 
     @Autowired
     GradBatchTestUtils gradBatchTestUtils;
@@ -83,7 +79,7 @@ public class DataConversionServiceWithMockRepositoryTest {
 
         when(this.restUtils.getStudentByPen(eq(pen), eq(summary.getAccessToken()))).thenReturn(penStudent);
         when(this.restUtils.saveGraduationStatus(any(GraduationStatus.class), eq(summary.getAccessToken()))).thenReturn(graduationStatus);
-        when(this.restUtils.getCountOfFrenchImmersionCourses(eq(pen))).thenReturn(Integer.valueOf(1));
+        when(this.restUtils.checkFrenchImmersionCourse(eq(pen), eq(summary.getAccessToken()))).thenReturn(Boolean.TRUE);
         when(this.restUtils.saveStudentSpecialProgram(eq(gradStudentSpecialProgram), eq(summary.getAccessToken()))).thenReturn(gradStudentSpecialProgram);
         when(this.restUtils.getStudentsByPen(eq(pen), eq(summary.getAccessToken()))).thenReturn(Arrays.asList(penStudent));
         when(this.restUtils.getGradSpecialProgram(eq("2018-EN"), eq("FI"), eq(summary.getAccessToken()))).thenReturn(specialProgram);
@@ -129,7 +125,7 @@ public class DataConversionServiceWithMockRepositoryTest {
 
         when(this.restUtils.getStudentByPen(eq(pen), eq(summary.getAccessToken()))).thenReturn(penStudent);
         when(this.restUtils.saveGraduationStatus(any(GraduationStatus.class), eq(summary.getAccessToken()))).thenReturn(graduationStatus);
-        when(this.restUtils.getCountOfFrenchImmersionCourses(eq(pen))).thenReturn(Integer.valueOf(1));
+        when(this.restUtils.checkFrenchImmersionCourse(eq(pen), eq(summary.getAccessToken()))).thenReturn(Boolean.TRUE);
         when(this.restUtils.saveStudentSpecialProgram(eq(gradStudentSpecialProgram), eq(summary.getAccessToken()))).thenReturn(gradStudentSpecialProgram);
         when(this.restUtils.getStudentsByPen(eq(pen), eq(summary.getAccessToken()))).thenReturn(Arrays.asList(penStudent));
         when(this.restUtils.getGradSpecialProgram(eq("2018-EN"), eq("FI"), eq(summary.getAccessToken()))).thenReturn(specialProgram);

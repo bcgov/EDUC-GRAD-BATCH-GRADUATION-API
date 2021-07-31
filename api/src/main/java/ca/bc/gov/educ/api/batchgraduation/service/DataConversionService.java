@@ -207,7 +207,7 @@ public class DataConversionService {
 	private void processSpecialPrograms(GraduationStatus student, String accessToken) {
 		// French Immersion for 2018-EN
 		if (StringUtils.equals(student.getProgram(), "2018-EN")) {
-			if (isFrenchImmersionCourse(student.getPen())) {
+			if (isFrenchImmersionCourse(student.getPen(), accessToken)) {
 				GradStudentSpecialProgram entity = new GradStudentSpecialProgram();
 				entity.setPen(student.getPen());
 				entity.setId(student.getStudentID());
@@ -272,11 +272,7 @@ public class DataConversionService {
 	}
 
 	@Transactional(readOnly = true)
-	public boolean isFrenchImmersionCourse(String pen) {
-		if (this.restUtils.getCountOfFrenchImmersionCourses(pen) > 0L) {
-		//if (this.dataConversionRepository.countFrenchImmersionCourses(pen) > 0L) {
-			return true;
-		}
-		return false;
+	public boolean isFrenchImmersionCourse(String pen, String accessToken) {
+		return this.restUtils.checkFrenchImmersionCourse(pen, accessToken);
 	}
 }

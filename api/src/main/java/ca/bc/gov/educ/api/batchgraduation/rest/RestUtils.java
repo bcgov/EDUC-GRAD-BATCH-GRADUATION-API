@@ -84,7 +84,8 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
-    // EDUC-GRAD-STUDENT-API
+    // EDUC-GRAD-STUDENT-API ========================================
+    // TODO: new endpoint
     public GraduationStatus getGraduationStatus(String pen, String accessToken) {
         return this.webClient.get()
                 .uri(constants.getGradStudentApiGradStatusUrl(), uri -> uri.path("/pen/{pen}").build(pen))
@@ -100,7 +101,7 @@ public class RestUtils {
                 .retrieve().bodyToMono(GraduationStatus.class).block();
     }
 
-    // EDUC-GRAD-PROGRAM-API
+    // EDUC-GRAD-PROGRAM-API ========================================
     public GradStudentSpecialProgram getStudentSpecialProgram(UUID studentID, UUID specialProgramID, String accessToken) {
         return this.webClient.get()
                 .uri(constants.getGradProgramApiOptionalProgramUrl(), uri -> uri.path("/{studentID}/{specialProgramID}")
@@ -117,10 +118,14 @@ public class RestUtils {
                 .retrieve().bodyToMono(GradStudentSpecialProgram.class).block();
     }
 
-    // EDUC-GRAD-COURSE-API
+    // EDUC-GRAD-COURSE-API ========================================
     // TODO: new endpoint
-    public Integer getCountOfFrenchImmersionCourses(String pen) {
-        return 0;
+    public Boolean checkFrenchImmersionCourse(String pen, String accessToken) {
+        return this.webClient.get()
+                .uri(constants.getCheckFrenchImmersionCourseUrl(), uri -> uri.path("/pen/{pen}")
+                        .build(pen))
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve().bodyToMono(Boolean.class).block();
     }
 
     // TODO: new endpoint

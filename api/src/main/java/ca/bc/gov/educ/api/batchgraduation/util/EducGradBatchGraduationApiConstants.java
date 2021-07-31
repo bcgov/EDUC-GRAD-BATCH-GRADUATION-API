@@ -54,5 +54,5 @@ public class EducGradBatchGraduationApiConstants {
     private String courseRestrictionUrl;
 
     @Value("${endpoint.grad-course-api.check-french-immersion-course}")
-    private String getCountOfFrenchImmersionCoursesUrl;
+    private String checkFrenchImmersionCourseUrl;
 }
