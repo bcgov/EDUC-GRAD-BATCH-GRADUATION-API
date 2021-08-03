@@ -112,21 +112,21 @@ public class RestUtilsTest {
     @Test
     public void testGetSpecialProgram_givenValues_returnsGradSpecialProgram_with_APICallSuccess() throws JsonProcessingException {
         final UUID specialProgramID = UUID.randomUUID();
-        final GradSpecialProgram specialProgram = new GradSpecialProgram();
-        specialProgram.setId(specialProgramID);
-        specialProgram.setProgramCode("abc");
-        specialProgram.setSpecialProgramCode("def");
+        final OptionalProgram specialProgram = new OptionalProgram();
+        specialProgram.setOptionalProgramID(specialProgramID);
+        specialProgram.setGraduationProgramCode("abc");
+        specialProgram.setOptProgramCode("def");
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(eq(this.constants.getGradProgramApiOptionalProgramUrl()), any(Function.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
-        when(this.responseMock.bodyToMono(GradSpecialProgram.class)).thenReturn(Mono.just(specialProgram));
+        when(this.responseMock.bodyToMono(OptionalProgram.class)).thenReturn(Mono.just(specialProgram));
         val result = this.restUtils.getGradSpecialProgram("abc", "def", "123");
         assertThat(result).isNotNull();
-        assertThat(result.getProgramCode()).isEqualTo("abc");
-        assertThat(result.getSpecialProgramCode()).isEqualTo("def");
+        assertThat(result.getGraduationProgramCode()).isEqualTo("abc");
+        assertThat(result.getOptProgramCode()).isEqualTo("def");
     }
 
     @Test
@@ -179,25 +179,25 @@ public class RestUtilsTest {
         final String pen = "123456789";
         final UUID specialProgramID = UUID.randomUUID();
 
-        GradStudentSpecialProgram gradStudentSpecialProgram = new GradStudentSpecialProgram();
+        StudentOptionalProgram gradStudentSpecialProgram = new StudentOptionalProgram();
         gradStudentSpecialProgram.setId(ID);
         gradStudentSpecialProgram.setPen(pen);
-        gradStudentSpecialProgram.setSpecialProgramID(specialProgramID);
-        gradStudentSpecialProgram.setMainProgramCode("2018-EN");
+        gradStudentSpecialProgram.setOptionalProgramID(specialProgramID);
+        gradStudentSpecialProgram.setProgramCode("2018-EN");
         gradStudentSpecialProgram.setSpecialProgramCode("Special");
         gradStudentSpecialProgram.setSpecialProgramName("Test Special Course");
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(eq(this.constants.getGradProgramApiOptionalProgramUrl()), any(Function.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(eq(this.constants.getGradStudentApiStudentOptionalProgramUrl()), any(Function.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
-        when(this.responseMock.bodyToMono(GradStudentSpecialProgram.class)).thenReturn(Mono.just(gradStudentSpecialProgram));
+        when(this.responseMock.bodyToMono(StudentOptionalProgram.class)).thenReturn(Mono.just(gradStudentSpecialProgram));
 
         var result = this.restUtils.getStudentSpecialProgram(studentID, specialProgramID, "123");
         assertThat(result).isNotNull();
         assertThat(result.getPen()).isEqualTo(pen);
-        assertThat(result.getSpecialProgramID()).isEqualTo(specialProgramID);
+        assertThat(result.getOptionalProgramID()).isEqualTo(specialProgramID);
         assertThat(result.getSpecialProgramCode()).isEqualTo(gradStudentSpecialProgram.getSpecialProgramCode());
     }
 
@@ -208,25 +208,25 @@ public class RestUtilsTest {
         final String pen = "123456789";
         final UUID specialProgramID = UUID.randomUUID();
 
-        GradStudentSpecialProgram gradStudentSpecialProgram = new GradStudentSpecialProgram();
+        StudentOptionalProgram gradStudentSpecialProgram = new StudentOptionalProgram();
         gradStudentSpecialProgram.setId(ID);
         gradStudentSpecialProgram.setPen(pen);
-        gradStudentSpecialProgram.setSpecialProgramID(specialProgramID);
-        gradStudentSpecialProgram.setMainProgramCode("2018-EN");
+        gradStudentSpecialProgram.setOptionalProgramID(specialProgramID);
+        gradStudentSpecialProgram.setProgramCode("2018-EN");
         gradStudentSpecialProgram.setSpecialProgramCode("Special");
         gradStudentSpecialProgram.setSpecialProgramName("Test Special Course");
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(eq(constants.getGradProgramApiOptionalProgramUrl()), any(Function.class))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(eq(constants.getGradStudentApiStudentOptionalProgramUrl()), any(Function.class))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(GradStudentSpecialProgram.class)).thenReturn(Mono.just(gradStudentSpecialProgram));
+        when(this.responseMock.bodyToMono(StudentOptionalProgram.class)).thenReturn(Mono.just(gradStudentSpecialProgram));
 
         var result = this.restUtils.saveStudentSpecialProgram(gradStudentSpecialProgram, "123");
         assertThat(result.getPen()).isEqualTo(pen);
-        assertThat(result.getSpecialProgramID()).isEqualTo(specialProgramID);
+        assertThat(result.getOptionalProgramID()).isEqualTo(specialProgramID);
         assertThat(result.getSpecialProgramCode()).isEqualTo(gradStudentSpecialProgram.getSpecialProgramCode());
     }
 

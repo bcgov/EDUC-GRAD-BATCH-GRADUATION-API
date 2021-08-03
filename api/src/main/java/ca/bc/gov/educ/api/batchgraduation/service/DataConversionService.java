@@ -32,7 +32,7 @@ public class DataConversionService {
 			GraduationStatus graduationStatus = restUtils.getGraduationStatus(convGradStudent.getPen(), accessToken);
 			if (graduationStatus != null && graduationStatus.getStudentID() != null) {
 				convertStudentData(convGradStudent, graduationStatus, summary);
-				graduationStatus.setUpdatedTimestamp(new Date());
+				graduationStatus.setUpdateDate(new Date());
 				GraduationStatus studentResponse = restUtils.saveGraduationStatus(graduationStatus, accessToken);
 				summary.setUpdatedCount(summary.getUpdatedCount() + 1L);
 				// process dependencies
@@ -208,14 +208,14 @@ public class DataConversionService {
 		// French Immersion for 2018-EN
 		if (StringUtils.equals(student.getProgram(), "2018-EN")) {
 			if (isFrenchImmersionCourse(student.getPen(), accessToken)) {
-				GradStudentSpecialProgram entity = new GradStudentSpecialProgram();
+				StudentOptionalProgram entity = new StudentOptionalProgram();
 				entity.setPen(student.getPen());
-				entity.setId(student.getStudentID());
+				entity.setStudentID(student.getStudentID());
 				// Call Grad Program Management API
-				GradSpecialProgram gradSpecialProgram = restUtils.getGradSpecialProgram("2018-EN", "FI", accessToken);
-				if (gradSpecialProgram != null && gradSpecialProgram.getId() != null) {
-					entity.setSpecialProgramID(gradSpecialProgram.getId());
-					GradStudentSpecialProgram studentSpecialProgramResponse = restUtils.getStudentSpecialProgram(student.getStudentID(), gradSpecialProgram.getId(), accessToken);
+				OptionalProgram optionalProgram = restUtils.getGradSpecialProgram("2018-EN", "FI", accessToken);
+				if (optionalProgram != null && optionalProgram.getOptionalProgramID() != null) {
+					entity.setOptionalProgramID(optionalProgram.getOptionalProgramID());
+					StudentOptionalProgram studentSpecialProgramResponse = restUtils.getStudentSpecialProgram(student.getStudentID(), optionalProgram.getOptionalProgramID(), accessToken);
 					if (studentSpecialProgramResponse == null) {
 						restUtils.saveStudentSpecialProgram(entity, accessToken);
 					}

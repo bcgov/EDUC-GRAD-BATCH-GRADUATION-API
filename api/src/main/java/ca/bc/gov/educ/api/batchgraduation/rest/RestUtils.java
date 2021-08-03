@@ -61,11 +61,11 @@ public class RestUtils {
                 .retrieve().bodyToMono(Student.class).block();
     }
 
-    public GradSpecialProgram getGradSpecialProgram(String programCode, String specialProgramCode, String accessToken) {
+    public OptionalProgram getGradSpecialProgram(String programCode, String specialProgramCode, String accessToken) {
         return this.webClient.get()
                 .uri(constants.getGradProgramApiOptionalProgramUrl(), uri -> uri.path("/{programCode}/{specialProgramCode}").build(programCode, specialProgramCode))
                 .headers(h -> h.setBearerAuth(accessToken))
-                .retrieve().bodyToMono(GradSpecialProgram.class).block();
+                .retrieve().bodyToMono(OptionalProgram.class).block();
     }
     
     public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken) {
@@ -101,21 +101,28 @@ public class RestUtils {
                 .retrieve().bodyToMono(GraduationStatus.class).block();
     }
 
-    // EDUC-GRAD-PROGRAM-API ========================================
-    public GradStudentSpecialProgram getStudentSpecialProgram(UUID studentID, UUID specialProgramID, String accessToken) {
+    public StudentOptionalProgram getStudentSpecialProgram(UUID studentID, UUID specialProgramID, String accessToken) {
         return this.webClient.get()
-                .uri(constants.getGradProgramApiOptionalProgramUrl(), uri -> uri.path("/{studentID}/{specialProgramID}")
+                .uri(constants.getGradStudentApiStudentOptionalProgramUrl(), uri -> uri.path("/{studentID}/{specialProgramID}")
                         .build(studentID, specialProgramID))
                 .headers(h -> h.setBearerAuth(accessToken))
-                .retrieve().bodyToMono(GradStudentSpecialProgram.class).block();
+                .retrieve().bodyToMono(StudentOptionalProgram.class).block();
     }
 
-    public GradStudentSpecialProgram saveStudentSpecialProgram(GradStudentSpecialProgram gradStudentSpecialProgram, String accessToken) {
+    public StudentOptionalProgram saveStudentSpecialProgram(StudentOptionalProgram gradStudentSpecialProgram, String accessToken) {
         return this.webClient.post()
-                .uri(constants.getGradProgramApiOptionalProgramUrl(), uri -> uri.path("/{studentID}/{specialProgramID}").build(gradStudentSpecialProgram.getId(), gradStudentSpecialProgram.getSpecialProgramID()))
+                .uri(constants.getGradStudentApiStudentOptionalProgramUrl(), uri -> uri.path("/{studentID}/{specialProgramID}").build(gradStudentSpecialProgram.getStudentID(), gradStudentSpecialProgram.getOptionalProgramID()))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .body(BodyInserters.fromValue(gradStudentSpecialProgram))
-                .retrieve().bodyToMono(GradStudentSpecialProgram.class).block();
+                .retrieve().bodyToMono(StudentOptionalProgram.class).block();
+    }
+
+    public StudentOptionalProgram updateStudentSpecialProgram(StudentOptionalProgramReq gradStudentSpecialProgramReq, String accessToken) {
+        return this.webClient.post()
+                .uri(constants.getGradStudentApiUpdateStudentOptionalProgramUrl())
+                .headers(h -> h.setBearerAuth(accessToken))
+                .body(BodyInserters.fromValue(gradStudentSpecialProgramReq))
+                .retrieve().bodyToMono(StudentOptionalProgram.class).block();
     }
 
     // EDUC-GRAD-COURSE-API ========================================

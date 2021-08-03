@@ -61,15 +61,15 @@ public class DataConversionServiceWithMockRepositoryTest {
         graduationStatus.setStudentID(studentID);
         graduationStatus.setPen(pen);
 
-        GradSpecialProgram specialProgram = new GradSpecialProgram();
-        specialProgram.setId(UUID.randomUUID());
-        specialProgram.setProgramCode("2018-EN");
-        specialProgram.setSpecialProgramCode("FI");
-        specialProgram.setSpecialProgramName("French Immersion");
+        OptionalProgram specialProgram = new OptionalProgram();
+        specialProgram.setOptionalProgramID(UUID.randomUUID());
+        specialProgram.setGraduationProgramCode("2018-EN");
+        specialProgram.setOptProgramCode("FI");
+        specialProgram.setOptionalProgramName("French Immersion");
 
-        GradStudentSpecialProgram gradStudentSpecialProgram = new GradStudentSpecialProgram();
+        StudentOptionalProgram gradStudentSpecialProgram = new StudentOptionalProgram();
         gradStudentSpecialProgram.setId(UUID.randomUUID());
-        gradStudentSpecialProgram.setSpecialProgramID(specialProgram.getId());
+        gradStudentSpecialProgram.setOptionalProgramID(specialProgram.getOptionalProgramID());
         gradStudentSpecialProgram.setPen(pen);
 
         ConvGradStudent student = ConvGradStudent.builder().pen("111222333").program("2018-EN").recalculateGradStatus("Y")
@@ -89,7 +89,7 @@ public class DataConversionServiceWithMockRepositoryTest {
         assertThat(result).isNotNull();
         assertThat(result.getPen()).isEqualTo(pen);
         assertThat(result.getRecalculateGradStatus()).isEqualTo("Y");
-        assertThat(result.getProgram()).isEqualTo(specialProgram.getProgramCode());
+        assertThat(result.getProgram()).isEqualTo(specialProgram.getGraduationProgramCode());
 
     }
 
@@ -107,15 +107,15 @@ public class DataConversionServiceWithMockRepositoryTest {
         graduationStatus.setStudentID(studentID);
         graduationStatus.setPen(pen);
 
-        GradSpecialProgram specialProgram = new GradSpecialProgram();
-        specialProgram.setId(UUID.randomUUID());
-        specialProgram.setProgramCode("2018-EN");
-        specialProgram.setSpecialProgramCode("FI");
-        specialProgram.setSpecialProgramName("French Immersion");
+        OptionalProgram specialProgram = new OptionalProgram();
+        specialProgram.setOptionalProgramID(UUID.randomUUID());
+        specialProgram.setGraduationProgramCode("2018-EN");
+        specialProgram.setOptProgramCode("FI");
+        specialProgram.setOptionalProgramName("French Immersion");
 
-        GradStudentSpecialProgram gradStudentSpecialProgram = new GradStudentSpecialProgram();
+        StudentOptionalProgram gradStudentSpecialProgram = new StudentOptionalProgram();
         gradStudentSpecialProgram.setId(UUID.randomUUID());
-        gradStudentSpecialProgram.setSpecialProgramID(specialProgram.getId());
+        gradStudentSpecialProgram.setOptionalProgramID(specialProgram.getOptionalProgramID());
         gradStudentSpecialProgram.setPen(pen);
 
         ConvGradStudent student = ConvGradStudent.builder().pen("111222333").program("2018-EN").recalculateGradStatus("Y")
@@ -135,7 +135,7 @@ public class DataConversionServiceWithMockRepositoryTest {
         assertThat(result).isNotNull();
         assertThat(result.getPen()).isEqualTo(pen);
         assertThat(result.getRecalculateGradStatus()).isEqualTo("Y");
-        assertThat(result.getProgram()).isEqualTo(specialProgram.getProgramCode());
+        assertThat(result.getProgram()).isEqualTo(specialProgram.getGraduationProgramCode());
 
     }
 

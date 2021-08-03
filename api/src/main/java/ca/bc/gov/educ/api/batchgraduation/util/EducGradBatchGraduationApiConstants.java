@@ -44,6 +44,12 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-student-api.grad-status}")
     private String gradStudentApiGradStatusUrl;
 
+    @Value("${endpoint.grad-student-api.student-optional-program}")
+    private String gradStudentApiStudentOptionalProgramUrl;
+
+    @Value("${endpoint.grad-student-api.update-student-optional-program}")
+    private String gradStudentApiUpdateStudentOptionalProgramUrl;
+
     @Value("${endpoint.grad-program-api.optional-program}")
     private String gradProgramApiOptionalProgramUrl;
 
