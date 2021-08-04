@@ -119,13 +119,13 @@ public class DataConversionService {
 	}
 
 	@Transactional
-	public void convertCourseRestriction(GradCourseRestriction courseRestriction, ConversionSummaryDTO summary) {
+	public void convertCourseRestriction(CourseRestriction courseRestriction, ConversionSummaryDTO summary) {
 		summary.setProcessedCount(summary.getProcessedCount() + 1L);
-		GradCourseRestriction currentCourseRestriction =  restUtils.getCourseRestriction(
+		CourseRestriction currentCourseRestriction =  restUtils.getCourseRestriction(
 			courseRestriction.getMainCourse(), courseRestriction.getMainCourseLevel(), courseRestriction.getRestrictedCourse(), courseRestriction.getRestrictedCourseLevel(), summary.getAccessToken());
 
 		if (currentCourseRestriction == null) {
-			currentCourseRestriction = new GradCourseRestriction();
+			currentCourseRestriction = new CourseRestriction();
 		}
 		convertCourseRestrictionData(courseRestriction, currentCourseRestriction);
 		restUtils.saveCourseRestriction(currentCourseRestriction, summary.getAccessToken());
@@ -137,12 +137,12 @@ public class DataConversionService {
 	}
 
 	@Transactional
-	public List<GradCourseRestriction> loadInitialRawGradCourseRestrictionsData(boolean purge) {
+	public List<CourseRestriction> loadInitialRawGradCourseRestrictionsData(boolean purge) {
 		if (purge) {
 //			gradCourseRestrictionRepository.deleteAll();
 //			gradCourseRestrictionRepository.flush();
 		}
-		List<GradCourseRestriction> courseRestrictions = new ArrayList<>();
+		List<CourseRestriction> courseRestrictions = new ArrayList<>();
 		List<Object[]> results = convGradStudentRepository.loadInitialRawCourseRestrictionData();
 		results.forEach(result -> {
 			String mainCourse = (String) result[0];
@@ -151,7 +151,7 @@ public class DataConversionService {
 			String restrictedCourseLevel = (String) result[3];
 			String startDate = (String) result[4];
 			String endDate = (String) result[5];
-			GradCourseRestriction courseRestriction = new GradCourseRestriction(
+			CourseRestriction courseRestriction = new CourseRestriction(
 					null, mainCourse, mainCourseLevel, restrictedCourse, restrictedCourseLevel, startDate, endDate);
 			courseRestrictions.add(courseRestriction);
 		});
@@ -160,7 +160,7 @@ public class DataConversionService {
 
 	@Transactional
 	public void removeGradCourseRestriction(String mainCourseCode, String restrictedCourseCode, ConversionSummaryDTO summary) {
-		List<GradCourseRestriction> removalList = restUtils.getCourseRestrictions(mainCourseCode, restrictedCourseCode, summary.getAccessToken());
+		List<CourseRestriction> removalList = restUtils.getCourseRestrictions(mainCourseCode, restrictedCourseCode, summary.getAccessToken());
 		removalList.forEach(c -> {
 			// TODO (jsung) : rest api call to delete course restriction
 			//gradCourseRestrictionRepository.delete(c);
@@ -168,7 +168,7 @@ public class DataConversionService {
 		});
 	}
 
-	private void convertCourseRestrictionData(GradCourseRestriction courseRestriction, GradCourseRestriction courseRestrictionEntity) {
+	private void convertCourseRestrictionData(CourseRestriction courseRestriction, CourseRestriction courseRestrictionEntity) {
 		courseRestrictionEntity.setMainCourse(courseRestriction.getMainCourse());
 		courseRestrictionEntity.setMainCourseLevel(courseRestriction.getMainCourseLevel());
 		courseRestrictionEntity.setRestrictedCourse(courseRestriction.getRestrictedCourse());

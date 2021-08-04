@@ -161,11 +161,11 @@ public class DataConversionServiceWithMockRepositoryTest {
         ConversionSummaryDTO summary = new ConversionSummaryDTO();
         summary.setAccessToken("123");
 
-        GradCourseRestriction courseRestriction = new GradCourseRestriction(
+        CourseRestriction courseRestriction = new CourseRestriction(
                 UUID.randomUUID(),  "main", "12", "rest", "12", null, null
         );
 
-        GradCourseRestriction gradCourseRestriction = new GradCourseRestriction();
+        CourseRestriction gradCourseRestriction = new CourseRestriction();
         gradCourseRestriction.setCourseRestrictionId(UUID.randomUUID());
         gradCourseRestriction.setMainCourse("main");
         gradCourseRestriction.setMainCourseLevel("12");
@@ -183,11 +183,11 @@ public class DataConversionServiceWithMockRepositoryTest {
         ConversionSummaryDTO summary = new ConversionSummaryDTO();
         summary.setAccessToken("123");
 
-        GradCourseRestriction courseRestriction = new GradCourseRestriction(
+        CourseRestriction courseRestriction = new CourseRestriction(
                 UUID.randomUUID(), "main", "12", "rest", "12", null, null
         );
 
-        GradCourseRestriction gradCourseRestriction = new GradCourseRestriction();
+        CourseRestriction gradCourseRestriction = new CourseRestriction();
         gradCourseRestriction.setCourseRestrictionId(UUID.randomUUID());
         gradCourseRestriction.setMainCourse("main");
         gradCourseRestriction.setMainCourseLevel("12");
@@ -213,7 +213,7 @@ public class DataConversionServiceWithMockRepositoryTest {
         var result = dataConversionService.loadInitialRawGradCourseRestrictionsData(true);
         assertThat(result).isNotNull();
         assertThat(result.size()).isEqualTo(1);
-        GradCourseRestriction responseCourseRestriction = result.get(0);
+        CourseRestriction responseCourseRestriction = result.get(0);
         assertThat(responseCourseRestriction.getMainCourse()).isEqualTo("main");
     }
 }

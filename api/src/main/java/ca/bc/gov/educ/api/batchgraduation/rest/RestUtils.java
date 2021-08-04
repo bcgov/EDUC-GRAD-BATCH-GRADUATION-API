@@ -85,7 +85,6 @@ public class RestUtils {
     }
 
     // EDUC-GRAD-STUDENT-API ========================================
-    // TODO: new endpoint
     public GraduationStatus getGraduationStatus(String pen, String accessToken) {
         return this.webClient.get()
                 .uri(constants.getGradStudentApiGradStatusUrl(), uri -> uri.path("/pen/{pen}").build(pen))
@@ -126,7 +125,6 @@ public class RestUtils {
     }
 
     // EDUC-GRAD-COURSE-API ========================================
-    // TODO: new endpoint
     public Boolean checkFrenchImmersionCourse(String pen, String accessToken) {
         return this.webClient.get()
                 .uri(constants.getCheckFrenchImmersionCourseUrl(), uri -> uri.path("/pen/{pen}")
@@ -135,17 +133,16 @@ public class RestUtils {
                 .retrieve().bodyToMono(Boolean.class).block();
     }
 
-    // TODO: new endpoint
-    public GradCourseRestriction getCourseRestriction(String mainCourse, String mainCourseLevel, String restrictedCourse, String restrictedCourseLevel, String accessToken) {
+    public CourseRestriction getCourseRestriction(String mainCourse, String mainCourseLevel, String restrictedCourse, String restrictedCourseLevel, String accessToken) {
         return this.webClient.get()
                 .uri(constants.getCourseRestrictionUrl(), uri -> uri.path("/{mainCourse}/{mainCourseLevel}/{restrictedCourse}/{restrictedCourseLevel}")
                         .build(mainCourse, mainCourseLevel, restrictedCourse, restrictedCourseLevel))
                 .headers(h -> h.setBearerAuth(accessToken))
-                .retrieve().bodyToMono(GradCourseRestriction.class).block();
+                .retrieve().bodyToMono(CourseRestriction.class).block();
     }
 
-    public List<GradCourseRestriction> getCourseRestrictions(String mainCourse, String restrictedCourse, String accessToken) {
-        final ParameterizedTypeReference<List<GradCourseRestriction>> responseType = new ParameterizedTypeReference<>() {
+    public List<CourseRestriction> getCourseRestrictions(String mainCourse, String restrictedCourse, String accessToken) {
+        final ParameterizedTypeReference<List<CourseRestriction>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.get()
                 .uri(constants.getCourseRestrictionUrl(), uri -> uri.path("/{mainCourse}/{restrictedCourse}")
@@ -154,13 +151,12 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
-    // TODO: new endpoint
-    public GradCourseRestriction saveCourseRestriction(GradCourseRestriction gradCourseRestriction, String accessToken) {
+    public CourseRestriction saveCourseRestriction(CourseRestriction courseRestriction, String accessToken) {
         return this.webClient.post()
-                .uri(constants.getCourseRestrictionUrl())
+                .uri(constants.getSaveCourseRestrictionUrl())
                 .headers(h -> h.setBearerAuth(accessToken))
-                .body(BodyInserters.fromValue(gradCourseRestriction))
-                .retrieve().bodyToMono(GradCourseRestriction.class).block();
+                .body(BodyInserters.fromValue(courseRestriction))
+                .retrieve().bodyToMono(CourseRestriction.class).block();
     }
 
 

@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GradCourseRestriction {
+public class CourseRestriction {
     private UUID courseRestrictionId;
     private String mainCourse;
     private String mainCourseLevel;

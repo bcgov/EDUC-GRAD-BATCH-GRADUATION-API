@@ -59,6 +59,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-course-api.course-restriction}")
     private String courseRestrictionUrl;
 
+    @Value("${endpoint.grad-course-api.save-course-restriction}")
+    private String saveCourseRestrictionUrl;
+
     @Value("${endpoint.grad-course-api.check-french-immersion-course}")
     private String checkFrenchImmersionCourseUrl;
 }

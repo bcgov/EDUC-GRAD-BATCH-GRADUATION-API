@@ -250,66 +250,66 @@ public class RestUtilsTest {
     public void testGetCourseRestrictions_givenValues_returnsGradCourseRestriction_with_APICallSuccess() throws JsonProcessingException {
         final UUID courseRestrictionID = UUID.randomUUID();
 
-        GradCourseRestriction gradCourseRestriction = new GradCourseRestriction();
-        gradCourseRestriction.setMainCourse("Main");
-        gradCourseRestriction.setMainCourseLevel("12");
-        gradCourseRestriction.setRestrictedCourse("Rest");
-        gradCourseRestriction.setRestrictedCourseLevel("12");
-        gradCourseRestriction.setCourseRestrictionId(courseRestrictionID);
+        CourseRestriction courseRestriction = new CourseRestriction();
+        courseRestriction.setMainCourse("Main");
+        courseRestriction.setMainCourseLevel("12");
+        courseRestriction.setRestrictedCourse("Rest");
+        courseRestriction.setRestrictedCourseLevel("12");
+        courseRestriction.setCourseRestrictionId(courseRestrictionID);
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(eq(this.constants.getCourseRestrictionUrl()), any(Function.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
-        final ParameterizedTypeReference<List<GradCourseRestriction>> responseType = new ParameterizedTypeReference<>() {
+        final ParameterizedTypeReference<List<CourseRestriction>> responseType = new ParameterizedTypeReference<>() {
         };
-        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(gradCourseRestriction)));
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(courseRestriction)));
 
         var result = this.restUtils.getCourseRestrictions("Main", "Rest", "123");
         assertThat(result).isNotNull();
         assertThat(result.isEmpty()).isFalse();
-        GradCourseRestriction responseData = result.get(0);
+        CourseRestriction responseData = result.get(0);
         assertThat(responseData.getCourseRestrictionId()).isEqualTo(courseRestrictionID);
-        assertThat(responseData.getMainCourse()).isEqualTo(gradCourseRestriction.getMainCourse());
-        assertThat(responseData.getRestrictedCourse()).isEqualTo(gradCourseRestriction.getRestrictedCourse());
+        assertThat(responseData.getMainCourse()).isEqualTo(courseRestriction.getMainCourse());
+        assertThat(responseData.getRestrictedCourse()).isEqualTo(courseRestriction.getRestrictedCourse());
     }
 
     @Test
     public void testGetCourseRestriction_givenValues_returnsGradCourseRestriction_with_APICallSuccess() throws JsonProcessingException {
         final UUID courseRestrictionID = UUID.randomUUID();
 
-        GradCourseRestriction gradCourseRestriction = new GradCourseRestriction();
-        gradCourseRestriction.setMainCourse("Main");
-        gradCourseRestriction.setMainCourseLevel("12");
-        gradCourseRestriction.setRestrictedCourse("Rest");
-        gradCourseRestriction.setRestrictedCourseLevel("12");
-        gradCourseRestriction.setCourseRestrictionId(courseRestrictionID);
+        CourseRestriction courseRestriction = new CourseRestriction();
+        courseRestriction.setMainCourse("Main");
+        courseRestriction.setMainCourseLevel("12");
+        courseRestriction.setRestrictedCourse("Rest");
+        courseRestriction.setRestrictedCourseLevel("12");
+        courseRestriction.setCourseRestrictionId(courseRestrictionID);
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(eq(this.constants.getCourseRestrictionUrl()), any(Function.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
-        when(this.responseMock.bodyToMono(GradCourseRestriction.class)).thenReturn(Mono.just(gradCourseRestriction));
+        when(this.responseMock.bodyToMono(CourseRestriction.class)).thenReturn(Mono.just(courseRestriction));
 
         var result = this.restUtils.getCourseRestriction("Main", "12", "Rest", "12", "123");
         assertThat(result).isNotNull();
         assertThat(result.getCourseRestrictionId()).isEqualTo(courseRestrictionID);
-        assertThat(result.getMainCourse()).isEqualTo(gradCourseRestriction.getMainCourse());
-        assertThat(result.getRestrictedCourse()).isEqualTo(gradCourseRestriction.getRestrictedCourse());
+        assertThat(result.getMainCourse()).isEqualTo(courseRestriction.getMainCourse());
+        assertThat(result.getRestrictedCourse()).isEqualTo(courseRestriction.getRestrictedCourse());
     }
 
     @Test
     public void testSaveCourseRestriction_givenValues_returnsGradCourseRestriction_with_APICallSuccess() throws JsonProcessingException {
         final UUID courseRestrictionID = UUID.randomUUID();
 
-        GradCourseRestriction gradCourseRestriction = new GradCourseRestriction();
-        gradCourseRestriction.setMainCourse("Main");
-        gradCourseRestriction.setMainCourseLevel("12");
-        gradCourseRestriction.setRestrictedCourse("Rest");
-        gradCourseRestriction.setRestrictedCourseLevel("12");
-        gradCourseRestriction.setCourseRestrictionId(courseRestrictionID);
+        CourseRestriction courseRestriction = new CourseRestriction();
+        courseRestriction.setMainCourse("Main");
+        courseRestriction.setMainCourseLevel("12");
+        courseRestriction.setRestrictedCourse("Rest");
+        courseRestriction.setRestrictedCourseLevel("12");
+        courseRestriction.setCourseRestrictionId(courseRestrictionID);
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(eq(constants.getCourseRestrictionUrl()))).thenReturn(this.requestBodyUriMock);
@@ -317,11 +317,11 @@ public class RestUtilsTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(GradCourseRestriction.class)).thenReturn(Mono.just(gradCourseRestriction));
+        when(this.responseMock.bodyToMono(CourseRestriction.class)).thenReturn(Mono.just(courseRestriction));
 
-        var result = this.restUtils.saveCourseRestriction(gradCourseRestriction, "123");
+        var result = this.restUtils.saveCourseRestriction(courseRestriction, "123");
         assertThat(result.getCourseRestrictionId()).isEqualTo(courseRestrictionID);
-        assertThat(result.getMainCourse()).isEqualTo(gradCourseRestriction.getMainCourse());
-        assertThat(result.getRestrictedCourse()).isEqualTo(gradCourseRestriction.getRestrictedCourse());
+        assertThat(result.getMainCourse()).isEqualTo(courseRestriction.getMainCourse());
+        assertThat(result.getRestrictedCourse()).isEqualTo(courseRestriction.getRestrictedCourse());
     }
 }

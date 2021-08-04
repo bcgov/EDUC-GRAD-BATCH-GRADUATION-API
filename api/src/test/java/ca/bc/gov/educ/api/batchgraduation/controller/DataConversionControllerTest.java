@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GradCourseRestriction;
+import ca.bc.gov.educ.api.batchgraduation.model.CourseRestriction;
 import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,22 +28,22 @@ public class DataConversionControllerTest {
 
     @Test
     public void testRunCourseRestrictionsDataConversionJob() {
-        GradCourseRestriction gradCourseRestriction1 = new GradCourseRestriction();
-        gradCourseRestriction1.setMainCourse("main");
-        gradCourseRestriction1.setMainCourseLevel("12");
-        gradCourseRestriction1.setRestrictedCourse("rest");
-        gradCourseRestriction1.setRestrictedCourseLevel("12");
+        CourseRestriction courseRestriction1 = new CourseRestriction();
+        courseRestriction1.setMainCourse("main");
+        courseRestriction1.setMainCourseLevel("12");
+        courseRestriction1.setRestrictedCourse("rest");
+        courseRestriction1.setRestrictedCourseLevel("12");
 
-        GradCourseRestriction gradCourseRestriction2 = new GradCourseRestriction();
-        gradCourseRestriction2.setMainCourse("CLEA");
-        gradCourseRestriction2.setMainCourseLevel("12");
-        gradCourseRestriction2.setRestrictedCourse("CLEB");
-        gradCourseRestriction2.setRestrictedCourseLevel("12");
+        CourseRestriction courseRestriction2 = new CourseRestriction();
+        courseRestriction2.setMainCourse("CLEA");
+        courseRestriction2.setMainCourseLevel("12");
+        courseRestriction2.setRestrictedCourse("CLEB");
+        courseRestriction2.setRestrictedCourseLevel("12");
 
         ConversionSummaryDTO summary = new ConversionSummaryDTO();
         summary.setTableName("GRAD_COURSE_RESTRICTIONS");
 
-        Mockito.when(dataConversionService.loadInitialRawGradCourseRestrictionsData(true)).thenReturn(Arrays.asList(gradCourseRestriction1, gradCourseRestriction2));
+        Mockito.when(dataConversionService.loadInitialRawGradCourseRestrictionsData(true)).thenReturn(Arrays.asList(courseRestriction1, courseRestriction2));
         var result = dataConversionController.runCourseRestrictionsDataConversionJob(true);
         Mockito.verify(dataConversionService).loadInitialRawGradCourseRestrictionsData(true);
 

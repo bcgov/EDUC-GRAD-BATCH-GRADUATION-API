@@ -90,4 +90,5 @@ endpoint:
     optional-program: https://educ-grad-program-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/program/optionalprograms
   grad-course-api:
     course-restriction: https://educ-grad-course-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/course/course-restriction
+    save-course-restriction: https://educ-grad-course-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/course/save-course-restriction
     check-french-immersion-course: https://educ-grad-course-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/course/check-french-immersion-course
