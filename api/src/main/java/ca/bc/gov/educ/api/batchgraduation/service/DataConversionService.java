@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.TraxStudentRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.DateConversionUtils;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,12 +14,12 @@ import java.util.*;
 @Service
 public class DataConversionService {
 
-    private final ConvGradStudentRepository convGradStudentRepository;
+    private final TraxStudentRepository traxStudentRepository;
 	private final RestUtils restUtils;
 
 	@Autowired
-	public DataConversionService(ConvGradStudentRepository convGradStudentRepository, RestUtils restUtils) {
-		this.convGradStudentRepository = convGradStudentRepository;
+	public DataConversionService(TraxStudentRepository traxStudentRepository, RestUtils restUtils) {
+		this.traxStudentRepository = traxStudentRepository;
 		this.restUtils = restUtils;
 	}
 
@@ -99,7 +99,7 @@ public class DataConversionService {
 //			dataConversionRepository.flush();
 		}
 		List<ConvGradStudent> students = new ArrayList<>();
-		List<Object[]> results = convGradStudentRepository.loadInitialRawData();
+		List<Object[]> results = traxStudentRepository.loadInitialRawData();
 		results.forEach(result -> {
 			String pen = (String) result[0];
 			String schoolOfRecord = (String) result[1];
@@ -143,7 +143,7 @@ public class DataConversionService {
 //			gradCourseRestrictionRepository.flush();
 		}
 		List<CourseRestriction> courseRestrictions = new ArrayList<>();
-		List<Object[]> results = convGradStudentRepository.loadInitialRawCourseRestrictionData();
+		List<Object[]> results = traxStudentRepository.loadInitialRawCourseRestrictionData();
 		results.forEach(result -> {
 			String mainCourse = (String) result[0];
 			String mainCourseLevel = (String) result[1];

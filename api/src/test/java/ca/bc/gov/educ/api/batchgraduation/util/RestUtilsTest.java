@@ -312,7 +312,7 @@ public class RestUtilsTest {
         courseRestriction.setCourseRestrictionId(courseRestrictionID);
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(eq(constants.getCourseRestrictionUrl()))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(eq(constants.getSaveCourseRestrictionUrl()))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);

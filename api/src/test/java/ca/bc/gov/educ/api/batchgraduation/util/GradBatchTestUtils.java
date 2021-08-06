@@ -1,8 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
-import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.TraxStudentRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,33 +10,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @Component
 @Profile("test")
 public class GradBatchTestUtils {
-    @Autowired
-    ConvGradStudentRepository convGradStudentRepository;
-
-    public static ConvGradStudentEntity populateIdAndAuditColumns(final ConvGradStudentEntity entity) {
-        if (entity.getStudentID() == null) {
-            entity.setStudentID(UUID.randomUUID());
-        }
-        if (entity.getCreatedBy() == null) {
-            entity.setCreatedBy("BATCH-GRADUATION-API");
-        }
-        if (entity.getUpdatedBy() == null) {
-            entity.setUpdatedBy("BATCH-GRADUATION-API");
-        }
-
-        entity.setCreatedTimestamp(new Date(System.currentTimeMillis()));
-        entity.setUpdatedTimestamp(new Date(System.currentTimeMillis()));
-
-        return entity;
-    }
 
     public List<ConvGradStudent> createConvGradStudents(final String jsonFileName) throws IOException {
         final File file = new File(

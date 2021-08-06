@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.TraxStudentRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.GradBatchTestUtils;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.After;
@@ -31,7 +31,7 @@ public class DataConversionServiceWithMockRepositoryTest {
     DataConversionService dataConversionService;
 
     @MockBean
-    ConvGradStudentRepository convGradStudentRepository;
+    TraxStudentRepository traxStudentRepository;
 
     @MockBean
     RestUtils restUtils;
@@ -147,7 +147,7 @@ public class DataConversionServiceWithMockRepositoryTest {
         List<Object[]> results = new ArrayList<>();
         results.add(obj);
 
-        when(this.convGradStudentRepository.loadInitialRawData()).thenReturn(results);
+        when(this.traxStudentRepository.loadInitialRawData()).thenReturn(results);
 
         var result = dataConversionService.loadInitialRawGradStudentData(true);
         assertThat(result).isNotNull();
@@ -208,7 +208,7 @@ public class DataConversionServiceWithMockRepositoryTest {
         List<Object[]> results = new ArrayList<>();
         results.add(obj);
 
-        when(this.convGradStudentRepository.loadInitialRawCourseRestrictionData()).thenReturn(results);
+        when(this.traxStudentRepository.loadInitialRawCourseRestrictionData()).thenReturn(results);
 
         var result = dataConversionService.loadInitialRawGradCourseRestrictionsData(true);
         assertThat(result).isNotNull();

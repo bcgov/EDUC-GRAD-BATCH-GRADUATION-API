@@ -3,7 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
 import ca.bc.gov.educ.api.batchgraduation.model.ConversionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
-import ca.bc.gov.educ.api.batchgraduation.repository.ConvGradStudentRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.TraxStudentRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.GradBatchTestUtils;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.After;
@@ -33,7 +33,7 @@ public class DataConversionServiceTest {
     DataConversionService dataConversionService;
 
     @Autowired
-    ConvGradStudentRepository convGradStudentRepository;
+    TraxStudentRepository traxStudentRepository;
 
     @MockBean
     RestUtils restUtils;
