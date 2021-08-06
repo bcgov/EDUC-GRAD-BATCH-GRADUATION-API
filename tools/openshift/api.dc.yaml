@@ -51,6 +51,8 @@ objects:
               envFrom:
                 - configMapRef:
                     name: educ-grad-api-config-map
+                - configMapRef:
+                    name: educ-grad-batch-api-config-map
                 - secretRef:
                     name: educ-grad-db-secret
                 - secretRef:

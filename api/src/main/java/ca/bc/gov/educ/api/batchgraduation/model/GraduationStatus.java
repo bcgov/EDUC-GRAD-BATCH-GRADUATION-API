@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Component
-public class GraduationStatus extends BaseModel{
+public class GraduationStatus extends BaseModel {
 
     private String studentGradData;
     private String pen;

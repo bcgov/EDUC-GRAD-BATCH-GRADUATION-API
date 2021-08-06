@@ -36,6 +36,15 @@ spring:
     initialize-schema: NEVER
     job:
       enabled: false
+  flyway:
+    enabled: ${ENABLE_FLYWAY}
+    baseline-on-migrate: false
+    table: FLYWAY_SCHEMA_HISTORY
+    url: ${CONNECTION_STRING}
+    schema: ${USERNAME}
+    user: ${USERNAME}
+    password: ${PASSWORD}
+    location: classpath:db/migration
 
 #Logging properties
 logging:
