@@ -3,7 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 import lombok.Data;
 
 @Data
-public class ConversionError {
+public class ProcessError {
   private String pen;
   private String reason;
 }

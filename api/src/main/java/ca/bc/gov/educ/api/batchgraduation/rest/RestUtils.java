@@ -1,10 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.rest;
 
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmResponse;
-import ca.bc.gov.educ.api.batchgraduation.model.GradSpecialProgram;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.model.Student;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,13 +52,6 @@ public class RestUtils {
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(responseType).block();
     }
-
-    public GradSpecialProgram getGradSpecialProgram(String programCode, String specialProgramCode, String accessToken) {
-        return this.webClient.get()
-                .uri(constants.getGradProgramManagementUrl(), uri -> uri.path("/{programCode}/{specialProgramCode}").build(programCode, specialProgramCode))
-                .headers(h -> h.setBearerAuth(accessToken))
-                .retrieve().bodyToMono(GradSpecialProgram.class).block();
-    }
     
     public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken) {
         return this.webClient.get()
@@ -75,8 +64,25 @@ public class RestUtils {
         final ParameterizedTypeReference<List<GraduationStatus>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.get()
-                .uri(constants.getGradStudentForGradListUrl())
+                .uri(constants.getGradStudentApiStudentForGradListUrl())
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(responseType).block();
     }
+
+    // EDUC-GRAD-STUDENT-API ========================================
+    public GraduationStatus getGraduationStatus(String pen, String accessToken) {
+        return this.webClient.get()
+                .uri(constants.getGradStudentApiGradStatusUrl(), uri -> uri.path("/pen/{pen}").build(pen))
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve().bodyToMono(GraduationStatus.class).block();
+    }
+
+    public GraduationStatus saveGraduationStatus(GraduationStatus graduationStatus, String accessToken) {
+        return this.webClient.post()
+                .uri(constants.getGradStudentApiGradStatusUrl(), uri -> uri.path("/{studentID}").build(graduationStatus.getStudentID()))
+                .headers(h -> h.setBearerAuth(accessToken))
+                .body(BodyInserters.fromValue(graduationStatus))
+                .retrieve().bodyToMono(GraduationStatus.class).block();
+    }
+
 }

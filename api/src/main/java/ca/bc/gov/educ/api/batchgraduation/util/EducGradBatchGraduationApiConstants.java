@@ -32,24 +32,19 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${authorization.password}")
     private String password;
 
-    @Value("${endpoint.keycloack.getToken}")
+    @Value("${endpoint.keycloak.getToken}")
     private String tokenUrl;
 
     @Value("${endpoint.grad-graduation-api.url}")
     private String graduationApiUrl;
 
-    @Value("${endpoint.pen-student-api.by-pen.url}")
+    @Value("${endpoint.grad-student-api.pen-student-by-pen}")
     private String penStudentApiByPenUrl;
 
-    @Value("${endpoint.graduation-status-api.read-grad-status.url}")
-    private String gradStudentApiUrl;
+    @Value("${endpoint.grad-student-api.grad-status}")
+    private String gradStudentApiGradStatusUrl;
 
-    @Value("${endpoint.graduation-status-api.update-grad-status}")
-    private String gradStatusUpdateUrl;
+    @Value("${endpoint.grad-student-api.student-for-grad-list}")
+    private String gradStudentApiStudentForGradListUrl;
 
-    @Value("${endpoint.grad-program-management-api.special-program.url}")
-    private String gradProgramManagementUrl;
-
-    @Value("${endpoint.grad-graduation-status-api.student-for-grad-list.url}")
-    private String gradStudentForGradListUrl;
 }

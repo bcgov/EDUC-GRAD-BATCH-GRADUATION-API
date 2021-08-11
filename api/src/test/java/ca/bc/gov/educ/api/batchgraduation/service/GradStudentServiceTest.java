@@ -1,10 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.GraduationStatusEntity;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.LoadStudentData;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
-import ca.bc.gov.educ.api.batchgraduation.repository.GraduationStatusRepository;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,10 +14,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -29,12 +27,6 @@ public class GradStudentServiceTest {
 
     @Autowired
     GradStudentService gradStudentService;
-
-    @Autowired
-    EducGradBatchGraduationApiConstants constants;
-
-    @MockBean
-    private GraduationStatusRepository graduationStatusRepository;
 
     @MockBean
     private RestUtils restUtils;
@@ -52,16 +44,16 @@ public class GradStudentServiceTest {
         student.setPen(pen);
         student.setStudentID(studentID.toString());
 
-        GraduationStatusEntity studentEntity = new GraduationStatusEntity();
-        studentEntity.setStudentID(studentID);
-        studentEntity.setPen(pen);
+        GraduationStatus graduationStatus = new GraduationStatus();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
 
-        when(restUtils.getStudentsByPen(pen, "accessToken")).thenReturn(Arrays.asList(student));
-        when(graduationStatusRepository.findById(pen)).thenReturn(Optional.empty());
-        when(graduationStatusRepository.save(any(GraduationStatusEntity.class))).thenReturn(studentEntity);
+        when(this.restUtils.getStudentsByPen(eq(pen), eq("accessToken"))).thenReturn(Arrays.asList(student));
+        when(this.restUtils.getGraduationStatus(eq(pen), eq("accessToken"))).thenReturn(graduationStatus);
+        when(this.restUtils.saveGraduationStatus(eq(graduationStatus), any(String.class))).thenReturn(graduationStatus);
 
-        gradStudentService.getStudentByPenFromStudentAPI(Arrays.asList(loadStudentData), "accessToken");
-        Mockito.verify(graduationStatusRepository).save(any(GraduationStatusEntity.class));
+        gradStudentService.getStudentByPenFromStudentAPI(Arrays.asList(loadStudentData),"accessToken");
+        Mockito.verify(this.restUtils).saveGraduationStatus(any(GraduationStatus.class), any(String.class));
     }
 
 }

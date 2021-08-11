@@ -18,7 +18,7 @@ public class AlgorithmSummaryDTO {
   private long readCount = 0L;
   private long processedCount = 0L;
 
-  private List<ConversionError> errors = new ArrayList<>();
+  private List<ProcessError> errors = new ArrayList<>();
   private String exception;
 
   // stats
@@ -28,7 +28,7 @@ public class AlgorithmSummaryDTO {
     put("2004", 0L);
     put("1996", 0L);
     put("1986", 0L);
-    put("1950-EN", 0L);
+    put("1950", 0L);
     put("NOPROG", 0L);
     put("SCCP", 0L);
   }};
