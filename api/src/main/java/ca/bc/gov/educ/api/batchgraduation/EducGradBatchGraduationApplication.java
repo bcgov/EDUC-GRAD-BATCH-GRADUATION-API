@@ -1,9 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.GradCourseRestrictionEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.ConvGradStudentEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.GradCourseRestriction;
-import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
 import org.modelmapper.ModelMapper;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
@@ -25,13 +21,6 @@ public class EducGradBatchGraduationApplication {
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
-
-        modelMapper.typeMap(ConvGradStudentEntity.class, ConvGradStudent.class);
-        modelMapper.typeMap(ConvGradStudent.class, ConvGradStudentEntity.class);
-
-        modelMapper.typeMap(GradCourseRestrictionEntity.class, GradCourseRestriction.class);
-        modelMapper.typeMap(GradCourseRestriction.class, GradCourseRestrictionEntity.class);
-
         return modelMapper;
     }
 }

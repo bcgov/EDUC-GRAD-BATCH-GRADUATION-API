@@ -1,12 +1,12 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
+import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmResponse;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ConversionError;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
@@ -29,7 +29,7 @@ public class GradAlgorithmService {
 			AlgorithmResponse algorithmResponse = restUtils.runGradAlgorithm(item.getStudentID(), accessToken);
 			return algorithmResponse.getGraduationStatus();
 		}catch(Exception e) {
-			ConversionError error = new ConversionError();
+			ProcessError error = new ProcessError();
 			error.setPen(item.getPen());
 			error.setReason("Unexpected Exception is occurred: " + e.getLocalizedMessage());
 			summary.getErrors().add(error);

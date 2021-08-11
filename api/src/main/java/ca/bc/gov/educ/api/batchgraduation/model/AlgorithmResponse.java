@@ -11,5 +11,5 @@ import lombok.Data;
 public class AlgorithmResponse {
 
     private GraduationStatus graduationStatus;
-    private List<GradStudentSpecialProgram> specialGraduationStatus;				
+    private List<StudentOptionalProgram> specialGraduationStatus;
 }

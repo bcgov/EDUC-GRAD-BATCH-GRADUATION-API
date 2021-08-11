@@ -2,8 +2,8 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmResponse;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ConversionError;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +65,7 @@ public class GradAlgorithmServiceTest {
         var result =  gradAlgorithmService.processStudent(item, summary);
         assertThat(result).isNull();
         assertThat(summary.getErrors().isEmpty()).isFalse();
-        ConversionError error = summary.getErrors().get(0);
+        ProcessError error = summary.getErrors().get(0);
         assertThat(error.getPen()).isEqualTo(item.getPen());
         assertThat(error.getReason().startsWith("Unexpected Exception is occurred:")).isTrue();
     }

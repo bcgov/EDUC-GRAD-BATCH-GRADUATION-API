@@ -23,4 +23,9 @@ public class DateConversionUtils {
     }
     return null;
   }
+
+  public static String formatDate (Date date, String dateFormat) {
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
+    return simpleDateFormat.format(date);
+  }
 }

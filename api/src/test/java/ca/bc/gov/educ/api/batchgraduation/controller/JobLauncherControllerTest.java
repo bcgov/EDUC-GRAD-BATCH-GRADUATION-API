@@ -77,16 +77,4 @@ public class JobLauncherControllerTest {
         assertThat(exceptionIsThrown).isFalse();
 
     }
-
-    @Test
-    public void testLauchDataConversionJob_thenReturnError() {
-        boolean exceptionIsThrown = false;
-        try {
-            jobLauncherController.launchDataConversionJob();
-        } catch (Exception e) {
-            exceptionIsThrown = true;
-        }
-
-        assertThat(exceptionIsThrown).isTrue();
-    }
 }

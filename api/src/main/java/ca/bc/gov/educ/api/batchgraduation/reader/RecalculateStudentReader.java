@@ -43,6 +43,10 @@ public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
     public GraduationStatus read() throws Exception {
         LOGGER.info("Reading the information of the next student");
 
+        if (nxtStudentForProcessing % 10 == 0) {
+            fetchAccessToken();
+        }
+
         if (studentDataIsNotInitialized()) {
         	studentList = fetchStudentDataFromAPI();
         	summaryDTO.setReadCount(studentList.size());

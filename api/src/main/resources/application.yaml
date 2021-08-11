@@ -4,7 +4,6 @@ security:
     resource:
       jwt:
         key-value: ${KEYCLOAK_PUBLIC_KEY}
-
 #DB Properties
 spring:
   jmx:
@@ -15,9 +14,9 @@ spring:
       maximum-pool-size: ${MAXIMUM_POOL_SIZE}
       connection-timeout: ${CONNECTION_TIMEOUT}
       max-lifetime: ${MAX_LIFETIME}
-    url: ${JDBC_URL}
-    username: ${ORACLE_USERNAME}
-    password: ${ORACLE_PASSWORD}
+    url: ${CONNECTION_STRING}
+    username: ${USERNAME}
+    password: ${PASSWORD}
     driver-class: oracle.jdbc.driver.OracleDriver
   jpa:
     show-sql: true
@@ -33,10 +32,19 @@ spring:
     user:
       name: ${API_USERNAME}
       password: ${API_PASSWORD}
-  batch: 
-   initialize-schema: NEVER
-   job: 
-    enabled: false
+  batch:
+    initialize-schema: NEVER
+    job:
+      enabled: false
+  flyway:
+    enabled: ${ENABLE_FLYWAY}
+    baseline-on-migrate: false
+    table: FLYWAY_SCHEMA_HISTORY
+    url: ${CONNECTION_STRING}
+    schema: ${USERNAME}
+    user: ${USERNAME}
+    password: ${PASSWORD}
+    location: classpath:db/migration
 
 #Logging properties
 logging:
@@ -71,26 +79,18 @@ server:
       io: 16
   #port: ${HTTP_PORT}
 
-authorization: 
- user: ${GRAD_CLIENT_NAME}
- password: ${GRAD_CLIENT_SECRET}
+authorization:
+  user: ${GRAD_CLIENT_NAME}
+  password: ${GRAD_CLIENT_SECRET}
 
 #Endpoints
-endpoint: 
- grad-graduation-status-api: 
-  student-for-grad-list: 
-   url: https://educ-grad-graduation-status-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/gradstatus/recalculate
- grad-graduation-api: 
-  url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s
- keycloack: 
-  getToken: https://soam-tools.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/token
- graduation-status-api: 
-  update-grad-status: https://educ-grad-graduation-status-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/gradstatus/studentid/%s
-  read-grad-status:
-      url: https://educ-grad-graduation-status-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/gradstatus/studentid/%s
- pen-student-api:
-  by-pen:
-   url: https://student-api-75e61b-tools.apps.silver.devops.gov.bc.ca/api/v1/student?pen=%s
- grad-program-management-api:
-   special-program:
-     url: https://educ-grad-program-management-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/programmanagement/specialprograms
+endpoint:
+  keycloak:
+    getToken: https://soam-tools.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/token
+  grad-graduation-api:
+    url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s
+  grad-student-api:
+    grad-status: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s
+    student-for-grad-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
+    pen-student-by-pen: https://student-api-75e61b-tools.apps.silver.devops.gov.bc.ca/api/v1/student?pen=%s
+

@@ -1,9 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
 
-import ca.bc.gov.educ.api.batchgraduation.model.GradSpecialProgram;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.model.Student;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import lombok.val;
 import org.codehaus.jackson.JsonProcessingException;
@@ -112,22 +110,46 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetSpecialProgram_givenValues_returnsGradSpecialProgram_with_APICallSuccess() throws JsonProcessingException {
-        final UUID specialProgramID = UUID.randomUUID();
-        final GradSpecialProgram specialProgram = new GradSpecialProgram();
-        specialProgram.setId(specialProgramID);
-        specialProgram.setProgramCode("abc");
-        specialProgram.setSpecialProgramCode("def");
+    public void testGetGraduationStatus_givenValues_returnsGraduationStatus_with_APICallSuccess() throws JsonProcessingException {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+
+        GraduationStatus graduationStatus = new GraduationStatus();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(eq(this.constants.getGradProgramManagementUrl()), any(Function.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(eq(this.constants.getGradStudentApiGradStatusUrl()), any(Function.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
-        when(this.responseMock.bodyToMono(GradSpecialProgram.class)).thenReturn(Mono.just(specialProgram));
-        val result = this.restUtils.getGradSpecialProgram("abc", "def", "123");
+        when(this.responseMock.bodyToMono(GraduationStatus.class)).thenReturn(Mono.just(graduationStatus));
+
+        var result = this.restUtils.getGraduationStatus(pen, "123");
         assertThat(result).isNotNull();
-        assertThat(result.getProgramCode()).isEqualTo("abc");
-        assertThat(result.getSpecialProgramCode()).isEqualTo("def");
+        assertThat(result.getPen()).isEqualTo(pen);
     }
+
+    @Test
+    public void testSaveGraduationStatus_givenValues_returnsGraduationStatus_with_APICallSuccess() throws JsonProcessingException {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+
+        GraduationStatus graduationStatus = new GraduationStatus();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(eq(constants.getGradStudentApiGradStatusUrl()), any(Function.class))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStatus.class)).thenReturn(Mono.just(graduationStatus));
+
+        var result = this.restUtils.saveGraduationStatus(graduationStatus, "123");
+        assertThat(result).isNotNull();
+        assertThat(result.getPen()).isEqualTo(pen);
+    }
+
 }
