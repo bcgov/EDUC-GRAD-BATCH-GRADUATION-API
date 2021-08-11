@@ -14,18 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import ca.bc.gov.educ.api.batchgraduation.listener.DataConversionJobCompletionNotificationListener;
 import ca.bc.gov.educ.api.batchgraduation.listener.JobCompletionNotificationListener;
-import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
-import ca.bc.gov.educ.api.batchgraduation.processor.DataConversionProcessor;
 import ca.bc.gov.educ.api.batchgraduation.processor.RunGradAlgorithmProcessor;
-import ca.bc.gov.educ.api.batchgraduation.reader.DataConversionStudentReader;
 import ca.bc.gov.educ.api.batchgraduation.reader.RecalculateStudentReader;
-import ca.bc.gov.educ.api.batchgraduation.service.DataConversionService;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.writer.BatchPerformanceWriter;
-import ca.bc.gov.educ.api.batchgraduation.writer.DataConversionStudentWriter;
 
 @Configuration
 public class BatchJobConfig {
@@ -77,51 +71,6 @@ public class BatchJobConfig {
                 .end()
                 .build();
     }
-
-  @Bean
-  public ItemReader<ConvGradStudent> dataConversionReader(DataConversionService dataConversionService, RestUtils restUtils) {
-    return new DataConversionStudentReader(dataConversionService, restUtils);
-  }
-
-  @Bean
-  public ItemWriter<ConvGradStudent> dataConversionWriter() {
-    return new DataConversionStudentWriter();
-  }
-
-  @Bean
-  public ItemProcessor<ConvGradStudent,ConvGradStudent> dataConversionProcessor() {
-    return new DataConversionProcessor();
-  }
-
-  /**
-   * Creates a bean that represents the only step of our batch job.
-   */
-  @Bean
-  public Step dataConversionJobStep(ItemReader<ConvGradStudent> dataConversionReader,
-                                    ItemProcessor<? super ConvGradStudent, ? extends ConvGradStudent> dataConversionProcessor,
-                                    ItemWriter<ConvGradStudent> dataConversionWriter,
-                                    StepBuilderFactory stepBuilderFactory) {
-    return stepBuilderFactory.get("dataConversionJobStep")
-            .<ConvGradStudent, ConvGradStudent>chunk(1)
-            .reader(dataConversionReader)
-            .processor(dataConversionProcessor)
-            .writer(dataConversionWriter)
-            .build();
-  }
-
-  /**
-   * Creates a bean that represents our batch job.
-   */
-  @Bean(name="dataConversionJob")
-  public Job dataConversionBatchJob(Step dataConversionJobStep, DataConversionJobCompletionNotificationListener listener,
-                                    JobBuilderFactory jobBuilderFactory) {
-    return jobBuilderFactory.get("dataConversionBatchJob")
-            .incrementer(new RunIdIncrementer())
-            .listener(listener)
-            .flow(dataConversionJobStep)
-            .end()
-            .build();
-  }
 
   @Bean
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {

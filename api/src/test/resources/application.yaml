@@ -61,7 +61,7 @@ authorization:
 
 #Endpoints
 endpoint:
-  keycloack:
+  keycloak:
     getToken: https://soam-tools.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/token
   grad-graduation-api:
     url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s
@@ -69,11 +69,3 @@ endpoint:
     grad-status: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s
     student-for-grad-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
     pen-student-by-pen: https://student-api-75e61b-tools.apps.silver.devops.gov.bc.ca/api/v1/student?pen=%s
-    student-optional-program:  https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/specialprogram
-    update-student-optional-program: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/gradstudent/specialprogram
-  grad-program-api:
-    optional-program: https://educ-grad-program-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/program/optionalprograms
-  grad-course-api:
-    course-restriction: https://educ-grad-course-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/course/course-restriction
-    save-course-restriction: https://educ-grad-course-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/course/save-course-restriction
-    check-french-immersion-course: https://educ-grad-course-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/course/check-french-immersion-course

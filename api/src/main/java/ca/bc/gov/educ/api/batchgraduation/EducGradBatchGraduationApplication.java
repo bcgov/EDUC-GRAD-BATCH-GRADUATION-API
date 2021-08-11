@@ -21,13 +21,6 @@ public class EducGradBatchGraduationApplication {
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
-
-//        modelMapper.typeMap(ConvGradStudentEntity.class, ConvGradStudent.class);
-//        modelMapper.typeMap(ConvGradStudent.class, ConvGradStudentEntity.class);
-//
-//        modelMapper.typeMap(GradCourseRestrictionEntity.class, GradCourseRestriction.class);
-//        modelMapper.typeMap(GradCourseRestriction.class, GradCourseRestrictionEntity.class);
-
         return modelMapper;
     }
 }

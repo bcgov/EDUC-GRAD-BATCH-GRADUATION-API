@@ -1,10 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
-import ca.bc.gov.educ.api.batchgraduation.model.ConvGradStudent;
-import ca.bc.gov.educ.api.batchgraduation.repository.TraxStudentRepository;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +15,11 @@ import java.util.Objects;
 @Profile("test")
 public class GradBatchTestUtils {
 
-    public List<ConvGradStudent> createConvGradStudents(final String jsonFileName) throws IOException {
+    public List<GraduationStatus> createConvGradStudents(final String jsonFileName) throws IOException {
         final File file = new File(
                 Objects.requireNonNull(GradBatchTestUtils.class.getClassLoader().getResource(jsonFileName)).getFile()
         );
-        final List<ConvGradStudent> models = new ObjectMapper().readValue(file, new TypeReference<>() {
+        final List<GraduationStatus> models = new ObjectMapper().readValue(file, new TypeReference<>() {
         });
         return models;
     }

@@ -32,7 +32,7 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${authorization.password}")
     private String password;
 
-    @Value("${endpoint.keycloack.getToken}")
+    @Value("${endpoint.keycloak.getToken}")
     private String tokenUrl;
 
     @Value("${endpoint.grad-graduation-api.url}")
@@ -44,24 +44,7 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-student-api.grad-status}")
     private String gradStudentApiGradStatusUrl;
 
-    @Value("${endpoint.grad-student-api.student-optional-program}")
-    private String gradStudentApiStudentOptionalProgramUrl;
-
-    @Value("${endpoint.grad-student-api.update-student-optional-program}")
-    private String gradStudentApiUpdateStudentOptionalProgramUrl;
-
-    @Value("${endpoint.grad-program-api.optional-program}")
-    private String gradProgramApiOptionalProgramUrl;
-
     @Value("${endpoint.grad-student-api.student-for-grad-list}")
     private String gradStudentApiStudentForGradListUrl;
 
-    @Value("${endpoint.grad-course-api.course-restriction}")
-    private String courseRestrictionUrl;
-
-    @Value("${endpoint.grad-course-api.save-course-restriction}")
-    private String saveCourseRestrictionUrl;
-
-    @Value("${endpoint.grad-course-api.check-french-immersion-course}")
-    private String checkFrenchImmersionCourseUrl;
 }
