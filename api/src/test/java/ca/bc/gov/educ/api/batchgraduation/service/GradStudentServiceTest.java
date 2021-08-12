@@ -49,7 +49,6 @@ public class GradStudentServiceTest {
         graduationStatus.setPen(pen);
 
         when(this.restUtils.getStudentsByPen(eq(pen), eq("accessToken"))).thenReturn(Arrays.asList(student));
-        when(this.restUtils.getGraduationStatus(eq(pen), eq("accessToken"))).thenReturn(graduationStatus);
         when(this.restUtils.saveGraduationStatus(eq(graduationStatus), any(String.class))).thenReturn(graduationStatus);
 
         gradStudentService.getStudentByPenFromStudentAPI(Arrays.asList(loadStudentData),"accessToken");

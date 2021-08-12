@@ -110,27 +110,6 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetGraduationStatus_givenValues_returnsGraduationStatus_with_APICallSuccess() throws JsonProcessingException {
-        final UUID studentID = UUID.randomUUID();
-        final String pen = "123456789";
-
-        GraduationStatus graduationStatus = new GraduationStatus();
-        graduationStatus.setStudentID(studentID);
-        graduationStatus.setPen(pen);
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(eq(this.constants.getGradStudentApiGradStatusUrl()), any(Function.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-
-        when(this.responseMock.bodyToMono(GraduationStatus.class)).thenReturn(Mono.just(graduationStatus));
-
-        var result = this.restUtils.getGraduationStatus(pen, "123");
-        assertThat(result).isNotNull();
-        assertThat(result.getPen()).isEqualTo(pen);
-    }
-
-    @Test
     public void testSaveGraduationStatus_givenValues_returnsGraduationStatus_with_APICallSuccess() throws JsonProcessingException {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
