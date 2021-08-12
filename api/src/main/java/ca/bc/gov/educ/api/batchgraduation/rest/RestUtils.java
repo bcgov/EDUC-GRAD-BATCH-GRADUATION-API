@@ -73,7 +73,7 @@ public class RestUtils {
 
     public GraduationStatus saveGraduationStatus(GraduationStatus graduationStatus, String accessToken) {
         return this.webClient.post()
-                .uri(constants.getGradStudentApiGradStatusUrl(), uri -> uri.path("/{studentID}").build(graduationStatus.getStudentID()))
+                .uri(String.format(constants.getGradStudentApiGradStatusUrl(),graduationStatus.getStudentID()))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .body(BodyInserters.fromValue(graduationStatus))
                 .retrieve().bodyToMono(GraduationStatus.class).block();
