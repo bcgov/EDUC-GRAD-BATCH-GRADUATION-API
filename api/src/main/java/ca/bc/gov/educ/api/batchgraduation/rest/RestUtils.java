@@ -70,12 +70,6 @@ public class RestUtils {
     }
 
     // EDUC-GRAD-STUDENT-API ========================================
-    public GraduationStatus getGraduationStatus(String pen, String accessToken) {
-        return this.webClient.get()
-                .uri(constants.getGradStudentApiGradStatusUrl(), uri -> uri.path("/pen/{pen}").build(pen))
-                .headers(h -> h.setBearerAuth(accessToken))
-                .retrieve().bodyToMono(GraduationStatus.class).block();
-    }
 
     public GraduationStatus saveGraduationStatus(GraduationStatus graduationStatus, String accessToken) {
         return this.webClient.post()
