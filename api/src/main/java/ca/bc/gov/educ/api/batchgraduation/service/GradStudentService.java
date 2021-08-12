@@ -26,19 +26,13 @@ public class GradStudentService {
     	loadStudentData.forEach(student -> {
         	List<Student> stuDataList = restUtils.getStudentsByPen(student.getPen(), accessToken);
         	stuDataList.forEach(st-> {
-				GraduationStatus gradStu = restUtils.getGraduationStatus(student.getPen(), accessToken);
-    			if(gradStu != null && gradStu.getStudentID() != null) {
-	    			gradStu.setPen(student.getPen());
+				GraduationStatus gradStu = new GraduationStatus();
 					gradStu.setProgram(student.getProgramCode());
-					gradStu.setGpa(student.getGpa());
-					gradStu.setHonoursStanding(student.getHonoursStanding());
-					gradStu.setProgramCompletionDate(student.getProgramCompletionDate());
 					gradStu.setSchoolOfRecord(student.getSchool());
 					gradStu.setStudentGrade(student.getStudentGrade());
 					gradStu.setStudentStatus(student.getStudentStatus());
 					gradStu.setStudentID(UUID.fromString(st.getStudentID()));
-					restUtils.saveGraduationStatus(gradStu, accessToken);
-    			}
+					restUtils.saveGraduationStatus(gradStu, accessToken);    			
     		});
     	});
     	
