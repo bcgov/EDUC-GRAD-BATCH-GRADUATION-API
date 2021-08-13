@@ -2,7 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmResponse;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class GradAlgorithmServiceTest {
 
     @Test
     public void testProcessStudent() {
-        GraduationStatus item = new GraduationStatus();
+        GraduationStudentRecord item = new GraduationStudentRecord();
         item.setStudentID(UUID.randomUUID());
         item.setPen("123456789");
 
@@ -51,7 +51,7 @@ public class GradAlgorithmServiceTest {
 
     @Test
     public void testProcessStudent_whenExceptionOccurs_thenReturnNullWithErrorsInSummary() {
-        GraduationStatus item = new GraduationStatus();
+        GraduationStudentRecord item = new GraduationStudentRecord();
         item.setStudentID(UUID.randomUUID());
         item.setPen("123456789");
 

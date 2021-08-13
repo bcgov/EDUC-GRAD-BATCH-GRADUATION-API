@@ -10,6 +10,6 @@ import lombok.Data;
 @Component
 public class AlgorithmResponse {
 
-    private GraduationStatus graduationStatus;
+    private GraduationStudentRecord graduationStatus;
     private List<StudentOptionalProgram> specialGraduationStatus;
 }

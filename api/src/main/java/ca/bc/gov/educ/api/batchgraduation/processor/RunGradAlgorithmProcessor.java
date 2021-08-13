@@ -8,11 +8,11 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.service.GradAlgorithmService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 
-public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStatus,GraduationStatus> {
+public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> {
 
 	@Autowired
 	EducGradBatchGraduationApiConstants constants;
@@ -30,7 +30,7 @@ public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStatus
 	}
     
 	@Override
-	public GraduationStatus process(GraduationStatus item) throws Exception {
+	public GraduationStudentRecord process(GraduationStudentRecord item) throws Exception {
 		return gradAlgorithmService.processStudent(item, summaryDTO);
 		
 	}
