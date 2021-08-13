@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import ca.bc.gov.educ.api.batchgraduation.listener.JobCompletionNotificationListener;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.processor.RunGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.reader.RecalculateStudentReader;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -28,17 +28,17 @@ public class BatchJobConfig {
 	JobRegistry jobRegistry;
 	  
     @Bean
-    public ItemReader<GraduationStatus> itemReader(RestUtils restUtils) {
+    public ItemReader<GraduationStudentRecord> itemReader(RestUtils restUtils) {
         return new RecalculateStudentReader(restUtils);
     }
 
     @Bean
-    public ItemWriter<GraduationStatus> itemWriter() {
+    public ItemWriter<GraduationStudentRecord> itemWriter() {
         return new BatchPerformanceWriter();
     }
     
     @Bean
-	public ItemProcessor<GraduationStatus,GraduationStatus> itemProcessor() {
+	public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessor() {
 		return new RunGradAlgorithmProcessor();
 	}
 
@@ -46,12 +46,12 @@ public class BatchJobConfig {
      * Creates a bean that represents the only step of our batch job.
      */
     @Bean
-    public Step graduationJobStep(ItemReader<GraduationStatus> itemReader,
-    						   org.springframework.batch.item.ItemProcessor<? super GraduationStatus, ? extends GraduationStatus> itemProcessor,
-                               ItemWriter<GraduationStatus> itemWriter,
+    public Step graduationJobStep(ItemReader<GraduationStudentRecord> itemReader,
+    						   org.springframework.batch.item.ItemProcessor<? super GraduationStudentRecord, ? extends GraduationStudentRecord> itemProcessor,
+                               ItemWriter<GraduationStudentRecord> itemWriter,
                                StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("graduationJobStep")
-                .<GraduationStatus, GraduationStatus>chunk(1)
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
                 .reader(itemReader)
                 .processor(itemProcessor)
                 .writer(itemWriter)

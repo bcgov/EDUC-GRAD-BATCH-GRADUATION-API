@@ -11,11 +11,11 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
-public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
+public class RecalculateStudentReader implements ItemReader<GraduationStudentRecord> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecalculateStudentReader.class);
     
@@ -24,7 +24,7 @@ public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
     private AlgorithmSummaryDTO summaryDTO;
 
     private int nxtStudentForProcessing;
-    private List<GraduationStatus> studentList;
+    private List<GraduationStudentRecord> studentList;
 
     public RecalculateStudentReader(RestUtils restUtils) {
         nxtStudentForProcessing = 0;
@@ -40,7 +40,7 @@ public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
     }
 
     @Override
-    public GraduationStatus read() throws Exception {
+    public GraduationStudentRecord read() throws Exception {
         LOGGER.info("Reading the information of the next student");
 
         if (nxtStudentForProcessing % 10 == 0) {
@@ -52,7 +52,7 @@ public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
         	summaryDTO.setReadCount(studentList.size());
         }
 
-        GraduationStatus nextStudent = null;
+        GraduationStudentRecord nextStudent = null;
         
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
@@ -70,7 +70,7 @@ public class RecalculateStudentReader implements ItemReader<GraduationStatus> {
         return this.studentList == null;
     }
 
-    private List<GraduationStatus> fetchStudentDataFromAPI() {
+    private List<GraduationStudentRecord> fetchStudentDataFromAPI() {
         LOGGER.info("Fetching Student List that need Processing");
         fetchAccessToken();			
 		return restUtils.getStudentsForAlgorithm(summaryDTO.getAccessToken());
