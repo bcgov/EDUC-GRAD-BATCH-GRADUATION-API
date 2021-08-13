@@ -5,12 +5,12 @@ import java.util.UUID;
 
 import javax.transaction.Transactional;
 
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.springframework.stereotype.Service;
 
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.LoadStudentData;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
 @Service
 public class GradStudentService {
@@ -26,13 +26,14 @@ public class GradStudentService {
     	loadStudentData.forEach(student -> {
         	List<Student> stuDataList = restUtils.getStudentsByPen(student.getPen(), accessToken);
         	stuDataList.forEach(st-> {
-				GraduationStatus gradStu = new GraduationStatus();
-					gradStu.setProgram(student.getProgramCode());
-					gradStu.setSchoolOfRecord(student.getSchool());
-					gradStu.setStudentGrade(student.getStudentGrade());
-					gradStu.setStudentStatus(student.getStudentStatus());
-					gradStu.setStudentID(UUID.fromString(st.getStudentID()));
-					restUtils.saveGraduationStatus(gradStu, accessToken);    			
+        		GraduationStudentRecord gradStu = new GraduationStudentRecord();
+				gradStu.setProgram(student.getProgramCode());
+				gradStu.setSchoolOfRecord(student.getSchool());
+				gradStu.setStudentGrade(student.getStudentGrade());
+				gradStu.setRecalculateGradStatus("Y");
+				gradStu.setStudentStatus(student.getStudentStatus());
+				gradStu.setStudentID(UUID.fromString(st.getStudentID()));
+				restUtils.saveGraduationStudentRecord(gradStu, accessToken);    			
     		});
     	});
     	

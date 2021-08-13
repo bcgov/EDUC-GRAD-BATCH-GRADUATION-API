@@ -11,9 +11,9 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 
-public class BatchPerformanceWriter implements ItemWriter<GraduationStatus> {
+public class BatchPerformanceWriter implements ItemWriter<GraduationStudentRecord> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchPerformanceWriter.class);
     
@@ -27,10 +27,10 @@ public class BatchPerformanceWriter implements ItemWriter<GraduationStatus> {
     }
     
     @Override
-    public void write(List<? extends GraduationStatus> list) throws Exception {
+    public void write(List<? extends GraduationStudentRecord> list) throws Exception {
         LOGGER.info("Recording Algorithm Processed Data");
         if(!list.isEmpty()) {
-	        GraduationStatus gradStatus = list.get(0);
+        	GraduationStudentRecord gradStatus = list.get(0);
 	        summaryDTO.increment(gradStatus.getProgram());
 	        LOGGER.info("Processed student[{}] - PEN: {} in total {}", summaryDTO.getProcessedCount(), gradStatus.getPen(), summaryDTO.getReadCount());
             LOGGER.info("-------------------------------------------------------");

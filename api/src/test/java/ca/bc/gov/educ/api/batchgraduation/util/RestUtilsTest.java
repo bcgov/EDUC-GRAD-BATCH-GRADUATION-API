@@ -26,7 +26,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -115,7 +115,7 @@ public class RestUtilsTest {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
 
-        GraduationStatus graduationStatus = new GraduationStatus();
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
         graduationStatus.setStudentID(studentID);
         graduationStatus.setPen(pen);
 
@@ -125,9 +125,9 @@ public class RestUtilsTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(GraduationStatus.class)).thenReturn(Mono.just(graduationStatus));
+        when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(graduationStatus));
 
-        var result = this.restUtils.saveGraduationStatus(graduationStatus, "123");
+        var result = this.restUtils.saveGraduationStudentRecord(graduationStatus, "123");
         assertThat(result).isNotNull();
         assertThat(result.getPen()).isEqualTo(pen);
     }

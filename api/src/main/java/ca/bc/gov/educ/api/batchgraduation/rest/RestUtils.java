@@ -1,8 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.rest;
 
-import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
+import java.util.List;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -13,8 +13,12 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
-import java.util.UUID;
+import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmResponse;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
+import ca.bc.gov.educ.api.batchgraduation.model.Student;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 
 @Component
 public class RestUtils {
@@ -60,8 +64,8 @@ public class RestUtils {
                 .retrieve().bodyToMono(AlgorithmResponse.class).block();
     }
     
-    public List<GraduationStatus> getStudentsForAlgorithm(String accessToken) {
-        final ParameterizedTypeReference<List<GraduationStatus>> responseType = new ParameterizedTypeReference<>() {
+    public List<GraduationStudentRecord> getStudentsForAlgorithm(String accessToken) {
+        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.get()
                 .uri(constants.getGradStudentApiStudentForGradListUrl())
@@ -71,12 +75,12 @@ public class RestUtils {
 
     // EDUC-GRAD-STUDENT-API ========================================
 
-    public GraduationStatus saveGraduationStatus(GraduationStatus graduationStatus, String accessToken) {
+    public GraduationStudentRecord saveGraduationStudentRecord(GraduationStudentRecord graduationStudentRecord, String accessToken) {
         return this.webClient.post()
-                .uri(String.format(constants.getGradStudentApiGradStatusUrl(),graduationStatus.getStudentID()))
+                .uri(String.format(constants.getGradStudentApiGradStatusUrl(),graduationStudentRecord.getStudentID()))
                 .headers(h -> h.setBearerAuth(accessToken))
-                .body(BodyInserters.fromValue(graduationStatus))
-                .retrieve().bodyToMono(GraduationStatus.class).block();
+                .body(BodyInserters.fromValue(graduationStudentRecord))
+                .retrieve().bodyToMono(GraduationStudentRecord.class).block();
     }
 
 }

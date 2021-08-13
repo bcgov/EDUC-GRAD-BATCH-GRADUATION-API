@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.LoadStudentData;
 import ca.bc.gov.educ.api.batchgraduation.model.Student;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -44,15 +44,15 @@ public class GradStudentServiceTest {
         student.setPen(pen);
         student.setStudentID(studentID.toString());
 
-        GraduationStatus graduationStatus = new GraduationStatus();
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
         graduationStatus.setStudentID(studentID);
         graduationStatus.setPen(pen);
 
         when(this.restUtils.getStudentsByPen(eq(pen), eq("accessToken"))).thenReturn(Arrays.asList(student));
-        when(this.restUtils.saveGraduationStatus(eq(graduationStatus), any(String.class))).thenReturn(graduationStatus);
+        when(this.restUtils.saveGraduationStudentRecord(eq(graduationStatus), any(String.class))).thenReturn(graduationStatus);
 
         gradStudentService.getStudentByPenFromStudentAPI(Arrays.asList(loadStudentData),"accessToken");
-        Mockito.verify(this.restUtils).saveGraduationStatus(any(GraduationStatus.class), any(String.class));
+        Mockito.verify(this.restUtils).saveGraduationStudentRecord(any(GraduationStudentRecord.class), any(String.class));
     }
 
 }
