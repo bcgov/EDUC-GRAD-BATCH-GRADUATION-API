@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class ProcessError {
-  private String pen;
+  private String studentID;
   private String reason;
 }
