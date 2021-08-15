@@ -22,7 +22,7 @@ public class GradAlgorithmService {
 	}
 
 	public GraduationStudentRecord processStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
-		LOGGER.info(" Processing  **** PEN: ****" + item.getPen().substring(5));
+		LOGGER.info(" Processing  **** STUDENT ID: ****" + item.getStudentID().toString().substring(5));
 		summary.setProcessedCount(summary.getProcessedCount() + 1L);
 		try {
 			String accessToken = summary.getAccessToken();
@@ -30,7 +30,7 @@ public class GradAlgorithmService {
 			return algorithmResponse.getGraduationStatus();
 		}catch(Exception e) {
 			ProcessError error = new ProcessError();
-			error.setPen(item.getPen());
+			error.setStudentID(item.getStudentID().toString());
 			error.setReason("Unexpected Exception is occurred: " + e.getLocalizedMessage());
 			summary.getErrors().add(error);
 			summary.setProcessedCount(summary.getProcessedCount() - 1L);

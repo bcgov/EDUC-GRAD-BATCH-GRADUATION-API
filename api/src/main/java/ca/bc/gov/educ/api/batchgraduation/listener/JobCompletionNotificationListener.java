@@ -22,7 +22,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("Data Conversion Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
+	    	LOGGER.info("Grad Algorithm Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
 
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
@@ -32,7 +32,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info(" Errors:		   {}", summaryDTO.getErrors().size());
 			summaryDTO.getErrors().forEach(e ->
-				LOGGER.info("  Pen: {}, Reason: {}", e.getPen(), e.getReason())
+				LOGGER.info("  Pen: {}, Reason: {}", e.getStudentID(), e.getReason())
 			);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
