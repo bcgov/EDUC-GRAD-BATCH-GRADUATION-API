@@ -32,7 +32,7 @@ public class BatchPerformanceWriter implements ItemWriter<GraduationStudentRecor
         if(!list.isEmpty()) {
         	GraduationStudentRecord gradStatus = list.get(0);
 	        summaryDTO.increment(gradStatus.getProgram());
-	        LOGGER.info("Processed student[{}] - PEN: {} in total {}", summaryDTO.getProcessedCount(), gradStatus.getPen(), summaryDTO.getReadCount());
+	        LOGGER.info("Processed student[{}] - Student ID: {} in total {}", summaryDTO.getProcessedCount(), gradStatus.getStudentID(), summaryDTO.getReadCount());
             LOGGER.info("-------------------------------------------------------");
         }
     }

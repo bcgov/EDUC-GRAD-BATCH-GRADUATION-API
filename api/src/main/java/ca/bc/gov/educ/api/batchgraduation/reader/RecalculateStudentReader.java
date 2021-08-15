@@ -56,7 +56,7 @@ public class RecalculateStudentReader implements ItemReader<GraduationStudentRec
         
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
-            LOGGER.info("Found student[{}] - PEN: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getPen(), summaryDTO.getReadCount());
+            LOGGER.info("Found student[{}] - Student ID: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getStudentID(), summaryDTO.getReadCount());
             nxtStudentForProcessing++;
         }
         else {
