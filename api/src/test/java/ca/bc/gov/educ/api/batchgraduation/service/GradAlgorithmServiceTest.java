@@ -41,7 +41,7 @@ public class GradAlgorithmServiceTest {
         summary.setAccessToken("123");
 
         AlgorithmResponse response = new AlgorithmResponse();
-        response.setGraduationStatus(item);
+        response.setGraduationStudentRecord(item);
 
         when(restUtils.runGradAlgorithm(eq(item.getStudentID()), eq(summary.getAccessToken()))).thenReturn(response);
         var result =  gradAlgorithmService.processStudent(item, summary);
@@ -59,7 +59,7 @@ public class GradAlgorithmServiceTest {
         summary.setAccessToken("123");
 
         AlgorithmResponse response = new AlgorithmResponse();
-        response.setGraduationStatus(item);
+        response.setGraduationStudentRecord(item);
 
         when(restUtils.runGradAlgorithm(item.getStudentID(), eq(any(String.class)))).thenThrow(new RuntimeException("Unexpected Exception is occurred!"));
         var result =  gradAlgorithmService.processStudent(item, summary);
