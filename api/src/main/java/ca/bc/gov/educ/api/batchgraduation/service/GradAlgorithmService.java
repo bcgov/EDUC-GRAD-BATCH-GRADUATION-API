@@ -27,7 +27,7 @@ public class GradAlgorithmService {
 		try {
 			String accessToken = summary.getAccessToken();
 			AlgorithmResponse algorithmResponse = restUtils.runGradAlgorithm(item.getStudentID(), accessToken);
-			return algorithmResponse.getGraduationStatus();
+			return algorithmResponse.getGraduationStudentRecord();
 		}catch(Exception e) {
 			ProcessError error = new ProcessError();
 			error.setStudentID(item.getStudentID().toString());
