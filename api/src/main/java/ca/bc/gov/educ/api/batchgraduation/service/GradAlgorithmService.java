@@ -11,7 +11,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
 @Service
-public class GradAlgorithmService {
+public class GradAlgorithmService extends GradService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GradAlgorithmService.class);
 	
@@ -26,7 +26,9 @@ public class GradAlgorithmService {
 		summary.setProcessedCount(summary.getProcessedCount() + 1L);
 		try {
 			String accessToken = summary.getAccessToken();
+			start();
 			AlgorithmResponse algorithmResponse = restUtils.runGradAlgorithm(item.getStudentID(), accessToken);
+			end();
 			return algorithmResponse.getGraduationStudentRecord();
 		}catch(Exception e) {
 			ProcessError error = new ProcessError();
