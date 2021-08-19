@@ -13,7 +13,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.Student;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
 @Service
-public class GradStudentService {
+public class GradStudentService extends GradService {
 
 	private final RestUtils restUtils;
 
@@ -23,6 +23,7 @@ public class GradStudentService {
 
     @Transactional
     public void getStudentByPenFromStudentAPI(List<LoadStudentData> loadStudentData, String accessToken) {
+    	start();
     	loadStudentData.forEach(student -> {
         	List<Student> stuDataList = restUtils.getStudentsByPen(student.getPen(), accessToken);
         	stuDataList.forEach(st-> {
@@ -36,6 +37,7 @@ public class GradStudentService {
 				restUtils.saveGraduationStudentRecord(gradStu, accessToken);    			
     		});
     	});
+    	end();
     	
     }
 }
