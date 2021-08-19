@@ -11,6 +11,7 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -30,12 +31,12 @@ public class BatchJobLauncher {
     private final JobLauncher jobLauncher;
 
     @Autowired
-    public BatchJobLauncher(Job job, JobLauncher jobLauncher) {
-        this.job = job;
+    public BatchJobLauncher(Job graduationBatchJob, JobLauncher jobLauncher) {
+        this.job = graduationBatchJob;
         this.jobLauncher = jobLauncher;
     }
 
-    @Scheduled(cron = "* 0 19 * * ?")
+    @Scheduled(cron = "0 0 19 * * *")
     public void runSpringBatchExampleJob() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
         LOGGER.info("Batch Job was started");
         jobLauncher.run(job, newExecution());

@@ -1,37 +1,45 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import java.util.Date;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.stereotype.Component;
 
-import ca.bc.gov.educ.api.batchgraduation.util.GradDataStore;
+import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 
 @Component
 public class JobCompletionNotificationListener extends JobExecutionListenerSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JobCompletionNotificationListener.class);
-
-    @Autowired
-    private GradDataStore gradDataStore;
     
     @Override
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
-	    	LOGGER.info("Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
-	    	ThreadLocal<Map<String, Integer>> map = gradDataStore.getProgramMap();
-	    	map.get().forEach((k,v) -> {
-	    		LOGGER.info("Number of Students Processed from "+k+" progam : "+v);
-	    	});
-	    	LOGGER.info("Number of Students Processed : "+gradDataStore.getSizeOfProcessedItem());
-	    	gradDataStore.clear();
+			LOGGER.info("=======================================================================================");
+	    	LOGGER.info("Grad Algorithm Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
+
+			ExecutionContext jobContext = jobExecution.getExecutionContext();
+			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
+
+			LOGGER.info(" Records read:    {}", summaryDTO.getReadCount());
+			LOGGER.info(" Processed count: {}", summaryDTO.getReadCount());
+			LOGGER.info(" --------------------------------------------------------------------------------------");
+			LOGGER.info(" Errors:		   {}", summaryDTO.getErrors().size());
+			summaryDTO.getErrors().forEach(e ->
+				LOGGER.info("  Pen: {}, Reason: {}", e.getStudentID(), e.getReason())
+			);
+			LOGGER.info(" --------------------------------------------------------------------------------------");
+			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
+				String key = e.getKey();
+				LOGGER.info(" {} count:	{}", key, summaryDTO.getProgramCountMap().get(key));
+			});
+			LOGGER.info("=======================================================================================");
 		}
     }
 }

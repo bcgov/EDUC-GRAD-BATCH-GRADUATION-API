@@ -13,7 +13,16 @@
 
     <properties>
         <sonar.language>java</sonar.language>
-        <sonar.exclusions>src/main/resources/**,src/main/java/ca/bc/gov/educ/api/codes/exception/**,src/main/java/ca/bc/gov/educ/api/codes/model/**
+        <sonar.exclusions>
+            src/main/resources/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/config/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/model/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/entity/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/util/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/listener/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/processor/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/reader/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/writer/**
         </sonar.exclusions>
         <java.version>11</java.version>
         <maven.compiler.version>3.8.0</maven.compiler.version>
@@ -39,6 +48,10 @@
                     <artifactId>spring-boot-starter-tomcat</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
         <dependency>
 		   <groupId>org.springframework.boot</groupId>
@@ -76,12 +89,23 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
-        </dependency>        
+        </dependency>
+        <dependency>
+            <groupId>org.modelmapper</groupId>
+            <artifactId>modelmapper</artifactId>
+            <version>2.3.6</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -89,7 +113,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>runtime</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.oracle.jdbc</groupId>
@@ -100,7 +124,22 @@
             <groupId>org.springframework.security.oauth.boot</groupId>
             <artifactId>spring-security-oauth2-autoconfigure</artifactId>
             <version>2.2.7.RELEASE</version>
-        </dependency>      
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.hamcrest</groupId>
+                    <artifactId>hamcrest-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
   <build>

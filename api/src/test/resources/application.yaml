@@ -1,9 +1,3 @@
-#Keycloak/OAuth properties
-security:
-  oauth2:
-    resource:
-      jwt:
-        key-value: ${KEYCLOAK_PUBLIC_KEY}
 #DB Properties
 spring:
   jmx:
@@ -11,20 +5,18 @@ spring:
   datasource:
     hikari:
       pool-name: batchgraduation-api-cp
-      maximum-pool-size: ${MAXIMUM_POOL_SIZE}
-      connection-timeout: ${CONNECTION_TIMEOUT}
-      max-lifetime: ${MAX_LIFETIME}
-    url: ${CONNECTION_STRING}
-    username: ${USERNAME}
-    password: ${PASSWORD}
-    driver-class: oracle.jdbc.driver.OracleDriver
+      maximum-pool-size: 1
+      connection-timeout: 6000
+      max-lifetime: 600000
+    driver-class: org.h2.Driver
   jpa:
     show-sql: true
-    database-platform: org.hibernate.dialect.Oracle12cDialect
+    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: none
+      ddl-auto: create-drop
+    generate-ddl: true
   mvc:
-    log-request-details: ${SPRING_SHOW_REQUEST_DETAILS}
+    log-request-details: true
   jackson:
     deserialization:
       fail-on-unknown-properties: false
@@ -37,51 +29,35 @@ spring:
     job:
       enabled: false
   flyway:
-    enabled: ${ENABLE_FLYWAY}
+    enabled: false
     baseline-on-migrate: false
     table: FLYWAY_SCHEMA_HISTORY
-    url: ${CONNECTION_STRING}
-    schema: ${USERNAME}
-    user: ${USERNAME}
-    password: ${PASSWORD}
-    location: classpath:db/migration
 
 #Logging properties
 logging:
-  file:
-    max-history: 1
-    clean-history-on-start: true
-    max-size: 20MB
-    name: /logs/app.log
   #pattern:
   #  file: %d | [${HOSTNAME}] | %clr(%5p) | [%t]   | %logger{36}:%L | %msg%n
   #  console: %d | [${HOSTNAME}] | %clr(%5p) | [%t]   | %logger{36}:%L | %msg%n
   level:
+    root: INFO
     ca:
       bc:
         gov:
           educ:
             api:
-              batchgraduation: ${APP_LOG_LEVEL}
+              batchgraduation: INFO
     org:
       springframework:
-        web: ${SPRING_WEB_LOG_LEVEL}
-        security: ${SPRING_SECURITY_LOG_LEVEL}
+        web: INFO
+        security: INFO
         boot:
           autoconfigure:
-            logging: ${SPRING_BOOT_AUTOCONFIG_LOG_LEVEL}
-
-#Local properties
-server:
-  undertow:
-    threads:
-      worker: 128
-      io: 16
-  #port: ${HTTP_PORT}
+            logging: INFO
+      hibernate: ERROR
 
 authorization:
-  user: ${GRAD_CLIENT_NAME}
-  password: ${GRAD_CLIENT_SECRET}
+  user: batch-api
+  password: abc
 
 #Endpoints
 endpoint:
@@ -93,4 +69,3 @@ endpoint:
     grad-status: https://gradstudent-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s
     student-for-grad-list: https://gradstudent-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
     pen-student-by-pen: https://student-api-75e61b-tools.apps.silver.devops.gov.bc.ca/api/v1/student?pen=%s
-

@@ -9,14 +9,15 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStatus;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 
 @Service
 @Scope(proxyMode = ScopedProxyMode.DEFAULT)
 public class GradDataStore {
 
 	private static final ThreadLocal<Map<String,Integer>> mapProgram = ThreadLocal.<Map<String,Integer>>withInitial(() -> {return new HashMap<String,Integer>();});
-	private static final ThreadLocal<List<GraduationStatus>> processedList = ThreadLocal.<List<GraduationStatus>>withInitial(() -> {return new LinkedList<GraduationStatus>();});
+	private static final ThreadLocal<List<GraduationStudentRecord>> processedList = ThreadLocal.<List<GraduationStudentRecord>>withInitial(() -> {return new LinkedList<GraduationStudentRecord>();});
+	private static final ThreadLocal<List<String>> erroredPenList = ThreadLocal.<List<String>>withInitial(() -> {return new LinkedList<String>();});
 	public void addProgram(String program) {
 		 if(mapProgram != null) {
 		        if(mapProgram.get().get(program) != null) {
@@ -29,7 +30,7 @@ public class GradDataStore {
 	        }
 	}
 	
-	public void addProcessedItem(GraduationStatus item) {
+	public void addProcessedItem(GraduationStudentRecord item) {
 		processedList.get().add(item);
 	}
 	
@@ -39,6 +40,14 @@ public class GradDataStore {
 	
 	public ThreadLocal<Map<String, Integer>> getProgramMap() {
 		return mapProgram;
+	}
+	
+	public void addErroredPen(String item) {
+		erroredPenList.get().add(item);
+	}
+	
+	public int getSizeOfErroredPen() {
+		return erroredPenList.get().size();
 	}
 	
     public void clear() {
