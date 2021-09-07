@@ -25,6 +25,8 @@ public class AlgorithmSummaryDTO {
   private Map<String, Long> programCountMap = new HashMap<>() {{
     put("2018-EN", 0L);
     put("2018-PF", 0L);
+    put("2004-EN", 0L);
+    put("2004-PF", 0L);
     put("2004", 0L);
     put("1996", 0L);
     put("1986", 0L);
