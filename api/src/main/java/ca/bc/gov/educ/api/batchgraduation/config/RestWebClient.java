@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
 
 import java.time.Duration;
 
@@ -16,7 +17,7 @@ public class RestWebClient {
     private final HttpClient httpClient;
 
     public RestWebClient() {
-        this.httpClient = HttpClient.create().compress(true)
+        this.httpClient = HttpClient.create(ConnectionProvider.create("batch-api")).compress(true)
                 .resolver(spec -> spec.queryTimeout(Duration.ofMillis(200)).trace("DNS", LogLevel.TRACE));
         this.httpClient.warmup().block();
     }
@@ -26,7 +27,7 @@ public class RestWebClient {
         return WebClient.builder().exchangeStrategies(ExchangeStrategies.builder()
                 .codecs(configurer -> configurer
                         .defaultCodecs()
-                        .maxInMemorySize(20 * 1024 * 1024))
+                        .maxInMemorySize(30 * 1024 * 1024))
                       .build()).build();
     }
 }
