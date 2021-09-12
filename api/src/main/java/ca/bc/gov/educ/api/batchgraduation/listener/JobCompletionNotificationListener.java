@@ -58,17 +58,17 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			
 			batchInfoDetailsRepository.save(ent);
 			
-			LOGGER.info(" Records read:    {}", summaryDTO.getReadCount());
+			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info(" Errors:		   {}", summaryDTO.getErrors().size());
 			summaryDTO.getErrors().forEach(e ->
-				LOGGER.info("  Pen: {}, Reason: {}", e.getStudentID(), e.getReason())
+				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(),e.getDetail())
 			);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
 				String key = e.getKey();
-				LOGGER.info(" {} count:	{}", key, summaryDTO.getProgramCountMap().get(key));
+				LOGGER.info(" {} count   : {}", key, summaryDTO.getProgramCountMap().get(key));
 			});
 			LOGGER.info("=======================================================================================");
 		}else if (jobExecution.getStatus() == BatchStatus.FAILED) {
@@ -103,17 +103,17 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			
 			batchInfoDetailsRepository.save(ent);
 			
-			LOGGER.info(" Records read:    {}", summaryDTO.getReadCount());
+			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
-			LOGGER.info(" Errors:		   {}", summaryDTO.getErrors().size());
+			LOGGER.info(" Errors		 : {}", summaryDTO.getErrors().size());
 			summaryDTO.getErrors().forEach(e ->
-				LOGGER.info("  Pen: {}, Reason: {}", e.getStudentID(), e.getReason())
+				LOGGER.info("  Student ID: {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail())
 			);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
 				String key = e.getKey();
-				LOGGER.info(" {} count:	{}", key, summaryDTO.getProgramCountMap().get(key));
+				LOGGER.info(" {} count   : {}", key, summaryDTO.getProgramCountMap().get(key));
 			});
 			LOGGER.info("=======================================================================================");
 		}
