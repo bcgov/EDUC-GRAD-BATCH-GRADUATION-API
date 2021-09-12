@@ -6,4 +6,5 @@ import lombok.Data;
 public class ProcessError {
   private String studentID;
   private String reason;
+  private String detail;
 }

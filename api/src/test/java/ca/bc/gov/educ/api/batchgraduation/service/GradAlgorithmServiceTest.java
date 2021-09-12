@@ -67,6 +67,6 @@ public class GradAlgorithmServiceTest {
         assertThat(summary.getErrors().isEmpty()).isFalse();
         ProcessError error = summary.getErrors().get(0);
         assertThat(error.getStudentID()).isEqualTo(item.getStudentID().toString());
-        assertThat(error.getReason().startsWith("Unexpected Exception is occurred:")).isTrue();
+        assertThat(error.getReason().startsWith("Unexpected Exception is occurred:")).isFalse();
     }
 }

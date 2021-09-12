@@ -28,12 +28,22 @@ public class GradAlgorithmService extends GradService {
 			String accessToken = summary.getAccessToken();
 			start();
 			AlgorithmResponse algorithmResponse = restUtils.runGradAlgorithm(item.getStudentID(), accessToken);
+			if(algorithmResponse.getException() != null) {
+				ProcessError error = new ProcessError();
+				error.setStudentID(item.getStudentID().toString());
+				error.setReason(algorithmResponse.getException().getExceptionName());
+				error.setDetail(algorithmResponse.getException().getExceptionDetails());
+				summary.getErrors().add(error);
+				summary.setProcessedCount(summary.getProcessedCount() - 1L);
+				return null;
+			}
 			end();
 			return algorithmResponse.getGraduationStudentRecord();
 		}catch(Exception e) {
 			ProcessError error = new ProcessError();
 			error.setStudentID(item.getStudentID().toString());
-			error.setReason("Unexpected Exception is occurred: " + e.getLocalizedMessage());
+			error.setReason("GRAD-GRADUATION-API IS DOWN");
+			error.setDetail("Graduation API is unavialble at this moment");
 			summary.getErrors().add(error);
 			summary.setProcessedCount(summary.getProcessedCount() - 1L);
 			return null;
