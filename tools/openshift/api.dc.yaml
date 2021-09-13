@@ -54,7 +54,7 @@ objects:
                 - configMapRef:
                     name: educ-grad-api-config-map
                 - configMapRef:
-                    name: educ-grad-batch-api-config-map
+                    name: educ-grad-batch-graduation-api-config-map
                 - secretRef:
                     name: api-grad-batch-db-secret
                 - secretRef:
