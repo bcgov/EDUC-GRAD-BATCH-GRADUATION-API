@@ -43,8 +43,11 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.keycloak.getToken}")
     private String tokenUrl;
 
-    @Value("${endpoint.grad-graduation-api.url}")
+    @Value("${endpoint.grad-graduation-api.graduatestudent.url}")
     private String graduationApiUrl;
+    
+    @Value("${endpoint.grad-graduation-api.reportonlyrun.url}")
+    private String graduationApiReportOnlyUrl;
 
     @Value("${endpoint.grad-student-api.pen-student-by-pen}")
     private String penStudentApiByPenUrl;
