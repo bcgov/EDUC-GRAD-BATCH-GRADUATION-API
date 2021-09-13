@@ -86,10 +86,13 @@ authorization:
 #Endpoints
 endpoint:
   keycloak:
-    getToken: https://soam-tools.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/token
+    getToken: ${KEYCLOAK_TOKEN_URL}
   grad-graduation-api:
-    url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/GS
+    graduatestudent: 
+      url: ${GRADUATE_STUDENT}
+    reportonlyrun: 
+      url: ${GRADUATE_STUDENT_REPORT_ONLY}
   grad-student-api:
-    grad-status: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s
-    student-for-grad-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
-    pen-student-by-pen: https://student-api-75e61b-tools.apps.silver.devops.gov.bc.ca/api/v1/student?pen=%s
+    grad-status: ${GRADUATION_STUDENT_RECORD}
+    student-for-grad-list: ${LIST_STUDENTS_FOR_GRADUATION}
+    pen-student-by-pen: ${INFO_FROM_PEN}
