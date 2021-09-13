@@ -2,6 +2,9 @@ package ca.bc.gov.educ.api.batchgraduation.util;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +28,11 @@ public class EducGradBatchGraduationApiConstants {
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     
     public static final String TRAX_DATE_FORMAT = "yyyyMM";
+    
+    public static final String DEFAULT_CREATED_BY = "API_GRAD_BATCH";
+    public static final Date DEFAULT_CREATED_TIMESTAMP = new Date();
+    public static final String DEFAULT_UPDATED_BY = "API_GRAD_BATCH";
+    public static final Date DEFAULT_UPDATED_TIMESTAMP = new Date();
 
     @Value("${authorization.user}")
     private String userName;
