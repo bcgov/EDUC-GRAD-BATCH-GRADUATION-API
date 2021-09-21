@@ -16,6 +16,7 @@ objects:
       name: "${REPO_NAME}-dc"
     spec:
       replicas: 2
+      revisionHistoryLimit: 1
       selector:
         app: "${REPO_NAME}"
         deploymentConfig: "${REPO_NAME}-dc"
@@ -30,7 +31,7 @@ objects:
         spec:
           containers:
             - image: image-registry.openshift-image-registry.svc:5000/77c02f-tools/${REPO_NAME}:latest
-              imagePullPolicy: IfNotPresent
+              imagePullPolicy: Always
               readinessProbe:
                 tcpSocket:
                   port: 8080
