@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
 import java.util.Date;
+import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
@@ -12,10 +13,13 @@ import lombok.EqualsAndHashCode;
 @Component
 public class BatchInfoDetails extends BaseModel{
 
+	private UUID id; 
 	private Integer jobExecutionId; 
 	private Date startTime;
 	private Date endTime;
 	private String expectedStudentsProcessed;
-	private String requiredLevel;
+	private String actualStudentsProcessed;
+	private String failedStudentsProcessed;
 	private String status;
+	private String triggerBy;
 }

@@ -18,6 +18,8 @@ public class EducGradBatchGraduationApiConstants {
     public static final String GRAD_BATCH_API_ROOT_MAPPING = "/api/" + API_VERSION + "/batch";
     public static final String EXECUTE_BATCH_JOB = "/executebatchjob";
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
+    
+    public static final String BATCH_DASHBOARD = "/dashboard";
 
     // Data Conversion
     public static final String EXECUTE_DATA_CONVERSION_BATCH_JOB = "/executeGradStudentDataConversionJob";

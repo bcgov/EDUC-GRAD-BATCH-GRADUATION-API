@@ -72,7 +72,7 @@ public class BatchJobConfig {
                 .build();
     }
 
-  @Bean
+    @Bean
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {
         JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();
         postProcessor.setJobRegistry(jobRegistry);
