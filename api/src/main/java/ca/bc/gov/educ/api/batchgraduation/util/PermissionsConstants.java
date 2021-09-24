@@ -5,4 +5,5 @@ public interface PermissionsConstants {
 	String _SUFFIX = "')";
 
 	String LOAD_STUDENT_IDS = _PREFIX + "LOAD_STUDENT_IDS" + _SUFFIX;
+	String LOAD_DASHBOARD = _PREFIX + "LOAD_BATCH_DASHBOARD" + _SUFFIX;
 }

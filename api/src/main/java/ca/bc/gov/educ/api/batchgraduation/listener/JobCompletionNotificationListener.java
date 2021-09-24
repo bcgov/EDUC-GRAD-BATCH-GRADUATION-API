@@ -3,10 +3,12 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +37,16 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info("=======================================================================================");
 	    	LOGGER.info("Grad Algorithm Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
-
+	    	JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
 			String status = jobExecution.getStatus().toString();
 			Date startTime = jobExecution.getStartTime();
 			Date endTime = jobExecution.getEndTime();
+			String jobTrigger = jobParameters.getString("job");
+			if(StringUtils.isBlank(jobTrigger)) {
+				jobTrigger = "BATCH";
+			}
 			
 			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
 			int failedRecords = summaryDTO.getErrors().size();			
@@ -55,6 +61,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			ent.setStartTime(startTime);
 			ent.setEndTime(endTime);
 			ent.setStatus(status);
+			ent.setTriggerBy(jobTrigger);
 			
 			batchInfoDetailsRepository.save(ent);
 			
