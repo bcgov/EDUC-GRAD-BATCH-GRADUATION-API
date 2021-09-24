@@ -1,13 +1,17 @@
 package ca.bc.gov.educ.api.batchgraduation.entity;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.GenericGenerator;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,6 +23,14 @@ import lombok.EqualsAndHashCode;
 public class BatchInfoDetailsEntity  extends BaseEntity {
    
 	@Id
+	@GeneratedValue(generator = "UUID")
+	@GenericGenerator(
+		name = "UUID",
+		strategy = "org.hibernate.id.UUIDGenerator"
+	)
+	@Column(name = "BATCH_INFO_DETAILS_ID", nullable = false)
+    private UUID id; 
+	
 	@Column(name = "JOB_EXECUTION_ID", nullable = false)
     private Long jobExecutionId; 
 	
@@ -41,4 +53,7 @@ public class BatchInfoDetailsEntity  extends BaseEntity {
 	
 	@Column(name = "STATUS", nullable = true)
     private String status;
+	
+	@Column(name = "TRIGGER_BY",nullable = true)
+	private String triggerBy;
 }

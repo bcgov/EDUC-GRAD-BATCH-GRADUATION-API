@@ -18,7 +18,9 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.web.bind.annotation.*;
 
+import ca.bc.gov.educ.api.batchgraduation.model.GradDashboard;
 import ca.bc.gov.educ.api.batchgraduation.model.LoadStudentData;
+import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradStudentService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
@@ -36,11 +38,13 @@ public class JobLauncherController {
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
     private final GradStudentService gradStudentService;
+    private final GradDashboardService gradDashboardService;
 
-    public JobLauncherController(JobLauncher jobLauncher, JobRegistry jobRegistry, GradStudentService gradStudentService) {
+    public JobLauncherController(JobLauncher jobLauncher, JobRegistry jobRegistry, GradStudentService gradStudentService, GradDashboardService gradDashboardService) {
         this.jobLauncher = jobLauncher;
         this.jobRegistry = jobRegistry;
         this.gradStudentService = gradStudentService;
+        this.gradDashboardService = gradDashboardService;
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_BATCH_JOB)
@@ -48,7 +52,7 @@ public class JobLauncherController {
     	logger.info("Inside Launch Job");
     	JobParametersBuilder builder = new JobParametersBuilder();
     	builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-    	builder.addString(JOB_PARAM, "GraduationBatchJob");
+    	builder.addString(JOB_PARAM, "MANUAL");
     	try {
         jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters());
       } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
@@ -66,6 +70,14 @@ public class JobLauncherController {
     	OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails(); 
     	String accessToken = auth.getTokenValue();
     	gradStudentService.getStudentByPenFromStudentAPI(loadStudentData,accessToken);
+    	
+    }
+    
+    @GetMapping(EducGradBatchGraduationApiConstants.BATCH_DASHBOARD)
+    @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
+    public GradDashboard loadDashboard() {
+    	logger.info("Inside loadDashboard");
+    	return gradDashboardService.getDashboardInfo();
     	
     }
 }
