@@ -29,7 +29,7 @@ public class GradDashboardService extends GradService {
     	start();
     	GradDashboard gradDash = new GradDashboard();
     	List<BatchInfoDetails> infoDetailsList= batchInfoDetailsTransformer.transformToDTO(batchInfoDetailsRepository.findAll());
-    	Collections.sort(infoDetailsList, Comparator.comparing(BatchInfoDetails::getJobExecutionId).reversed());  
+    	Collections.sort(infoDetailsList, Comparator.comparing(BatchInfoDetails::getStartTime).reversed());  
     	if(!infoDetailsList.isEmpty()) {
     		BatchInfoDetails info = infoDetailsList.get(0);
     		gradDash.setLastActualStudentsProcessed(info.getActualStudentsProcessed());
