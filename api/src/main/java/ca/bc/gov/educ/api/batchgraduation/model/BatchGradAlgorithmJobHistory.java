@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Component
-public class BatchInfoDetails extends BaseModel{
+public class BatchGradAlgorithmJobHistory extends BaseModel{
 
 	private UUID id; 
 	private Integer jobExecutionId; 

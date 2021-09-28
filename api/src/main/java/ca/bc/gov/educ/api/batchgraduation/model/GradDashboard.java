@@ -13,7 +13,7 @@ import lombok.EqualsAndHashCode;
 @Component
 public class GradDashboard {
 
-	private List<BatchInfoDetails> batchInfoList;
+	private List<BatchGradAlgorithmJobHistory> batchInfoList;
 	private Integer lastJobExecutionId; 
 	private Date lastJobstartTime;
 	private Date lastJobendTime;
