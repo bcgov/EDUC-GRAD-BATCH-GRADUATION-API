@@ -14,10 +14,10 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchInfoDetailsEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchInfoDetailsRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
 @Component
@@ -26,7 +26,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
     private static final Logger LOGGER = LoggerFactory.getLogger(JobCompletionNotificationListener.class);
     
     @Autowired
-    private BatchInfoDetailsRepository batchInfoDetailsRepository;
+    private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
     
     @Autowired
     private RestUtils restUtils;
@@ -53,7 +53,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();			
 			
-			BatchInfoDetailsEntity ent = new BatchInfoDetailsEntity();
+			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
 			ent.setFailedStudentsProcessed(failedRecords);
@@ -63,7 +63,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			ent.setStatus(status);
 			ent.setTriggerBy(jobTrigger);
 			
-			batchInfoDetailsRepository.save(ent);
+			batchGradAlgorithmJobHistoryRepository.save(ent);
 			
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
@@ -99,7 +99,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();			
 			
-			BatchInfoDetailsEntity ent = new BatchInfoDetailsEntity();
+			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
 			ent.setFailedStudentsProcessed(failedRecords);
@@ -108,7 +108,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			ent.setEndTime(endTime);
 			ent.setStatus(status);
 			
-			batchInfoDetailsRepository.save(ent);
+			batchGradAlgorithmJobHistoryRepository.save(ent);
 			
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
