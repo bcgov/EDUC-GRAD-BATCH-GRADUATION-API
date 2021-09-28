@@ -8,30 +8,30 @@ import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
-import ca.bc.gov.educ.api.batchgraduation.model.BatchInfoDetails;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchGradAlgorithmJobHistory;
 import ca.bc.gov.educ.api.batchgraduation.model.GradDashboard;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchInfoDetailsRepository;
-import ca.bc.gov.educ.api.batchgraduation.transformer.BatchInfoDetailsTransformer;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.transformer.BatchGradAlgorithmJobHistoryTransformer;
 
 @Service
 public class GradDashboardService extends GradService {
 
-	private final BatchInfoDetailsRepository  batchInfoDetailsRepository;
-	private final BatchInfoDetailsTransformer batchInfoDetailsTransformer;
+	private final BatchGradAlgorithmJobHistoryRepository  batchGradAlgorithmJobHistoryRepository;
+	private final BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer;
 
-    public GradDashboardService(BatchInfoDetailsRepository batchInfoDetailsRepository,BatchInfoDetailsTransformer batchInfoDetailsTransformer) {
-    	this.batchInfoDetailsRepository = batchInfoDetailsRepository;
-    	this.batchInfoDetailsTransformer = batchInfoDetailsTransformer;
+    public GradDashboardService(BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository,BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer) {
+    	this.batchGradAlgorithmJobHistoryRepository = batchGradAlgorithmJobHistoryRepository;
+    	this.batchGradAlgorithmJobHistoryTransformer = batchGradAlgorithmJobHistoryTransformer;
 	}
 
     @Transactional
 	public GradDashboard getDashboardInfo() {
     	start();
     	GradDashboard gradDash = new GradDashboard();
-    	List<BatchInfoDetails> infoDetailsList= batchInfoDetailsTransformer.transformToDTO(batchInfoDetailsRepository.findAll());
-    	Collections.sort(infoDetailsList, Comparator.comparing(BatchInfoDetails::getStartTime).reversed());  
+    	List<BatchGradAlgorithmJobHistory> infoDetailsList= batchGradAlgorithmJobHistoryTransformer.transformToDTO(batchGradAlgorithmJobHistoryRepository.findAll());
+    	Collections.sort(infoDetailsList, Comparator.comparing(BatchGradAlgorithmJobHistory::getStartTime).reversed());  
     	if(!infoDetailsList.isEmpty()) {
-    		BatchInfoDetails info = infoDetailsList.get(0);
+    		BatchGradAlgorithmJobHistory info = infoDetailsList.get(0);
     		gradDash.setLastActualStudentsProcessed(info.getActualStudentsProcessed());
     		gradDash.setLastExpectedStudentsProcessed(info.getExpectedStudentsProcessed());
     		gradDash.setLastFailedStudentsProcessed(info.getFailedStudentsProcessed());

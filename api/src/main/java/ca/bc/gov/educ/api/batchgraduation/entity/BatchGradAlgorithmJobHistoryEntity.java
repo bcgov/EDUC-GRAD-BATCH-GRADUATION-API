@@ -18,9 +18,9 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
-@Table(name = "BATCH_INFO_DETAILS")
+@Table(name = "BATCH_GRAD_ALGORITHM_JOB_HISTORY")
 @EqualsAndHashCode(callSuper=false)
-public class BatchInfoDetailsEntity  extends BaseEntity {
+public class BatchGradAlgorithmJobHistoryEntity  extends BaseEntity {
    
 	@Id
 	@GeneratedValue(generator = "UUID")
@@ -28,7 +28,7 @@ public class BatchInfoDetailsEntity  extends BaseEntity {
 		name = "UUID",
 		strategy = "org.hibernate.id.UUIDGenerator"
 	)
-	@Column(name = "BATCH_INFO_DETAILS_ID", nullable = false)
+	@Column(name = "BATCH_GRAD_ALGORITHM_JOB_HISTORY_ID", nullable = false)
     private UUID id; 
 	
 	@Column(name = "JOB_EXECUTION_ID", nullable = false)
@@ -54,6 +54,6 @@ public class BatchInfoDetailsEntity  extends BaseEntity {
 	@Column(name = "STATUS", nullable = true)
     private String status;
 	
-	@Column(name = "TRIGGER_BY",nullable = true)
+	@Column(name = "BATCH_JOB_TRIGGER_CODE",nullable = true)
 	private String triggerBy;
 }
