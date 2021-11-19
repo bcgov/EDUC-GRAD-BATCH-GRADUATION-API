@@ -14,7 +14,7 @@ import java.util.Map;
 public class AlgorithmSummaryDTO {
 
   private String tableName;
-
+  private Long batchId;
   private long readCount = 0L;
   private long processedCount = 0L;
 

@@ -65,9 +65,11 @@ endpoint:
     getToken: https://soam-tools.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/token
   grad-graduation-api:
     graduatestudent:
-      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/GS
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/GS?batchId=%s
     reportonlyrun: 
-      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/FMR
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/FMR?batchId=%s
+    tvrrun:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/REGFM?batchId=%s
   grad-student-api:
     grad-status: https://gradstudent-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s
     student-for-grad-list: https://gradstudent-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
