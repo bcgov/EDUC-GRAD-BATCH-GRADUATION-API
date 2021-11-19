@@ -40,11 +40,12 @@ public class GradAlgorithmServiceTest {
 
         AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
         summary.setAccessToken("123");
+        summary.setBatchId(121L);
 
         AlgorithmResponse response = new AlgorithmResponse();
         response.setGraduationStudentRecord(item);
 
-        when(restUtils.runGradAlgorithm(eq(item.getStudentID()), eq(summary.getAccessToken()),eq(item.getProgramCompletionDate()))).thenReturn(response);
+        when(restUtils.runGradAlgorithm(eq(item.getStudentID()), eq(summary.getAccessToken()),eq(item.getProgramCompletionDate()),eq(summary.getBatchId()))).thenReturn(response);
         var result =  gradAlgorithmService.processStudent(item, summary);
         assertThat(result).isNotNull();
         assertThat(result.getStudentID()).isEqualTo(item.getStudentID());
@@ -58,11 +59,12 @@ public class GradAlgorithmServiceTest {
 
         AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
         summary.setAccessToken("123");
+        summary.setBatchId(123L);
 
         AlgorithmResponse response = new AlgorithmResponse();
         response.setGraduationStudentRecord(item);
 
-        when(restUtils.runGradAlgorithm(item.getStudentID(), eq(any(String.class)),eq(item.getProgramCompletionDate()))).thenThrow(new RuntimeException("Unexpected Exception is occurred!"));
+        when(restUtils.runGradAlgorithm(item.getStudentID(), eq(any(String.class)),eq(item.getProgramCompletionDate()),eq(summary.getBatchId()))).thenThrow(new RuntimeException("Unexpected Exception is occurred!"));
         var result =  gradAlgorithmService.processStudent(item, summary);
         assertThat(result).isNull();
         assertThat(summary.getErrors().isEmpty()).isFalse();
