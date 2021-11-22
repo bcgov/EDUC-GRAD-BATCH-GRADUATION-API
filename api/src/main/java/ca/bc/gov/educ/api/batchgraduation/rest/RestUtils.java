@@ -57,15 +57,15 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
     
-    public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken, String programCompleteDate) {
+    public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken, String programCompleteDate,Long batchId) {
         if(programCompleteDate != null) {
-        	return this.webClient.get()
-            		.uri(String.format(constants.getGraduationApiReportOnlyUrl(), studentID))
+            return this.webClient.get()
+            		.uri(String.format(constants.getGraduationApiReportOnlyUrl(), studentID,batchId))
                     .headers(h -> h.setBearerAuth(accessToken))
                     .retrieve().bodyToMono(AlgorithmResponse.class).block();
         }
     	return this.webClient.get()
-        		.uri(String.format(constants.getGraduationApiUrl(), studentID))
+        		.uri(String.format(constants.getGraduationApiUrl(), studentID,batchId))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(AlgorithmResponse.class).block();
     }

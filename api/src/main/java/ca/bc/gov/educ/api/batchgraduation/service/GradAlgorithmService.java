@@ -27,7 +27,7 @@ public class GradAlgorithmService extends GradService {
 		try {
 			String accessToken = summary.getAccessToken();
 			start();
-			AlgorithmResponse algorithmResponse = restUtils.runGradAlgorithm(item.getStudentID(), accessToken,item.getProgramCompletionDate());
+			AlgorithmResponse algorithmResponse = restUtils.runGradAlgorithm(item.getStudentID(), accessToken,item.getProgramCompletionDate(),summary.getBatchId());
 			if(algorithmResponse.getException() != null) {
 				ProcessError error = new ProcessError();
 				error.setStudentID(item.getStudentID().toString());

@@ -27,6 +27,7 @@ public class RunGradAlgorithmProcessor implements ItemProcessor<GraduationStuden
 		JobExecution jobExecution = stepExecution.getJobExecution();
 		ExecutionContext jobContext = jobExecution.getExecutionContext();
 		summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
+		summaryDTO.setBatchId(jobExecution.getId());
 	}
     
 	@Override
