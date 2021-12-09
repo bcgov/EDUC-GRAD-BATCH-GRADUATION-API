@@ -1,6 +1,6 @@
 # EDUC-GRAD-BATCH-GRADUATION-API
 
-[![img](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
+[![img](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md) &nbsp;
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/bcgov/educ-grad-batch-graduation-api/Build) &nbsp; 
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=educ-grad-batch-graduation-api&metric=bugs)](https://sonarcloud.io/summary/new_code?id=educ-grad-batch-graduation-api) &nbsp;
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=educ-grad-batch-graduation-api&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=educ-grad-batch-graduation-api) &nbsp;
