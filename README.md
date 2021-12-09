@@ -1,3 +1,6 @@
+# EDUC-GRAD-BATCH-GRADUATION-API
+
+[![img](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/bcgov/educ-grad-batch-graduation-api/Build) &nbsp; 
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=educ-grad-batch-graduation-api&metric=bugs)](https://sonarcloud.io/summary/new_code?id=educ-grad-batch-graduation-api) &nbsp;
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=educ-grad-batch-graduation-api&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=educ-grad-batch-graduation-api) &nbsp;
@@ -12,6 +15,4 @@
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=educ-grad-batch-graduation-api&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=educ-grad-batch-graduation-api) &nbsp;
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=educ-grad-batch-graduation-api&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=educ-grad-batch-graduation-api) &nbsp;
 
-# EDUC-GRAD-BATCH-GRADUATION-API
 
-[![img](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
