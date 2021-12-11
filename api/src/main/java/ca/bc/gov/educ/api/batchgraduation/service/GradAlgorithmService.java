@@ -51,5 +51,35 @@ public class GradAlgorithmService extends GradService {
 		
 	}
 
+	public GraduationStudentRecord processProjectedGradStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
+		LOGGER.info(" Processing  **** STUDENT ID: ****" + item.getStudentID().toString().substring(5));
+		summary.setProcessedCount(summary.getProcessedCount() + 1L);
+		try {
+			String accessToken = summary.getAccessToken();
+			start();
+			AlgorithmResponse algorithmResponse = restUtils.runProjectedGradAlgorithm(item.getStudentID(), accessToken,summary.getBatchId());
+			if(algorithmResponse.getException() != null) {
+				ProcessError error = new ProcessError();
+				error.setStudentID(item.getStudentID().toString());
+				error.setReason(algorithmResponse.getException().getExceptionName());
+				error.setDetail(algorithmResponse.getException().getExceptionDetails());
+				summary.getErrors().add(error);
+				summary.setProcessedCount(summary.getProcessedCount() - 1L);
+				return null;
+			}
+			end();
+			return algorithmResponse.getGraduationStudentRecord();
+		}catch(Exception e) {
+			ProcessError error = new ProcessError();
+			error.setStudentID(item.getStudentID().toString());
+			error.setReason("GRAD-GRADUATION-API IS DOWN");
+			error.setDetail("Graduation API is unavialble at this moment");
+			summary.getErrors().add(error);
+			summary.setProcessedCount(summary.getProcessedCount() - 1L);
+			return null;
+		}
+
+	}
+
 	
 }

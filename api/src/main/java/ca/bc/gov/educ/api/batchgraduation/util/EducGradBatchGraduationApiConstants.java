@@ -16,7 +16,8 @@ public class EducGradBatchGraduationApiConstants {
 	public static final String API_ROOT_MAPPING = "";
     public static final String API_VERSION = "v1";
     public static final String GRAD_BATCH_API_ROOT_MAPPING = "/api/" + API_VERSION + "/batch";
-    public static final String EXECUTE_BATCH_JOB = "/executebatchjob";
+    public static final String EXECUTE_REG_GRAD_BATCH_JOB = "/executereggradbatchjob";
+    public static final String EXECUTE_TVR_RUN_BATCH_JOB = "/executetvrrunbatchjob";
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
     
     public static final String BATCH_DASHBOARD = "/dashboard";
@@ -51,6 +52,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-api.reportonlyrun.url}")
     private String graduationApiReportOnlyUrl;
 
+    @Value("${endpoint.grad-graduation-api.tvrrun.url}")
+    private String graduationApiProjectedGradUrl;
+
     @Value("${endpoint.grad-student-api.pen-student-by-pen}")
     private String penStudentApiByPenUrl;
 
@@ -59,5 +63,8 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-student-api.student-for-grad-list}")
     private String gradStudentApiStudentForGradListUrl;
+
+    @Value("${endpoint.grad-student-api.student-for-projectedgrad-list}")
+    private String gradStudentApiStudentForProjectedGradListUrl;
 
 }

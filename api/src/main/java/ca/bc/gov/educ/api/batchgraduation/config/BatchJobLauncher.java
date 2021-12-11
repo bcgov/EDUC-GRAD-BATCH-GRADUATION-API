@@ -2,11 +2,10 @@ package ca.bc.gov.educ.api.batchgraduation.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameter;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -27,26 +26,57 @@ public class BatchJobLauncher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchJobLauncher.class);
 
-    private final Job job;
-    private final JobLauncher jobLauncher;
+    @Autowired
+    @Qualifier("GraduationBatchJob")
+    private Job graduationBatchJob;
 
     @Autowired
-    public BatchJobLauncher(Job graduationBatchJob, JobLauncher jobLauncher) {
-        this.job = graduationBatchJob;
-        this.jobLauncher = jobLauncher;
-    }
+    @Qualifier("tvrBatchJob")
+    private Job tvrBatchJob;
 
-    @Scheduled(cron = "0 0 19 * * *")
-    public void runSpringBatchExampleJob() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+    @Autowired
+    private JobLauncher jobLauncher;
+
+    @Autowired
+    private JobRegistry jobRegistry;
+
+    private static final String TIME="time";
+    private static final String JOB_TRIGGER="jobTrigger";
+    private static final String JOB_TYPE="jobType";
+
+
+
+    @Scheduled(cron = "0 * 19 * * *")
+    public void runRegularGradAlgorithm() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException {
         LOGGER.info("Batch Job was started");
-        jobLauncher.run(job, newExecution());
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, "BATCH");
+        builder.addString(JOB_TYPE, "REGALG");
+        try {
+            jobLauncher.run(graduationBatchJob, builder.toJobParameters());
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         LOGGER.info("Batch Job was stopped");
     }
 
-    private JobParameters newExecution() {
-        Map<String, JobParameter> parameters = new HashMap<>();
-        JobParameter parameter = new JobParameter(new Date());
-        parameters.put("currentTime", parameter);
-        return new JobParameters(parameters);
+    @Scheduled(cron = "0 * 21 * * *")
+    public void runTranscriptVerificationReportProcess() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException {
+        LOGGER.info("Batch Job was started");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, "BATCH");
+        builder.addString(JOB_TYPE, "TVRRUN");
+        try {
+            jobLauncher.run(tvrBatchJob, builder.toJobParameters());
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        LOGGER.info("Batch Job was stopped");
     }
 }
