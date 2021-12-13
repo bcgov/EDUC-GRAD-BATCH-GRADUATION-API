@@ -56,4 +56,7 @@ public class BatchGradAlgorithmJobHistoryEntity  extends BaseEntity {
 	
 	@Column(name = "BATCH_JOB_TRIGGER_CODE",nullable = true)
 	private String triggerBy;
+
+	@Column(name = "BATCH_JOB_TYPE_CODE",nullable = true)
+	private String jobType;
 }

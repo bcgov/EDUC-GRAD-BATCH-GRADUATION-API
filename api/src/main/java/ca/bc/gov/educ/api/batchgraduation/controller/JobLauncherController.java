@@ -32,8 +32,9 @@ import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
 public class JobLauncherController {
 
     private static final Logger logger = LoggerFactory.getLogger(JobLauncherController.class);
-    private static final String TIME="time";
-    private static final String JOB_PARAM="job";
+    private static final String TIME = "time";
+    private static final String JOB_TRIGGER="jobTrigger";
+    private static final String JOB_TYPE="jobType";
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
@@ -47,37 +48,55 @@ public class JobLauncherController {
         this.gradDashboardService = gradDashboardService;
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_BATCH_JOB)
-    public void launchJob( ) {
-    	logger.info("Inside Launch Job");
-    	JobParametersBuilder builder = new JobParametersBuilder();
-    	builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-    	builder.addString(JOB_PARAM, "MANUAL");
-    	try {
-        jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters());
-      } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-          | JobParametersInvalidException | NoSuchJobException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
-      }
-    	
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_REG_GRAD_BATCH_JOB)
+    public void launchRegGradJob() {
+        logger.debug("launchRegGradJob");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, "MANUAL");
+        builder.addString(JOB_TYPE, "REGALG");
+        try {
+            jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters());
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | NoSuchJobException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_TVR_RUN_BATCH_JOB)
+    public void launchTvrRunJob() {
+        logger.debug("launchTvrRunJob");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, "MANUAL");
+        builder.addString(JOB_TYPE, "TVRRUN");
+        try {
+            jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | NoSuchJobException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
     }
 
     @PostMapping(EducGradBatchGraduationApiConstants.LOAD_STUDENT_IDS)
     @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
     public void loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData) {
-    	logger.info("Inside loadStudentIDs");
-    	OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails(); 
-    	String accessToken = auth.getTokenValue();
-    	gradStudentService.getStudentByPenFromStudentAPI(loadStudentData,accessToken);
-    	
+        logger.info("Inside loadStudentIDs");
+        OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
+        String accessToken = auth.getTokenValue();
+        gradStudentService.getStudentByPenFromStudentAPI(loadStudentData, accessToken);
+
     }
-    
+
     @GetMapping(EducGradBatchGraduationApiConstants.BATCH_DASHBOARD)
     @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
     public GradDashboard loadDashboard() {
-    	logger.info("Inside loadDashboard");
-    	return gradDashboardService.getDashboardInfo();
-    	
+        logger.info("Inside loadDashboard");
+        return gradDashboardService.getDashboardInfo();
+
     }
 }

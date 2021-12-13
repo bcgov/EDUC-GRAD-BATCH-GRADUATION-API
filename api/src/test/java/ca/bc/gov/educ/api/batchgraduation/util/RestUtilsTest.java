@@ -6,11 +6,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import org.codehaus.jackson.JsonProcessingException;
 import org.junit.After;
 import org.junit.Before;
@@ -26,9 +28,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.model.Student;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import lombok.val;
 import reactor.core.publisher.Mono;
@@ -132,4 +131,112 @@ public class RestUtilsTest {
         assertThat(result.getPen()).isEqualTo(pen);
     }
 
+    @Test
+    public void testRunGradAlgorithm() {
+        final String studentID = UUID.randomUUID().toString();
+        final Student student = new Student();
+        String programCompletionDate = "2020/01";
+
+        GraduationStudentRecord grd = new GraduationStudentRecord();
+        grd.setStudentID(new UUID(1,1));
+        grd.setProgram("2018-EN");
+
+        AlgorithmResponse res = new AlgorithmResponse();
+        res.setGraduationStudentRecord(grd);
+        res.setStudentOptionalProgram(new ArrayList<>());
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getGraduationApiReportOnlyUrl(), studentID,null))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(res));
+
+        val result = this.restUtils.runGradAlgorithm(UUID.fromString(studentID), "123",programCompletionDate,null);
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void testRunGradAlgorithm_programCompletionDateNull() {
+        final String studentID = UUID.randomUUID().toString();
+        final Student student = new Student();
+        String programCompletionDate = "2020/01";
+
+        GraduationStudentRecord grd = new GraduationStudentRecord();
+        grd.setStudentID(new UUID(1,1));
+        grd.setProgram("2018-EN");
+
+        AlgorithmResponse res = new AlgorithmResponse();
+        res.setGraduationStudentRecord(grd);
+        res.setStudentOptionalProgram(new ArrayList<>());
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getGraduationApiUrl(), studentID,null))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(res));
+
+        val result = this.restUtils.runGradAlgorithm(UUID.fromString(studentID), "123",null,null);
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void testRunProjectedGradAlgorithm() {
+        final String studentID = UUID.randomUUID().toString();
+        GraduationStudentRecord grd = new GraduationStudentRecord();
+        grd.setStudentID(new UUID(1,1));
+        grd.setProgram("2018-EN");
+        AlgorithmResponse res = new AlgorithmResponse();
+        res.setGraduationStudentRecord(grd);
+        res.setStudentOptionalProgram(new ArrayList<>());
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,null))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(res));
+
+        val result = this.restUtils.runProjectedGradAlgorithm(UUID.fromString(studentID), "123",null);
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void testGetStudentsForAlgorithm() {
+        final String studentID = UUID.randomUUID().toString();
+        GraduationStudentRecord grd = new GraduationStudentRecord();
+        grd.setStudentID(new UUID(1,1));
+        grd.setProgram("2018-EN");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getGradStudentApiStudentForGradListUrl())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        };
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(grd)));
+
+        val result = this.restUtils.getStudentsForAlgorithm("abc");
+        assertThat(result).isNotNull();
+        assertThat(result.size() > 0).isTrue();
+    }
+
+    @Test
+    public void testGetStudentsForProjectedAlgorithm() {
+        final String studentID = UUID.randomUUID().toString();
+        GraduationStudentRecord grd = new GraduationStudentRecord();
+        grd.setStudentID(new UUID(1,1));
+        grd.setProgram("2018-EN");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getGradStudentApiStudentForProjectedGradListUrl())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        };
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(grd)));
+
+        val result = this.restUtils.getStudentsForProjectedAlgorithm("abc");
+        assertThat(result).isNotNull();
+        assertThat(result.size() > 0).isTrue();
+    }
 }

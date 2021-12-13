@@ -69,12 +69,29 @@ public class RestUtils {
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(AlgorithmResponse.class).block();
     }
+
+    public AlgorithmResponse runProjectedGradAlgorithm(UUID studentID, String accessToken,Long batchId) {
+        return this.webClient.get()
+            .uri(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,batchId))
+            .headers(h -> h.setBearerAuth(accessToken))
+            .retrieve().bodyToMono(AlgorithmResponse.class).block();
+
+    }
     
     public List<GraduationStudentRecord> getStudentsForAlgorithm(String accessToken) {
         final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.get()
                 .uri(constants.getGradStudentApiStudentForGradListUrl())
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve().bodyToMono(responseType).block();
+    }
+
+    public List<GraduationStudentRecord> getStudentsForProjectedAlgorithm(String accessToken) {
+        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        };
+        return this.webClient.get()
+                .uri(constants.getGradStudentApiStudentForProjectedGradListUrl())
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(responseType).block();
     }
