@@ -39,10 +39,22 @@ public class JobLauncherControllerTest {
     private JobLauncherController jobLauncherController;
 
     @Test
-    public void testLaunchJob() {
+    public void testRegGradJob() {
         boolean exceptionIsThrown = false;
         try {
-            jobLauncherController.launchJob();
+            jobLauncherController.launchRegGradJob();
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(exceptionIsThrown).isFalse();
+    }
+
+    @Test
+    public void testTVRJob() {
+        boolean exceptionIsThrown = false;
+        try {
+            jobLauncherController.launchTvrRunJob();
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
