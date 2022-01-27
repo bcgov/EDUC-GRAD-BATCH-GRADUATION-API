@@ -46,7 +46,7 @@ public class BatchJobLauncher {
 
 
 
-    @Scheduled(cron = "0 * 19 * * *")
+    @Scheduled(cron = "0 0 21 * * *")
     public void runRegularGradAlgorithm() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException {
         LOGGER.info("Batch Job was started");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -63,7 +63,7 @@ public class BatchJobLauncher {
         LOGGER.info("Batch Job was stopped");
     }
 
-    @Scheduled(cron = "0 * 21 * * *")
+    @Scheduled(cron = "0 0 23 * * *")
     public void runTranscriptVerificationReportProcess() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException {
         LOGGER.info("Batch Job was started");
         JobParametersBuilder builder = new JobParametersBuilder();
