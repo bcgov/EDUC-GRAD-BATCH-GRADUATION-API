@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.persistence.Column;
+
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Component
@@ -22,4 +24,5 @@ public class BatchGradAlgorithmJobHistory extends BaseModel{
 	private String failedStudentsProcessed;
 	private String status;
 	private String triggerBy;
+	private String jobType;
 }
