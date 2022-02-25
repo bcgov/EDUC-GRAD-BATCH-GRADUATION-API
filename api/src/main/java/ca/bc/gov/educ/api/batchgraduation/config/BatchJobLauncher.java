@@ -46,7 +46,7 @@ public class BatchJobLauncher {
 
 
 
-    @Scheduled(cron = "0 0 21 * * *")
+    @Scheduled(cron = "0 0 18 * * *")
     public void runRegularGradAlgorithm() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException {
         LOGGER.info("Batch Job was started");
         JobParametersBuilder builder = new JobParametersBuilder();
