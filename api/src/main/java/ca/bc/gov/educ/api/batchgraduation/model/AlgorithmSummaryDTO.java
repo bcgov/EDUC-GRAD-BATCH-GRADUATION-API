@@ -27,7 +27,8 @@ public class AlgorithmSummaryDTO {
     put("2018-PF", 0L);
     put("2004-EN", 0L);
     put("2004-PF", 0L);
-    put("1996", 0L);
+    put("1996-EN", 0L);
+    put("1996-PF", 0L);
     put("1986", 0L);
     put("1950", 0L);
     put("NOPROG", 0L);
