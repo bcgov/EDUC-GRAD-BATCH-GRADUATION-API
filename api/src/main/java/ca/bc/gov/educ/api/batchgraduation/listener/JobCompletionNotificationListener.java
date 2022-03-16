@@ -46,7 +46,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
 			
-			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
+			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
 			int failedRecords = summaryDTO.getErrors().size();			
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();			
@@ -88,7 +88,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			Date startTime = jobExecution.getStartTime();
 			Date endTime = jobExecution.getEndTime();
 			
-			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
+			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
 			int failedRecords = 0;			
 			List<GraduationStudentRecord> list = restUtils.getStudentsForAlgorithm(summaryDTO.getAccessToken());
 			if(!list.isEmpty()) {

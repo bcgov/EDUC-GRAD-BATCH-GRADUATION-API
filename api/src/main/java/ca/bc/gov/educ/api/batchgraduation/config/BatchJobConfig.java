@@ -1,14 +1,19 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
 import ca.bc.gov.educ.api.batchgraduation.listener.TvrRunJobCompletionNotificationListener;
+import ca.bc.gov.educ.api.batchgraduation.processor.RegGradAlgPartitionHandlerCreator;
 import ca.bc.gov.educ.api.batchgraduation.processor.RunProjectedGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.reader.RecalculateProjectedGradRunReader;
+import ca.bc.gov.educ.api.batchgraduation.reader.RegGradAlgPartitioner;
+import ca.bc.gov.educ.api.batchgraduation.service.GradAlgorithmService;
+import ca.bc.gov.educ.api.batchgraduation.service.GradStudentService;
 import ca.bc.gov.educ.api.batchgraduation.writer.TvrRunBatchPerformanceWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ItemProcessor;
@@ -24,6 +29,9 @@ import ca.bc.gov.educ.api.batchgraduation.processor.RunGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.reader.RecalculateStudentReader;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.writer.BatchPerformanceWriter;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
 public class BatchJobConfig {
@@ -61,6 +69,36 @@ public class BatchJobConfig {
         return new RunProjectedGradAlgorithmProcessor();
     }
 
+    // Partitioning for pen updates
+    @Bean
+    public Step masterStep(StepBuilderFactory stepBuilderFactory, GradStudentService gradStudentService) {
+        return stepBuilderFactory.get("masterStep")
+                .partitioner(slaveStep(stepBuilderFactory).getName(), partitioner(gradStudentService))
+                .step(slaveStep(stepBuilderFactory))
+                .taskExecutor(taskExecutor())
+                .build();
+    }
+
+    @Bean
+    public RegGradAlgPartitioner partitioner(GradStudentService gradStudentService) {
+        // Reader to feed input data for each partition
+        return new RegGradAlgPartitioner(gradStudentService);
+    }
+
+    @Bean
+    public Step slaveStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStep")
+                .tasklet(regGradAlgPartitionHandler())
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public RegGradAlgPartitionHandlerCreator regGradAlgPartitionHandler() {
+        // Processor for each partition
+        return new RegGradAlgPartitionHandlerCreator();
+    }
+
     /**
      * Creates a bean that represents the only step of our batch job.
      */
@@ -81,12 +119,12 @@ public class BatchJobConfig {
      * Creates a bean that represents our batch job.
      */
     @Bean(name="GraduationBatchJob")
-    public Job graduationBatchJob(Step graduationJobStep,JobCompletionNotificationListener listener,
+    public Job graduationBatchJob(Step masterStep,JobCompletionNotificationListener listener,StepBuilderFactory stepBuilderFactory,GradStudentService gradStudentService,
                           JobBuilderFactory jobBuilderFactory) {
         return jobBuilderFactory.get("GraduationBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(graduationJobStep)               
+                .flow(masterStep(stepBuilderFactory, gradStudentService))
                 .end()
                 .build();
     }
@@ -126,5 +164,15 @@ public class BatchJobConfig {
         JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();
         postProcessor.setJobRegistry(jobRegistry);
         return postProcessor;
+    }
+
+    @Bean
+    public TaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(50);
+        executor.setThreadNamePrefix("partition_task_executor_thread-");
+        executor.initialize();
+        return executor;
     }
 }

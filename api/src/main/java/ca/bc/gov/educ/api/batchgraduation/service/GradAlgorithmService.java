@@ -37,6 +37,8 @@ public class GradAlgorithmService extends GradService {
 				summary.setProcessedCount(summary.getProcessedCount() - 1L);
 				return null;
 			}
+			LOGGER.info(" Processed  **** STUDENT ID: ****" + item.getStudentID().toString().substring(5));
+			summary.increment(item.getProgram());
 			end();
 			return algorithmResponse.getGraduationStudentRecord();
 		}catch(Exception e) {
