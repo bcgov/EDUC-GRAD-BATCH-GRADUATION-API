@@ -22,7 +22,7 @@ public class GradAlgorithmService extends GradService {
 	}
 
 	public GraduationStudentRecord processStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
-		LOGGER.info(" Processing  **** STUDENT ID: ****" + item.getStudentID().toString().substring(5));
+		LOGGER.info("*** {} Partition  - Processing  * STUDENT ID: * {}",Thread.currentThread().getName(),item.getStudentID().toString());
 		summary.setProcessedCount(summary.getProcessedCount() + 1L);
 		try {
 			String accessToken = summary.getAccessToken();
@@ -37,7 +37,7 @@ public class GradAlgorithmService extends GradService {
 				summary.setProcessedCount(summary.getProcessedCount() - 1L);
 				return null;
 			}
-			LOGGER.info(" Processed  **** STUDENT ID: ****" + item.getStudentID().toString().substring(5));
+			LOGGER.info("*** {} Partition  * Processed student[{}] * Student ID: {} in total {}",Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
 			summary.increment(item.getProgram());
 			end();
 			return algorithmResponse.getGraduationStudentRecord();
@@ -48,6 +48,7 @@ public class GradAlgorithmService extends GradService {
 			error.setDetail("Graduation API is unavialble at this moment");
 			summary.getErrors().add(error);
 			summary.setProcessedCount(summary.getProcessedCount() - 1L);
+			LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {}",Thread.currentThread().getName(),item.getStudentID().toString());
 			return null;
 		}
 		

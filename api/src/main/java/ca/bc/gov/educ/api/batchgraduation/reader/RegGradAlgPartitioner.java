@@ -34,7 +34,6 @@ public class RegGradAlgPartitioner extends SimplePartitioner {
             accessToken = res.getAccess_token();
         }
         List<GraduationStudentRecord> studentList = restUtils.getStudentsForAlgorithm(accessToken);
-        studentList.forEach(sc->LOGGER.info("Student ID {}",sc.getStudentID()));
         if(!studentList.isEmpty()) {
             int partitionSize = 10;
             List<List<GraduationStudentRecord>> partitions = new LinkedList<>();
@@ -52,8 +51,10 @@ public class RegGradAlgPartitioner extends SimplePartitioner {
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }
+            LOGGER.info("Found {} in total running on {} partitions",studentList.size(),map.size());
             return map;
         }
+        LOGGER.info("No Students Found for Processing");
         return new HashMap<>();
     }
 }

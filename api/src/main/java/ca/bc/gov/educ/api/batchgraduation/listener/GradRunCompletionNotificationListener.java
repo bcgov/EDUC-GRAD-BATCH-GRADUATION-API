@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -21,9 +20,9 @@ import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistor
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
 @Component
-public class JobCompletionNotificationListener extends JobExecutionListenerSupport {
+public class GradRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobCompletionNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GradRunCompletionNotificationListener.class);
     
     @Autowired
     private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;

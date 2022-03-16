@@ -5,7 +5,6 @@ import ca.bc.gov.educ.api.batchgraduation.processor.RegGradAlgPartitionHandlerCr
 import ca.bc.gov.educ.api.batchgraduation.processor.RunProjectedGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.reader.RecalculateProjectedGradRunReader;
 import ca.bc.gov.educ.api.batchgraduation.reader.RegGradAlgPartitioner;
-import ca.bc.gov.educ.api.batchgraduation.service.GradAlgorithmService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradStudentService;
 import ca.bc.gov.educ.api.batchgraduation.writer.TvrRunBatchPerformanceWriter;
 import org.springframework.batch.core.Job;
@@ -23,13 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import ca.bc.gov.educ.api.batchgraduation.listener.JobCompletionNotificationListener;
+import ca.bc.gov.educ.api.batchgraduation.listener.GradRunCompletionNotificationListener;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
-import ca.bc.gov.educ.api.batchgraduation.processor.RunGradAlgorithmProcessor;
-import ca.bc.gov.educ.api.batchgraduation.reader.RecalculateStudentReader;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.writer.BatchPerformanceWriter;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -38,11 +33,6 @@ public class BatchJobConfig {
 
 	@Autowired
 	JobRegistry jobRegistry;
-	  
-    @Bean
-    public ItemReader<GraduationStudentRecord> itemReaderRegGrad(RestUtils restUtils) {
-        return new RecalculateStudentReader(restUtils);
-    }
 
     @Bean
     public ItemReader<GraduationStudentRecord> itemReaderTvrRun(RestUtils restUtils) {
@@ -50,19 +40,9 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public ItemWriter<GraduationStudentRecord> itemWriterRegGrad() {
-        return new BatchPerformanceWriter();
-    }
-
-    @Bean
     public ItemWriter<GraduationStudentRecord> itemWriterTvrRun() {
         return new TvrRunBatchPerformanceWriter();
     }
-    
-    @Bean
-	public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorRegGrad() {
-		return new RunGradAlgorithmProcessor();
-	}
 
     @Bean
     public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorTvrRun() {
@@ -100,27 +80,11 @@ public class BatchJobConfig {
     }
 
     /**
-     * Creates a bean that represents the only step of our batch job.
-     */
-    @Bean
-    public Step graduationJobStep(ItemReader<GraduationStudentRecord> itemReaderRegGrad,
-    						   org.springframework.batch.item.ItemProcessor<? super GraduationStudentRecord, ? extends GraduationStudentRecord> itemProcessorRegGrad,
-                               ItemWriter<GraduationStudentRecord> itemWriterRegGrad,
-                               StepBuilderFactory stepBuilderFactory) {
-        return stepBuilderFactory.get("graduationJobStep")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
-                .reader(itemReaderRegGrad)
-                .processor(itemProcessorRegGrad)
-                .writer(itemWriterRegGrad)
-                .build();
-    }
-
-    /**
      * Creates a bean that represents our batch job.
      */
     @Bean(name="GraduationBatchJob")
-    public Job graduationBatchJob(Step masterStep,JobCompletionNotificationListener listener,StepBuilderFactory stepBuilderFactory,GradStudentService gradStudentService,
-                          JobBuilderFactory jobBuilderFactory) {
+    public Job graduationBatchJob(Step masterStep, GradRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, GradStudentService gradStudentService,
+                                  JobBuilderFactory jobBuilderFactory) {
         return jobBuilderFactory.get("GraduationBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
