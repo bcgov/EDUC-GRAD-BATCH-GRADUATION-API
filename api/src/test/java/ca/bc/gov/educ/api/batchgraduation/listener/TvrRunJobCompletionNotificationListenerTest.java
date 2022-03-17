@@ -40,6 +40,7 @@ public class TvrRunJobCompletionNotificationListenerTest {
 
     @Autowired
     private TvrRunJobCompletionNotificationListener tvrRunJobCompletionNotificationListener;
+
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
     @MockBean
     RestUtils restUtils;
@@ -74,7 +75,7 @@ public class TvrRunJobCompletionNotificationListenerTest {
         summaryDTO.setBatchId(121L);
         summaryDTO.setProcessedCount(10);
         summaryDTO.setErrors(new ArrayList<>());
-        jobContext.put("summaryDTO", summaryDTO);
+        jobContext.put("tvrRunSummaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
@@ -118,7 +119,7 @@ public class TvrRunJobCompletionNotificationListenerTest {
         summaryDTO.setBatchId(121L);
         summaryDTO.setProcessedCount(10);
         summaryDTO.setErrors(new ArrayList<>());
-        jobContext.put("summaryDTO", summaryDTO);
+        jobContext.put("tvrRunSummaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();

@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
-public class RegGradAlgPartitionHandlerCreator extends BasePartitionHandlerCreator implements Tasklet {
+public class TvrRunPartitionHandlerCreator extends BasePartitionHandlerCreator implements Tasklet {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RegGradAlgPartitionHandlerCreator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TvrRunPartitionHandlerCreator.class);
 
     @Autowired
     GradAlgorithmService gradAlgorithmService;
@@ -52,7 +52,7 @@ public class RegGradAlgPartitionHandlerCreator extends BasePartitionHandlerCreat
         System.out.println(Thread.currentThread().getName() + " summary processed count = " + summaryDTO.getProcessedCount());
 
         // Aggregate summary
-        aggregate(contribution,"regGradAlgSummaryDTO");
+        aggregate(contribution,"tvrRunSummaryDTO");
         return RepeatStatus.FINISHED;
     }
 
