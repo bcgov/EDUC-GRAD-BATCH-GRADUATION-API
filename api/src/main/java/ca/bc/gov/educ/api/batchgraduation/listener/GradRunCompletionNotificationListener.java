@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -21,9 +20,9 @@ import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistor
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
 @Component
-public class JobCompletionNotificationListener extends JobExecutionListenerSupport {
+public class GradRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobCompletionNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GradRunCompletionNotificationListener.class);
     
     @Autowired
     private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
@@ -46,7 +45,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
 			
-			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
+			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
 			int failedRecords = summaryDTO.getErrors().size();			
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();			
@@ -88,7 +87,7 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			Date startTime = jobExecution.getStartTime();
 			Date endTime = jobExecution.getEndTime();
 			
-			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
+			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
 			int failedRecords = 0;			
 			List<GraduationStudentRecord> list = restUtils.getStudentsForAlgorithm(summaryDTO.getAccessToken());
 			if(!list.isEmpty()) {
