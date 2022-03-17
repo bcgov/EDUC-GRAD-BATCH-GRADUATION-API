@@ -76,7 +76,7 @@ public class JobCompletionNotificationListenerTest {
         summaryDTO.setBatchId(121L);
         summaryDTO.setProcessedCount(10);
         summaryDTO.setErrors(new ArrayList<>());
-        jobContext.put("summaryDTO", summaryDTO);
+        jobContext.put("regGradAlgSummaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
@@ -120,7 +120,7 @@ public class JobCompletionNotificationListenerTest {
         summaryDTO.setBatchId(121L);
         summaryDTO.setProcessedCount(10);
         summaryDTO.setErrors(new ArrayList<>());
-        jobContext.put("summaryDTO", summaryDTO);
+        jobContext.put("regGradAlgSummaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
