@@ -52,7 +52,7 @@ public class TvrRunPartitionHandlerCreator extends BasePartitionHandlerCreator i
         System.out.println(Thread.currentThread().getName() + " summary processed count = " + summaryDTO.getProcessedCount());
 
         // Aggregate summary
-        aggregate(contribution);
+        aggregate(contribution,"tvrRunSummaryDTO");
         return RepeatStatus.FINISHED;
     }
 

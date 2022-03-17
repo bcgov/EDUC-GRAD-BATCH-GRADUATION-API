@@ -30,11 +30,11 @@ public abstract class BasePartitionHandlerCreator implements Tasklet {
     @Value("#{stepExecution.jobExecution.jobId}")
     Long batchId;
 
-    protected void aggregate(StepContribution contribution) {
-        AlgorithmSummaryDTO totalSummaryDTO = (AlgorithmSummaryDTO)contribution.getStepExecution().getJobExecution().getExecutionContext().get("tvrRunSummaryDTO");
+    protected void aggregate(StepContribution contribution,String summaryContextName) {
+        AlgorithmSummaryDTO totalSummaryDTO = (AlgorithmSummaryDTO)contribution.getStepExecution().getJobExecution().getExecutionContext().get(summaryContextName);
         if (totalSummaryDTO == null) {
             totalSummaryDTO = new AlgorithmSummaryDTO();
-            contribution.getStepExecution().getJobExecution().getExecutionContext().put("tvrRunSummaryDTO", totalSummaryDTO);
+            contribution.getStepExecution().getJobExecution().getExecutionContext().put(summaryContextName, totalSummaryDTO);
         }
         totalSummaryDTO.setReadCount(totalSummaryDTO.getReadCount() + summaryDTO.getReadCount());
         totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());

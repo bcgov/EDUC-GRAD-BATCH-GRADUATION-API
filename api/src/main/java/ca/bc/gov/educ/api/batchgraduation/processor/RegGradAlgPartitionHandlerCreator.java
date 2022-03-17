@@ -52,7 +52,7 @@ public class RegGradAlgPartitionHandlerCreator extends BasePartitionHandlerCreat
         System.out.println(Thread.currentThread().getName() + " summary processed count = " + summaryDTO.getProcessedCount());
 
         // Aggregate summary
-        aggregate(contribution);
+        aggregate(contribution,"regGradAlgSummaryDTO");
         return RepeatStatus.FINISHED;
     }
 
