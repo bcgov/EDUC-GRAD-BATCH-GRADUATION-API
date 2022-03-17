@@ -55,6 +55,7 @@ public class BatchJobConfig {
         return stepBuilderFactory.get("masterStep")
                 .partitioner(slaveStep(stepBuilderFactory).getName(), partitioner(gradStudentService))
                 .step(slaveStep(stepBuilderFactory))
+                .gridSize(10)
                 .taskExecutor(taskExecutor())
                 .build();
     }

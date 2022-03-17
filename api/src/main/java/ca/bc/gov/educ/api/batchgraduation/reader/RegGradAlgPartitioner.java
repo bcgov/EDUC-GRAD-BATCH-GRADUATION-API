@@ -34,8 +34,9 @@ public class RegGradAlgPartitioner extends SimplePartitioner {
             accessToken = res.getAccess_token();
         }
         List<GraduationStudentRecord> studentList = restUtils.getStudentsForAlgorithm(accessToken);
+
         if(!studentList.isEmpty()) {
-            int partitionSize = 10;
+            int partitionSize = studentList.size()/gridSize + 1;
             List<List<GraduationStudentRecord>> partitions = new LinkedList<>();
             for (int i = 0; i < studentList.size(); i += partitionSize) {
                 partitions.add(studentList.subList(i, Math.min(i + partitionSize, studentList.size())));
