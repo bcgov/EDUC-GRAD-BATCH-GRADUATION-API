@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
-public class RegGradAlgPartitionHandlerCreator extends BasePartitionHandlerCreator implements Tasklet {
+public class TvrRunPartitionHandlerCreator extends BasePartitionHandlerCreator implements Tasklet {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RegGradAlgPartitionHandlerCreator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TvrRunPartitionHandlerCreator.class);
 
     @Autowired
     GradAlgorithmService gradAlgorithmService;
