@@ -33,7 +33,7 @@ public class BatchJobConfig {
         return stepBuilderFactory.get("masterStepRegGrad")
                 .partitioner(slaveStepRegGrad(stepBuilderFactory).getName(), partitionerRegGrad(gradStudentService))
                 .step(slaveStepRegGrad(stepBuilderFactory))
-                .gridSize(10)
+                .gridSize(5)
                 .taskExecutor(taskExecutor())
                 .build();
     }
@@ -77,7 +77,7 @@ public class BatchJobConfig {
         return stepBuilderFactory.get("masterStepTvrRun")
                 .partitioner(slaveStepTvrRun(stepBuilderFactory).getName(), partitionerTvrRun(gradStudentService))
                 .step(slaveStepTvrRun(stepBuilderFactory))
-                .gridSize(10)
+                .gridSize(5)
                 .taskExecutor(taskExecutor())
                 .build();
     }
