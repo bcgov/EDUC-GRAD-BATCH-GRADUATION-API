@@ -44,7 +44,7 @@ public class TvrRunPartitionHandlerCreator extends BasePartitionHandlerCreator i
             summaryDTO.setBatchId(batchId);
             LOGGER.info("{} processing partitionData = {}",Thread.currentThread().getName(), d.getProgram());
             try {
-                gradAlgorithmService.processStudent(d, summaryDTO);
+                gradAlgorithmService.processProjectedGradStudent(d, summaryDTO);
             }catch (Exception e) {
                 LOGGER.info("Student Errored Out");
             }
