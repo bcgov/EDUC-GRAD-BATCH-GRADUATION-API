@@ -106,4 +106,5 @@ endpoint:
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate
     student-for-projectedgrad-list: ${GRAD_STUDENT_API}api/v1/student/projected
-    pen-student-by-pen: ${PEN_API}api/v1/student?pen=%s 
+    pen-student-by-pen: ${PEN_API}api/v1/student?pen=%s
+    student-for-special-grad-run-list: ${GRAD_STUDENT_API}api/v1/student/studentlistsearch
