@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.model.LoadStudentData;
-import ca.bc.gov.educ.api.batchgraduation.service.GradStudentService;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -31,9 +30,6 @@ public class JobLauncherControllerTest {
 
     @Mock
     private JobRegistry jobRegistry;
-
-    @Mock
-    private GradStudentService gradStudentService;
 
     @InjectMocks
     private JobLauncherController jobLauncherController;

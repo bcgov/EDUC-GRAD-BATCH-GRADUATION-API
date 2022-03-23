@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.processor;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.service.GradAlgorithmService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.StepContribution;
@@ -18,9 +17,6 @@ import java.util.List;
 public class TvrRunPartitionHandlerCreator extends BasePartitionHandlerCreator implements Tasklet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TvrRunPartitionHandlerCreator.class);
-
-    @Autowired
-    GradAlgorithmService gradAlgorithmService;
 
     @Autowired
     RestUtils restUtils;
@@ -44,7 +40,7 @@ public class TvrRunPartitionHandlerCreator extends BasePartitionHandlerCreator i
             summaryDTO.setBatchId(batchId);
             LOGGER.info("{} processing partitionData = {}",Thread.currentThread().getName(), d.getProgram());
             try {
-                gradAlgorithmService.processProjectedGradStudent(d, summaryDTO);
+                restUtils.processProjectedGradStudent(d, summaryDTO);
             }catch (Exception e) {
                 LOGGER.info("Student Errored Out");
             }

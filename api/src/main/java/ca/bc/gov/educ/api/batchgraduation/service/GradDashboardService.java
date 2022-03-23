@@ -4,14 +4,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.stereotype.Service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.BatchGradAlgorithmJobHistory;
 import ca.bc.gov.educ.api.batchgraduation.model.GradDashboard;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchGradAlgorithmJobHistoryTransformer;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class GradDashboardService extends GradService {
@@ -24,7 +23,7 @@ public class GradDashboardService extends GradService {
     	this.batchGradAlgorithmJobHistoryTransformer = batchGradAlgorithmJobHistoryTransformer;
 	}
 
-    @Transactional
+    @Transactional(readOnly = true)
 	public GradDashboard getDashboardInfo() {
     	start();
     	GradDashboard gradDash = new GradDashboard();

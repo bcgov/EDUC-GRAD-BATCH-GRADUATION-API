@@ -6,7 +6,6 @@ import ca.bc.gov.educ.api.batchgraduation.processor.RegGradAlgPartitionHandlerCr
 import ca.bc.gov.educ.api.batchgraduation.processor.TvrRunPartitionHandlerCreator;
 import ca.bc.gov.educ.api.batchgraduation.reader.RegGradAlgPartitioner;
 import ca.bc.gov.educ.api.batchgraduation.reader.TvrRunPartitioner;
-import ca.bc.gov.educ.api.batchgraduation.service.GradStudentService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -29,9 +28,9 @@ public class BatchJobConfig {
 
     // Partitioning for Regular Grad Run updates
     @Bean
-    public Step masterStepRegGrad(StepBuilderFactory stepBuilderFactory, GradStudentService gradStudentService) {
+    public Step masterStepRegGrad(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("masterStepRegGrad")
-                .partitioner(slaveStepRegGrad(stepBuilderFactory).getName(), partitionerRegGrad(gradStudentService))
+                .partitioner(slaveStepRegGrad(stepBuilderFactory).getName(), partitionerRegGrad())
                 .step(slaveStepRegGrad(stepBuilderFactory))
                 .gridSize(5)
                 .taskExecutor(taskExecutor())
@@ -39,8 +38,8 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public RegGradAlgPartitioner partitionerRegGrad(GradStudentService gradStudentService) {
-        return new RegGradAlgPartitioner(gradStudentService);
+    public RegGradAlgPartitioner partitionerRegGrad() {
+        return new RegGradAlgPartitioner();
     }
 
     @Bean
@@ -60,12 +59,11 @@ public class BatchJobConfig {
      * Creates a bean that represents our batch job.
      */
     @Bean(name="GraduationBatchJob")
-    public Job graduationBatchJob(GradRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, GradStudentService gradStudentService,
-                                  JobBuilderFactory jobBuilderFactory) {
+    public Job graduationBatchJob(GradRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory,JobBuilderFactory jobBuilderFactory) {
         return jobBuilderFactory.get("GraduationBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepRegGrad(stepBuilderFactory, gradStudentService))
+                .flow(masterStepRegGrad(stepBuilderFactory))
                 .end()
                 .build();
     }
@@ -73,9 +71,9 @@ public class BatchJobConfig {
 
     // Partitioning for Regular TVR Run updates
     @Bean
-    public Step masterStepTvrRun(StepBuilderFactory stepBuilderFactory, GradStudentService gradStudentService) {
+    public Step masterStepTvrRun(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("masterStepTvrRun")
-                .partitioner(slaveStepTvrRun(stepBuilderFactory).getName(), partitionerTvrRun(gradStudentService))
+                .partitioner(slaveStepTvrRun(stepBuilderFactory).getName(), partitionerTvrRun())
                 .step(slaveStepTvrRun(stepBuilderFactory))
                 .gridSize(5)
                 .taskExecutor(taskExecutor())
@@ -83,8 +81,8 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public TvrRunPartitioner partitionerTvrRun(GradStudentService gradStudentService) {
-        return new TvrRunPartitioner(gradStudentService);
+    public TvrRunPartitioner partitionerTvrRun() {
+        return new TvrRunPartitioner();
     }
 
     @Bean
@@ -104,12 +102,11 @@ public class BatchJobConfig {
      * Creates a bean that represents our batch job.
      */
     @Bean(name="tvrBatchJob")
-    public Job tvrBatchJob(TvrRunJobCompletionNotificationListener listener,StepBuilderFactory stepBuilderFactory, GradStudentService gradStudentService,
-                           JobBuilderFactory jobBuilderFactory) {
+    public Job tvrBatchJob(TvrRunJobCompletionNotificationListener listener,StepBuilderFactory stepBuilderFactory,JobBuilderFactory jobBuilderFactory) {
         return jobBuilderFactory.get("tvrBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepTvrRun(stepBuilderFactory, gradStudentService))
+                .flow(masterStepTvrRun(stepBuilderFactory))
                 .end()
                 .build();
     }

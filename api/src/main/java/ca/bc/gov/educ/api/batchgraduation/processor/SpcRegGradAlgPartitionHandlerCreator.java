@@ -14,9 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
-public class RegGradAlgPartitionHandlerCreator extends BasePartitionHandlerCreator implements Tasklet {
+public class SpcRegGradAlgPartitionHandlerCreator extends BasePartitionHandlerCreator implements Tasklet {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RegGradAlgPartitionHandlerCreator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpcRegGradAlgPartitionHandlerCreator.class);
+
 
     @Autowired
     RestUtils restUtils;

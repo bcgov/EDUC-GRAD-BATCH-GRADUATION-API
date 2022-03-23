@@ -4,7 +4,6 @@ import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.service.GradStudentService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.partition.support.SimplePartitioner;
@@ -20,14 +19,10 @@ public class TvrRunPartitioner extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TvrRunPartitioner.class);
 
-    private final GradStudentService gradStudentService;
-
     @Autowired
     RestUtils restUtils;
 
-    public TvrRunPartitioner(GradStudentService gradStudentService) {
-        this.gradStudentService = gradStudentService;
-    }
+    public TvrRunPartitioner(){}
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
