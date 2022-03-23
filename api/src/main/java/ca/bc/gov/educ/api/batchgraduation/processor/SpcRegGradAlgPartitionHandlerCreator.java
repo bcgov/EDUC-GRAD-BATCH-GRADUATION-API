@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -29,7 +30,7 @@ public class SpcRegGradAlgPartitionHandlerCreator extends BasePartitionHandlerCr
     AlgorithmSummaryDTO summaryDTO;
 
     @Value("#{stepExecution.jobExecution.jobId}")
-    Long batchId;
+    JobExecution jobExecution;
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
@@ -38,7 +39,7 @@ public class SpcRegGradAlgPartitionHandlerCreator extends BasePartitionHandlerCr
             if (summaryDTO.getProcessedCount() % 50 == 0) {
                 summaryDTO.setAccessToken(fetchAccessToken());
             }
-            summaryDTO.setBatchId(batchId);
+            summaryDTO.setBatchId(jobExecution.getId());
             LOGGER.info("{} processing partitionData = {}",Thread.currentThread().getName(), d.getProgram());
             try {
                 restUtils.processStudent(d, summaryDTO);
