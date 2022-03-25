@@ -14,6 +14,7 @@ spring:
       maximum-pool-size: ${MAXIMUM_POOL_SIZE}
       connection-timeout: ${CONNECTION_TIMEOUT}
       max-lifetime: ${MAX_LIFETIME}
+      keepalive-time: ${KEEP_ALIVE_TIME}
     url: ${CONNECTION_STRING}
     username: ${USERNAME}
     password: ${PASSWORD}
