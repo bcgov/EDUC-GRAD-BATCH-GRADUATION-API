@@ -47,6 +47,7 @@ public class TvrRunPartitioner extends SimplePartitioner {
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());
                 executionContext.put("summary", summaryDTO);
+                executionContext.put("index",0);
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }
