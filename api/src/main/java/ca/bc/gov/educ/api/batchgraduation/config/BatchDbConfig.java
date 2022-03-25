@@ -27,7 +27,7 @@ import java.util.HashMap;
         transactionManagerRef = "batchTransactionManager"
 )
 @EnableTransactionManagement
-public class DbConfig {
+public class BatchDbConfig {
     // Hikari Pool
     @Value("${spring.db-connection.hikari.maximum-pool-size}")
     private int maxPoolSize;
@@ -59,7 +59,7 @@ public class DbConfig {
 
     @Primary
     @Bean
-    public DataSource dataSource() {
+    public DataSource batchDataSource() {
         HikariConfig config = new HikariConfig();
 
         config.setDriverClassName(driverClassName);
@@ -83,7 +83,7 @@ public class DbConfig {
     public LocalContainerEntityManagerFactoryBean batchEntityManager() {
         LocalContainerEntityManagerFactoryBean em
                 = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(dataSource());
+        em.setDataSource(batchDataSource());
         em.setPackagesToScan(new String[] {"ca.bc.gov.educ.api.batchgraduation.entity"});
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
