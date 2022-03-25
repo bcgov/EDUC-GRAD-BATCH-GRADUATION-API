@@ -63,7 +63,7 @@ public class BatchJobLauncher {
         LOGGER.info("Batch Job was stopped");
     }
 
-    @Scheduled(cron = "0 0/30 23-2 * * *")
+    @Scheduled(cron = "0 0 23 * * *")
     public void runTranscriptVerificationReportProcess() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, NoSuchJobException {
         LOGGER.info("Batch Job was started");
         JobParametersBuilder builder = new JobParametersBuilder();
