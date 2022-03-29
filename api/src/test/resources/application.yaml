@@ -75,3 +75,4 @@ endpoint:
     student-for-grad-list: https://gradstudent-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
     student-for-projectedgrad-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/projected
     pen-student-by-pen: https://student-api-75e61b-tools.apps.silver.devops.gov.bc.ca/api/v1/student?pen=%s
+    student-for-special-grad-run-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentlistsearch
