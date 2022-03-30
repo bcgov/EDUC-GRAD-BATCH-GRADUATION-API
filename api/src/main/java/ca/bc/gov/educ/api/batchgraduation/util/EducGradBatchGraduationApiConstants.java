@@ -75,4 +75,8 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-student-api.get-student-data-list}")
     private String gradStudentApiStudentDataListUrl;
 
+    // Number of Partitions
+    @Value("${batch.partitions.number}")
+    private int numberOfPartitions;
+
 }
