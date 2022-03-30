@@ -8,6 +8,7 @@ import ca.bc.gov.educ.api.batchgraduation.processor.RunProjectedGradAlgorithmPro
 import ca.bc.gov.educ.api.batchgraduation.processor.RunRegularGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.processor.RunSpecialGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.reader.*;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.writer.RegGradAlgBatchPerformanceWriter;
 import ca.bc.gov.educ.api.batchgraduation.writer.TvrRunBatchPerformanceWriter;
 import org.springframework.batch.core.Job;
@@ -56,12 +57,12 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step masterStepRegGrad(StepBuilderFactory stepBuilderFactory) {
+    public Step masterStepRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepRegGrad")
                 .partitioner(graduationJobStep(stepBuilderFactory).getName(), partitionerRegGrad())
                 .step(graduationJobStep(stepBuilderFactory))
-                .gridSize(5)
-                .taskExecutor(taskExecutor())
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
                 .build();
     }
 
@@ -84,11 +85,11 @@ public class BatchJobConfig {
      * Creates a bean that represents our batch job.
      */
     @Bean(name="GraduationBatchJob")
-    public Job graduationBatchJob(GradRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory,JobBuilderFactory jobBuilderFactory) {
+    public Job graduationBatchJob(GradRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory,JobBuilderFactory jobBuilderFactory,EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("GraduationBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepRegGrad(stepBuilderFactory))
+                .flow(masterStepRegGrad(stepBuilderFactory,constants))
                 .end()
                 .build();
     }
@@ -115,12 +116,12 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step masterStepTvrRun(StepBuilderFactory stepBuilderFactory) {
+    public Step masterStepTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepTvrRun")
                 .partitioner(tvrJobStep(stepBuilderFactory).getName(), partitionerTvrRun())
                 .step(tvrJobStep(stepBuilderFactory))
-                .gridSize(5)
-                .taskExecutor(taskExecutor())
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
                 .build();
     }
 
@@ -144,11 +145,11 @@ public class BatchJobConfig {
      * Creates a bean that represents our batch job.
      */
     @Bean(name="tvrBatchJob")
-    public Job tvrBatchJob(TvrRunJobCompletionNotificationListener listener,StepBuilderFactory stepBuilderFactory,JobBuilderFactory jobBuilderFactory) {
+    public Job tvrBatchJob(TvrRunJobCompletionNotificationListener listener,StepBuilderFactory stepBuilderFactory,JobBuilderFactory jobBuilderFactory,EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("tvrBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepTvrRun(stepBuilderFactory))
+                .flow(masterStepTvrRun(stepBuilderFactory,constants))
                 .end()
                 .build();
     }
@@ -174,12 +175,12 @@ public class BatchJobConfig {
 
     // Partitioning for Regular Grad Run updates
     @Bean
-    public Step masterStepSpcRegGrad(StepBuilderFactory stepBuilderFactory) {
+    public Step masterStepSpcRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepSpcRegGrad")
                 .partitioner(slaveStepSpcRegGrad(stepBuilderFactory).getName(), partitionerSpcRegGrad())
                 .step(slaveStepSpcRegGrad(stepBuilderFactory))
-                .gridSize(5)
-                .taskExecutor(taskExecutor())
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
                 .build();
     }
 
@@ -204,11 +205,11 @@ public class BatchJobConfig {
      * Creates a bean that represents our batch job.
      */
     @Bean(name="SpecialGraduationBatchJob")
-    public Job specialGraduationBatchJob(SpecialRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory) {
+    public Job specialGraduationBatchJob(SpecialRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("SpecialGraduationBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepSpcRegGrad(stepBuilderFactory))
+                .flow(masterStepSpcRegGrad(stepBuilderFactory,constants))
                 .end()
                 .build();
     }
@@ -224,10 +225,10 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public TaskExecutor taskExecutor() {
+    public TaskExecutor taskExecutor(int numberOfPartitions) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(15);
-        executor.setMaxPoolSize(15);
+        executor.setCorePoolSize(numberOfPartitions);
+        executor.setMaxPoolSize(numberOfPartitions);
         executor.setThreadNamePrefix("partition_task_executor_thread-");
         executor.initialize();
         return executor;

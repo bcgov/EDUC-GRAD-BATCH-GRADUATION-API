@@ -92,6 +92,10 @@ authorization:
   user: ${GRAD_CLIENT_NAME}
   password: ${GRAD_CLIENT_SECRET}
 
+batch:
+  partitions:
+    number: ${NUMBER_OF_PARTITIONS}
+
 #Endpoints
 endpoint:
   keycloak:
