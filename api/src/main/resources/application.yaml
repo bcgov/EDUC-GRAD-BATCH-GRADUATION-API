@@ -109,3 +109,4 @@ endpoint:
     student-for-projectedgrad-list: ${GRAD_STUDENT_API}api/v1/student/projected
     pen-student-by-pen: ${PEN_API}api/v1/student?pen=%s
     student-for-special-grad-run-list: ${GRAD_STUDENT_API}api/v1/student/studentlistsearch
+    get-student-data-list: ${GRAD_STUDENT_API}api/v1/student/multistudentids

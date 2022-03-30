@@ -20,13 +20,13 @@ public class RunProjectedGradAlgorithmProcessor implements ItemProcessor<Graduat
 	@Value("#{stepExecutionContext['summary']}")
 	AlgorithmSummaryDTO summaryDTO;
 
-	@Value("#{stepExecution.jobExecution.jobId}")
-	JobExecution jobExecution;
+	@Value("#{stepExecution.jobExecution.id}")
+	Long batchId;
     
 	@Override
 	public GraduationStudentRecord process(GraduationStudentRecord item) throws Exception {
 		LOGGER.info("*** {} processing partitionData = {}",Thread.currentThread().getName(), item.getProgram());
-		summaryDTO.setBatchId(jobExecution.getId());
+		summaryDTO.setBatchId(batchId);
 		return restUtils.processProjectedGradStudent(item, summaryDTO);
 		
 	}

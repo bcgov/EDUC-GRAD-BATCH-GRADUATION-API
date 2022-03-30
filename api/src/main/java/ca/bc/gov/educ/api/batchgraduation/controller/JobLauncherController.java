@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import java.util.List;
 
+import ca.bc.gov.educ.api.batchgraduation.model.ErrorBoard;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,6 +17,8 @@ import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
@@ -104,7 +107,20 @@ public class JobLauncherController {
 
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_RUNS)
+    @GetMapping(EducGradBatchGraduationApiConstants.BATCH_ERRORS)
+    @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
+    public ResponseEntity<List<ErrorBoard>> loadError(@PathVariable Long batchId, @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber, @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        logger.info("Inside loadError");
+        OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
+        String accessToken = auth.getTokenValue();
+        List<ErrorBoard> errList = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken);
+        if(errList.isEmpty()) {
+            return new ResponseEntity<List<ErrorBoard>>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<List<ErrorBoard>>(errList,HttpStatus.OK);
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_RUNS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     public void launchRegGradSpecialJob(@RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchRegGradSpecialJob");
