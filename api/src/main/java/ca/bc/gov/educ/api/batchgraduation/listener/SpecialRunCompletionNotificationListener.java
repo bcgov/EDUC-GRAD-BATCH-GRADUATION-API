@@ -1,13 +1,12 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.BatchGradAlgorithmErrorHistory;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -18,16 +17,15 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @Component
-public class GradRunCompletionNotificationListener extends JobExecutionListenerSupport {
+public class SpecialRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GradRunCompletionNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpecialRunCompletionNotificationListener.class);
     
     @Autowired
     private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
@@ -53,7 +51,7 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
 			
-			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
+			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("spcRunAlgSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new AlgorithmSummaryDTO();
 			}

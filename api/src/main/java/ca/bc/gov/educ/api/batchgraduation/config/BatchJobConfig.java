@@ -1,19 +1,27 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
 import ca.bc.gov.educ.api.batchgraduation.listener.GradRunCompletionNotificationListener;
+import ca.bc.gov.educ.api.batchgraduation.listener.SpecialRunCompletionNotificationListener;
 import ca.bc.gov.educ.api.batchgraduation.listener.TvrRunJobCompletionNotificationListener;
-import ca.bc.gov.educ.api.batchgraduation.processor.RegGradAlgPartitionHandlerCreator;
-import ca.bc.gov.educ.api.batchgraduation.processor.TvrRunPartitionHandlerCreator;
-import ca.bc.gov.educ.api.batchgraduation.reader.RegGradAlgPartitioner;
-import ca.bc.gov.educ.api.batchgraduation.reader.TvrRunPartitioner;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.processor.RunProjectedGradAlgorithmProcessor;
+import ca.bc.gov.educ.api.batchgraduation.processor.RunRegularGradAlgorithmProcessor;
+import ca.bc.gov.educ.api.batchgraduation.processor.RunSpecialGradAlgorithmProcessor;
+import ca.bc.gov.educ.api.batchgraduation.reader.*;
+import ca.bc.gov.educ.api.batchgraduation.writer.RegGradAlgBatchPerformanceWriter;
+import ca.bc.gov.educ.api.batchgraduation.writer.TvrRunBatchPerformanceWriter;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.configuration.support.JobRegistryBeanPostProcessor;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.item.ItemProcessor;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,17 +29,37 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @Configuration
+@EnableBatchProcessing
 public class BatchJobConfig {
 
 	@Autowired
 	JobRegistry jobRegistry;
 
     // Partitioning for Regular Grad Run updates
+
+    @Bean
+    @StepScope
+    public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorRegGrad() {
+        return new RunRegularGradAlgorithmProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderRegGrad() {
+        return new RecalculateStudentReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<GraduationStudentRecord> itemWriterRegGrad() {
+        return new RegGradAlgBatchPerformanceWriter();
+    }
+
     @Bean
     public Step masterStepRegGrad(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("masterStepRegGrad")
-                .partitioner(slaveStepRegGrad(stepBuilderFactory).getName(), partitionerRegGrad())
-                .step(slaveStepRegGrad(stepBuilderFactory))
+                .partitioner(graduationJobStep(stepBuilderFactory).getName(), partitionerRegGrad())
+                .step(graduationJobStep(stepBuilderFactory))
                 .gridSize(5)
                 .taskExecutor(taskExecutor())
                 .build();
@@ -43,16 +71,13 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step slaveStepRegGrad(StepBuilderFactory stepBuilderFactory) {
-        return stepBuilderFactory.get("slaveStepRegGrad")
-                .tasklet(regGradAlgPartitionHandler())
+    public Step graduationJobStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("graduationJobStep")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderRegGrad())
+                .processor(itemProcessorRegGrad())
+                .writer(itemWriterRegGrad())
                 .build();
-    }
-
-    @Bean
-    @StepScope
-    public RegGradAlgPartitionHandlerCreator regGradAlgPartitionHandler() {
-        return new RegGradAlgPartitionHandlerCreator();
     }
 
     /**
@@ -70,11 +95,30 @@ public class BatchJobConfig {
 
 
     // Partitioning for Regular TVR Run updates
+
+    @Bean
+    @StepScope
+    public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorTvrRun() {
+        return new RunProjectedGradAlgorithmProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderTvrRun() {
+        return new RecalculateProjectedGradRunReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<GraduationStudentRecord> itemWriterTvrRun() {
+        return new TvrRunBatchPerformanceWriter();
+    }
+
     @Bean
     public Step masterStepTvrRun(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("masterStepTvrRun")
-                .partitioner(slaveStepTvrRun(stepBuilderFactory).getName(), partitionerTvrRun())
-                .step(slaveStepTvrRun(stepBuilderFactory))
+                .partitioner(tvrJobStep(stepBuilderFactory).getName(), partitionerTvrRun())
+                .step(tvrJobStep(stepBuilderFactory))
                 .gridSize(5)
                 .taskExecutor(taskExecutor())
                 .build();
@@ -85,17 +129,15 @@ public class BatchJobConfig {
         return new TvrRunPartitioner();
     }
 
-    @Bean
-    public Step slaveStepTvrRun(StepBuilderFactory stepBuilderFactory) {
-        return stepBuilderFactory.get("slaveStepTvrRun")
-                .tasklet(tvrRunPartitionHandlerCreator())
-                .build();
-    }
 
     @Bean
-    @StepScope
-    public TvrRunPartitionHandlerCreator tvrRunPartitionHandlerCreator() {
-        return new TvrRunPartitionHandlerCreator();
+    public Step tvrJobStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("tvrJobStep")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderTvrRun())
+                .processor(itemProcessorTvrRun())
+                .writer(itemWriterTvrRun())
+                .build();
     }
 
     /**
@@ -111,6 +153,69 @@ public class BatchJobConfig {
                 .build();
     }
 
+    //
+    @Bean
+    @StepScope
+    public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorSpcRegGrad() {
+        return new RunSpecialGradAlgorithmProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderSpcRegGrad() {
+        return new SpecialGradRunStudentReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<GraduationStudentRecord> itemWriterSpcRegGrad() {
+        return new RegGradAlgBatchPerformanceWriter();
+    }
+
+    // Partitioning for Regular Grad Run updates
+    @Bean
+    public Step masterStepSpcRegGrad(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("masterStepSpcRegGrad")
+                .partitioner(slaveStepSpcRegGrad(stepBuilderFactory).getName(), partitionerSpcRegGrad())
+                .step(slaveStepSpcRegGrad(stepBuilderFactory))
+                .gridSize(5)
+                .taskExecutor(taskExecutor())
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public SpcRegGradAlgPartitioner partitionerSpcRegGrad() {
+        return new SpcRegGradAlgPartitioner();
+    }
+
+
+    @Bean
+    public Step slaveStepSpcRegGrad(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepSpcRegGrad")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderSpcRegGrad())
+                .processor(itemProcessorSpcRegGrad())
+                .writer(itemWriterSpcRegGrad())
+                .build();
+    }
+
+    /**
+     * Creates a bean that represents our batch job.
+     */
+    @Bean(name="SpecialGraduationBatchJob")
+    public Job specialGraduationBatchJob(SpecialRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory) {
+        return jobBuilderFactory.get("SpecialGraduationBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepSpcRegGrad(stepBuilderFactory))
+                .end()
+                .build();
+    }
+
+
+    //
+
     @Bean
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {
         JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();
@@ -121,8 +226,8 @@ public class BatchJobConfig {
     @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10);
-        executor.setMaxPoolSize(50);
+        executor.setCorePoolSize(15);
+        executor.setMaxPoolSize(15);
         executor.setThreadNamePrefix("partition_task_executor_thread-");
         executor.initialize();
         return executor;

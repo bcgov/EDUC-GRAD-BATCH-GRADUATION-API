@@ -1,9 +1,16 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.model.ErrorBoard;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.BatchGradAlgorithmJobHistory;
@@ -16,11 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class GradDashboardService extends GradService {
 
 	private final BatchGradAlgorithmJobHistoryRepository  batchGradAlgorithmJobHistoryRepository;
+	private final BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
 	private final BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer;
+	private final RestUtils restUtils;
 
-    public GradDashboardService(BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository,BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer) {
+    public GradDashboardService(BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository,BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer,BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository,RestUtils restUtils) {
     	this.batchGradAlgorithmJobHistoryRepository = batchGradAlgorithmJobHistoryRepository;
     	this.batchGradAlgorithmJobHistoryTransformer = batchGradAlgorithmJobHistoryTransformer;
+		this.batchGradAlgorithmErrorHistoryRepository = batchGradAlgorithmErrorHistoryRepository;
+		this.restUtils = restUtils;
 	}
 
     @Transactional(readOnly = true)
@@ -44,5 +55,28 @@ public class GradDashboardService extends GradService {
     	}
     	end();
 		return gradDash;
+    }
+
+    public List<ErrorBoard> getErrorInfo(Long batchId, Integer pageNumber, Integer pageSize,String accessToken) {
+		Pageable paging = PageRequest.of(pageNumber, pageSize);
+		Page<BatchGradAlgorithmErrorHistoryEntity> pagedDate = batchGradAlgorithmErrorHistoryRepository.findByJobExecutionId(batchId,paging);
+		List<BatchGradAlgorithmErrorHistoryEntity> list = pagedDate.getContent();
+		List<UUID> studentIds = list.stream().map(BatchGradAlgorithmErrorHistoryEntity::getStudentID).collect(Collectors.toList());
+		List<ErrorBoard> eList = new ArrayList<>();
+		if(!studentIds.isEmpty()) {
+			List<GraduationStudentRecord> studentList = restUtils.getStudentData(studentIds, accessToken);
+
+			for (GraduationStudentRecord gRec : studentList) {
+				ErrorBoard eD = new ErrorBoard();
+				BatchGradAlgorithmErrorHistoryEntity ent = batchGradAlgorithmErrorHistoryRepository.findByStudentID(gRec.getStudentID());
+				eD.setError(ent.getError());
+				eD.setLegalFirstName(gRec.getLegalFirstName());
+				eD.setLegalLastName(gRec.getLegalLastName());
+				eD.setLegalMiddleNames(gRec.getLegalMiddleNames());
+				eD.setPen(gRec.getPen());
+				eList.add(eD);
+			}
+		}
+		return eList;
     }
 }

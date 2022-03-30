@@ -197,5 +197,13 @@ public class RestUtils {
         });
     }
 
-
+    public List<GraduationStudentRecord> getStudentData(List<UUID> studentIds, String accessToken) {
+        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        };
+        return this.webClient.post()
+                .uri(String.format(constants.getGradStudentApiStudentDataListUrl()))
+                .headers(h -> h.setBearerAuth(accessToken))
+                .body(BodyInserters.fromValue(studentIds))
+                .retrieve().bodyToMono(responseType).block();
+    }
 }
