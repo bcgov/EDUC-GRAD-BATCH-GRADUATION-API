@@ -19,8 +19,10 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_REG_GRAD_BATCH_JOB = "/executereggradbatchjob";
     public static final String EXECUTE_TVR_RUN_BATCH_JOB = "/executetvrrunbatchjob";
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
+    public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
     
     public static final String BATCH_DASHBOARD = "/dashboard";
+    public static final String BATCH_ERRORS = "/dashboard/errors/{batchId}";
 
     // Data Conversion
     public static final String EXECUTE_DATA_CONVERSION_BATCH_JOB = "/executeGradStudentDataConversionJob";
@@ -66,5 +68,15 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-student-api.student-for-projectedgrad-list}")
     private String gradStudentApiStudentForProjectedGradListUrl;
+
+    @Value("${endpoint.grad-student-api.student-for-special-grad-run-list}")
+    private String gradStudentApiStudentForSpcGradListUrl;
+
+    @Value("${endpoint.grad-student-api.get-student-data-list}")
+    private String gradStudentApiStudentDataListUrl;
+
+    // Number of Partitions
+    @Value("${batch.partitions.number}")
+    private int numberOfPartitions;
 
 }

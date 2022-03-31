@@ -13,7 +13,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @SpringBootApplication
-@EnableBatchProcessing
 @EnableScheduling
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class EducGradBatchGraduationApplication {

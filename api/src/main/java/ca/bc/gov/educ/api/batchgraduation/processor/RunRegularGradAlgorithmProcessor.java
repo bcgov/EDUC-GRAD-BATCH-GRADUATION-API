@@ -10,9 +10,9 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-public class RunProjectedGradAlgorithmProcessor implements ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> {
+public class RunRegularGradAlgorithmProcessor implements ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(RunProjectedGradAlgorithmProcessor.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RunRegularGradAlgorithmProcessor.class);
 
 	@Autowired
 	RestUtils restUtils;
@@ -26,8 +26,9 @@ public class RunProjectedGradAlgorithmProcessor implements ItemProcessor<Graduat
 	@Override
 	public GraduationStudentRecord process(GraduationStudentRecord item) throws Exception {
 		LOGGER.info("*** {} processing partitionData = {}",Thread.currentThread().getName(), item.getProgram());
+
 		summaryDTO.setBatchId(batchId);
-		return restUtils.processProjectedGradStudent(item, summaryDTO);
+		return restUtils.processStudent(item, summaryDTO);
 		
 	}
 

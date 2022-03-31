@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.writer;
 
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -9,13 +9,14 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemWriter;
+
+import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.List;
+public class RegGradAlgBatchPerformanceWriter implements ItemWriter<GraduationStudentRecord> {
 
-public class TvrRunBatchPerformanceWriter implements ItemWriter<GraduationStudentRecord> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TvrRunBatchPerformanceWriter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegGradAlgBatchPerformanceWriter.class);
 
     @Value("#{stepExecutionContext['summary']}")
     AlgorithmSummaryDTO summaryDTO;

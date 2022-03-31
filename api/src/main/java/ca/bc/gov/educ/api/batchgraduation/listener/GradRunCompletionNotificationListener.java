@@ -1,9 +1,13 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchGradAlgorithmErrorHistory;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -21,12 +25,15 @@ import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistor
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 
 @Component
-public class JobCompletionNotificationListener extends JobExecutionListenerSupport {
+public class GradRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobCompletionNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GradRunCompletionNotificationListener.class);
     
     @Autowired
     private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
+
+	@Autowired
+	private BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
     
     @Autowired
     private RestUtils restUtils;
@@ -46,7 +53,10 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
 			
-			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
+			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
+			if(summaryDTO == null) {
+				summaryDTO = new AlgorithmSummaryDTO();
+			}
 			int failedRecords = summaryDTO.getErrors().size();			
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();			
@@ -68,13 +78,23 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info(" Errors:		   {}", summaryDTO.getErrors().size());
-			summaryDTO.getErrors().forEach(e ->
-				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(),e.getDetail())
-			);
+			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
+			summaryDTO.getErrors().forEach(e -> {
+				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail());
+				BatchGradAlgorithmErrorHistoryEntity errorHistory = new BatchGradAlgorithmErrorHistoryEntity();
+				errorHistory.setStudentID(UUID.fromString(e.getStudentID()));
+				errorHistory.setJobExecutionId(jobExecutionId);
+				errorHistory.setError(e.getReason() + "-" + e.getDetail());
+				eList.add(errorHistory);
+			});
+			if(!eList.isEmpty())
+				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
+
 			LOGGER.info(" --------------------------------------------------------------------------------------");
+			AlgorithmSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
 				String key = e.getKey();
-				LOGGER.info(" {} count   : {}", key, summaryDTO.getProgramCountMap().get(key));
+				LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getProgramCountMap().get(key));
 			});
 			LOGGER.info("=======================================================================================");
 		}else if (jobExecution.getStatus() == BatchStatus.FAILED) {
@@ -88,7 +108,10 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			Date startTime = jobExecution.getStartTime();
 			Date endTime = jobExecution.getEndTime();
 			
-			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
+			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
+			if(summaryDTO == null) {
+				summaryDTO = new AlgorithmSummaryDTO();
+			}
 			int failedRecords = 0;			
 			List<GraduationStudentRecord> list = restUtils.getStudentsForAlgorithm(summaryDTO.getAccessToken());
 			if(!list.isEmpty()) {
@@ -113,13 +136,23 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info(" Errors		 : {}", summaryDTO.getErrors().size());
-			summaryDTO.getErrors().forEach(e ->
-				LOGGER.info("  Student ID: {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail())
-			);
+			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
+			summaryDTO.getErrors().forEach(e -> {
+				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail());
+				BatchGradAlgorithmErrorHistoryEntity errorHistory = new BatchGradAlgorithmErrorHistoryEntity();
+				errorHistory.setStudentID(UUID.fromString(e.getStudentID()));
+				errorHistory.setJobExecutionId(jobExecutionId);
+				errorHistory.setError(e.getReason() + "-" + e.getDetail());
+				eList.add(errorHistory);
+			});
+
+			if(!eList.isEmpty())
+				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
+			AlgorithmSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
 				String key = e.getKey();
-				LOGGER.info(" {} count   : {}", key, summaryDTO.getProgramCountMap().get(key));
+				LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getProgramCountMap().get(key));
 			});
 			LOGGER.info("=======================================================================================");
 		}

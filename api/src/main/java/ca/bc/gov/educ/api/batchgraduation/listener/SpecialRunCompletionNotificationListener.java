@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Component
-public class TvrRunJobCompletionNotificationListener extends JobExecutionListenerSupport {
+public class SpecialRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TvrRunJobCompletionNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpecialRunCompletionNotificationListener.class);
     
     @Autowired
     private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
@@ -41,7 +41,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("TVR Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
+	    	LOGGER.info("Grad Algorithm Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
 	    	JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
@@ -51,7 +51,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
 			
-			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("tvrRunSummaryDTO");
+			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("spcRunAlgSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new AlgorithmSummaryDTO();
 			}
@@ -69,7 +69,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			ent.setStatus(status);
 			ent.setTriggerBy(jobTrigger);
 			ent.setJobType(jobType);
-			
+
 			batchGradAlgorithmJobHistoryRepository.save(ent);
 			
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
@@ -85,9 +85,9 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 				errorHistory.setError(e.getReason() + "-" + e.getDetail());
 				eList.add(errorHistory);
 			});
-
 			if(!eList.isEmpty())
 				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
+
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			AlgorithmSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
@@ -98,7 +98,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 		}else if (jobExecution.getStatus() == BatchStatus.FAILED) {
 			long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("TVR Job failed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
+	    	LOGGER.info("Grad Algorithm Job failed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
 
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
@@ -106,7 +106,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			Date startTime = jobExecution.getStartTime();
 			Date endTime = jobExecution.getEndTime();
 			
-			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("tvrRunSummaryDTO");
+			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new AlgorithmSummaryDTO();
 			}
