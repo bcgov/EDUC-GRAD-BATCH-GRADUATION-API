@@ -1,14 +1,18 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
+import ca.bc.gov.educ.api.batchgraduation.listener.DistributionRunCompletionNotificationListener;
 import ca.bc.gov.educ.api.batchgraduation.listener.GradRunCompletionNotificationListener;
 import ca.bc.gov.educ.api.batchgraduation.listener.SpecialRunCompletionNotificationListener;
 import ca.bc.gov.educ.api.batchgraduation.listener.TvrRunJobCompletionNotificationListener;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunProcessor;
 import ca.bc.gov.educ.api.batchgraduation.processor.RunProjectedGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.processor.RunRegularGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.processor.RunSpecialGradAlgorithmProcessor;
 import ca.bc.gov.educ.api.batchgraduation.reader.*;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import ca.bc.gov.educ.api.batchgraduation.writer.DistributionRunWriter;
 import ca.bc.gov.educ.api.batchgraduation.writer.RegGradAlgBatchPerformanceWriter;
 import ca.bc.gov.educ.api.batchgraduation.writer.TvrRunBatchPerformanceWriter;
 import org.springframework.batch.core.Job;
@@ -217,6 +221,67 @@ public class BatchJobConfig {
 
     //
 
+    //
+    @Bean
+    @StepScope
+    public ItemProcessor<StudentCredentialDistribution,StudentCredentialDistribution> itemProcessorDisRun() {
+        return new DistributionRunProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<StudentCredentialDistribution> itemReaderDisRun() {
+        return new DistributionRunReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<StudentCredentialDistribution> itemWriterDisRun() {
+        return new DistributionRunWriter();
+    }
+
+    // Partitioning for Regular Grad Run updates
+    @Bean
+    public Step masterStepDisRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepDisRun")
+                .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRun())
+                .step(slaveStepDisRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public DistributionRunPartitioner partitionerDisRun() {
+        return new DistributionRunPartitioner();
+    }
+
+
+    @Bean
+    public Step slaveStepDisRun(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepDisRun")
+                .<StudentCredentialDistribution, StudentCredentialDistribution>chunk(1)
+                .reader(itemReaderDisRun())
+                .processor(itemProcessorDisRun())
+                .writer(itemWriterDisRun())
+                .build();
+    }
+
+    /**
+     * Creates a bean that represents our batch job.
+     */
+    @Bean(name="DistributionBatchJob")
+    public Job distributionBatchJob(DistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("DistributionBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepDisRun(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    //
     @Bean
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {
         JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();
