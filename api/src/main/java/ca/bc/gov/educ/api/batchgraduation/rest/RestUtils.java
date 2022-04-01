@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.rest;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
@@ -136,7 +137,6 @@ public class RestUtils {
                 return null;
             }
             LOGGER.info("*** {} Partition  * Processed student[{}] * Student ID: {} in total {}",Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
-            summary.increment(item.getProgram());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             ProcessError error = new ProcessError();
@@ -167,7 +167,6 @@ public class RestUtils {
                 return null;
             }
             LOGGER.info("*** {} Partition  * Processed student[{}] * Student ID: {} in total {}",Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
-            summary.increment(item.getProgram());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             ProcessError error = new ProcessError();
@@ -205,5 +204,54 @@ public class RestUtils {
                 .headers(h -> h.setBearerAuth(accessToken))
                 .body(BodyInserters.fromValue(studentIds))
                 .retrieve().bodyToMono(responseType).block();
+    }
+
+    public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary) {
+        LOGGER.info("*** {} Partition  - Processing  * STUDENT ID: * {}",Thread.currentThread().getName(),item.getStudentID().toString());
+        summary.setProcessedCount(summary.getProcessedCount() + 1L);
+        String accessToken = summary.getAccessToken();
+
+        StudentCredentialDistribution scObj = summary.getGlobalList().stream().filter(pr -> pr.getStudentID().compareTo(item.getStudentID()) == 0)
+                .findAny()
+                .orElse(null);
+        if(scObj != null) {
+            item.setSchoolOfRecord(scObj.getSchoolOfRecord());
+        }else {
+            GradSearchStudent stuRec =this.getStudentData(item.getStudentID().toString(),accessToken);
+            if (stuRec != null) {
+                item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
+            }
+        }
+        summary.getGlobalList().add(item);
+        LOGGER.info("*** {} Partition  * Processed student[{}] * Student ID: {} in total {}",Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+        return item;
+    }
+
+    public GradSearchStudent getStudentData(String studentID, String accessToken) {
+
+        GradSearchStudent result = webClient.get()
+                .uri(String.format(constants.getStudentInfo(),studentID))
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve()
+                .bodyToMono(GradSearchStudent.class)
+                .block();
+
+        if(result != null)
+            LOGGER.info("*** Fetched # of Graduation Record : {}",result.getStudentID());
+
+        return result;
+    }
+
+    public void mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
+
+        DistributionResponse result = webClient.post()
+                .uri(String.format(constants.getMergeAndUpload(),batchId))
+                .headers(h -> h.setBearerAuth(accessToken))
+                .body(BodyInserters.fromValue(mapDist))
+                .retrieve()
+                .bodyToMono(DistributionResponse.class)
+                .block();
+
+        LOGGER.info("Merge and Upload Success {}",result.getMergeProcessResponse());
     }
 }
