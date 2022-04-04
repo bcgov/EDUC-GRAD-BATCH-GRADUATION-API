@@ -149,7 +149,7 @@ public class JobLauncherController {
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, "MANUAL");
-        builder.addString(JOB_TYPE, "DISRUN");
+        builder.addString(JOB_TYPE, "DISTRUNMONTH");
         try {
             jobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
