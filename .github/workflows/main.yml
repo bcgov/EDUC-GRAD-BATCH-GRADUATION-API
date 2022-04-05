@@ -6,10 +6,10 @@ on:
   pull_request:
     branches:
       - main
-      - grad-release
+      - release/*
 jobs:
   build:
-    name: Build unit test and analyze
+    name: Build
     runs-on: ubuntu-latest
     defaults:
       run:
