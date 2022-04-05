@@ -4,8 +4,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.ErrorBoard;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.springframework.data.domain.Page;
@@ -13,8 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import ca.bc.gov.educ.api.batchgraduation.model.BatchGradAlgorithmJobHistory;
-import ca.bc.gov.educ.api.batchgraduation.model.GradDashboard;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchGradAlgorithmJobHistoryTransformer;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +54,8 @@ public class GradDashboardService extends GradService {
 		return gradDash;
     }
 
-    public List<ErrorBoard> getErrorInfo(Long batchId, Integer pageNumber, Integer pageSize,String accessToken) {
+    public ErrorDashBoard getErrorInfo(Long batchId, Integer pageNumber, Integer pageSize,String accessToken) {
+		ErrorDashBoard edb = new ErrorDashBoard();
 		Pageable paging = PageRequest.of(pageNumber, pageSize);
 		Page<BatchGradAlgorithmErrorHistoryEntity> pagedDate = batchGradAlgorithmErrorHistoryRepository.findByJobExecutionId(batchId,paging);
 		List<BatchGradAlgorithmErrorHistoryEntity> list = pagedDate.getContent();
@@ -68,7 +66,7 @@ public class GradDashboardService extends GradService {
 
 			for (GraduationStudentRecord gRec : studentList) {
 				ErrorBoard eD = new ErrorBoard();
-				BatchGradAlgorithmErrorHistoryEntity ent = batchGradAlgorithmErrorHistoryRepository.findByStudentID(gRec.getStudentID());
+				BatchGradAlgorithmErrorHistoryEntity ent = batchGradAlgorithmErrorHistoryRepository.findByStudentIDAndJobExecutionId(gRec.getStudentID(),batchId);
 				eD.setError(ent.getError());
 				eD.setLegalFirstName(gRec.getLegalFirstName());
 				eD.setLegalLastName(gRec.getLegalLastName());
@@ -77,6 +75,14 @@ public class GradDashboardService extends GradService {
 				eList.add(eD);
 			}
 		}
-		return eList;
+		edb.setErrorList(eList);
+		edb.setPageable(pagedDate.getPageable());
+		edb.setNumber(pagedDate.getNumber());
+		edb.setSize(pagedDate.getSize());
+		edb.setSort(pagedDate.getSort());
+		edb.setTotalElements(pagedDate.getTotalElements());
+		edb.setTotalPages(pagedDate.getTotalPages());
+		edb.setNumberOfElements(pagedDate.getNumberOfElements());
+		return edb;
     }
 }

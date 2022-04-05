@@ -16,5 +16,5 @@ public interface BatchGradAlgorithmErrorHistoryRepository extends JpaRepository<
 
     Page<BatchGradAlgorithmErrorHistoryEntity> findByJobExecutionId(Long batchId, Pageable paging);
 
-    BatchGradAlgorithmErrorHistoryEntity findByStudentID(UUID studentID);
+    BatchGradAlgorithmErrorHistoryEntity findByStudentIDAndJobExecutionId(UUID studentID, Long batchId);
 }
