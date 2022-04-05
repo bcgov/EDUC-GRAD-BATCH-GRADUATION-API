@@ -2,8 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import java.util.List;
 
-import ca.bc.gov.educ.api.batchgraduation.model.ErrorBoard;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,8 +24,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
 import org.springframework.web.bind.annotation.*;
 
-import ca.bc.gov.educ.api.batchgraduation.model.GradDashboard;
-import ca.bc.gov.educ.api.batchgraduation.model.LoadStudentData;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
@@ -111,15 +108,15 @@ public class JobLauncherController {
 
     @GetMapping(EducGradBatchGraduationApiConstants.BATCH_ERRORS)
     @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
-    public ResponseEntity<List<ErrorBoard>> loadError(@PathVariable Long batchId, @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber, @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+    public ResponseEntity<ErrorDashBoard> loadError(@PathVariable Long batchId, @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber, @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
         logger.info("Inside loadError");
         OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
         String accessToken = auth.getTokenValue();
-        List<ErrorBoard> errList = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken);
-        if(errList.isEmpty()) {
-            return new ResponseEntity<List<ErrorBoard>>(HttpStatus.NO_CONTENT);
+        ErrorDashBoard dash = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken);
+        if(dash == null) {
+            return new ResponseEntity<ErrorDashBoard>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<List<ErrorBoard>>(errList,HttpStatus.OK);
+        return new ResponseEntity<ErrorDashBoard>(dash,HttpStatus.OK);
     }
 
     @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_RUNS)
