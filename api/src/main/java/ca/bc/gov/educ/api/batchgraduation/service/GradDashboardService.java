@@ -68,7 +68,7 @@ public class GradDashboardService extends GradService {
 
 			for (GraduationStudentRecord gRec : studentList) {
 				ErrorBoard eD = new ErrorBoard();
-				BatchGradAlgorithmErrorHistoryEntity ent = batchGradAlgorithmErrorHistoryRepository.findByStudentID(gRec.getStudentID());
+				BatchGradAlgorithmErrorHistoryEntity ent = batchGradAlgorithmErrorHistoryRepository.findByStudentIDAndJobExecutionId(gRec.getStudentID(),batchId);
 				eD.setError(ent.getError());
 				eD.setLegalFirstName(gRec.getLegalFirstName());
 				eD.setLegalLastName(gRec.getLegalLastName());
