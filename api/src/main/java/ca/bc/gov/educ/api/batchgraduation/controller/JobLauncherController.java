@@ -139,6 +139,26 @@ public class JobLauncherController {
 
     }
 
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_TVR_RUNS)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    public void launchTvrRunSpecialJob(@RequestBody StudentSearchRequest studentSearchRequest) {
+        logger.debug("launchTvrRunSpecialJob");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, "MANUAL");
+        builder.addString(JOB_TYPE, "TVRRUN");
+
+        try {
+            String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
+            builder.addString(SEARCH_REQUEST, studentSearchData);
+            jobLauncher.run(jobRegistry.getJob("SpecialGraduationBatchJob"), builder.toJobParameters());
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_DIS_RUN_BATCH_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     public void launchDistributionRunJob() {
