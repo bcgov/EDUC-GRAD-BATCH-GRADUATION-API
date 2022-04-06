@@ -48,6 +48,10 @@ public class JobLauncherController {
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
     private static final String SEARCH_REQUEST = "searchRequest";
+    private static final String MANUAL = "MANUAL";
+    private static final String TVRRUN = "TVRRUN";
+    private static final String REGALG = "REGALG";
+    private static final String DISTRUNMONTH = "DISTRUNMONTH";
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
@@ -69,8 +73,8 @@ public class JobLauncherController {
         logger.debug("launchRegGradJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, "MANUAL");
-        builder.addString(JOB_TYPE, "REGALG");
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, REGALG);
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
@@ -93,8 +97,8 @@ public class JobLauncherController {
         logger.debug("launchTvrRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, "MANUAL");
-        builder.addString(JOB_TYPE, "TVRRUN");
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, TVRRUN);
         try {
             JobExecution jobExecution =jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
@@ -131,9 +135,9 @@ public class JobLauncherController {
         logger.debug("Inside loadDashboard");
         GradDashboard dash = gradDashboardService.getDashboardInfo();
         if(dash != null) {
-            return new ResponseEntity<GradDashboard>(dash,HttpStatus.OK);
+            return new ResponseEntity<>(dash,HttpStatus.OK);
         }
-        return new ResponseEntity<GradDashboard>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.BATCH_ERRORS)
@@ -146,9 +150,9 @@ public class JobLauncherController {
         String accessToken = auth.getTokenValue();
         ErrorDashBoard dash = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken);
         if(dash == null) {
-            return new ResponseEntity<ErrorDashBoard>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<ErrorDashBoard>(dash,HttpStatus.OK);
+        return new ResponseEntity<>(dash,HttpStatus.OK);
     }
 
     @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_RUNS)
@@ -159,8 +163,8 @@ public class JobLauncherController {
         logger.debug("launchRegGradSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, "MANUAL");
-        builder.addString(JOB_TYPE, "REGALG");
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, REGALG);
 
         try {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
@@ -184,8 +188,8 @@ public class JobLauncherController {
         logger.debug("launchTvrRunSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, "MANUAL");
-        builder.addString(JOB_TYPE, "TVRRUN");
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, TVRRUN);
 
         try {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
@@ -204,18 +208,24 @@ public class JobLauncherController {
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_DIS_RUN_BATCH_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
-    public void launchDistributionRunJob() {
+    @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<DistributionSummaryDTO> launchDistributionRunJob() {
         logger.debug("launchDistributionRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, "MANUAL");
-        builder.addString(JOB_TYPE, "DISTRUNMONTH");
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, DISTRUNMONTH);
         try {
-            jobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
+            return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
         }
 
     }
