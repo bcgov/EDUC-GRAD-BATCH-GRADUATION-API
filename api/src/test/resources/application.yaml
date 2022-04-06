@@ -5,7 +5,7 @@ spring:
   datasource:
     hikari:
       pool-name: batchgraduation-api-cp
-      maximum-pool-size: 1
+      maximum-pool-size: 15
       connection-timeout: 6000
       max-lifetime: 600000
     driver-class: org.h2.Driver
@@ -59,6 +59,10 @@ authorization:
   user: batch-api
   password: abc
 
+batch:
+  partitions:
+    number: 10
+
 #Endpoints
 endpoint:
   keycloak:
@@ -76,3 +80,13 @@ endpoint:
     student-for-projectedgrad-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/projected
     pen-student-by-pen: https://student-api-75e61b-tools.apps.silver.devops.gov.bc.ca/api/v1/student?pen=%s
     student-for-special-grad-run-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentlistsearch
+    get-student-data-list: http://localhost:9994/api/v1/student/multistudentids
+    get-student-record: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/stdid/%s
+  grad-graduation-report-api:
+    get-transcript-list:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/gettranscriptsfordistribution
+    get-certificate-list:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/getcertificatesfordistribution
+  grad-distribution-api:
+    merge-n-upload:
+      url: http://localhost:9998/api/v1/distribute/run/MER?batchId=%s

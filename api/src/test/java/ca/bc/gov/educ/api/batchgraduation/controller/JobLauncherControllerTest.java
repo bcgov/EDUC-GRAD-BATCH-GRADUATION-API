@@ -43,7 +43,7 @@ public class JobLauncherControllerTest {
             exceptionIsThrown = true;
         }
 
-        assertThat(exceptionIsThrown).isFalse();
+        assertThat(exceptionIsThrown).isTrue();
     }
 
     @Test
@@ -55,7 +55,7 @@ public class JobLauncherControllerTest {
             exceptionIsThrown = true;
         }
 
-        assertThat(exceptionIsThrown).isFalse();
+        assertThat(exceptionIsThrown).isTrue();
     }
 
     @Test
@@ -82,7 +82,7 @@ public class JobLauncherControllerTest {
             exceptionIsThrown = true;
         }
 
-        assertThat(exceptionIsThrown).isFalse();
+        assertThat(exceptionIsThrown).isTrue();
 
     }
 }

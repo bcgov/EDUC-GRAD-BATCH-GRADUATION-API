@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.rest;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import org.slf4j.Logger;
@@ -180,8 +181,9 @@ public class RestUtils {
         }
     }
 
-    public void getStudentByPenFromStudentAPI(List<LoadStudentData> loadStudentData, String accessToken) {
-       loadStudentData.forEach(student -> {
+    public Integer getStudentByPenFromStudentAPI(List<LoadStudentData> loadStudentData, String accessToken) {
+       AtomicReference<Integer> recordsAdded = new AtomicReference<>(0);
+        loadStudentData.forEach(student -> {
             List<Student> stuDataList = this.getStudentsByPen(student.getPen(), accessToken);
             stuDataList.forEach(st-> {
                 GraduationStudentRecord gradStu = new GraduationStudentRecord();
@@ -192,8 +194,10 @@ public class RestUtils {
                 gradStu.setStudentStatus(student.getStudentStatus());
                 gradStu.setStudentID(UUID.fromString(st.getStudentID()));
                 this.saveGraduationStudentRecord(gradStu, accessToken);
+                recordsAdded.getAndSet(recordsAdded.get() + 1);
             });
         });
+        return recordsAdded.get();
     }
 
     public List<GraduationStudentRecord> getStudentData(List<UUID> studentIds, String accessToken) {
