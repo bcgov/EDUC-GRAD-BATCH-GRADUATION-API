@@ -21,6 +21,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_DIS_RUN_BATCH_JOB = "/executedisrunbatchjob";
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
+    public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
     
     public static final String BATCH_DASHBOARD = "/dashboard";
     public static final String BATCH_ERRORS = "/dashboard/errors/{batchId}";
