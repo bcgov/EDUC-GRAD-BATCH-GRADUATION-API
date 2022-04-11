@@ -117,14 +117,14 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
     @Operation(summary = "Load Students to GRAD", description = "Load Students to GRAD", tags = { "Student" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<Integer> loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData) {
+    public ResponseEntity<String> loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData) {
         logger.debug("Inside loadStudentIDs");
         OAuth2AuthenticationDetails auth = (OAuth2AuthenticationDetails) SecurityContextHolder.getContext().getAuthentication().getDetails();
         String accessToken = auth.getTokenValue();
         Integer recordsAdded = restUtils.getStudentByPenFromStudentAPI(loadStudentData, accessToken);
         if(recordsAdded != null)
-            return ResponseEntity.ok(recordsAdded);
-        return ResponseEntity.status(500).body(recordsAdded);
+            return ResponseEntity.ok("Record Added Successfully");
+        return ResponseEntity.status(500).body("Student Record Could not be added");
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.BATCH_DASHBOARD)
