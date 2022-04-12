@@ -194,7 +194,7 @@ public class JobLauncherController {
         try {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
-            JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("SpecialGraduationBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("SpecialTvrRunBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("tvrRunSummaryDTO");
             return ResponseEntity.ok(summaryDTO);
