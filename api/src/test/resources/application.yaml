@@ -87,6 +87,8 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/gettranscriptsfordistribution
     get-certificate-list:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/getcertificatesfordistribution
+    update-student-credential:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcredential/%s/%s/%s
   grad-distribution-api:
     merge-n-upload:
       url: http://localhost:9998/api/v1/distribute/run/MER?batchId=%s
