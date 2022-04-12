@@ -93,4 +93,7 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-distribution-api.merge-n-upload.url}")
     private String mergeAndUpload;
 
+    @Value("${endpoint.grad-graduation-report-api.update-student-credential.url}")
+    private String updateStudentCredential;
+
 }
