@@ -6,10 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.listener.SpecialRunCompletionNotificat
 import ca.bc.gov.educ.api.batchgraduation.listener.TvrRunJobCompletionNotificationListener;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunProcessor;
-import ca.bc.gov.educ.api.batchgraduation.processor.RunProjectedGradAlgorithmProcessor;
-import ca.bc.gov.educ.api.batchgraduation.processor.RunRegularGradAlgorithmProcessor;
-import ca.bc.gov.educ.api.batchgraduation.processor.RunSpecialGradAlgorithmProcessor;
+import ca.bc.gov.educ.api.batchgraduation.processor.*;
 import ca.bc.gov.educ.api.batchgraduation.reader.*;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.writer.DistributionRunWriter;
@@ -168,12 +165,30 @@ public class BatchJobConfig {
     @Bean
     @StepScope
     public ItemReader<GraduationStudentRecord> itemReaderSpcRegGrad() {
-        return new SpecialGradRunStudentReader();
+        return new SpecialProjectedGradRunReader();
     }
 
     @Bean
     @StepScope
     public ItemWriter<GraduationStudentRecord> itemWriterSpcRegGrad() {
+        return new TvrRunBatchPerformanceWriter();
+    }
+
+    @Bean
+    @StepScope
+    public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorSpcTvrRun() {
+        return new RunSpecialProjectedGradAlgorithmProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderSpcTvrRun() {
+        return new SpecialGradRunStudentReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<GraduationStudentRecord> itemWriterSpcTvrRun() {
         return new RegGradAlgBatchPerformanceWriter();
     }
 
@@ -181,6 +196,16 @@ public class BatchJobConfig {
     @Bean
     public Step masterStepSpcRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepSpcRegGrad")
+                .partitioner(slaveStepSpcRegGrad(stepBuilderFactory).getName(), partitionerSpcRegGrad())
+                .step(slaveStepSpcRegGrad(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
+    public Step masterStepSpcTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepSpcTvrRun")
                 .partitioner(slaveStepSpcRegGrad(stepBuilderFactory).getName(), partitionerSpcRegGrad())
                 .step(slaveStepSpcRegGrad(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
@@ -205,6 +230,16 @@ public class BatchJobConfig {
                 .build();
     }
 
+    @Bean
+    public Step slaveStepSpcTvrRun(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepSpcTvrRun")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderSpcTvrRun())
+                .processor(itemProcessorSpcTvrRun())
+                .writer(itemWriterSpcTvrRun())
+                .build();
+    }
+
     /**
      * Creates a bean that represents our batch job.
      */
@@ -218,6 +253,18 @@ public class BatchJobConfig {
                 .build();
     }
 
+    /**
+     * Creates a bean that represents our batch job.
+     */
+    @Bean(name="SpecialTvrRunBatchJob")
+    public Job specialTvrRunBatchJob(SpecialRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("SpecialTvrRunBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepSpcTvrRun(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
 
     //
 

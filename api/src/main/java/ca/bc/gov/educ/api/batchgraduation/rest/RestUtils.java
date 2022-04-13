@@ -146,7 +146,7 @@ public class RestUtils {
             error.setDetail("Graduation API is unavialble at this moment");
             summary.getErrors().add(error);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {}",Thread.currentThread().getName(),item.getStudentID().toString());
+            LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count : {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
             return null;
         }
 
@@ -176,7 +176,7 @@ public class RestUtils {
             error.setDetail("Graduation API is unavialble at this moment");
             summary.getErrors().add(error);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {}",Thread.currentThread().getName(),item.getStudentID().toString());
+            LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count: {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
             return null;
         }
     }
@@ -248,7 +248,7 @@ public class RestUtils {
         return result;
     }
 
-    public void mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
+    public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
 
         DistributionResponse result = webClient.post()
                 .uri(String.format(constants.getMergeAndUpload(),batchId))
@@ -259,5 +259,10 @@ public class RestUtils {
                 .block();
 
         LOGGER.info("Merge and Upload Success {}",result.getMergeProcessResponse());
+        return  result;
+    }
+
+    public void updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String accessToken) {
+        webClient.get().uri(String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType)).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(boolean.class).block();
     }
 }

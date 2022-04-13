@@ -172,9 +172,17 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR");
 			certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB");
 		});
-		restUtils.mergeAndUpload(batchId,accessToken,mapDist);
+		DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist);
+		if(disres != null) {
+			updateBackStudentRecords(cList,accessToken);
+		}
 	}
 
+	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,String accessToken) {
+		cList.forEach(scd-> {
+			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),accessToken);
+		});
+	}
 	private void transcriptPrintFile(List<StudentCredentialDistribution> yed4List, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
 		if(!yed4List.isEmpty()) {
 			TranscriptPrintRequest tpReq = new TranscriptPrintRequest();
