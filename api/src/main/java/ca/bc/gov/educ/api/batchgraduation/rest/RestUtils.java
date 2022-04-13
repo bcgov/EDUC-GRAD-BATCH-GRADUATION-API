@@ -146,7 +146,7 @@ public class RestUtils {
             error.setDetail("Graduation API is unavialble at this moment");
             summary.getErrors().add(error);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count : {}",Thread.currentThread().getName(),item.getStudentID().toString(),summary.getErrors().size());
+            LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count : {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
             return null;
         }
 
@@ -176,7 +176,7 @@ public class RestUtils {
             error.setDetail("Graduation API is unavialble at this moment");
             summary.getErrors().add(error);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count: {}",Thread.currentThread().getName(),item.getStudentID().toString(),summary.getErrors().size());
+            LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count: {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
             return null;
         }
     }
