@@ -229,4 +229,17 @@ public class JobLauncherController {
         }
 
     }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.BATCH_SUMMARY)
+    @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
+    @Operation(summary = "Load Batch Summary", description = "Load Batch Summary", tags = { "Dashboard" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "204", description = "No Content")})
+    public ResponseEntity<SummaryDashBoard> loadSummary(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber, @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        logger.debug("Inside loadSummary");
+        SummaryDashBoard batchSummary = gradDashboardService.getBatchSummary(pageNumber,pageSize);
+        if(batchSummary == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(batchSummary,HttpStatus.OK);
+    }
 }

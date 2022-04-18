@@ -25,6 +25,7 @@ public class EducGradBatchGraduationApiConstants {
     
     public static final String BATCH_DASHBOARD = "/dashboard";
     public static final String BATCH_ERRORS = "/dashboard/errors/{batchId}";
+    public static final String BATCH_SUMMARY = "/dashboard/summary";
 
     // Data Conversion
     public static final String EXECUTE_DATA_CONVERSION_BATCH_JOB = "/executeGradStudentDataConversionJob";
