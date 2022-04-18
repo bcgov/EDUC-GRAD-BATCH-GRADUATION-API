@@ -165,7 +165,10 @@ public class JobLauncherController {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, REGALG);
-
+        AlgorithmSummaryDTO validate = validateInput(studentSearchRequest);
+        if(validate != null) {
+            return ResponseEntity.status(400).body(validate);
+        }
         try {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
@@ -180,6 +183,15 @@ public class JobLauncherController {
         }
     }
 
+    private AlgorithmSummaryDTO validateInput(StudentSearchRequest studentSearchRequest) {
+        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
+            AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+            summaryDTO.setException("Please provide at least 1 parameter");
+            return summaryDTO;
+        }
+        return null;
+    }
+
     @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_TVR_RUNS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized TVR runs", tags = { "TVR" })
@@ -190,7 +202,10 @@ public class JobLauncherController {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
-
+        AlgorithmSummaryDTO validate = validateInput(studentSearchRequest);
+        if(validate != null) {
+            return ResponseEntity.status(400).body(validate);
+        }
         try {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
@@ -228,5 +243,18 @@ public class JobLauncherController {
             return ResponseEntity.status(500).body(summaryDTO);
         }
 
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.BATCH_SUMMARY)
+    @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
+    @Operation(summary = "Load Batch Summary", description = "Load Batch Summary", tags = { "Dashboard" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "204", description = "No Content")})
+    public ResponseEntity<SummaryDashBoard> loadSummary(@RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber, @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+        logger.debug("Inside loadSummary");
+        SummaryDashBoard batchSummary = gradDashboardService.getBatchSummary(pageNumber,pageSize);
+        if(batchSummary == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(batchSummary,HttpStatus.OK);
     }
 }

@@ -17,6 +17,7 @@ import java.util.List;
 public class StudentSearchRequest implements Serializable {
     List<String> schoolOfRecords;
     List<String> districts;
+    List<String> schoolCategoryCodes;
     List<String> pens;
     List<String> programs;
 
