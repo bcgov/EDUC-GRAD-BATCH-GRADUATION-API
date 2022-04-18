@@ -165,10 +165,9 @@ public class JobLauncherController {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, REGALG);
-        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
-            AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-            summaryDTO.setException("Please provide at least 1 parameter");
-            return ResponseEntity.status(400).body(summaryDTO);
+        AlgorithmSummaryDTO validate = validateInput(studentSearchRequest);
+        if(validate != null) {
+            return ResponseEntity.status(400).body(validate);
         }
         try {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
@@ -184,6 +183,15 @@ public class JobLauncherController {
         }
     }
 
+    private AlgorithmSummaryDTO validateInput(StudentSearchRequest studentSearchRequest) {
+        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
+            AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+            summaryDTO.setException("Please provide at least 1 parameter");
+            return summaryDTO;
+        }
+        return null;
+    }
+
     @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_TVR_RUNS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized TVR runs", tags = { "TVR" })
@@ -194,10 +202,9 @@ public class JobLauncherController {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
-        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
-            AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-            summaryDTO.setException("Please provide at least 1 parameter");
-            return ResponseEntity.status(400).body(summaryDTO);
+        AlgorithmSummaryDTO validate = validateInput(studentSearchRequest);
+        if(validate != null) {
+            return ResponseEntity.status(400).body(validate);
         }
         try {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
