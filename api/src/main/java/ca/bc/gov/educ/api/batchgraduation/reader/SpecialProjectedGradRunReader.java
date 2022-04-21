@@ -33,7 +33,7 @@ public class SpecialProjectedGradRunReader extends BaseReader {
             LOGGER.info("*** Found student[{}] - Student ID: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getStudentID(), summaryDTO.getReadCount());
             nxtStudentForProcessing++;
         }else {
-        	aggregate("tvrRunSummaryDTO");
+        	aggregate("spcRunAlgSummaryDTO");
         }
         return nextStudent;
     }
