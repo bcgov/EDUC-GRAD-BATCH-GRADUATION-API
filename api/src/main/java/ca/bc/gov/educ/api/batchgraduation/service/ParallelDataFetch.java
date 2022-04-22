@@ -22,4 +22,10 @@ public class ParallelDataFetch {
         Mono<List<StudentCredentialDistribution>> certificateList = graduationReportService.getCertificateList(accessToken);
         return Mono.zip(transcriptList,certificateList).map(tuple -> new DistributionDataParallelDTO(tuple.getT1(),tuple.getT2()));
     }
+
+    public Mono<DistributionDataParallelDTO> fetchDistributionRequiredDataYearly(String accessToken) {
+        Mono<List<StudentCredentialDistribution>> transcriptList = graduationReportService.getTranscriptListYearly(accessToken);
+        Mono<List<StudentCredentialDistribution>> certificateList = graduationReportService.getCertificateList(accessToken);
+        return Mono.zip(transcriptList,certificateList).map(tuple -> new DistributionDataParallelDTO(tuple.getT1(),tuple.getT2()));
+    }
 }

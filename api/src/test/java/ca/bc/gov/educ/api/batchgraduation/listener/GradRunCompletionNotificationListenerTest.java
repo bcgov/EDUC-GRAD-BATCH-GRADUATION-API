@@ -33,14 +33,14 @@ import static org.mockito.MockitoAnnotations.openMocks;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class TvrRunJobCompletionNotificationListenerTest {
+public class GradRunCompletionNotificationListenerTest {
 
     private static final String TIME = "time";
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
 
     @Autowired
-    private TvrRunJobCompletionNotificationListener tvrRunJobCompletionNotificationListener;
+    private GradRunCompletionNotificationListener gradRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
     @MockBean
     RestUtils restUtils;
@@ -102,7 +102,7 @@ public class TvrRunJobCompletionNotificationListenerTest {
         ent.setJobType(jobType);
 
         ex.setExecutionContext(jobContext);
-        tvrRunJobCompletionNotificationListener.afterJob(ex);
+        gradRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
     }
@@ -153,7 +153,7 @@ public class TvrRunJobCompletionNotificationListenerTest {
         grd.setProgram("2018-EN");
         list.add(grd);
         Mockito.when(restUtils.getStudentsForAlgorithm(summaryDTO.getAccessToken())).thenReturn(list);
-        tvrRunJobCompletionNotificationListener.afterJob(ex);
+        gradRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
     }

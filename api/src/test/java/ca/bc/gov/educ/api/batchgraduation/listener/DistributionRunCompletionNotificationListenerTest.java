@@ -1,14 +1,17 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
+import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -18,32 +21,53 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class TvrRunJobCompletionNotificationListenerTest {
+public class DistributionRunCompletionNotificationListenerTest {
 
     private static final String TIME = "time";
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
 
+    @Mock
+    WebClient.RequestHeadersSpec requestHeadersMock;
+    @Mock WebClient.RequestHeadersUriSpec requestHeadersUriMock;
+    @Mock WebClient.ResponseSpec responseMock;
+    @Mock WebClient.RequestBodySpec requestBodyMock;
+    @Mock WebClient.RequestBodyUriSpec requestBodyUriMock;
+
     @Autowired
-    private TvrRunJobCompletionNotificationListener tvrRunJobCompletionNotificationListener;
+    private DistributionRunCompletionNotificationListener distributionRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
     @MockBean
     RestUtils restUtils;
+
+    @Autowired
+    EducGradBatchGraduationApiConstants constants;
+
+    @Autowired
+    ParallelDataFetch parallelDataFetch;
+
+    @Autowired
+    GraduationReportService graduationReportService;
 
     @MockBean
     WebClient webClient;
@@ -73,56 +97,22 @@ public class TvrRunJobCompletionNotificationListenerTest {
         ExecutionContext jobContext = new ExecutionContext();
 
 
-        AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+        List<StudentCredentialDistribution> scdList = new ArrayList<>();
+        StudentCredentialDistribution scd = new StudentCredentialDistribution();
+        scd.setId(new UUID(1,1));
+        scd.setStudentID(new UUID(2,2));
+        scd.setCredentialTypeCode("E");
+        scd.setPaperType("YED2");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
         summaryDTO.setAccessToken("123");
         summaryDTO.setBatchId(121L);
         summaryDTO.setProcessedCount(10);
         summaryDTO.setErrors(new ArrayList<>());
-        jobContext.put("summaryDTO", summaryDTO);
-
-        JobParameters jobParameters = ex. getJobParameters();
-        int failedRecords = summaryDTO.getErrors().size();
-        Long processedStudents = summaryDTO.getProcessedCount();
-        Long expectedStudents = summaryDTO.getReadCount();
-        String status = ex.getStatus().toString();
-        Date startTime = ex.getStartTime();
-        Date endTime = ex.getEndTime();
-        String jobTrigger = jobParameters.getString("jobTrigger");
-        String jobType = jobParameters.getString("jobType");
-
-        BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
-        ent.setActualStudentsProcessed(processedStudents);
-        ent.setExpectedStudentsProcessed(expectedStudents);
-        ent.setFailedStudentsProcessed(failedRecords);
-        ent.setJobExecutionId(121L);
-        ent.setStartTime(startTime);
-        ent.setEndTime(endTime);
-        ent.setStatus(status);
-        ent.setTriggerBy(jobTrigger);
-        ent.setJobType(jobType);
-
-        ex.setExecutionContext(jobContext);
-        tvrRunJobCompletionNotificationListener.afterJob(ex);
-
-        assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
-    }
-
-    @Test
-    public void testAfterJob_Failed() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
-        JobExecution ex = new JobExecution(121L);
-        ex.setStatus(BatchStatus.FAILED);
-        ex.setStartTime(new Date());
-        ex.setEndTime(new Date());
-        ex.setId(121L);
-        ExecutionContext jobContext = new ExecutionContext();
-
-
-        AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-        summaryDTO.setAccessToken("123");
-        summaryDTO.setBatchId(121L);
-        summaryDTO.setProcessedCount(10);
-        summaryDTO.setErrors(new ArrayList<>());
-        jobContext.put("summaryDTO", summaryDTO);
+        summaryDTO.setGlobalList(scdList);
+        jobContext.put("distributionSummaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
@@ -147,13 +137,39 @@ public class TvrRunJobCompletionNotificationListenerTest {
 
         ex.setExecutionContext(jobContext);
 
-        List<GraduationStudentRecord> list = new ArrayList<>();
-        GraduationStudentRecord grd = new GraduationStudentRecord();
-        grd.setStudentID(new UUID(1,1));
-        grd.setProgram("2018-EN");
-        list.add(grd);
-        Mockito.when(restUtils.getStudentsForAlgorithm(summaryDTO.getAccessToken())).thenReturn(list);
-        tvrRunJobCompletionNotificationListener.afterJob(ex);
+        List<StudentCredentialDistribution> cList = new ArrayList<>();
+        cList.add(scd);
+
+        List<StudentCredentialDistribution> tList = new ArrayList<>();
+        tList.add(scd);
+
+        DistributionDataParallelDTO dp = new DistributionDataParallelDTO(tList,cList);
+
+        ParameterizedTypeReference<List<StudentCredentialDistribution>> tListRes = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getTranscriptDistributionList())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
+
+        ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getCertificateDistributionList())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(cListRes)).thenReturn(Mono.just(cList));
+
+        ResponseObj obj = new ResponseObj();
+        obj.setAccess_token("asdasd");
+        Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
+        Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
+        Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
+        Mockito.when(parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
+        distributionRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
     }

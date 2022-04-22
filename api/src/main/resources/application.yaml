@@ -117,6 +117,8 @@ endpoint:
     get-student-record: ${GRAD_STUDENT_API}api/v1/student/stdid/%s
   grad-graduation-report-api:
     get-transcript-list:
+      yearly:
+        url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistributionyearly
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistribution
     get-certificate-list:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/getcertificatesfordistribution

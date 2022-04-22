@@ -329,6 +329,49 @@ public class BatchJobConfig {
     }
 
     //
+
+    // Partitioning for Regular Grad Run updates
+    @Bean
+    public Step masterStepDisRunYearly(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepDisRunYearly")
+                .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRunYearly())
+                .step(slaveStepDisRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public DistributionRunPartitionerYearly partitionerDisRunYearly() {
+        return new DistributionRunPartitionerYearly();
+    }
+
+
+    @Bean
+    public Step slaveStepDisRunYearly(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepDisRun")
+                .<StudentCredentialDistribution, StudentCredentialDistribution>chunk(1)
+                .reader(itemReaderDisRun())
+                .processor(itemProcessorDisRun())
+                .writer(itemWriterDisRun())
+                .build();
+    }
+
+    /**
+     * Creates a bean that represents our batch job.
+     */
+    @Bean(name="YearlyDistributionBatchJob")
+    public Job distributionBatchJobYearly(DistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("YearlyDistributionBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepDisRunYearly(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    //
     @Bean
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {
         JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();

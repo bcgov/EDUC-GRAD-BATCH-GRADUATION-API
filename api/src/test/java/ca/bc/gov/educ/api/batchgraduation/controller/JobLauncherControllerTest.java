@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.model.LoadStudentData;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -9,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.security.core.Authentication;
@@ -30,6 +32,9 @@ public class JobLauncherControllerTest {
 
     @Mock
     private JobRegistry jobRegistry;
+
+    @Mock
+    private JobParametersBuilder jobParametersBuilder;
 
     @InjectMocks
     private JobLauncherController jobLauncherController;
@@ -84,5 +89,45 @@ public class JobLauncherControllerTest {
 
         assertThat(exceptionIsThrown).isTrue();
 
+    }
+
+    @Test
+    public void testDistributionGradJob() {
+        boolean exceptionIsThrown = false;
+        try {
+            jobLauncherController.launchDistributionRunJob();
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(exceptionIsThrown).isTrue();
+    }
+
+    @Test
+    public void testSpcTVRGradJob() {
+        boolean exceptionIsThrown = false;
+        StudentSearchRequest req = new StudentSearchRequest();
+        req.setPens(Arrays.asList("123213123"));
+        try {
+            jobLauncherController.launchTvrRunSpecialJob(req);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(exceptionIsThrown).isTrue();
+    }
+
+    @Test
+    public void testSpcRegGradJob() {
+        boolean exceptionIsThrown = false;
+        StudentSearchRequest req = new StudentSearchRequest();
+        req.setPens(Arrays.asList("123213123"));
+        try {
+            jobLauncherController.launchRegGradSpecialJob(req);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(exceptionIsThrown).isTrue();
     }
 }
