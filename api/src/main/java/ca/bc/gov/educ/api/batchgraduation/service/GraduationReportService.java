@@ -23,6 +23,12 @@ public class GraduationReportService {
 		return webClient.get().uri(constants.getTranscriptDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>(){});
 	}
 
+	public Mono<List<StudentCredentialDistribution>> getTranscriptListYearly(String accessToken) {
+		return webClient.get().uri(constants.getTranscriptYearlyDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>(){});
+	}
+
+
+
 	public Mono<List<StudentCredentialDistribution>> getCertificateList(String accessToken) {
 		return webClient.get().uri(constants.getCertificateDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>(){});
 	}

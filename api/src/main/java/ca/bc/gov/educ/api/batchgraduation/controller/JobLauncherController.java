@@ -52,6 +52,7 @@ public class JobLauncherController {
     private static final String TVRRUN = "TVRRUN";
     private static final String REGALG = "REGALG";
     private static final String DISTRUNMONTH = "DISTRUNMONTH";
+    private static final String DISTRUNYEAREND = "DISTRUNYEAREND";
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
@@ -233,6 +234,30 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE, DISTRUNMONTH);
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
+            return ResponseEntity.ok(summaryDTO);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | NoSuchJobException e) {
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
+        }
+
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_YEARLY_DIS_RUN_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<DistributionSummaryDTO> launchYearlyDistributionRunJob() {
+        logger.debug("launchYearlyDistributionRunJob");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, DISTRUNYEAREND);
+        try {
+            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
             return ResponseEntity.ok(summaryDTO);
