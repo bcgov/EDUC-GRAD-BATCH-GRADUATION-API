@@ -66,21 +66,21 @@ batch:
 #Endpoints
 endpoint:
   keycloak:
-    getToken: https://soam-tools.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/token
+    getToken: https://soam-dev.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/token
   grad-graduation-api:
     graduatestudent:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/GS?batchId=%s
-    reportonlyrun: 
+    reportonlyrun:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/FMR?batchId=%s
     tvrrun:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/REGFM?batchId=%s
   grad-student-api:
     grad-status: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s
-    student-for-grad-list: https://gradstudent-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
+    student-for-grad-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
     student-for-projectedgrad-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/projected
     pen-student-by-pen: https://student-api-75e61b-tools.apps.silver.devops.gov.bc.ca/api/v1/student?pen=%s
     student-for-special-grad-run-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentlistsearch
-    get-student-data-list: http://localhost:9994/api/v1/student/multistudentids
+    get-student-data-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/multistudentids
     get-student-record: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/stdid/%s
   grad-graduation-report-api:
     get-transcript-list:
@@ -91,4 +91,4 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcredential/%s/%s/%s
   grad-distribution-api:
     merge-n-upload:
-      url: http://localhost:9998/api/v1/distribute/run/MER?batchId=%s
+      url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/MER?batchId=%s
