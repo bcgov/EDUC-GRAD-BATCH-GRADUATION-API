@@ -114,7 +114,7 @@ endpoint:
     pen-student-by-pen: ${PEN_API}api/v1/student?pen=%s
     student-for-special-grad-run-list: ${GRAD_STUDENT_API}api/v1/student/studentlistsearch
     get-student-data-list: ${GRAD_STUDENT_API}api/v1/student/multistudentids
-    get-student-record: ${GRAD_STUDENT_API}api/v1/student/stdid/%s
+    get-student-record: ${GRAD_STUDENT_API}api/v1/student/grad/%s
   grad-graduation-report-api:
     get-transcript-list:
       yearly:

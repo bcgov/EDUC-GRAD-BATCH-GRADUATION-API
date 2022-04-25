@@ -206,8 +206,8 @@ public class BatchJobConfig {
     @Bean
     public Step masterStepSpcTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepSpcTvrRun")
-                .partitioner(slaveStepSpcRegGrad(stepBuilderFactory).getName(), partitionerSpcRegGrad())
-                .step(slaveStepSpcRegGrad(stepBuilderFactory))
+                .partitioner(slaveStepSpcTvrRun(stepBuilderFactory).getName(), partitionerSpcRegGrad())
+                .step(slaveStepSpcTvrRun(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
                 .build();
