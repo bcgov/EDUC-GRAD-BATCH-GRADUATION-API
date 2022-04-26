@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import java.util.List;
+import java.util.Set;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -11,16 +12,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,12 +62,14 @@ public class JobLauncherController {
     private final JobRegistry jobRegistry;
     private final RestUtils restUtils;
     private final GradDashboardService gradDashboardService;
+    private final JobExplorer jobExplorer;
 
-    public JobLauncherController(JobLauncher jobLauncher, JobRegistry jobRegistry, RestUtils restUtils, GradDashboardService gradDashboardService) {
+    public JobLauncherController(JobExplorer jobExplorer,JobLauncher jobLauncher, JobRegistry jobRegistry, RestUtils restUtils, GradDashboardService gradDashboardService) {
         this.jobLauncher = jobLauncher;
         this.jobRegistry = jobRegistry;
         this.restUtils = restUtils;
         this.gradDashboardService = gradDashboardService;
+        this.jobExplorer = jobExplorer;
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_REG_GRAD_BATCH_JOB)
@@ -76,7 +82,13 @@ public class JobLauncherController {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, REGALG);
+
         try {
+            if (isJobRunning(jobRegistry.getJob("GraduationBatchJob"))) {
+                AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+                summaryDTO.setException("An instance of this job already running");
+                return ResponseEntity.status(500).body(summaryDTO);
+            }
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
@@ -101,6 +113,11 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
         try {
+            if (isJobRunning(jobRegistry.getJob("tvrBatchJob"))) {
+                AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+                summaryDTO.setException("An instance of this job already running");
+                return ResponseEntity.status(500).body(summaryDTO);
+            }
             JobExecution jobExecution =jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("tvrRunSummaryDTO");
@@ -281,5 +298,10 @@ public class JobLauncherController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(batchSummary,HttpStatus.OK);
+    }
+
+    private boolean isJobRunning(Job job) {
+        Set<JobExecution> jobExecutions = jobExplorer.findRunningJobExecutions(job.getName());
+        return !jobExecutions.isEmpty();
     }
 }
