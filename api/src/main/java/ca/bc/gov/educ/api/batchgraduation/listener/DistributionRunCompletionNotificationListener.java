@@ -180,7 +180,7 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 
 	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,String accessToken) {
 		cList.forEach(scd-> {
-			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),accessToken);
+			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),accessToken);
 		});
 	}
 	private void transcriptPrintFile(List<StudentCredentialDistribution> yed4List, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {

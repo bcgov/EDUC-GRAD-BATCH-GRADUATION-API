@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This bean schedules and runs our Spring Batch job.
@@ -40,6 +42,9 @@ public class BatchJobLauncher {
     @Autowired
     private JobRegistry jobRegistry;
 
+    @Autowired
+    private JobExplorer jobExplorer;
+
     private static final String TIME="time";
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
@@ -53,6 +58,9 @@ public class BatchJobLauncher {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, "BATCH");
         builder.addString(JOB_TYPE, "REGALG");
+        if (isJobRunning(graduationBatchJob)) {
+            return;
+        }
         try {
             jobLauncher.run(graduationBatchJob, builder.toJobParameters());
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
@@ -70,6 +78,9 @@ public class BatchJobLauncher {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, "BATCH");
         builder.addString(JOB_TYPE, "TVRRUN");
+        if (isJobRunning(tvrBatchJob)) {
+            return;
+        }
         try {
             jobLauncher.run(tvrBatchJob, builder.toJobParameters());
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
@@ -78,5 +89,10 @@ public class BatchJobLauncher {
             e.printStackTrace();
         }
         LOGGER.info("Batch Job was stopped");
+    }
+
+    private boolean isJobRunning(Job job) {
+        Set<JobExecution> jobExecutions = jobExplorer.findRunningJobExecutions(job.getName());
+        return !jobExecutions.isEmpty();
     }
 }

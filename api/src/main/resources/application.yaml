@@ -123,7 +123,7 @@ endpoint:
     get-certificate-list:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/getcertificatesfordistribution
     update-student-credential:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcredential/%s/%s/%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s
   grad-distribution-api:
     merge-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MER?batchId=%s
