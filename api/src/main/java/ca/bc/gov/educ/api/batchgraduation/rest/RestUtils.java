@@ -262,7 +262,7 @@ public class RestUtils {
         return  result;
     }
 
-    public void updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String accessToken) {
-        webClient.get().uri(String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType)).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(boolean.class).block();
+    public void updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String documentStatusCode,String accessToken) {
+        webClient.get().uri(String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode)).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(boolean.class).block();
     }
 }
