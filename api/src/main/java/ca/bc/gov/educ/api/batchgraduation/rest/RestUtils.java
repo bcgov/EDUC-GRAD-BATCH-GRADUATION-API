@@ -262,7 +262,34 @@ public class RestUtils {
         return  result;
     }
 
+    public DistributionResponse createReprintAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
+
+        DistributionResponse result = webClient.post()
+                .uri(String.format(constants.getReprintAndUpload(),batchId))
+                .headers(h -> h.setBearerAuth(accessToken))
+                .body(BodyInserters.fromValue(mapDist))
+                .retrieve()
+                .bodyToMono(DistributionResponse.class)
+                .block();
+
+        LOGGER.info("Merge and Upload Success {}",result.getMergeProcessResponse());
+        return  result;
+    }
+
     public void updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String documentStatusCode,String accessToken) {
         webClient.get().uri(String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode)).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(boolean.class).block();
+    }
+
+    public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req, String accessToken) {
+        final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
+        };
+        List<StudentCredentialDistribution> res = this.webClient.post()
+                .uri(String.format(constants.getStudentDataForUserReqDisRun(),credentialType))
+                .headers(h -> h.setBearerAuth(accessToken))
+                .body(BodyInserters.fromValue(req))
+                .retrieve()
+                .bodyToMono(responseType)
+                .block();
+        return res;
     }
 }

@@ -91,6 +91,10 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/getcertificatesfordistribution
     update-student-credential:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcredential/%s/%s/%s
+    user-req-dis-run:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/userrequest/%s
   grad-distribution-api:
     merge-n-upload:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/MER?batchId=%s
+    reprint-n-upload:
+      url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/RPR?batchId=%s

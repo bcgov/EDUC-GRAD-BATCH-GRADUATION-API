@@ -23,6 +23,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
     public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
+    public static final String EXECUTE_SPECIALIZED_USER_REQ_RUNS = "/userrequestdisrun/{credentialType}";
     
     public static final String BATCH_DASHBOARD = "/dashboard";
     public static final String BATCH_ERRORS = "/dashboard/errors/{batchId}";
@@ -98,7 +99,13 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-distribution-api.merge-n-upload.url}")
     private String mergeAndUpload;
 
+    @Value("${endpoint.grad-distribution-api.reprint-n-upload.url}")
+    private String reprintAndUpload;
+
     @Value("${endpoint.grad-graduation-report-api.update-student-credential.url}")
     private String updateStudentCredential;
+
+    @Value("${endpoint.grad-graduation-report-api.user-req-dis-run.url}")
+    private String studentDataForUserReqDisRun;
 
 }
