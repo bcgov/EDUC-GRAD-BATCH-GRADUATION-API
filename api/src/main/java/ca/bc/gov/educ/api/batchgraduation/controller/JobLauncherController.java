@@ -55,6 +55,9 @@ public class JobLauncherController {
     private static final String REGALG = "REGALG";
     private static final String DISTRUNMONTH = "DISTRUNMONTH";
     private static final String DISTRUNYEAREND = "DISTRUNYEAREND";
+    private static final String DISTRUNUSER = "DISTRUNUSER";
+    private static final String CREDENTIALTYPE = "credentialType";
+    private static final String DISDTO = "distributionSummaryDTO";
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
@@ -208,6 +211,15 @@ public class JobLauncherController {
         return null;
     }
 
+    private DistributionSummaryDTO validateInputDisRun(StudentSearchRequest studentSearchRequest) {
+        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setException("Please provide at least 1 parameter");
+            return summaryDTO;
+        }
+        return null;
+    }
+
     @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_TVR_RUNS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized TVR runs", tags = { "TVR" })
@@ -250,7 +262,7 @@ public class JobLauncherController {
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
-            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
@@ -274,7 +286,7 @@ public class JobLauncherController {
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
-            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
@@ -296,6 +308,36 @@ public class JobLauncherController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(batchSummary,HttpStatus.OK);
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_USER_REQ_RUNS)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<DistributionSummaryDTO> launchUserReqDisRunSpecialJob(@PathVariable String credentialType,@RequestBody StudentSearchRequest studentSearchRequest) {
+        logger.debug("launchUserReqDisRunSpecialJob");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, DISTRUNUSER);
+        DistributionSummaryDTO validate = validateInputDisRun(studentSearchRequest);
+        if(validate != null) {
+            return ResponseEntity.status(400).body(validate);
+        }
+        try {
+            String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
+            builder.addString(SEARCH_REQUEST, studentSearchData);
+            builder.addString(CREDENTIALTYPE,credentialType);
+            JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("UserReqDistributionBatchJob"), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            return ResponseEntity.ok(summaryDTO);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
+        }
+
     }
 
     private boolean isJobRunning(Job job) {

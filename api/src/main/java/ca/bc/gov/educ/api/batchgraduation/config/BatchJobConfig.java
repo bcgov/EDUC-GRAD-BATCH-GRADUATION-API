@@ -1,9 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
-import ca.bc.gov.educ.api.batchgraduation.listener.DistributionRunCompletionNotificationListener;
-import ca.bc.gov.educ.api.batchgraduation.listener.GradRunCompletionNotificationListener;
-import ca.bc.gov.educ.api.batchgraduation.listener.SpecialRunCompletionNotificationListener;
-import ca.bc.gov.educ.api.batchgraduation.listener.TvrRunJobCompletionNotificationListener;
+import ca.bc.gov.educ.api.batchgraduation.listener.*;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.processor.*;
@@ -342,11 +339,27 @@ public class BatchJobConfig {
     }
 
     @Bean
+    public Step masterStepUserReqDisRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepUserReqDisRun")
+                .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRunUserReq())
+                .step(slaveStepDisRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
     @StepScope
     public DistributionRunPartitionerYearly partitionerDisRunYearly() {
         return new DistributionRunPartitionerYearly();
     }
 
+
+    @Bean
+    @StepScope
+    public DistributionRunPartitionerUserReq partitionerDisRunUserReq() {
+        return new DistributionRunPartitionerUserReq();
+    }
 
     @Bean
     public Step slaveStepDisRunYearly(StepBuilderFactory stepBuilderFactory) {
@@ -367,6 +380,19 @@ public class BatchJobConfig {
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .flow(masterStepDisRunYearly(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    /**
+     * Creates a bean that represents our batch job.
+     */
+    @Bean(name="UserReqDistributionBatchJob")
+    public Job distributionBatchJobUserReq(UserReqDistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("UserReqDistributionBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepUserReqDisRun(stepBuilderFactory,constants))
                 .end()
                 .build();
     }

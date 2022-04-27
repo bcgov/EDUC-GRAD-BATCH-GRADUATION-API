@@ -32,6 +32,7 @@ public abstract class DistributionRunBaseReader implements ItemReader<StudentCre
             jobExecution.getExecutionContext().put(summaryContextName, totalSummaryDTO);
         }
         totalSummaryDTO.setBatchId(summaryDTO.getBatchId());
+        totalSummaryDTO.setCredentialType(summaryDTO.getCredentialType());
         totalSummaryDTO.setReadCount(totalSummaryDTO.getReadCount() + summaryDTO.getReadCount());
         totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());
         totalSummaryDTO.getErrors().addAll(summaryDTO.getErrors());
