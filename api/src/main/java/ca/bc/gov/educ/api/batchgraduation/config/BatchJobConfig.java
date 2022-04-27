@@ -392,7 +392,7 @@ public class BatchJobConfig {
         return jobBuilderFactory.get("UserReqDistributionBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepDisRunYearly(stepBuilderFactory,constants))
+                .flow(masterStepUserReqDisRun(stepBuilderFactory,constants))
                 .end()
                 .build();
     }
