@@ -11,76 +11,39 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
-public class RecalculateProjectedGradRunReader implements ItemReader<GraduationStudentRecord> {
+public class RecalculateProjectedGradRunReader extends BaseReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecalculateProjectedGradRunReader.class);
 
-    private final RestUtils restUtils;
+    @Value("#{stepExecutionContext['index']}")
+    private Integer nxtStudentForProcessing;
 
-    private AlgorithmSummaryDTO summaryDTO;
-
-    private int nxtStudentForProcessing;
-    private List<GraduationStudentRecord> studentList;
-
-    public RecalculateProjectedGradRunReader(RestUtils restUtils) {
-        nxtStudentForProcessing = 0;
-        this.restUtils = restUtils;
-    }
-    
-    @BeforeStep
-    public void initializeSummaryDto(StepExecution stepExecution) {
-        JobExecution jobExecution = stepExecution.getJobExecution();
-        ExecutionContext jobContext = jobExecution.getExecutionContext();
-        summaryDTO = new AlgorithmSummaryDTO();
-        jobContext.put("summaryDTO", summaryDTO);
-    }
+    @Value("#{stepExecutionContext['data']}")
+    List<GraduationStudentRecord> studentList;
 
     @Override
     public GraduationStudentRecord read() throws Exception {
-        LOGGER.info("Reading the information of the next student");
+        LOGGER.info("*** Reading the information of the next student");
 
-        if (nxtStudentForProcessing % 10 == 0) {
+        if (nxtStudentForProcessing % 50 == 0) {
             fetchAccessToken();
         }
-
-        if (studentDataIsNotInitialized()) {
-        	studentList = fetchStudentDataFromAPI();
-        	summaryDTO.setReadCount(studentList.size());
-        }
+        summaryDTO.setReadCount(studentList.size());
 
         GraduationStudentRecord nextStudent = null;
         
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
-            LOGGER.info("Found student[{}] - Student ID: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getStudentID(), summaryDTO.getReadCount());
+            LOGGER.info("*** Found student[{}] - Student ID: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getStudentID(), summaryDTO.getReadCount());
             nxtStudentForProcessing++;
-        }
-        else {
-        	nxtStudentForProcessing = 0;
-            studentList = null;
+        }else {
+        	aggregate("tvrRunSummaryDTO");
         }
         return nextStudent;
-    }
-
-    private boolean studentDataIsNotInitialized() {
-        return this.studentList == null;
-    }
-
-    private List<GraduationStudentRecord> fetchStudentDataFromAPI() {
-        LOGGER.info("Fetching Student List that need Processing");
-        fetchAccessToken();			
-		return restUtils.getStudentsForProjectedAlgorithm(summaryDTO.getAccessToken());
-    }
-    
-    private void fetchAccessToken() {
-        LOGGER.info("Fetching the access token from KeyCloak API");
-        ResponseObj res = restUtils.getTokenResponseObject();
-        if (res != null) {
-            summaryDTO.setAccessToken(res.getAccess_token());
-            LOGGER.info("Setting the new access token in summaryDTO.");
-        }
     }
 }

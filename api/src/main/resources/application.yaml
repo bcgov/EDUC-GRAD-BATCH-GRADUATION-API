@@ -8,12 +8,13 @@ security:
 spring:
   jmx:
     enabled: false
-  datasource:
+  db-connection:
     hikari:
       pool-name: educ-grad-batch-graduation-api-cp
       maximum-pool-size: ${MAXIMUM_POOL_SIZE}
       connection-timeout: ${CONNECTION_TIMEOUT}
       max-lifetime: ${MAX_LIFETIME}
+      keepalive-time: ${KEEP_ALIVE_TIME}
     url: ${CONNECTION_STRING}
     username: ${USERNAME}
     password: ${PASSWORD}
@@ -91,6 +92,10 @@ authorization:
   user: ${GRAD_CLIENT_NAME}
   password: ${GRAD_CLIENT_SECRET}
 
+batch:
+  partitions:
+    number: ${NUMBER_OF_PARTITIONS}
+
 #Endpoints
 endpoint:
   keycloak:
@@ -106,4 +111,23 @@ endpoint:
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate
     student-for-projectedgrad-list: ${GRAD_STUDENT_API}api/v1/student/projected
-    pen-student-by-pen: ${PEN_API}api/v1/student?pen=%s 
+    pen-student-by-pen: ${PEN_API}api/v1/student?pen=%s
+    student-for-special-grad-run-list: ${GRAD_STUDENT_API}api/v1/student/studentlistsearch
+    get-student-data-list: ${GRAD_STUDENT_API}api/v1/student/multistudentids
+    get-student-record: ${GRAD_STUDENT_API}api/v1/student/grad/%s
+  grad-graduation-report-api:
+    get-transcript-list:
+      yearly:
+        url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistributionyearly
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistribution
+    get-certificate-list:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/getcertificatesfordistribution
+    update-student-credential:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s
+    user-req-dis-run:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/userrequest/%s
+  grad-distribution-api:
+    merge-n-upload:
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MER?batchId=%s
+    reprint-n-upload:
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/RPR?batchId=%s

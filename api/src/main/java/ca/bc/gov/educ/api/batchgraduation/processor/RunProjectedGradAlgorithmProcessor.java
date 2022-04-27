@@ -2,36 +2,32 @@ package ca.bc.gov.educ.api.batchgraduation.processor;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
-import ca.bc.gov.educ.api.batchgraduation.service.GradAlgorithmService;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.BeforeStep;
-import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 public class RunProjectedGradAlgorithmProcessor implements ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> {
 
-	@Autowired
-	EducGradBatchGraduationApiConstants constants;
-	
-	@Autowired
-	private GradAlgorithmService gradAlgorithmService;
+	private static final Logger LOGGER = LoggerFactory.getLogger(RunProjectedGradAlgorithmProcessor.class);
 
-	private AlgorithmSummaryDTO summaryDTO;
+	@Autowired
+	RestUtils restUtils;
 
-	@BeforeStep
-	public void retrieveSummaryDto(StepExecution stepExecution) {
-		JobExecution jobExecution = stepExecution.getJobExecution();
-		ExecutionContext jobContext = jobExecution.getExecutionContext();
-		summaryDTO = (AlgorithmSummaryDTO)jobContext.get("summaryDTO");
-		summaryDTO.setBatchId(jobExecution.getId());
-	}
+	@Value("#{stepExecutionContext['summary']}")
+	AlgorithmSummaryDTO summaryDTO;
+
+	@Value("#{stepExecution.jobExecution.id}")
+	Long batchId;
     
 	@Override
 	public GraduationStudentRecord process(GraduationStudentRecord item) throws Exception {
-		return gradAlgorithmService.processProjectedGradStudent(item, summaryDTO);
+		LOGGER.info("*** {} processing partitionData = {}",Thread.currentThread().getName(), item.getProgram());
+		summaryDTO.setBatchId(batchId);
+		return restUtils.processProjectedGradStudent(item, summaryDTO);
 		
 	}
 

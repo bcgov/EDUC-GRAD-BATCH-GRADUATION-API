@@ -6,10 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
@@ -239,4 +236,112 @@ public class RestUtilsTest {
         assertThat(result).isNotNull();
         assertThat(result.size() > 0).isTrue();
     }
+
+    @Test
+    public void testUpdateStudentCredentialRecord() {
+        final String studentID = UUID.randomUUID().toString();
+        String credentialTypeCode = "E";
+        String paperType="YED2";
+        String documentStatusCode="COMPL";
+        GraduationStudentRecord grd = new GraduationStudentRecord();
+        grd.setStudentID(new UUID(1,1));
+        grd.setProgram("2018-EN");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(boolean.class)).thenReturn(Mono.just(true));
+
+        this.restUtils.updateStudentCredentialRecord(UUID.fromString(studentID),credentialTypeCode,paperType,documentStatusCode,null);
+        assertThat(grd).isNotNull();
+    }
+
+
+
+    @Test
+    public void testGetStudentsForUserReqDisRun() {
+        String credentialType = "OT";
+        StudentSearchRequest req = new StudentSearchRequest();
+        List<String> sch = Arrays.asList("43224223");
+        req.setSchoolOfRecords(sch);
+        List<StudentCredentialDistribution> scdList = new ArrayList<>();
+        StudentCredentialDistribution scd = new StudentCredentialDistribution();
+        scd.setSchoolOfRecord("1212211");
+        scd.setPaperType("YED2");
+        scd.setCredentialTypeCode("E");
+        scd.setId(new UUID(1,1));
+        scdList.add(scd);
+
+        final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getStudentDataForUserReqDisRun(),credentialType))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(scdList));
+
+
+        val result = this.restUtils.getStudentsForUserReqDisRun(credentialType,req,null);
+        assertThat(result).isNotNull();
+        assertThat(result.size() > 0).isTrue();
+    }
+
+    @Test
+    public void testCreateReprintAndUpload() {
+        DistributionResponse req = new DistributionResponse();
+        req.setMergeProcessResponse("Merged");
+        Long batchId = 3344L;
+        final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getReprintAndUpload(),batchId))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
+
+
+        val result = this.restUtils.createReprintAndUpload(batchId,null,new HashMap<>());
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void testMergeAndUpload() {
+        DistributionResponse req = new DistributionResponse();
+        req.setMergeProcessResponse("Merged");
+        Long batchId = 3344L;
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getMergeAndUpload(),batchId))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
+
+
+        val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>());
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void testGetStudentData() {
+        final String studentID = UUID.randomUUID().toString();
+        GradSearchStudent grd = new GradSearchStudent();
+        grd.setStudentID(studentID);
+        grd.setProgram("2018-EN");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentInfo(),studentID))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GradSearchStudent.class)).thenReturn(Mono.just(grd));
+
+        GradSearchStudent res = this.restUtils.getStudentData(studentID,null);
+        assertThat(res).isNotNull();
+    }
+
 }

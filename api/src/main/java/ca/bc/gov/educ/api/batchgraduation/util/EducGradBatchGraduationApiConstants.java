@@ -18,9 +18,16 @@ public class EducGradBatchGraduationApiConstants {
     public static final String GRAD_BATCH_API_ROOT_MAPPING = "/api/" + API_VERSION + "/batch";
     public static final String EXECUTE_REG_GRAD_BATCH_JOB = "/executereggradbatchjob";
     public static final String EXECUTE_TVR_RUN_BATCH_JOB = "/executetvrrunbatchjob";
+    public static final String EXECUTE_DIS_RUN_BATCH_JOB = "/executedisrunbatchjob";
+    public static final String EXECUTE_YEARLY_DIS_RUN_BATCH_JOB = "/executeyearlydisrunbatchjob";
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
+    public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
+    public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
+    public static final String EXECUTE_SPECIALIZED_USER_REQ_RUNS = "/userrequestdisrun/{credentialType}";
     
     public static final String BATCH_DASHBOARD = "/dashboard";
+    public static final String BATCH_ERRORS = "/dashboard/errors/{batchId}";
+    public static final String BATCH_SUMMARY = "/dashboard/summary";
 
     // Data Conversion
     public static final String EXECUTE_DATA_CONVERSION_BATCH_JOB = "/executeGradStudentDataConversionJob";
@@ -66,5 +73,39 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-student-api.student-for-projectedgrad-list}")
     private String gradStudentApiStudentForProjectedGradListUrl;
+
+    @Value("${endpoint.grad-student-api.student-for-special-grad-run-list}")
+    private String gradStudentApiStudentForSpcGradListUrl;
+
+    @Value("${endpoint.grad-student-api.get-student-data-list}")
+    private String gradStudentApiStudentDataListUrl;
+
+    // Number of Partitions
+    @Value("${batch.partitions.number}")
+    private int numberOfPartitions;
+
+    @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
+    private String transcriptDistributionList;
+
+    @Value("${endpoint.grad-graduation-report-api.get-transcript-list.yearly.url}")
+    private String transcriptYearlyDistributionList;
+
+    @Value("${endpoint.grad-graduation-report-api.get-certificate-list.url}")
+    private String certificateDistributionList;
+
+    @Value("${endpoint.grad-student-api.get-student-record}")
+    private String studentInfo;
+
+    @Value("${endpoint.grad-distribution-api.merge-n-upload.url}")
+    private String mergeAndUpload;
+
+    @Value("${endpoint.grad-distribution-api.reprint-n-upload.url}")
+    private String reprintAndUpload;
+
+    @Value("${endpoint.grad-graduation-report-api.update-student-credential.url}")
+    private String updateStudentCredential;
+
+    @Value("${endpoint.grad-graduation-report-api.user-req-dis-run.url}")
+    private String studentDataForUserReqDisRun;
 
 }
