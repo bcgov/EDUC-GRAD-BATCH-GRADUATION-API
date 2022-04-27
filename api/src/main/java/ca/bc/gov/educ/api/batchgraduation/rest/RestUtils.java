@@ -258,7 +258,8 @@ public class RestUtils {
                 .bodyToMono(DistributionResponse.class)
                 .block();
 
-        LOGGER.info("Merge and Upload Success {}",result.getMergeProcessResponse());
+        if(result != null)
+            LOGGER.info("Merge and Upload Success {}",result.getMergeProcessResponse());
         return  result;
     }
 
@@ -271,8 +272,8 @@ public class RestUtils {
                 .retrieve()
                 .bodyToMono(DistributionResponse.class)
                 .block();
-
-        LOGGER.info("Merge and Upload Success {}",result.getMergeProcessResponse());
+        if(result != null)
+            LOGGER.info("Merge and Upload Success {}",result.getMergeProcessResponse());
         return  result;
     }
 
@@ -283,13 +284,12 @@ public class RestUtils {
     public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req, String accessToken) {
         final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
         };
-        List<StudentCredentialDistribution> res = this.webClient.post()
+        return this.webClient.post()
                 .uri(String.format(constants.getStudentDataForUserReqDisRun(),credentialType))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .body(BodyInserters.fromValue(req))
                 .retrieve()
                 .bodyToMono(responseType)
                 .block();
-        return res;
     }
 }

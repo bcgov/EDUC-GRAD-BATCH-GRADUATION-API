@@ -57,6 +57,7 @@ public class JobLauncherController {
     private static final String DISTRUNYEAREND = "DISTRUNYEAREND";
     private static final String DISTRUNUSER = "DISTRUNUSER";
     private static final String CREDENTIALTYPE = "credentialType";
+    private static final String DISDTO = "distributionSummaryDTO";
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
@@ -252,7 +253,7 @@ public class JobLauncherController {
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
-            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
@@ -276,7 +277,7 @@ public class JobLauncherController {
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
-            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
@@ -320,7 +321,7 @@ public class JobLauncherController {
             builder.addString(CREDENTIALTYPE,credentialType);
             JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("UserReqDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
-            AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("distributionSummaryDTO");
+            AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get(DISDTO);
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
             AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
