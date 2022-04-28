@@ -32,6 +32,13 @@ spring:
     enabled: false
     baseline-on-migrate: false
     table: FLYWAY_SCHEMA_HISTORY
+  #Keycloak/OAuth properties
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://soam-dev.apps.silver.devops.gov.bc.ca/auth/realms/master
+          jwk-set-uri: https://soam-dev.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/certs
 
 #Logging properties
 logging:
