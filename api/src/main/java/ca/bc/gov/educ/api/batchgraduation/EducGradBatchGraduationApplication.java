@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,6 +44,15 @@ public class EducGradBatchGraduationApplication {
             web.ignoring().antMatchers("/api/v1/api-docs-ui.html",
                     "/api/v1/swagger-ui/**", "/api/v1/api-docs/**",
                     "/actuator/health","/actuator/prometheus", "/health");
+        }
+        @Override
+        protected void configure(final HttpSecurity http) throws Exception {
+            http.authorizeRequests()
+                    .anyRequest()
+                    .authenticated()
+                    .and()
+                    .oauth2ResourceServer()
+                    .jwt();
         }
     }
 }

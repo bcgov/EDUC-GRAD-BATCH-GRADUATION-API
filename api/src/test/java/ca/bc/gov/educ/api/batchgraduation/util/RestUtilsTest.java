@@ -10,7 +10,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import org.codehaus.jackson.JsonProcessingException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -107,7 +106,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testSaveGraduationStatus_givenValues_returnsGraduationStatus_with_APICallSuccess() throws JsonProcessingException {
+    public void testSaveGraduationStatus_givenValues_returnsGraduationStatus_with_APICallSuccess() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
 
