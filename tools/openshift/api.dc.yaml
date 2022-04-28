@@ -62,8 +62,6 @@ objects:
                 - secretRef:
                     name: api-grad-batch-db-secret
                 - secretRef:
-                    name: grad-keycloak-pk-secret
-                - secretRef:
                     name: grad-client-secret
               resources: {}
       test: false
