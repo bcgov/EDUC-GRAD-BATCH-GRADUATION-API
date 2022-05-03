@@ -6,6 +6,9 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -223,9 +226,19 @@ public class RestUtils {
         if(scObj != null) {
             item.setSchoolOfRecord(scObj.getSchoolOfRecord());
         }else {
-            GradSearchStudent stuRec =this.getStudentData(item.getStudentID().toString(),accessToken);
+            GraduationStudentRecordDistribution stuRec =this.getStudentData(item.getStudentID().toString(),accessToken);
             if (stuRec != null) {
                 item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
+                item.setProgram(stuRec.getProgram());
+                item.setHonoursStanding(stuRec.getHonoursStanding());
+                item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
+                item.setProgramCompletionDate(stuRec.getProgramCompletionDate());
+                item.setStudentID(stuRec.getStudentID());
+                item.setPen(stuRec.getPen());
+                item.setLegalFirstName(stuRec.getLegalFirstName());
+                item.setLegalMiddleNames(stuRec.getLegalMiddleNames());
+                item.setLegalLastName(stuRec.getLegalLastName());
+
             }
         }
         summary.getGlobalList().add(item);
@@ -233,13 +246,13 @@ public class RestUtils {
         return item;
     }
 
-    public GradSearchStudent getStudentData(String studentID, String accessToken) {
+    public GraduationStudentRecordDistribution getStudentData(String studentID, String accessToken) {
 
-        GradSearchStudent result = webClient.get()
+        GraduationStudentRecordDistribution result = webClient.get()
                 .uri(String.format(constants.getStudentInfo(),studentID))
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve()
-                .bodyToMono(GradSearchStudent.class)
+                .bodyToMono(GraduationStudentRecordDistribution.class)
                 .block();
 
         if(result != null)
