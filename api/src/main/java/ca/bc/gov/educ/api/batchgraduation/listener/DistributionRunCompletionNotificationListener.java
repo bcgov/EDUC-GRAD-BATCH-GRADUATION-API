@@ -167,7 +167,9 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			List<StudentCredentialDistribution> yed2List = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
 			List<StudentCredentialDistribution> yedrList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
 			List<StudentCredentialDistribution> yedbList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
+			List<StudentCredentialDistribution> studentList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0).collect(Collectors.toList());
 			transcriptPrintFile(yed4List,batchId,usl,mapDist);
+			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 			certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2");
 			certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR");
 			certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB");
@@ -183,6 +185,25 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),accessToken);
 		});
 	}
+	private void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
+		if(!studentList.isEmpty()) {
+			SchoolDistributionRequest tpReq = new SchoolDistributionRequest();
+			tpReq.setBatchId(batchId);
+			tpReq.setPsId(usl +" " +batchId);
+			tpReq.setCount(studentList.size());
+			tpReq.setStudentList(studentList);
+			if(mapDist.get(usl) != null) {
+				DistributionPrintRequest dist = mapDist.get(usl);
+				dist.setSchoolDistributionRequest(tpReq);
+				mapDist.put(usl,dist);
+			}else{
+				DistributionPrintRequest dist = new DistributionPrintRequest();
+				dist.setSchoolDistributionRequest(tpReq);
+				mapDist.put(usl,dist);
+			}
+		}
+	}
+
 	private void transcriptPrintFile(List<StudentCredentialDistribution> yed4List, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
 		if(!yed4List.isEmpty()) {
 			TranscriptPrintRequest tpReq = new TranscriptPrintRequest();
