@@ -6,6 +6,7 @@ import lombok.Data;
 public class DistributionPrintRequest {
 
 	private TranscriptPrintRequest transcriptPrintRequest;
+	private SchoolDistributionRequest schoolDistributionRequest;
 	private CertificatePrintRequest yed2CertificatePrintRequest;
 	private CertificatePrintRequest yedbCertificatePrintRequest;
 	private CertificatePrintRequest yedrCertificatePrintRequest;

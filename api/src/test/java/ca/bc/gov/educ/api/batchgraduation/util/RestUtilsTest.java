@@ -328,8 +328,8 @@ public class RestUtilsTest {
 
     @Test
     public void testGetStudentData() {
-        final String studentID = UUID.randomUUID().toString();
-        GradSearchStudent grd = new GradSearchStudent();
+        final UUID studentID = UUID.randomUUID();
+        GraduationStudentRecordDistribution grd = new GraduationStudentRecordDistribution();
         grd.setStudentID(studentID);
         grd.setProgram("2018-EN");
 
@@ -337,9 +337,9 @@ public class RestUtilsTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getStudentInfo(),studentID))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(GradSearchStudent.class)).thenReturn(Mono.just(grd));
+        when(this.responseMock.bodyToMono(GraduationStudentRecordDistribution.class)).thenReturn(Mono.just(grd));
 
-        GradSearchStudent res = this.restUtils.getStudentData(studentID,null);
+        GraduationStudentRecordDistribution res = this.restUtils.getStudentData(studentID.toString(),null);
         assertThat(res).isNotNull();
     }
 
