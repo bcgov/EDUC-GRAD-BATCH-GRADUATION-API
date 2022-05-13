@@ -163,10 +163,18 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		List<StudentCredentialDistribution> finalCList = cList;
 		uniqueSchoolList.forEach(usl->{
-			List<StudentCredentialDistribution> yed4List = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
-			List<StudentCredentialDistribution> yed2List = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
-			List<StudentCredentialDistribution> yedrList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
-			List<StudentCredentialDistribution> yedbList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
+			List<StudentCredentialDistribution> yed4List = new ArrayList<>();
+			if(credentialType.equalsIgnoreCase("OT") || credentialType.equalsIgnoreCase("RT")) {
+				yed4List = finalCList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
+			}
+			List<StudentCredentialDistribution> yed2List = new ArrayList<>();
+			List<StudentCredentialDistribution> yedrList = new ArrayList<>();
+			List<StudentCredentialDistribution> yedbList = new ArrayList<>();
+			if(credentialType.equalsIgnoreCase("OC") || credentialType.equalsIgnoreCase("RC")) {
+				yed2List = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
+				yedrList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
+				yedbList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
+			}
 			transcriptPrintFile(yed4List,batchId,usl,mapDist);
 			certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2");
 			certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR");
