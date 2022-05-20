@@ -51,7 +51,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
-
+			String credentialType = jobParameters.getString("credentialType");
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new DistributionSummaryDTO();
@@ -60,7 +60,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),summaryDTO.getCredentialType(),obj.getAccess_token());
+			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),credentialType,obj.getAccess_token());
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -164,16 +164,19 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 		List<StudentCredentialDistribution> finalCList = cList;
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = new ArrayList<>();
-			if(credentialType.equalsIgnoreCase("OT") || credentialType.equalsIgnoreCase("RT")) {
-				yed4List = finalCList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
-			}
 			List<StudentCredentialDistribution> yed2List = new ArrayList<>();
 			List<StudentCredentialDistribution> yedrList = new ArrayList<>();
 			List<StudentCredentialDistribution> yedbList = new ArrayList<>();
-			if(credentialType.equalsIgnoreCase("OC") || credentialType.equalsIgnoreCase("RC")) {
-				yed2List = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
-				yedrList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
-				yedbList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
+			if(credentialType != null) {
+				if (credentialType.equalsIgnoreCase("OT") || credentialType.equalsIgnoreCase("RT")) {
+					yed4List = finalCList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
+				}
+
+				if (credentialType.equalsIgnoreCase("OC") || credentialType.equalsIgnoreCase("RC")) {
+					yed2List = finalCList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
+					yedrList = finalCList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
+					yedbList = finalCList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
+				}
 			}
 			transcriptPrintFile(yed4List,batchId,usl,mapDist);
 			certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2");
@@ -181,19 +184,21 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB");
 		});
 		DistributionResponse disres = null;
-		if(credentialType.equalsIgnoreCase("RC")) {
-			disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist);
-		}else {
-			disres = restUtils.mergeAndUpload(batchId, accessToken, mapDist);
+		if(credentialType != null) {
+			if (credentialType.equalsIgnoreCase("RC")) {
+				disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist);
+			} else {
+				disres = restUtils.mergeAndUpload(batchId, accessToken, mapDist);
+			}
 		}
-//		if(disres != null) {
-//			updateBackStudentRecords(cList,accessToken);
-//		}
+		if(disres != null) {
+			updateBackStudentRecords(cList,batchId,"USERDIST",accessToken);
+		}
 	}
 
-	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,String accessToken) {
+	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
 		cList.forEach(scd-> {
-			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),accessToken);
+			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
 		});
 	}
 	private void transcriptPrintFile(List<StudentCredentialDistribution> yed4List, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {

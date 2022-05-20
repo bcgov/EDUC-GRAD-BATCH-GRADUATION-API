@@ -348,4 +348,12 @@ public class RestUtils {
                 .bodyToMono(responseType)
                 .block();
     }
+
+    public void updateStudentGradRecord(UUID studentID, Long batchId,String activityCode, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        webClient.post().uri(String.format(constants.getUpdateStudentRecord(),studentID,batchId,activityCode)).headers(h -> {
+            h.setBearerAuth(accessToken);
+            h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+        }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
+    }
 }

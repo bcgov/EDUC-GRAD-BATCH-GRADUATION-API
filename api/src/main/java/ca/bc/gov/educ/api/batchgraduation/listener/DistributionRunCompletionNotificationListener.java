@@ -51,7 +51,7 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
-
+			String activityCode = jobType != null && jobType.equalsIgnoreCase("DISTRUNMONTH")?"MONTHLYDIST":"YEARENDDIST";
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new DistributionSummaryDTO();
@@ -60,7 +60,7 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token());
+			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),activityCode,obj.getAccess_token());
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -159,7 +159,7 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 		}
     }
 
-	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String,DistributionPrintRequest> mapDist,String accessToken) {
+	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String,DistributionPrintRequest> mapDist,String activityCode,String accessToken) {
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		List<StudentCredentialDistribution> finalCList = cList;
 		uniqueSchoolList.forEach(usl->{
@@ -176,13 +176,14 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 		});
 		DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist);
 		if(disres != null) {
-			updateBackStudentRecords(cList,accessToken);
+			updateBackStudentRecords(cList,batchId,activityCode,accessToken);
 		}
 	}
 
-	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,String accessToken) {
+	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode,String accessToken) {
 		cList.forEach(scd-> {
 			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),accessToken);
+			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
 		});
 	}
 	private void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
