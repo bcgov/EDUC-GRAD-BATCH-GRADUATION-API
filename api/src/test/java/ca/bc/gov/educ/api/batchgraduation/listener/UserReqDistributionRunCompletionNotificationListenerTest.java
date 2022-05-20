@@ -91,14 +91,14 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "TVRRUN");
+        builder.addString("credentialType","OT");
 
-        JobExecution ex = new JobExecution(121L);
+        JobExecution ex = new JobExecution(121L);new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), builder.toJobParameters(), null);
         ex.setStatus(BatchStatus.COMPLETED);
         ex.setStartTime(new Date());
         ex.setEndTime(new Date());
         ex.setId(121L);
-        ExecutionContext jobContext = new ExecutionContext();
-
+        ExecutionContext jobContext = ex.getExecutionContext();
 
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
@@ -127,6 +127,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         Date endTime = ex.getEndTime();
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
+        String credentialType = jobParameters.getString("credentialType");
 
         BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
         ent.setActualStudentsProcessed(processedStudents);

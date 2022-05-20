@@ -106,6 +106,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-report-api.update-student-credential.url}")
     private String updateStudentCredential;
 
+    @Value("${endpoint.grad-student-api.update-student-record}")
+    private String updateStudentRecord;
+
     @Value("${endpoint.grad-graduation-report-api.user-req-dis-run.url}")
     private String studentDataForUserReqDisRun;
 
