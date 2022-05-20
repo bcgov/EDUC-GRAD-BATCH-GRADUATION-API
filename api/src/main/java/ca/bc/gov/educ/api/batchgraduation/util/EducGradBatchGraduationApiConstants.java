@@ -15,6 +15,7 @@ public class EducGradBatchGraduationApiConstants {
 
 	public static final String API_ROOT_MAPPING = "";
     public static final String API_VERSION = "v1";
+    public static final String CORRELATION_ID = "correlationID";
     public static final String GRAD_BATCH_API_ROOT_MAPPING = "/api/" + API_VERSION + "/batch";
     public static final String EXECUTE_REG_GRAD_BATCH_JOB = "/executereggradbatchjob";
     public static final String EXECUTE_TVR_RUN_BATCH_JOB = "/executetvrrunbatchjob";
