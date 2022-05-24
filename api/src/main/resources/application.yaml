@@ -115,7 +115,7 @@ endpoint:
     student-for-special-grad-run-list: ${GRAD_STUDENT_API}api/v1/student/studentlistsearch
     get-student-data-list: ${GRAD_STUDENT_API}api/v1/student/multistudentids
     get-student-record: ${GRAD_STUDENT_API}api/v1/student/grad/%s
-    update-student-record: ${GRAD_STUDENT_API}api/v1/student/projected/studentid/%s?batchId=%s&activityCode=%s
+    update-student-record: ${GRAD_STUDENT_API}api/v1/student/distribution/studentid/%s?batchId=%s&activityCode=%s
   grad-graduation-report-api:
     get-transcript-list:
       yearly:
