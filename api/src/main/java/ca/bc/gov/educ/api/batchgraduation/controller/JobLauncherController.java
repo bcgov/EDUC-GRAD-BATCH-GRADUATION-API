@@ -162,7 +162,7 @@ public class JobLauncherController {
                                                     @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
                                                     @RequestHeader(name="Authorization") String accessToken) {
         logger.debug("Inside loadError");
-        ErrorDashBoard dash = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken);
+        ErrorDashBoard dash = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken.replaceAll("Bearer ", ""));
         if(dash == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
