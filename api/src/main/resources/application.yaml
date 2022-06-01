@@ -107,6 +107,8 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/FMR?batchId=%s
     tvrrun:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/REGFM?batchId=%s
+    schoolreport:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/school
   grad-student-api:
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate

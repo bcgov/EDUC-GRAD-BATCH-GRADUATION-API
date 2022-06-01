@@ -13,6 +13,7 @@ import java.util.UUID;
 public class GraduationStudentRecord extends BaseModel{
 
     private String studentGradData;
+    private String studentProjectedGradData;
     private String pen;
     private String program;
     private String programName;
