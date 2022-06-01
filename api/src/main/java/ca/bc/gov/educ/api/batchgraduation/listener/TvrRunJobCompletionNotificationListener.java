@@ -2,8 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -17,10 +16,8 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class TvrRunJobCompletionNotificationListener extends JobExecutionListenerSupport {
@@ -57,8 +54,9 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			}
 			int failedRecords = summaryDTO.getErrors().size();			
 			Long processedStudents = summaryDTO.getProcessedCount();
-			Long expectedStudents = summaryDTO.getReadCount();			
-			
+			Long expectedStudents = summaryDTO.getReadCount();
+			ResponseObj obj = restUtils.getTokenResponseObject();
+			processGlobalList(summaryDTO.getGlobalList(),summaryDTO.getMapDist(),jobExecutionId,obj.getAccess_token());
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -155,4 +153,28 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			LOGGER.info("=======================================================================================");
 		}
     }
+
+	private void processGlobalList(List<GraduationStudentRecord> cList, Map<String, SchoolReportRequest> mapDist, Long batchId, String accessToken) {
+		List<String> uniqueSchoolList = cList.stream().map(GraduationStudentRecord::getSchoolOfRecord).distinct().collect(Collectors.toList());
+		List<GraduationStudentRecord> finalCList = cList;
+		uniqueSchoolList.forEach(usl->{
+			List<GraduationStudentRecord> stdList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0).collect(Collectors.toList());
+			schoolReportRequest(stdList,usl,mapDist);
+		});
+		restUtils.createAndStoreSchoolReports(accessToken,mapDist);
+	}
+
+	private void schoolReportRequest(List<GraduationStudentRecord> studentList, String usl, Map<String,SchoolReportRequest> mapDist) {
+		if(!studentList.isEmpty()) {
+			if(mapDist.get(usl) != null) {
+				SchoolReportRequest srr = mapDist.get(usl);
+				srr.setStudentList(studentList);
+				mapDist.put(usl,srr);
+			}else{
+				SchoolReportRequest srr = new SchoolReportRequest();
+				srr.setStudentList(studentList);
+				mapDist.put(usl,srr);
+			}
+		}
+	}
 }

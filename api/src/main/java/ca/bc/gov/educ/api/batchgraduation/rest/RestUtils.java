@@ -192,6 +192,7 @@ public class RestUtils {
                 return null;
             }
             LOGGER.info("*** {} Partition  * Processed student[{}] * Student ID: {} in total {}",Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+            summary.getGlobalList().add(item);
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             ProcessError error = new ProcessError();
@@ -287,6 +288,23 @@ public class RestUtils {
             LOGGER.info("*** Fetched # of Graduation Record : {}",result.getStudentID());
 
         return result;
+    }
+
+    public void createAndStoreSchoolReports(String accessToken, Map<String, SchoolReportRequest> mapDist) {
+        UUID correlationID = UUID.randomUUID();
+        Integer result = webClient.post()
+                .uri(String.format(constants.getCreateAndStore()))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
+                .body(BodyInserters.fromValue(mapDist))
+                .retrieve()
+                .bodyToMono(Integer.class)
+                .block();
+
+        if(result != null && result != 0)
+            LOGGER.info("Create and Store School Report Success {}");
     }
 
     public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {

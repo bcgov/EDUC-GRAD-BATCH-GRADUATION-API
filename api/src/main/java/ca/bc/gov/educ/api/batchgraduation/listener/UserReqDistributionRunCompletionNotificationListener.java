@@ -25,24 +25,22 @@ import java.util.stream.Collectors;
 public class UserReqDistributionRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserReqDistributionRunCompletionNotificationListener.class);
-    
-    @Autowired
-    private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
+    private static final String LOG_SEPARATION = "=======================================================================================";
+    private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
-	@Autowired
-	private BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
-    
-    @Autowired
-    private RestUtils restUtils;
+	@Autowired BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
+	@Autowired BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
+    @Autowired RestUtils restUtils;
+	ParallelDataFetch parallelDataFetch;
 
-	private ParallelDataFetch parallelDataFetch;
+
     
     @Override
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
-			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
+			LOGGER.info(LOG_SEPARATION);
+	    	LOGGER.info("Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 	    	JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
@@ -76,8 +74,8 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
-			LOGGER.info(" --------------------------------------------------------------------------------------");
-			LOGGER.info(" Errors:		   {}", summaryDTO.getErrors().size());
+			LOGGER.info(LOG_SEPARATION_SINGLE);
+			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
 			summaryDTO.getErrors().forEach(e -> {
 				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail());
@@ -90,17 +88,14 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			if(!eList.isEmpty())
 				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
 
-			LOGGER.info(" --------------------------------------------------------------------------------------");
+			LOGGER.info(LOG_SEPARATION_SINGLE);
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
-			summaryDTO.getCredentialCountMap().entrySet().stream().forEach(e -> {
-				String key = e.getKey();
-				LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key));
-			});
-			LOGGER.info("=======================================================================================");
+			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
+			LOGGER.info(LOG_SEPARATION);
 		}else if (jobExecution.getStatus() == BatchStatus.FAILED) {
 			long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
-			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("Distribution Job failed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
+			LOGGER.info(LOG_SEPARATION);
+	    	LOGGER.info("Distribution Job failed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
@@ -135,8 +130,8 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
-			LOGGER.info(" --------------------------------------------------------------------------------------");
-			LOGGER.info(" Errors		 : {}", summaryDTO.getErrors().size());
+			LOGGER.info(LOG_SEPARATION_SINGLE);
+			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
 			summaryDTO.getErrors().forEach(e -> {
 				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail());
@@ -149,19 +144,15 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 
 			if(!eList.isEmpty())
 				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
-			LOGGER.info(" --------------------------------------------------------------------------------------");
+			LOGGER.info(LOG_SEPARATION_SINGLE);
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
-			summaryDTO.getCredentialCountMap().entrySet().stream().forEach(e -> {
-				String key = e.getKey();
-				LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key));
-			});
-			LOGGER.info("=======================================================================================");
+			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
+			LOGGER.info(LOG_SEPARATION);
 		}
     }
 
 	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String credentialType, String accessToken) {
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
-		List<StudentCredentialDistribution> finalCList = cList;
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = new ArrayList<>();
 			List<StudentCredentialDistribution> yed2List = new ArrayList<>();
@@ -169,13 +160,13 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			List<StudentCredentialDistribution> yedbList = new ArrayList<>();
 			if(credentialType != null) {
 				if (credentialType.equalsIgnoreCase("OT") || credentialType.equalsIgnoreCase("RT")) {
-					yed4List = finalCList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
+					yed4List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
 				}
 
 				if (credentialType.equalsIgnoreCase("OC") || credentialType.equalsIgnoreCase("RC")) {
-					yed2List = finalCList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
-					yedrList = finalCList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
-					yedbList = finalCList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
+					yed2List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
+					yedrList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
+					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
 				}
 			}
 			transcriptPrintFile(yed4List,batchId,usl,mapDist);
@@ -184,7 +175,13 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB");
 		});
 		DistributionResponse disres = null;
+		String activityCode = null;
 		if(credentialType != null) {
+			if(credentialType.equalsIgnoreCase("OC")) {
+				activityCode = "USERDISTOC";
+			}else {
+				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
+			}
 			if (credentialType.equalsIgnoreCase("RC")) {
 				disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist);
 			} else {
@@ -192,14 +189,12 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			}
 		}
 		if(disres != null) {
-			updateBackStudentRecords(cList,batchId,"USERDIST",accessToken);
+			updateBackStudentRecords(cList,batchId,activityCode,accessToken);
 		}
 	}
 
 	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
-		cList.forEach(scd-> {
-			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
-		});
+		cList.forEach(scd->	restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken));
 	}
 	private void transcriptPrintFile(List<StudentCredentialDistribution> yed4List, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
 		if(!yed4List.isEmpty()) {

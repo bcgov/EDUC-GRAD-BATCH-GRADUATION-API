@@ -19,6 +19,7 @@ public class AlgorithmSummaryDTO {
   private long processedCount = 0L;
 
   private List<ProcessError> errors = new ArrayList<>();
+  private List<GraduationStudentRecord> globalList = new ArrayList<>();
   private String exception;
 
   // stats
@@ -34,6 +35,8 @@ public class AlgorithmSummaryDTO {
     put("NOPROG", 0L);
     put("SCCP", 0L);
   }};
+
+  private Map<String, SchoolReportRequest> mapDist = new HashMap<>();
 
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String accessToken;
