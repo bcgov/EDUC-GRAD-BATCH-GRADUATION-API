@@ -264,7 +264,8 @@ public class RestUtils {
                 item.setLegalFirstName(stuRec.getLegalFirstName());
                 item.setLegalMiddleNames(stuRec.getLegalMiddleNames());
                 item.setLegalLastName(stuRec.getLegalLastName());
-
+                item.setNonGradReasons(stuRec.getNonGradReasons());
+                item.setStudentGrade(stuRec.getStudentGrade());
             }
         }
         summary.getGlobalList().add(item);
