@@ -189,6 +189,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			}
 		}
 		if(disres != null) {
+			ResponseObj obj = restUtils.getTokenResponseObject();
 			updateBackStudentRecords(cList,batchId,activityCode,accessToken);
 		}
 	}

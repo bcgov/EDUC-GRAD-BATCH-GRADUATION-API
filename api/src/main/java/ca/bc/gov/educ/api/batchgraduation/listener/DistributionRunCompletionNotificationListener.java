@@ -176,7 +176,8 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 		});
 		DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist);
 		if(disres != null) {
-			updateBackStudentRecords(cList,batchId,activityCode,accessToken);
+			ResponseObj obj = restUtils.getTokenResponseObject();
+			updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());
 		}
 	}
 
