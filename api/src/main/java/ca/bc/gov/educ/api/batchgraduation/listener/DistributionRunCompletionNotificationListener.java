@@ -174,7 +174,7 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR");
 			certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB");
 		});
-		DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist);
+		DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode);
 		if(disres != null) {
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());
