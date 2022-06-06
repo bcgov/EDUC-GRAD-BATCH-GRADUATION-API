@@ -131,6 +131,6 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/userrequest/%s
   grad-distribution-api:
     merge-n-upload:
-      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MER?batchId=%s
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MER?batchId=%s&activityCode=%s
     reprint-n-upload:
-      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/RPR?batchId=%s
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/RPR?batchId=%s&activityCode=%s

@@ -183,9 +183,9 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
 			}
 			if (credentialType.equalsIgnoreCase("RC")) {
-				disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist);
+				disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist,activityCode);
 			} else {
-				disres = restUtils.mergeAndUpload(batchId, accessToken, mapDist);
+				disres = restUtils.mergeAndUpload(batchId, accessToken, mapDist,activityCode);
 			}
 		}
 		if(disres != null) {
