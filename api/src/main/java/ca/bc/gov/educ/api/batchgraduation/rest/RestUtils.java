@@ -273,6 +273,35 @@ public class RestUtils {
         return item;
     }
 
+    public BlankCredentialDistribution processBlankDistribution(BlankCredentialDistribution item, BlankDistributionSummaryDTO summary) {
+        summary.setProcessedCount(summary.getProcessedCount() + 1L);
+        String accessToken = summary.getAccessToken();
+        GradCertificateTypes certType = this.getCertTypes(item.getCredentialTypeCode(),accessToken);
+        if(certType != null)
+            item.setPaperType(certType.getPaperType());
+        else
+            item.setPaperType("YED4");
+
+        summary.getGlobalList().add(item);
+        return item;
+    }
+
+    public GradCertificateTypes getCertTypes(String certType,String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        GradCertificateTypes result = webClient.get()
+                .uri(String.format(constants.getCertificateTypes(),certType))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
+                .retrieve()
+                .bodyToMono(GradCertificateTypes.class)
+                .block();
+        if(result != null)
+            LOGGER.info("*** Fetched # of Cert type Record : {}",result.getCode());
+
+        return result;
+    }
     public GraduationStudentRecordDistribution getStudentData(String studentID, String accessToken) {
         UUID correlationID = UUID.randomUUID();
         GraduationStudentRecordDistribution result = webClient.get()
@@ -323,6 +352,24 @@ public class RestUtils {
 
         if(result != null)
             LOGGER.info("Merge and Upload Success {}",result.getMergeProcessResponse());
+        return  result;
+    }
+
+
+    public DistributionResponse createBlankCredentialsAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
+        UUID correlationID = UUID.randomUUID();
+        DistributionResponse result = webClient.post()
+                .uri(String.format(constants.getCreateBlanksAndUpload(),batchId))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
+                .body(BodyInserters.fromValue(mapDist))
+                .retrieve()
+                .bodyToMono(DistributionResponse.class)
+                .block();
+        if(result != null)
+            LOGGER.info("Create and Upload Success {}",result.getMergeProcessResponse());
         return  result;
     }
 

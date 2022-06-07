@@ -91,7 +91,7 @@ public class JobLauncherController {
             AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                | JobParametersInvalidException | NoSuchJobException e) {
+                | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
             AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
             summaryDTO.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(summaryDTO);
@@ -120,7 +120,7 @@ public class JobLauncherController {
             AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("tvrRunSummaryDTO");
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                | JobParametersInvalidException | NoSuchJobException e) {
+                | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
             AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
             summaryDTO.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(summaryDTO);
@@ -135,7 +135,7 @@ public class JobLauncherController {
     public ResponseEntity<String> loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData,
                                                  @RequestHeader(name="Authorization") String accessToken) {
         logger.debug("Inside loadStudentIDs");
-        Integer recordsAdded = restUtils.getStudentByPenFromStudentAPI(loadStudentData, accessToken.replaceAll("Bearer ", ""));
+        Integer recordsAdded = restUtils.getStudentByPenFromStudentAPI(loadStudentData, accessToken.replace("Bearer ", ""));
         if(recordsAdded != null)
             return ResponseEntity.ok("Record Added Successfully");
         return ResponseEntity.status(500).body("Student Record Could not be added");
@@ -162,7 +162,7 @@ public class JobLauncherController {
                                                     @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
                                                     @RequestHeader(name="Authorization") String accessToken) {
         logger.debug("Inside loadError");
-        ErrorDashBoard dash = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken.replaceAll("Bearer ", ""));
+        ErrorDashBoard dash = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken.replace("Bearer ", ""));
         if(dash == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -210,6 +210,15 @@ public class JobLauncherController {
         if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
             DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
             summaryDTO.setException("Please provide at least 1 parameter");
+            return summaryDTO;
+        }
+        return null;
+    }
+
+    private BlankDistributionSummaryDTO validateInputBlankDisRun(BlankCredentialRequest blankCredentialRequest) {
+        if(blankCredentialRequest.getSchoolOfRecords().isEmpty() || blankCredentialRequest.getCredentialTypeCode().isEmpty()) {
+            BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
+            summaryDTO.setException("Please provide both parameters");
             return summaryDTO;
         }
         return null;
@@ -329,6 +338,35 @@ public class JobLauncherController {
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
             DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
+        }
+
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_BLANK_USER_REQ_RUNS)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Specialized User Req Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<BlankDistributionSummaryDTO> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest) {
+        logger.debug("launchUserReqDisRunSpecialJob");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, DISTRUNUSER);
+        BlankDistributionSummaryDTO validate = validateInputBlankDisRun(blankCredentialRequest);
+        if(validate != null) {
+            return ResponseEntity.status(400).body(validate);
+        }
+        try {
+            String searchData = new ObjectMapper().writeValueAsString(blankCredentialRequest);
+            builder.addString(SEARCH_REQUEST, searchData);
+            JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO)jobContext.get("blankDistributionSummaryDTO");
+            return ResponseEntity.ok(summaryDTO);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
+            BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
             summaryDTO.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(summaryDTO);
         }
