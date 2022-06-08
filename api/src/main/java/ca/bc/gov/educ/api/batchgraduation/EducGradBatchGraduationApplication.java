@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation;
 
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
 import org.modelmapper.ModelMapper;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @SpringBootApplication
 @EnableScheduling
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableSchedulerLock(defaultLockAtMostFor = "1s")
 public class EducGradBatchGraduationApplication {
 
     public static void main(String[] args) {
