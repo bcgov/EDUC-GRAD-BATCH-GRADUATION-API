@@ -13,14 +13,13 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -33,7 +32,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
@@ -59,20 +57,19 @@ public class JobLauncherController {
     private final JobRegistry jobRegistry;
     private final RestUtils restUtils;
     private final GradDashboardService gradDashboardService;
-    private final JobExplorer jobExplorer;
 
-    public JobLauncherController(JobExplorer jobExplorer,JobLauncher jobLauncher, JobRegistry jobRegistry, RestUtils restUtils, GradDashboardService gradDashboardService) {
+    public JobLauncherController(JobLauncher jobLauncher, JobRegistry jobRegistry, RestUtils restUtils, GradDashboardService gradDashboardService) {
         this.jobLauncher = jobLauncher;
         this.jobRegistry = jobRegistry;
         this.restUtils = restUtils;
         this.gradDashboardService = gradDashboardService;
-        this.jobExplorer = jobExplorer;
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_REG_GRAD_BATCH_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Manual Reg Grad Job", description = "Run Manual Reg Grad Job", tags = { "Reg Grad" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public ResponseEntity<AlgorithmSummaryDTO> launchRegGradJob() {
         logger.debug("launchRegGradJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -81,11 +78,6 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE, REGALG);
 
         try {
-            if (isJobRunning(jobRegistry.getJob("GraduationBatchJob"))) {
-                AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-                summaryDTO.setException("An instance of this job already running");
-                return ResponseEntity.status(500).body(summaryDTO);
-            }
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
@@ -103,6 +95,7 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Manual TVR Job", description = "Run Manual TVR Job", tags = { "TVR" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public ResponseEntity<AlgorithmSummaryDTO> launchTvrRunJob() {
         logger.debug("launchTvrRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -110,11 +103,6 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
         try {
-            if (isJobRunning(jobRegistry.getJob("tvrBatchJob"))) {
-                AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-                summaryDTO.setException("An instance of this job already running");
-                return ResponseEntity.status(500).body(summaryDTO);
-            }
             JobExecution jobExecution =jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("tvrRunSummaryDTO");
@@ -371,10 +359,5 @@ public class JobLauncherController {
             return ResponseEntity.status(500).body(summaryDTO);
         }
 
-    }
-
-    private boolean isJobRunning(Job job) {
-        Set<JobExecution> jobExecutions = jobExplorer.findRunningJobExecutions(job.getName());
-        return !jobExecutions.isEmpty();
     }
 }

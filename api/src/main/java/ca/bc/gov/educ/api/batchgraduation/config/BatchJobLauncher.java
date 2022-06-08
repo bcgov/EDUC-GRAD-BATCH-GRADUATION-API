@@ -1,9 +1,9 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
 
 /**
  * This bean schedules and runs our Spring Batch job.
@@ -51,6 +49,7 @@ public class BatchJobLauncher {
 
 
     @Scheduled(cron = "0 0 18 * * *")
+    @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runRegularGradAlgorithm() {
         LOGGER.info("Batch Job was started");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -58,9 +57,6 @@ public class BatchJobLauncher {
         builder.addString(JOB_TRIGGER, "BATCH");
         builder.addString(JOB_TYPE, "REGALG");
         try {
-            if (isJobRunning(graduationBatchJob)) {
-                return;
-            }
             jobLauncher.run(graduationBatchJob, builder.toJobParameters());
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | IllegalArgumentException e) {
@@ -70,6 +66,7 @@ public class BatchJobLauncher {
     }
 
     @Scheduled(cron = "0 0 23 * * *")
+    @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runTranscriptVerificationReportProcess() {
         LOGGER.info("Batch Job was started");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -78,19 +75,11 @@ public class BatchJobLauncher {
         builder.addString(JOB_TYPE, "TVRRUN");
 
         try {
-            if (isJobRunning(tvrBatchJob)) {
-                return;
-            }
             jobLauncher.run(tvrBatchJob, builder.toJobParameters());
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | IllegalArgumentException e) {
             LOGGER.debug("Error {}",e.getLocalizedMessage());
         }
         LOGGER.info("Batch Job was stopped");
-    }
-
-    private boolean isJobRunning(Job job) {
-        Set<JobExecution> jobExecutions = jobExplorer.findRunningJobExecutions(job.getName());
-        return !jobExecutions.isEmpty();
     }
 }
