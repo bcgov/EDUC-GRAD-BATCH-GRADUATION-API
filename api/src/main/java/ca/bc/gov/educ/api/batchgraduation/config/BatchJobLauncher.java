@@ -49,7 +49,7 @@ public class BatchJobLauncher {
 
 
     @Scheduled(cron = "0 0 18 * * *")
-    @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "800ms", lockAtMostFor = "1m")
+    @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runRegularGradAlgorithm() {
         LOGGER.info("Batch Job was started");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -66,7 +66,7 @@ public class BatchJobLauncher {
     }
 
     @Scheduled(cron = "0 0 23 * * *")
-    @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "800ms", lockAtMostFor = "1m")
+    @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runTranscriptVerificationReportProcess() {
         LOGGER.info("Batch Job was started");
         JobParametersBuilder builder = new JobParametersBuilder();
