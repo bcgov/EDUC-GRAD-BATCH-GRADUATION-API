@@ -1,17 +1,22 @@
 package ca.bc.gov.educ.api.batchgraduation;
 
+import net.javacrumbs.shedlock.core.LockProvider;
+import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import org.modelmapper.ModelMapper;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.PlatformTransactionManager;
 
 @SpringBootApplication
 @EnableScheduling
@@ -54,5 +59,17 @@ public class EducGradBatchGraduationApplication {
                     .oauth2ResourceServer()
                     .jwt();
         }
+    }
+
+    /**
+     * Lock provider lock provider.
+     *
+     * @param jdbcTemplate       the jdbc template
+     * @param transactionManager the transaction manager
+     * @return the lock provider
+     */
+    @Bean
+    public LockProvider lockProvider(@Autowired JdbcTemplate jdbcTemplate, @Autowired PlatformTransactionManager transactionManager) {
+        return new JdbcTemplateLockProvider(jdbcTemplate, transactionManager, "BATCH_SHEDLOCK");
     }
 }

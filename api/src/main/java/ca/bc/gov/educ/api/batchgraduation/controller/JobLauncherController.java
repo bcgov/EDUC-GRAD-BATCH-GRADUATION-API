@@ -81,11 +81,6 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE, REGALG);
 
         try {
-            if (isJobRunning(jobRegistry.getJob("GraduationBatchJob"))) {
-                AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-                summaryDTO.setException("An instance of this job already running");
-                return ResponseEntity.status(500).body(summaryDTO);
-            }
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("regGradAlgSummaryDTO");
@@ -110,11 +105,6 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
         try {
-            if (isJobRunning(jobRegistry.getJob("tvrBatchJob"))) {
-                AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-                summaryDTO.setException("An instance of this job already running");
-                return ResponseEntity.status(500).body(summaryDTO);
-            }
             JobExecution jobExecution =jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("tvrRunSummaryDTO");
@@ -371,10 +361,5 @@ public class JobLauncherController {
             return ResponseEntity.status(500).body(summaryDTO);
         }
 
-    }
-
-    private boolean isJobRunning(Job job) {
-        Set<JobExecution> jobExecutions = jobExplorer.findRunningJobExecutions(job.getName());
-        return !jobExecutions.isEmpty();
     }
 }
