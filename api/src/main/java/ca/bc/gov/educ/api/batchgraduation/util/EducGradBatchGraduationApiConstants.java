@@ -15,6 +15,7 @@ public class EducGradBatchGraduationApiConstants {
 
 	public static final String API_ROOT_MAPPING = "";
     public static final String API_VERSION = "v1";
+    public static final String CORRELATION_ID = "correlationID";
     public static final String GRAD_BATCH_API_ROOT_MAPPING = "/api/" + API_VERSION + "/batch";
     public static final String EXECUTE_REG_GRAD_BATCH_JOB = "/executereggradbatchjob";
     public static final String EXECUTE_TVR_RUN_BATCH_JOB = "/executetvrrunbatchjob";
@@ -24,6 +25,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
     public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
     public static final String EXECUTE_SPECIALIZED_USER_REQ_RUNS = "/userrequestdisrun/{credentialType}";
+    public static final String EXECUTE_SPECIALIZED_BLANK_USER_REQ_RUNS = "/userrequestblankdisrun";
     
     public static final String BATCH_DASHBOARD = "/dashboard";
     public static final String BATCH_ERRORS = "/dashboard/errors/{batchId}";
@@ -102,10 +104,22 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-distribution-api.reprint-n-upload.url}")
     private String reprintAndUpload;
 
+    @Value("${endpoint.grad-distribution-api.blanks-n-upload.url}")
+    private String createBlanksAndUpload;
+
     @Value("${endpoint.grad-graduation-report-api.update-student-credential.url}")
     private String updateStudentCredential;
 
+    @Value("${endpoint.grad-graduation-report-api.get-certificate-types.url}")
+    private String certificateTypes;
+
+    @Value("${endpoint.grad-student-api.update-student-record}")
+    private String updateStudentRecord;
+
     @Value("${endpoint.grad-graduation-report-api.user-req-dis-run.url}")
     private String studentDataForUserReqDisRun;
+
+    @Value("${endpoint.grad-graduation-api.schoolreport.url}")
+    private String createAndStore;
 
 }

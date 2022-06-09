@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.After;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -76,6 +78,7 @@ public class TvrRunJobCompletionNotificationListenerTest {
         AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
         summaryDTO.setAccessToken("123");
         summaryDTO.setBatchId(121L);
+        summaryDTO.setGlobalList(new ArrayList<>());
         summaryDTO.setProcessedCount(10);
         summaryDTO.setErrors(new ArrayList<>());
         jobContext.put("summaryDTO", summaryDTO);
@@ -102,6 +105,9 @@ public class TvrRunJobCompletionNotificationListenerTest {
         ent.setJobType(jobType);
 
         ex.setExecutionContext(jobContext);
+        ResponseObj obj = new ResponseObj();
+        obj.setAccess_token("asdasd");
+        Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
         tvrRunJobCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);

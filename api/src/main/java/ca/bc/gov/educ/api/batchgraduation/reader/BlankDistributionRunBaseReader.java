@@ -1,48 +1,41 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.List;
 import java.util.Map;
 
-public abstract class BaseReader implements ItemReader<GraduationStudentRecord> {
+public abstract class BlankDistributionRunBaseReader implements ItemReader<BlankCredentialDistribution> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlankDistributionRunBaseReader.class);
 
     @Autowired
     RestUtils restUtils;
 
-    @Value("#{stepExecutionContext['data']}")
-    List<GraduationStudentRecord> partitionData;
-
     @Value("#{stepExecutionContext['summary']}")
-    AlgorithmSummaryDTO summaryDTO;
+    BlankDistributionSummaryDTO summaryDTO;
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution jobExecution;
 
     protected void aggregate(String summaryContextName) {
-        AlgorithmSummaryDTO totalSummaryDTO = (AlgorithmSummaryDTO)jobExecution.getExecutionContext().get(summaryContextName);
+        BlankDistributionSummaryDTO totalSummaryDTO = (BlankDistributionSummaryDTO)jobExecution.getExecutionContext().get(summaryContextName);
         if (totalSummaryDTO == null) {
-            totalSummaryDTO = new AlgorithmSummaryDTO();
+            totalSummaryDTO = new BlankDistributionSummaryDTO();
             jobExecution.getExecutionContext().put(summaryContextName, totalSummaryDTO);
         }
+        totalSummaryDTO.setBatchId(summaryDTO.getBatchId());
         totalSummaryDTO.setReadCount(totalSummaryDTO.getReadCount() + summaryDTO.getReadCount());
         totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());
         totalSummaryDTO.getErrors().addAll(summaryDTO.getErrors());
         totalSummaryDTO.getGlobalList().addAll(summaryDTO.getGlobalList());
-        mergeMapCounts(totalSummaryDTO.getProgramCountMap(),summaryDTO.getProgramCountMap());
+        mergeMapCounts(totalSummaryDTO.getCredentialCountMap(),summaryDTO.getCredentialCountMap());
     }
 
     protected void fetchAccessToken() {

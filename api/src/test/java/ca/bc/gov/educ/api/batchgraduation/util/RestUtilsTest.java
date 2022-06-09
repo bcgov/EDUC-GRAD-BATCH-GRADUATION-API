@@ -290,6 +290,7 @@ public class RestUtilsTest {
 
     @Test
     public void testCreateReprintAndUpload() {
+        String activityCode = "USERDISTRC";
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
         Long batchId = 3344L;
@@ -304,12 +305,13 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
 
 
-        val result = this.restUtils.createReprintAndUpload(batchId,null,new HashMap<>());
+        val result = this.restUtils.createReprintAndUpload(batchId,null,new HashMap<>(), activityCode);
         assertThat(result).isNotNull();
     }
 
     @Test
     public void testMergeAndUpload() {
+        String activityCode = "USERDISTOC";
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
         Long batchId = 3344L;
@@ -322,7 +324,7 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
 
 
-        val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>());
+        val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode);
         assertThat(result).isNotNull();
     }
 

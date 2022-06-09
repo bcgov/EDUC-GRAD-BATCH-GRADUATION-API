@@ -80,6 +80,8 @@ endpoint:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/FMR?batchId=%s
     tvrrun:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/studentid/%s/run/REGFM?batchId=%s
+    schoolreport:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/school
   grad-student-api:
     grad-status: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s
     student-for-grad-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
@@ -88,6 +90,7 @@ endpoint:
     student-for-special-grad-run-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentlistsearch
     get-student-data-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/multistudentids
     get-student-record: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/stdid/%s
+    update-student-record: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/projected/studentid/%s?batchId=%s&activityCode=%s
   grad-graduation-report-api:
     get-transcript-list:
       yearly:
@@ -99,8 +102,12 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcredential/%s/%s/%s
     user-req-dis-run:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/userrequest/%s
+    get-certificate-types:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/certificatetype/%s
   grad-distribution-api:
     merge-n-upload:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/MER?batchId=%s
     reprint-n-upload:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/RPR?batchId=%s
+    blanks-n-upload:
+      url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/BCPR?batchId=%s

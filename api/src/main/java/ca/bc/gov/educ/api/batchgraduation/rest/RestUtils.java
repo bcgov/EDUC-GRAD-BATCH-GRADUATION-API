@@ -15,6 +15,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -24,7 +25,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RestUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestUtils.class);
-
+    private static final String STUDENT_PROCESS = "*** {} Partition  - Processing  * STUDENT ID: * {}";
+    private static final String STUDENT_PROCESSED = "*** {} Partition  * Processed student[{}] * Student ID: {} in total {}";
     private final EducGradBatchGraduationApiConstants constants;
 
     private final WebClient webClient;
@@ -40,7 +42,7 @@ public class RestUtils {
                 constants.getUserName(), constants.getPassword());
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
         map.add("grant_type", "client_credentials");
-        System.out.println("url = " + constants.getTokenUrl());
+        LOGGER.debug("url = {}",constants.getTokenUrl());
         return this.webClient.post().uri(constants.getTokenUrl())
                 .headers(h -> h.addAll(httpHeadersKC))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
@@ -50,9 +52,10 @@ public class RestUtils {
     }
 
     public List<Student> getStudentsByPen(String pen, String accessToken) {
+        // No need to add a correlationID here.
         final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
         };
-        System.out.println("url = " + constants.getPenStudentApiByPenUrl());
+        LOGGER.debug("url = {}",constants.getPenStudentApiByPenUrl());
         return this.webClient.get()
                 .uri(String.format(constants.getPenStudentApiByPenUrl(), pen))
                 .headers(h -> h.setBearerAuth(accessToken))
@@ -60,47 +63,67 @@ public class RestUtils {
     }
     
     public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken, String programCompleteDate,Long batchId) {
+        UUID correlationID = UUID.randomUUID();
         if(programCompleteDate != null) {
             return this.webClient.get()
             		.uri(String.format(constants.getGraduationApiReportOnlyUrl(), studentID,batchId))
-                    .headers(h -> h.setBearerAuth(accessToken))
+                    .headers(h -> {
+                        h.setBearerAuth(accessToken);
+                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                    })
                     .retrieve().bodyToMono(AlgorithmResponse.class).block();
         }
     	return this.webClient.get()
         		.uri(String.format(constants.getGraduationApiUrl(), studentID,batchId))
-                .headers(h -> h.setBearerAuth(accessToken))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .retrieve().bodyToMono(AlgorithmResponse.class).block();
     }
 
     public AlgorithmResponse runProjectedGradAlgorithm(UUID studentID, String accessToken,Long batchId) {
+        UUID correlationID = UUID.randomUUID();
         return this.webClient.get()
             .uri(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,batchId))
-            .headers(h -> h.setBearerAuth(accessToken))
+            .headers(h -> {
+                h.setBearerAuth(accessToken);
+                h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+            })
             .retrieve().bodyToMono(AlgorithmResponse.class).block();
 
     }
     
     public List<GraduationStudentRecord> getStudentsForAlgorithm(String accessToken) {
+        UUID correlationID = UUID.randomUUID();
         final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.get()
                 .uri(constants.getGradStudentApiStudentForGradListUrl())
-                .headers(h -> h.setBearerAuth(accessToken))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .retrieve().bodyToMono(responseType).block();
     }
 
     public List<GraduationStudentRecord> getStudentsForProjectedAlgorithm(String accessToken) {
+        UUID correlationID = UUID.randomUUID();
         final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.get()
                 .uri(constants.getGradStudentApiStudentForProjectedGradListUrl())
-                .headers(h -> h.setBearerAuth(accessToken))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .retrieve().bodyToMono(responseType).block();
     }
 
     // EDUC-GRAD-STUDENT-API ========================================
 
     public GraduationStudentRecord saveGraduationStudentRecord(GraduationStudentRecord graduationStudentRecord, String accessToken) {
+        // No need to add a correlationID here.
         return this.webClient.post()
                 .uri(String.format(constants.getGradStudentApiGradStatusUrl(),graduationStudentRecord.getStudentID()))
                 .headers(h -> h.setBearerAuth(accessToken))
@@ -109,20 +132,22 @@ public class RestUtils {
     }
 
     public List<GraduationStudentRecord> getStudentsForSpecialGradRun(StudentSearchRequest req,String accessToken) {
-        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
-        };
+        UUID correlationID = UUID.randomUUID();
         GraduationStudentRecordSearchResult res = this.webClient.post()
                 .uri(constants.getGradStudentApiStudentForSpcGradListUrl())
-                .headers(h -> h.setBearerAuth(accessToken))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .body(BodyInserters.fromValue(req))
                 .retrieve()
                 .bodyToMono(GraduationStudentRecordSearchResult.class)
                 .block();
-        return res.getGraduationStudentRecords();
+        return res != null ?res.getGraduationStudentRecords():new ArrayList<>();
     }
 
     public GraduationStudentRecord processStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
-        LOGGER.info("*** {} Partition  - Processing  * STUDENT ID: * {}",Thread.currentThread().getName(),item.getStudentID().toString());
+        LOGGER.info(STUDENT_PROCESS,Thread.currentThread().getName(),item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         try {
             String accessToken = summary.getAccessToken();
@@ -136,13 +161,13 @@ public class RestUtils {
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
                 return null;
             }
-            LOGGER.info("*** {} Partition  * Processed student[{}] * Student ID: {} in total {}",Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+            LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             ProcessError error = new ProcessError();
             error.setStudentID(item.getStudentID().toString());
             error.setReason("GRAD-GRADUATION-API IS DOWN");
-            error.setDetail("Graduation API is unavialble at this moment");
+            error.setDetail("Graduation API is unavailable at this moment");
             summary.getErrors().add(error);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count : {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
@@ -152,7 +177,7 @@ public class RestUtils {
     }
 
     public GraduationStudentRecord processProjectedGradStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
-        LOGGER.info("*** {} Partition  - Processing  * STUDENT ID: * {}",Thread.currentThread().getName(),item.getStudentID().toString());
+        LOGGER.info(STUDENT_PROCESS,Thread.currentThread().getName(),item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         try {
             String accessToken = summary.getAccessToken();
@@ -166,13 +191,14 @@ public class RestUtils {
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
                 return null;
             }
-            LOGGER.info("*** {} Partition  * Processed student[{}] * Student ID: {} in total {}",Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+            LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+            summary.getGlobalList().add(item);
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             ProcessError error = new ProcessError();
             error.setStudentID(item.getStudentID().toString());
             error.setReason("GRAD-GRADUATION-API IS DOWN");
-            error.setDetail("Graduation API is unavialble at this moment");
+            error.setDetail("Graduation API is unavailable at this moment");
             summary.getErrors().add(error);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count: {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
@@ -200,19 +226,23 @@ public class RestUtils {
     }
 
     public List<GraduationStudentRecord> getStudentData(List<UUID> studentIds, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
         final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
         };
         StudentList stuList = new StudentList();
         stuList.setStudentids(studentIds);
         return this.webClient.post()
-                .uri(String.format(constants.getGradStudentApiStudentDataListUrl()))
-                .headers(h -> h.setBearerAuth(accessToken))
+                .uri(constants.getGradStudentApiStudentDataListUrl())
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .body(BodyInserters.fromValue(stuList))
                 .retrieve().bodyToMono(responseType).block();
     }
 
     public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary) {
-        LOGGER.info("*** {} Partition  - Processing  * STUDENT ID: * {}",Thread.currentThread().getName(),item.getStudentID().toString());
+        LOGGER.info(STUDENT_PROCESS,Thread.currentThread().getName(),item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         String accessToken = summary.getAccessToken();
 
@@ -234,19 +264,52 @@ public class RestUtils {
                 item.setLegalFirstName(stuRec.getLegalFirstName());
                 item.setLegalMiddleNames(stuRec.getLegalMiddleNames());
                 item.setLegalLastName(stuRec.getLegalLastName());
-
+                item.setNonGradReasons(stuRec.getNonGradReasons());
+                item.setStudentGrade(stuRec.getStudentGrade());
             }
         }
         summary.getGlobalList().add(item);
-        LOGGER.info("*** {} Partition  * Processed student[{}] * Student ID: {} in total {}",Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+        LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
         return item;
     }
 
-    public GraduationStudentRecordDistribution getStudentData(String studentID, String accessToken) {
+    public BlankCredentialDistribution processBlankDistribution(BlankCredentialDistribution item, BlankDistributionSummaryDTO summary) {
+        summary.setProcessedCount(summary.getProcessedCount() + 1L);
+        String accessToken = summary.getAccessToken();
+        GradCertificateTypes certType = this.getCertTypes(item.getCredentialTypeCode(),accessToken);
+        if(certType != null)
+            item.setPaperType(certType.getPaperType());
+        else
+            item.setPaperType("YED4");
 
+        summary.getGlobalList().add(item);
+        return item;
+    }
+
+    public GradCertificateTypes getCertTypes(String certType,String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        GradCertificateTypes result = webClient.get()
+                .uri(String.format(constants.getCertificateTypes(),certType))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
+                .retrieve()
+                .bodyToMono(GradCertificateTypes.class)
+                .block();
+        if(result != null)
+            LOGGER.info("*** Fetched # of Cert type Record : {}",result.getCode());
+
+        return result;
+    }
+    public GraduationStudentRecordDistribution getStudentData(String studentID, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
         GraduationStudentRecordDistribution result = webClient.get()
                 .uri(String.format(constants.getStudentInfo(),studentID))
-                .headers(h -> h.setBearerAuth(accessToken))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .retrieve()
                 .bodyToMono(GraduationStudentRecordDistribution.class)
                 .block();
@@ -257,11 +320,31 @@ public class RestUtils {
         return result;
     }
 
-    public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
+    public void createAndStoreSchoolReports(String accessToken, Map<String, SchoolReportRequest> mapDist) {
+        UUID correlationID = UUID.randomUUID();
+        Integer result = webClient.post()
+                .uri(constants.getCreateAndStore())
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
+                .body(BodyInserters.fromValue(mapDist))
+                .retrieve()
+                .bodyToMono(Integer.class)
+                .block();
 
+        if(result != null && result != 0)
+            LOGGER.info("Create and Store School Report Success {}",result);
+    }
+
+    public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String activityCode) {
+        UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
-                .uri(String.format(constants.getMergeAndUpload(),batchId))
-                .headers(h -> h.setBearerAuth(accessToken))
+                .uri(String.format(constants.getMergeAndUpload(),batchId,activityCode))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .body(BodyInserters.fromValue(mapDist))
                 .retrieve()
                 .bodyToMono(DistributionResponse.class)
@@ -272,11 +355,32 @@ public class RestUtils {
         return  result;
     }
 
-    public DistributionResponse createReprintAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
 
+    public DistributionResponse createBlankCredentialsAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
+        UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
-                .uri(String.format(constants.getReprintAndUpload(),batchId))
-                .headers(h -> h.setBearerAuth(accessToken))
+                .uri(String.format(constants.getCreateBlanksAndUpload(),batchId))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
+                .body(BodyInserters.fromValue(mapDist))
+                .retrieve()
+                .bodyToMono(DistributionResponse.class)
+                .block();
+        if(result != null)
+            LOGGER.info("Create and Upload Success {}",result.getMergeProcessResponse());
+        return  result;
+    }
+
+    public DistributionResponse createReprintAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist, String activityCode) {
+        UUID correlationID = UUID.randomUUID();
+        DistributionResponse result = webClient.post()
+                .uri(String.format(constants.getReprintAndUpload(),batchId,activityCode))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .body(BodyInserters.fromValue(mapDist))
                 .retrieve()
                 .bodyToMono(DistributionResponse.class)
@@ -287,18 +391,35 @@ public class RestUtils {
     }
 
     public void updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String documentStatusCode,String accessToken) {
-        webClient.get().uri(String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode)).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(boolean.class).block();
+        UUID correlationID = UUID.randomUUID();
+        webClient.get().uri(String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                }).retrieve().bodyToMono(boolean.class).block();
     }
 
     public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
         final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.post()
                 .uri(String.format(constants.getStudentDataForUserReqDisRun(),credentialType))
-                .headers(h -> h.setBearerAuth(accessToken))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
                 .body(BodyInserters.fromValue(req))
                 .retrieve()
                 .bodyToMono(responseType)
                 .block();
+    }
+
+    public void updateStudentGradRecord(UUID studentID, Long batchId,String activityCode, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        webClient.post().uri(String.format(constants.getUpdateStudentRecord(),studentID,batchId,activityCode)).headers(h -> {
+            h.setBearerAuth(accessToken);
+            h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+        }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
     }
 }

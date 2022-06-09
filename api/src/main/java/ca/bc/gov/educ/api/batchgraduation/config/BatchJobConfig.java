@@ -1,11 +1,13 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
 import ca.bc.gov.educ.api.batchgraduation.listener.*;
+import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.processor.*;
 import ca.bc.gov.educ.api.batchgraduation.reader.*;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import ca.bc.gov.educ.api.batchgraduation.writer.BlankDistributionRunWriter;
 import ca.bc.gov.educ.api.batchgraduation.writer.DistributionRunWriter;
 import ca.bc.gov.educ.api.batchgraduation.writer.RegGradAlgBatchPerformanceWriter;
 import ca.bc.gov.educ.api.batchgraduation.writer.TvrRunBatchPerformanceWriter;
@@ -284,6 +286,24 @@ public class BatchJobConfig {
         return new DistributionRunWriter();
     }
 
+    //
+    @Bean
+    @StepScope
+    public ItemProcessor<BlankCredentialDistribution,BlankCredentialDistribution> itemProcessorBlankDisRun() {
+        return new BlankDistributionRunProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<BlankCredentialDistribution> itemReaderBlankDisRun() {
+        return new BlankDistributionRunReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<BlankCredentialDistribution> itemWriterBlankDisRun() {
+        return new BlankDistributionRunWriter();
+    }
     // Partitioning for Regular Grad Run updates
     @Bean
     public Step masterStepDisRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
@@ -309,6 +329,16 @@ public class BatchJobConfig {
                 .reader(itemReaderDisRun())
                 .processor(itemProcessorDisRun())
                 .writer(itemWriterDisRun())
+                .build();
+    }
+
+    @Bean
+    public Step slaveStepBlankDisRun(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepBlankDisRun")
+                .<BlankCredentialDistribution, BlankCredentialDistribution>chunk(1)
+                .reader(itemReaderBlankDisRun())
+                .processor(itemProcessorBlankDisRun())
+                .writer(itemWriterBlankDisRun())
                 .build();
     }
 
@@ -349,6 +379,16 @@ public class BatchJobConfig {
     }
 
     @Bean
+    public Step masterStepBlankUserReqDisRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepBlankUserReqDisRun")
+                .partitioner(slaveStepBlankDisRun(stepBuilderFactory).getName(), partitionerDisRunBlankUserReq())
+                .step(slaveStepBlankDisRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
     @StepScope
     public DistributionRunPartitionerYearly partitionerDisRunYearly() {
         return new DistributionRunPartitionerYearly();
@@ -359,6 +399,12 @@ public class BatchJobConfig {
     @StepScope
     public DistributionRunPartitionerUserReq partitionerDisRunUserReq() {
         return new DistributionRunPartitionerUserReq();
+    }
+
+    @Bean
+    @StepScope
+    public DistributionRunPartitionerBlankUserReq partitionerDisRunBlankUserReq() {
+        return new DistributionRunPartitionerBlankUserReq();
     }
 
     @Bean
@@ -393,6 +439,19 @@ public class BatchJobConfig {
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .flow(masterStepUserReqDisRun(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    /**
+     * Creates a bean that represents our batch job.
+     */
+    @Bean(name="blankDistributionBatchJob")
+    public Job blankDistributionBatchJobUserReq(UserReqBlankDistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("blankDistributionBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepBlankUserReqDisRun(stepBuilderFactory,constants))
                 .end()
                 .build();
     }

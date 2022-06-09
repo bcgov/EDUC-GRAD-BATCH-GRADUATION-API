@@ -1,10 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
@@ -44,7 +41,7 @@ import static org.mockito.MockitoAnnotations.openMocks;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class UserReqDistributionRunCompletionNotificationListenerTest {
+public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
 
     private static final String TIME = "time";
     private static final String JOB_TRIGGER="jobTrigger";
@@ -58,7 +55,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
     @Mock WebClient.RequestBodyUriSpec requestBodyUriMock;
 
     @Autowired
-    private UserReqDistributionRunCompletionNotificationListener userReqDistributionRunCompletionNotificationListener;
+    private UserReqBlankDistributionRunCompletionNotificationListener userReqBlankDistributionRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
     @MockBean
     RestUtils restUtils;
@@ -100,19 +97,16 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         ex.setId(121L);
         ExecutionContext jobContext = ex.getExecutionContext();
 
-        List<StudentCredentialDistribution> scdList = new ArrayList<>();
-        StudentCredentialDistribution scd = new StudentCredentialDistribution();
-        scd.setId(new UUID(1,1));
-        scd.setStudentID(new UUID(2,2));
+        List<BlankCredentialDistribution> scdList = new ArrayList<>();
+        BlankCredentialDistribution scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("E");
         scd.setPaperType("YED2");
         scd.setSchoolOfRecord("05005001");
         scdList.add(scd);
 
-        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+        BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
         summaryDTO.setAccessToken("123");
         summaryDTO.setBatchId(121L);
-        summaryDTO.setCredentialType("OT");
         summaryDTO.setProcessedCount(10);
         summaryDTO.setErrors(new ArrayList<>());
         summaryDTO.setGlobalList(scdList);
@@ -142,39 +136,19 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
 
         ex.setExecutionContext(jobContext);
 
-        List<StudentCredentialDistribution> cList = new ArrayList<>();
+        List<BlankCredentialDistribution> cList = new ArrayList<>();
         cList.add(scd);
 
-        List<StudentCredentialDistribution> tList = new ArrayList<>();
+        List<BlankCredentialDistribution> tList = new ArrayList<>();
         tList.add(scd);
-
-        DistributionDataParallelDTO dp = new DistributionDataParallelDTO(tList,cList);
-
-        ParameterizedTypeReference<List<StudentCredentialDistribution>> tListRes = new ParameterizedTypeReference<>() {
-        };
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getTranscriptDistributionList())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
 
         ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
         };
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getCertificateDistributionList())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(cListRes)).thenReturn(Mono.just(cList));
-
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
         Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
-        Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
-        Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
-        Mockito.when(parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
-        userReqDistributionRunCompletionNotificationListener.afterJob(ex);
+        userReqBlankDistributionRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
     }
