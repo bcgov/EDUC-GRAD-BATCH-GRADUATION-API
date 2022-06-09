@@ -192,6 +192,8 @@ public class RestUtils {
                 return null;
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+            GraduationStudentRecord gItem = this.getGradStatus(item.getStudentID(),accessToken);
+            item.setStudentProjectedGradData(gItem.getStudentProjectedGradData());
             summary.getGlobalList().add(item);
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
@@ -420,6 +422,15 @@ public class RestUtils {
         webClient.post().uri(String.format(constants.getUpdateStudentRecord(),studentID,batchId,activityCode)).headers(h -> {
             h.setBearerAuth(accessToken);
             h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+        }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
+    }
+
+    public GraduationStudentRecord getGradStatus(UUID studentID, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        return webClient.get().uri(String.format(constants.getReadGradStudentRecord(),studentID))
+            .headers(h -> {
+                h.setBearerAuth(accessToken);
+                h.set(constants.CORRELATION_ID, correlationID.toString());
         }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
     }
 }

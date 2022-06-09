@@ -122,4 +122,7 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-api.schoolreport.url}")
     private String createAndStore;
 
+    @Value("${endpoint.grad-student-api.read-grad-student-record}")
+    private String readGradStudentRecord;
+
 }
