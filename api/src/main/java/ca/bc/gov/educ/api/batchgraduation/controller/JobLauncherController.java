@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchJobExecutionRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
@@ -57,19 +58,20 @@ public class JobLauncherController {
     private final JobRegistry jobRegistry;
     private final RestUtils restUtils;
     private final GradDashboardService gradDashboardService;
+    private final BatchJobExecutionRepository batchJobExecutionRepository;
 
-    public JobLauncherController(JobLauncher jobLauncher, JobRegistry jobRegistry, RestUtils restUtils, GradDashboardService gradDashboardService) {
+    public JobLauncherController(BatchJobExecutionRepository batchJobExecutionRepository,JobLauncher jobLauncher, JobRegistry jobRegistry, RestUtils restUtils, GradDashboardService gradDashboardService) {
         this.jobLauncher = jobLauncher;
         this.jobRegistry = jobRegistry;
         this.restUtils = restUtils;
         this.gradDashboardService = gradDashboardService;
+        this.batchJobExecutionRepository = batchJobExecutionRepository;
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_REG_GRAD_BATCH_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Manual Reg Grad Job", description = "Run Manual Reg Grad Job", tags = { "Reg Grad" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    //@SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public ResponseEntity<AlgorithmSummaryDTO> launchRegGradJob() {
         logger.debug("launchRegGradJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -95,25 +97,29 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Manual TVR Job", description = "Run Manual TVR Job", tags = { "TVR" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-   // @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public ResponseEntity<AlgorithmSummaryDTO> launchTvrRunJob() {
         logger.debug("launchTvrRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
-        try {
-            JobExecution jobExecution =jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
-            ExecutionContext jobContext = jobExecution.getExecutionContext();
-            AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("tvrRunSummaryDTO");
-            return ResponseEntity.ok(summaryDTO);
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
-            AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-            summaryDTO.setException(e.getLocalizedMessage());
-            return ResponseEntity.status(500).body(summaryDTO);
+        boolean isBatchRunning = batchJobExecutionRepository.batchJobRunning("tvrBatchJob");
+        if(!isBatchRunning) {
+            try {
+                JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
+                ExecutionContext jobContext = jobExecution.getExecutionContext();
+                AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO) jobContext.get("tvrRunSummaryDTO");
+                return ResponseEntity.ok(summaryDTO);
+            } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                    | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
+                AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+                summaryDTO.setException(e.getLocalizedMessage());
+                return ResponseEntity.status(500).body(summaryDTO);
+            }
         }
-
+        AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+        summaryDTO.setException("Job is already running");
+        return ResponseEntity.status(409).body(summaryDTO);
     }
 
     @PostMapping(EducGradBatchGraduationApiConstants.LOAD_STUDENT_IDS)
