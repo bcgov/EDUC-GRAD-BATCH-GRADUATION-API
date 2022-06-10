@@ -8,6 +8,7 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstan
 import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.util.internal.StringUtil;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -103,23 +104,17 @@ public class JobLauncherController {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
-        boolean isBatchRunning = batchJobExecutionRepository.batchJobRunning("tvrBatchJob");
-        if(!isBatchRunning) {
-            try {
-                JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
-                ExecutionContext jobContext = jobExecution.getExecutionContext();
-                AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO) jobContext.get("tvrRunSummaryDTO");
-                return ResponseEntity.ok(summaryDTO);
-            } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                    | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
-                AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-                summaryDTO.setException(e.getLocalizedMessage());
-                return ResponseEntity.status(500).body(summaryDTO);
-            }
+        try {
+            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO) jobContext.get("tvrRunSummaryDTO");
+            return ResponseEntity.ok(summaryDTO);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
+            AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
         }
-        AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-        summaryDTO.setException("Job is already running");
-        return ResponseEntity.status(409).body(summaryDTO);
     }
 
     @PostMapping(EducGradBatchGraduationApiConstants.LOAD_STUDENT_IDS)
@@ -167,7 +162,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized Regular Grad Runs", description = "Run specialized Regular Grad runs", tags = { "Reg Grad" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    //@SchedulerLock(name = "SpecialGraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public ResponseEntity<AlgorithmSummaryDTO> launchRegGradSpecialJob(@RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchRegGradSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -223,7 +217,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized TVR runs", tags = { "TVR" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    //@SchedulerLock(name = "SpecialTvrRunBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public ResponseEntity<AlgorithmSummaryDTO> launchTvrRunSpecialJob(@RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchTvrRunSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -253,7 +246,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    //@SchedulerLock(name = "DistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "30m")
     public ResponseEntity<DistributionSummaryDTO> launchDistributionRunJob() {
         logger.debug("launchDistributionRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -278,7 +270,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    //@SchedulerLock(name = "YearlyDistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "60m")
     public ResponseEntity<DistributionSummaryDTO> launchYearlyDistributionRunJob() {
         logger.debug("launchYearlyDistributionRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -316,7 +307,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    //@SchedulerLock(name = "UserReqDistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "30m")
     public ResponseEntity<DistributionSummaryDTO> launchUserReqDisRunSpecialJob(@PathVariable String credentialType,@RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchUserReqDisRunSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -347,7 +337,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized User Req Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    //@SchedulerLock(name = "blankDistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "30m")
     public ResponseEntity<BlankDistributionSummaryDTO> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest) {
         logger.debug("launchUserReqDisRunSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();

@@ -13,7 +13,4 @@ public interface BatchJobExecutionRepository extends JpaRepository<BatchJobExecu
 
     Page<BatchJobExecutionEntity> findAllByOrderByCreateTimeDesc(Pageable page);
 
-    @Query(value="SELECT CASE WHEN COUNT(c) > 0 THEN true ELSE false END FROM BATCH_SHEDLOCK c WHERE c.name = :jobName and c.LOCK_UNTIL > SYSDATE",nativeQuery=true)
-    boolean batchJobRunning(@Param("jobName") String jobName);
-
 }
