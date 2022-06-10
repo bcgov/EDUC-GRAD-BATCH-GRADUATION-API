@@ -118,6 +118,7 @@ endpoint:
     get-student-data-list: ${GRAD_STUDENT_API}api/v1/student/multistudentids
     get-student-record: ${GRAD_STUDENT_API}api/v1/student/grad/%s
     update-student-record: ${GRAD_STUDENT_API}api/v1/student/distribution/studentid/%s?batchId=%s&activityCode=%s
+    read-grad-student-record: ${GRAD_STUDENT_API}api/v1/student/studentid/%s/algorithm
   grad-graduation-report-api:
     get-transcript-list:
       yearly:
