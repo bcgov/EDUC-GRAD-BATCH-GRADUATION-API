@@ -100,9 +100,9 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
         try {
-            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution =jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
-            AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO) jobContext.get("tvrRunSummaryDTO");
+            AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("tvrRunSummaryDTO");
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
