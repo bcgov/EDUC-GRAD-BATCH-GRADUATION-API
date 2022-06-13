@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.config.BatchJobLauncher;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
