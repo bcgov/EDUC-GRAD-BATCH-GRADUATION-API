@@ -3,8 +3,8 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 public enum TaskSelection {
 	SGBJ ("SpecialGraduationBatchJob"),
 	STBJ ("SpecialTvrRunBatchJob"),
-	URDBJ ("DISTRUNUSER"),
-    BDBJ ("DISTRUNUSER");
+	URDBJ ("UserReqDistributionBatchJob"),
+    BDBJ ("blankDistributionBatchJob");
 
     private final String value;
 
