@@ -31,6 +31,10 @@ public class EducGradBatchGraduationApiConstants {
     public static final String BATCH_ERRORS = "/dashboard/errors/{batchId}";
     public static final String BATCH_SUMMARY = "/dashboard/summary";
 
+    public static final String SCHEDULE_JOBS = "/schedule/add";
+    public static final String REMOVE_JOB = "/schedule/remove/{jobId}";
+    public static final String LIST_JOBS = "/schedule/listjobs";
+
     // Data Conversion
     public static final String EXECUTE_DATA_CONVERSION_BATCH_JOB = "/executeGradStudentDataConversionJob";
     public static final String GRAD_CONVERSION_API_MAPPING = "/dataconversion";
@@ -42,9 +46,9 @@ public class EducGradBatchGraduationApiConstants {
     public static final String TRAX_DATE_FORMAT = "yyyyMM";
     
     public static final String DEFAULT_CREATED_BY = "API_GRAD_BATCH";
-    public static final Date DEFAULT_CREATED_TIMESTAMP = new Date();
+    protected static final Date DEFAULT_CREATED_TIMESTAMP = new Date();
     public static final String DEFAULT_UPDATED_BY = "API_GRAD_BATCH";
-    public static final Date DEFAULT_UPDATED_TIMESTAMP = new Date();
+    protected static final Date DEFAULT_UPDATED_TIMESTAMP = new Date();
 
     @Value("${authorization.user}")
     private String userName;
