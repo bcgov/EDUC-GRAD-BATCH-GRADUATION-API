@@ -278,12 +278,16 @@ public class RestUtils {
     public BlankCredentialDistribution processBlankDistribution(BlankCredentialDistribution item, BlankDistributionSummaryDTO summary) {
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         String accessToken = summary.getAccessToken();
-        GradCertificateTypes certType = this.getCertTypes(item.getCredentialTypeCode(),accessToken);
-        if(certType != null)
-            item.setPaperType(certType.getPaperType());
-        else
+        String credentialType = summary.getCredentialType();
+        if (credentialType != null && credentialType.equalsIgnoreCase("OC")){
+            GradCertificateTypes certType = this.getCertTypes(item.getCredentialTypeCode(), accessToken);
+            if (certType != null)
+                item.setPaperType(certType.getPaperType());
+            else
+                item.setPaperType("YED4");
+        }else {
             item.setPaperType("YED4");
-
+        }
         summary.getGlobalList().add(item);
         return item;
     }

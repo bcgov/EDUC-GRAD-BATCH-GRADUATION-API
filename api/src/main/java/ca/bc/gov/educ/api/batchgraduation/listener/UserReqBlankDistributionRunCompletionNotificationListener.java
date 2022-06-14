@@ -44,6 +44,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
+			String credentialType = jobParameters.getString("credentialType");
 			BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new BlankDistributionSummaryDTO();
@@ -52,7 +53,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token());
+			processGlobalList(credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token());
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -89,13 +90,25 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 		}
     }
 
-	private void processGlobalList(List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist,String accessToken) {
+	private void processGlobalList(String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken) {
 		List<String> uniqueSchoolList = cList.stream().map(BlankCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
-			List<BlankCredentialDistribution> yed4List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
-			List<BlankCredentialDistribution> yed2List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
-			List<BlankCredentialDistribution> yedrList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
-			List<BlankCredentialDistribution> yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
+			List<BlankCredentialDistribution> yed4List = new ArrayList<>();
+			List<BlankCredentialDistribution> yed2List = new ArrayList<>();
+			List<BlankCredentialDistribution> yedrList = new ArrayList<>();
+			List<BlankCredentialDistribution> yedbList = new ArrayList<>();
+
+			if(credentialType != null) {
+				if (credentialType.equalsIgnoreCase("OT")) {
+					yed4List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
+				}
+
+				if (credentialType.equalsIgnoreCase("OC")) {
+					yed2List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
+					yedrList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
+					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
+				}
+			}
 
 			transcriptPrintFile(yed4List,batchId,usl,mapDist);
 			certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2");

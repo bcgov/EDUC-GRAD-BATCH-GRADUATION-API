@@ -20,6 +20,7 @@ public class BlankDistributionSummaryDTO {
   private List<ProcessError> errors = new ArrayList<>();
   private List<BlankCredentialDistribution> globalList = new ArrayList<>();
   private String exception;
+  private String credentialType;
 
   // stats
   private Map<String, Long> credentialCountMap = new HashMap<>() {{
