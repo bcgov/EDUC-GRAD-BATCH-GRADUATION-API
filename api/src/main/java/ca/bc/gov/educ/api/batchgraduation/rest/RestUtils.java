@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.rest;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,8 @@ public class RestUtils {
                 .headers(h -> h.setBearerAuth(accessToken))
                 .retrieve().bodyToMono(responseType).block();
     }
-    
+
+    @Retry(name = "reggradrun")
     public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken, String programCompleteDate,Long batchId) {
         UUID correlationID = UUID.randomUUID();
         if(programCompleteDate != null) {
@@ -82,6 +84,7 @@ public class RestUtils {
                 .retrieve().bodyToMono(AlgorithmResponse.class).block();
     }
 
+    @Retry(name = "tvrrun")
     public AlgorithmResponse runProjectedGradAlgorithm(UUID studentID, String accessToken,Long batchId) {
         UUID correlationID = UUID.randomUUID();
         return this.webClient.get()
