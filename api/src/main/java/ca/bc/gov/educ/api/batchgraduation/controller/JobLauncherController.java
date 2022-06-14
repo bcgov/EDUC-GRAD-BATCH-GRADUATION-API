@@ -332,12 +332,13 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized User Req Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<BlankDistributionSummaryDTO> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest) {
+    public ResponseEntity<BlankDistributionSummaryDTO> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest,@PathVariable String credentialType) {
         logger.debug("launchUserReqDisRunSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
+        builder.addString(CREDENTIALTYPE,credentialType);
         BlankDistributionSummaryDTO validate = validateInputBlankDisRun(blankCredentialRequest);
         if(validate != null) {
             return ResponseEntity.status(400).body(validate);

@@ -25,7 +25,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
     public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
     public static final String EXECUTE_SPECIALIZED_USER_REQ_RUNS = "/userrequestdisrun/{credentialType}";
-    public static final String EXECUTE_SPECIALIZED_BLANK_USER_REQ_RUNS = "/userrequestblankdisrun";
+    public static final String EXECUTE_SPECIALIZED_BLANK_USER_REQ_RUNS = "/userrequestblankdisrun/{credentialType}";
     
     public static final String BATCH_DASHBOARD = "/dashboard";
     public static final String BATCH_ERRORS = "/dashboard/errors/{batchId}";
