@@ -88,6 +88,24 @@ springdoc:
     path: /api/v1/api-docs-ui.html
     operationsSorter: alpha
 
+#Resilience
+resilience4j.retry:
+  instances:
+    reggradrun:
+      maxRetryAttempts: ${MAX_RETRY_ATTEMPTS}
+      waitDuration: 2s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
+    tvrrun:
+      maxRetryAttempts: ${MAX_RETRY_ATTEMPTS}
+      waitDuration: 2s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
+
 authorization:
   user: ${GRAD_CLIENT_NAME}
   password: ${GRAD_CLIENT_SECRET}
