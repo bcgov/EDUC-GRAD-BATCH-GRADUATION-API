@@ -162,7 +162,7 @@ public class RestUtils {
                 error.setDetail(algorithmResponse.getException().getExceptionDetails());
                 summary.getErrors().add(error);
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
-                return null;
+                checkStatus(item,summary);
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
             return algorithmResponse.getGraduationStudentRecord();
@@ -174,9 +174,16 @@ public class RestUtils {
             summary.getErrors().add(error);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count : {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
-            return null;
+            checkStatus(item,summary);
         }
+        return null;
+    }
 
+    private void checkStatus(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
+        GraduationStudentRecord rec = this.getGradStatus(item.getStudentID(),summary.getAccessToken());
+        if(rec.getRecalculateGradStatus().equalsIgnoreCase("Y")) {
+            this.processStudent(item,summary);
+        }
     }
 
     public GraduationStudentRecord processProjectedGradStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
@@ -437,7 +444,7 @@ public class RestUtils {
         return webClient.get().uri(String.format(constants.getReadGradStudentRecord(),studentID))
             .headers(h -> {
                 h.setBearerAuth(accessToken);
-                h.set(constants.CORRELATION_ID, correlationID.toString());
+                h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
         }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
     }
 }
