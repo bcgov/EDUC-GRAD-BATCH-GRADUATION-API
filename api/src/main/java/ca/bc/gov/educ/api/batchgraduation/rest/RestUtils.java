@@ -180,6 +180,7 @@ public class RestUtils {
     }
 
     private void checkStatus(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
+        LOGGER.info("Custom Retry Working for Student ID",item.getStudentID());
         GraduationStudentRecord rec = this.getGradStatus(item.getStudentID(),summary.getAccessToken());
         if(rec.getRecalculateGradStatus().equalsIgnoreCase("Y")) {
             this.processStudent(item,summary);
