@@ -63,7 +63,7 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
-    @Retry(name = "reggradrun")
+
     public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken, String programCompleteDate,Long batchId) {
         UUID correlationID = UUID.randomUUID();
         if(programCompleteDate != null) {
@@ -84,7 +84,7 @@ public class RestUtils {
                 .retrieve().bodyToMono(AlgorithmResponse.class).block();
     }
 
-    @Retry(name = "tvrrun")
+
     public AlgorithmResponse runProjectedGradAlgorithm(UUID studentID, String accessToken,Long batchId) {
         UUID correlationID = UUID.randomUUID();
         return this.webClient.get()
@@ -180,7 +180,7 @@ public class RestUtils {
     }
 
     private void checkStatus(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
-        LOGGER.info("Custom Retry Working for Student ID",item.getStudentID());
+        LOGGER.info("Custom Retry Working for Student ID -{}",item.getStudentID());
         GraduationStudentRecord rec = this.getGradStatus(item.getStudentID(),summary.getAccessToken());
         if(rec.getRecalculateGradStatus().equalsIgnoreCase("Y")) {
             this.processStudent(item,summary);
