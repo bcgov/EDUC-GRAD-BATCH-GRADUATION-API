@@ -63,7 +63,7 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
-
+    @Retry(name = "reggradrun")
     public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken, String programCompleteDate,Long batchId) {
         UUID correlationID = UUID.randomUUID();
         if(programCompleteDate != null) {
@@ -84,7 +84,7 @@ public class RestUtils {
                 .retrieve().bodyToMono(AlgorithmResponse.class).block();
     }
 
-
+    @Retry(name = "tvrrun")
     public AlgorithmResponse runProjectedGradAlgorithm(UUID studentID, String accessToken,Long batchId) {
         UUID correlationID = UUID.randomUUID();
         return this.webClient.get()
@@ -162,7 +162,7 @@ public class RestUtils {
                 error.setDetail(algorithmResponse.getException().getExceptionDetails());
                 summary.getErrors().add(error);
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
-                checkStatus(item,summary);
+                return null;
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
             return algorithmResponse.getGraduationStudentRecord();
@@ -174,16 +174,7 @@ public class RestUtils {
             summary.getErrors().add(error);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count : {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
-            checkStatus(item,summary);
-        }
-        return null;
-    }
-
-    private void checkStatus(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
-        LOGGER.info("Custom Retry Working for Student ID -{}",item.getStudentID());
-        GraduationStudentRecord rec = this.getGradStatus(item.getStudentID(),summary.getAccessToken());
-        if(rec.getRecalculateGradStatus().equalsIgnoreCase("Y")) {
-            this.processStudent(item,summary);
+            return null;
         }
     }
 
