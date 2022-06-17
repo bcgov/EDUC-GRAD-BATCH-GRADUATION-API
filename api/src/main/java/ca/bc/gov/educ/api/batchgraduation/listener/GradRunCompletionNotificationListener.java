@@ -57,6 +57,10 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 			if(summaryDTO == null) {
 				summaryDTO = new AlgorithmSummaryDTO();
 			}
+			for (UUID successfulStudentID : summaryDTO.getSuccessfulStudentIDs()) {
+				summaryDTO.getErrors().removeIf(t -> t.getStudentID().equalsIgnoreCase(successfulStudentID.toString()));
+			}
+
 			int failedRecords = summaryDTO.getErrors().size();			
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();			
