@@ -52,6 +52,12 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderRegErrorGrad() {
+        return new RecalculateStudentErrorReader();
+    }
+
+    @Bean
+    @StepScope
     public ItemWriter<GraduationStudentRecord> itemWriterRegGrad() {
         return new RegGradAlgBatchPerformanceWriter();
     }
@@ -67,8 +73,29 @@ public class BatchJobConfig {
     }
 
     @Bean
+    public Step masterStepErrorRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepErrorRegGrad")
+                .partitioner(graduationJobErrorStep(stepBuilderFactory).getName(), partitionerRegGrad())
+                .step(graduationJobErrorStep(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+
+    @Bean
     public RegGradAlgPartitioner partitionerRegGrad() {
         return new RegGradAlgPartitioner();
+    }
+
+    @Bean
+    public Step graduationJobErrorStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("graduationJobErrorStep")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderRegErrorGrad())
+                .processor(itemProcessorRegGrad())
+                .writer(itemWriterRegGrad())
+                .build();
     }
 
     @Bean
@@ -89,8 +116,8 @@ public class BatchJobConfig {
         return jobBuilderFactory.get("GraduationBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepRegGrad(stepBuilderFactory,constants))
-                .end()
+                .start(masterStepRegGrad(stepBuilderFactory,constants))
+                .next(masterStepErrorRegGrad(stepBuilderFactory,constants))
                 .build();
     }
 
