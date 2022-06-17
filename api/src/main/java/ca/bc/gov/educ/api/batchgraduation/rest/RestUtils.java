@@ -166,6 +166,9 @@ public class RestUtils {
                 return null;
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+            if(!summary.getSuccessfulStudentIDs().contains(item.getStudentID())) {
+                summary.getSuccessfulStudentIDs().add(item.getStudentID());
+            }
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             ProcessError error = new ProcessError();

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class BaseReader implements ItemReader<GraduationStudentRecord> {
 
@@ -41,6 +42,10 @@ public abstract class BaseReader implements ItemReader<GraduationStudentRecord> 
         totalSummaryDTO.setReadCount(totalSummaryDTO.getReadCount() + summaryDTO.getReadCount());
         totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());
         totalSummaryDTO.getErrors().addAll(summaryDTO.getErrors());
+        totalSummaryDTO.getSuccessfulStudentIDs().addAll(summaryDTO.getSuccessfulStudentIDs());
+        for (UUID successfulStudentID : totalSummaryDTO.getSuccessfulStudentIDs()) {
+            totalSummaryDTO.getErrors().removeIf(t -> t.getStudentID().equalsIgnoreCase(successfulStudentID.toString()));
+        }
         totalSummaryDTO.getGlobalList().addAll(summaryDTO.getGlobalList());
         mergeMapCounts(totalSummaryDTO.getProgramCountMap(),summaryDTO.getProgramCountMap());
     }
