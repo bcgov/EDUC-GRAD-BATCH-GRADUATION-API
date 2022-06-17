@@ -152,6 +152,7 @@ public class RestUtils {
     public GraduationStudentRecord processStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
         LOGGER.info(STUDENT_PROCESS,Thread.currentThread().getName(),item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
+        summary.getErrors().removeIf(t -> t.getStudentID().equalsIgnoreCase(item.getStudentID().toString()));
         try {
             String accessToken = summary.getAccessToken();
             AlgorithmResponse algorithmResponse = this.runGradAlgorithm(item.getStudentID(), accessToken,item.getProgramCompletionDate(),summary.getBatchId());
