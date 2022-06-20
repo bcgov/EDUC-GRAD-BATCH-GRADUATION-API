@@ -24,10 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -80,7 +77,7 @@ public class TvrRunJobCompletionNotificationListenerTest {
         summaryDTO.setBatchId(121L);
         summaryDTO.setGlobalList(new ArrayList<>());
         summaryDTO.setProcessedCount(10);
-        summaryDTO.setErrors(new ArrayList<>());
+        summaryDTO.setErrors(new HashMap<>());
         jobContext.put("summaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
@@ -127,7 +124,7 @@ public class TvrRunJobCompletionNotificationListenerTest {
         summaryDTO.setAccessToken("123");
         summaryDTO.setBatchId(121L);
         summaryDTO.setProcessedCount(10);
-        summaryDTO.setErrors(new ArrayList<>());
+        summaryDTO.setErrors(new HashMap<>());
         jobContext.put("summaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
