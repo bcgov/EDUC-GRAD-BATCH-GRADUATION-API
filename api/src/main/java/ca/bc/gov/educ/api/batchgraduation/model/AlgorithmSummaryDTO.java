@@ -18,7 +18,7 @@ public class AlgorithmSummaryDTO {
   private long processedCount = 0L;
 
   List<UUID> successfulStudentIDs = new ArrayList<>();
-  private List<ProcessError> errors = new ArrayList<>();
+  private Map<UUID,ProcessError> errors = new HashMap<>();
   private List<GraduationStudentRecord> globalList = new ArrayList<>();
   private String exception;
 
@@ -43,5 +43,8 @@ public class AlgorithmSummaryDTO {
 
   public void increment(String programCode) {
     programCountMap.computeIfPresent(programCode,(key, val) -> val + 1);
+  }
+  public void updateError(UUID studentID,ProcessError newError) {
+    errors.computeIfPresent(studentID,(key, val) -> newError);
   }
 }

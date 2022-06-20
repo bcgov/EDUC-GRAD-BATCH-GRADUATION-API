@@ -41,7 +41,7 @@ public abstract class BaseReader implements ItemReader<GraduationStudentRecord> 
         }
         totalSummaryDTO.setReadCount(totalSummaryDTO.getReadCount() + summaryDTO.getReadCount());
         totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());
-        totalSummaryDTO.getErrors().addAll(summaryDTO.getErrors());
+        totalSummaryDTO.getErrors().putAll(summaryDTO.getErrors());
         totalSummaryDTO.getSuccessfulStudentIDs().addAll(summaryDTO.getSuccessfulStudentIDs());
         totalSummaryDTO.getGlobalList().addAll(summaryDTO.getGlobalList());
         mergeMapCounts(totalSummaryDTO.getProgramCountMap(),summaryDTO.getProgramCountMap());

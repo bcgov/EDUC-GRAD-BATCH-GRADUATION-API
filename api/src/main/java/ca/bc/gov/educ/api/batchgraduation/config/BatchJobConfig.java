@@ -138,6 +138,12 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderTvrErrorRun() {
+        return new RecalculateProjectedGradRunErrorReader();
+    }
+
+    @Bean
+    @StepScope
     public ItemWriter<GraduationStudentRecord> itemWriterTvrRun() {
         return new TvrRunBatchPerformanceWriter();
     }
@@ -147,6 +153,16 @@ public class BatchJobConfig {
         return stepBuilderFactory.get("masterStepTvrRun")
                 .partitioner(tvrJobStep(stepBuilderFactory).getName(), partitionerTvrRun())
                 .step(tvrJobStep(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
+    public Step masterStepErrorTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepErrorTvrRun")
+                .partitioner(tvrJobErrorStep(stepBuilderFactory).getName(), partitionerTvrRun())
+                .step(tvrJobErrorStep(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
                 .build();
@@ -168,6 +184,16 @@ public class BatchJobConfig {
                 .build();
     }
 
+    @Bean
+    public Step tvrJobErrorStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("tvrJobErrorStep")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderTvrErrorRun())
+                .processor(itemProcessorTvrRun())
+                .writer(itemWriterTvrRun())
+                .build();
+    }
+
     /**
      * Creates a bean that represents our batch job.
      */
@@ -176,8 +202,8 @@ public class BatchJobConfig {
         return jobBuilderFactory.get("tvrBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepTvrRun(stepBuilderFactory,constants))
-                .end()
+                .start(masterStepTvrRun(stepBuilderFactory,constants))
+                .next(masterStepErrorTvrRun(stepBuilderFactory,constants))
                 .build();
     }
 
