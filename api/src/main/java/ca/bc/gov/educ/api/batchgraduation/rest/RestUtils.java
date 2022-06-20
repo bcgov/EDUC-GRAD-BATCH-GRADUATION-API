@@ -160,18 +160,19 @@ public class RestUtils {
                 error.setStudentID(item.getStudentID().toString());
                 error.setReason(algorithmResponse.getException().getExceptionName());
                 error.setDetail(algorithmResponse.getException().getExceptionDetails());
-                summary.getErrors().add(error);
+                summary.updateError(item.getStudentID(),error);
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
                 return null;
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+            summary.getSuccessfulStudentIDs().add(item.getStudentID());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             ProcessError error = new ProcessError();
             error.setStudentID(item.getStudentID().toString());
             error.setReason("GRAD-GRADUATION-API IS DOWN");
             error.setDetail("Graduation API is unavailable at this moment");
-            summary.getErrors().add(error);
+            summary.updateError(item.getStudentID(),error);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count : {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
             return null;
@@ -189,13 +190,14 @@ public class RestUtils {
                 error.setStudentID(item.getStudentID().toString());
                 error.setReason(algorithmResponse.getException().getExceptionName());
                 error.setDetail(algorithmResponse.getException().getExceptionDetails());
-                summary.getErrors().add(error);
+                summary.updateError(item.getStudentID(),error);
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
                 return null;
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
             GraduationStudentRecord gItem = this.getGradStatus(item.getStudentID(),accessToken);
             item.setStudentProjectedGradData(gItem.getStudentProjectedGradData());
+            summary.getSuccessfulStudentIDs().add(item.getStudentID());
             summary.getGlobalList().add(item);
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
@@ -203,7 +205,7 @@ public class RestUtils {
             error.setStudentID(item.getStudentID().toString());
             error.setReason("GRAD-GRADUATION-API IS DOWN");
             error.setDetail("Graduation API is unavailable at this moment");
-            summary.getErrors().add(error);
+            summary.updateError(item.getStudentID(),error);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count: {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
             return null;

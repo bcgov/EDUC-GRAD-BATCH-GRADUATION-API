@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
@@ -20,7 +17,8 @@ public class AlgorithmSummaryDTO {
   private long readCount = 0L;
   private long processedCount = 0L;
 
-  private List<ProcessError> errors = new ArrayList<>();
+  List<UUID> successfulStudentIDs = new ArrayList<>();
+  private Map<UUID,ProcessError> errors = new HashMap<>();
   private List<GraduationStudentRecord> globalList = new ArrayList<>();
   private String exception;
 
@@ -45,5 +43,8 @@ public class AlgorithmSummaryDTO {
 
   public void increment(String programCode) {
     programCountMap.computeIfPresent(programCode,(key, val) -> val + 1);
+  }
+  public void updateError(UUID studentID,ProcessError newError) {
+    errors.computeIfPresent(studentID,(key, val) -> newError);
   }
 }
