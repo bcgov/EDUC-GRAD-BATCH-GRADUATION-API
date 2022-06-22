@@ -129,4 +129,7 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-student-api.read-grad-student-record}")
     private String readGradStudentRecord;
 
+    @Value("${endpoint.grad-student-api.read-grad-student-record-batch}")
+    private String readGradStudentRecordBatch;
+
 }

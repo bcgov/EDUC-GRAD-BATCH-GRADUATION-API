@@ -184,6 +184,11 @@ public class RestUtils {
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         try {
             String accessToken = summary.getAccessToken();
+            GraduationStudentRecord batchItem = this.getGradStatusForBatch(item.getStudentID(),accessToken);
+            item.setPen(batchItem.getPen());
+            item.setLegalFirstName(batchItem.getLegalFirstName());
+            item.setLegalMiddleNames(batchItem.getLegalMiddleNames());
+            item.setLegalLastName(batchItem.getLegalLastName());
             AlgorithmResponse algorithmResponse = this.runProjectedGradAlgorithm(item.getStudentID(), accessToken,summary.getBatchId());
             if(algorithmResponse.getException() != null) {
                 ProcessError error = new ProcessError();
@@ -441,4 +446,14 @@ public class RestUtils {
                 h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
         }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
     }
+
+    public GraduationStudentRecord getGradStatusForBatch(UUID studentID, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        return webClient.get().uri(String.format(constants.getReadGradStudentRecordBatch(),studentID))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
+    }
+
 }
