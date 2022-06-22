@@ -42,7 +42,7 @@ public class TaskDefinition implements Runnable{
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
-        builder.addString(JOB_TYPE, jobType.name());
+        builder.addString(JOB_TYPE, jobType.getValue());
         if(task.getCredentialType() != null) {
             builder.addString(CREDENTIAL_TYPE,task.getCredentialType());
         }
@@ -74,7 +74,7 @@ public class TaskDefinition implements Runnable{
     private void executeBatchJob(JobParametersBuilder builder, TaskSelection taskType, String data) {
         builder.addString(SEARCH_REQUEST, data);
         try {
-            jobLauncher.run(jobRegistry.getJob(taskType.name()), builder.toJobParameters());
+            jobLauncher.run(jobRegistry.getJob(taskType.getValue()), builder.toJobParameters());
         }catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
         }
