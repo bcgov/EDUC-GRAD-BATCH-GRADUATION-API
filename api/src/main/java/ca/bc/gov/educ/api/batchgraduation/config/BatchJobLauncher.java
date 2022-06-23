@@ -34,6 +34,10 @@ public class BatchJobLauncher {
     private Job tvrBatchJob;
 
     @Autowired
+    @Qualifier("SchoolReportBatchJob")
+    private Job schoolReportBatchJob;
+
+    @Autowired
     private JobLauncher jobLauncher;
 
     @Autowired
@@ -48,7 +52,7 @@ public class BatchJobLauncher {
 
 
 
-    @Scheduled(cron = "0 0 18 * * *")
+    @Scheduled(cron = "0 0 16 * * *")
     @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runRegularGradAlgorithm() {
         LOGGER.info("Batch Job was started");
@@ -65,7 +69,7 @@ public class BatchJobLauncher {
         LOGGER.info("Batch Job was stopped");
     }
 
-    @Scheduled(cron = "0 0 23 * * *")
+    @Scheduled(cron = "0 0 20 * * *")
     @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runTranscriptVerificationReportProcess() {
         LOGGER.info("Batch Job was started");
@@ -76,6 +80,23 @@ public class BatchJobLauncher {
 
         try {
             jobLauncher.run(tvrBatchJob, builder.toJobParameters());
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | IllegalArgumentException e) {
+            LOGGER.debug("Error {}",e.getLocalizedMessage());
+        }
+        LOGGER.info("Batch Job was stopped");
+    }
+
+    @Scheduled(cron = "0 0 23 * * *")
+    @SchedulerLock(name = "SchoolReportBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
+    public void runSchoolReportPosting() {
+        LOGGER.info("Batch Job was started");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, "BATCH");
+        builder.addString(JOB_TYPE, "SCHREP");
+        try {
+            jobLauncher.run(schoolReportBatchJob, builder.toJobParameters());
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | IllegalArgumentException e) {
             LOGGER.debug("Error {}",e.getLocalizedMessage());

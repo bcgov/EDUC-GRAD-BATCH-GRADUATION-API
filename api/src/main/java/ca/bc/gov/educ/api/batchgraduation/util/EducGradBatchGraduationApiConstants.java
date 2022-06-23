@@ -105,6 +105,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-distribution-api.merge-n-upload.url}")
     private String mergeAndUpload;
 
+    @Value("${endpoint.grad-distribution-api.merge-n-upload-yearly.url}")
+    private String mergeAndUploadYearly;
+
     @Value("${endpoint.grad-distribution-api.reprint-n-upload.url}")
     private String reprintAndUpload;
 
@@ -126,10 +129,19 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-api.schoolreport.url}")
     private String createAndStore;
 
+    @Value("${endpoint.grad-distribution-api.read-n-post.url}")
+    private String readAndPost;
+
     @Value("${endpoint.grad-student-api.read-grad-student-record}")
     private String readGradStudentRecord;
 
     @Value("${endpoint.grad-student-api.read-grad-student-record-batch}")
     private String readGradStudentRecordBatch;
+
+    @Value("${endpoint.grad-graduation-report-api.get-school-report-list.url}")
+    private String schoolReportPostingList;
+
+    @Value("${endpoint.grad-graduation-report-api.update-school-report.url}")
+    private String updateSchoolReport;
 
 }

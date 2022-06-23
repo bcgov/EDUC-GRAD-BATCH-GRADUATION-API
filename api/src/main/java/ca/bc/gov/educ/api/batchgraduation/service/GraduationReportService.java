@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
+import ca.bc.gov.educ.api.batchgraduation.model.SchoolReportDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class GraduationReportService {
@@ -31,6 +33,17 @@ public class GraduationReportService {
 
 	public Mono<List<StudentCredentialDistribution>> getCertificateList(String accessToken) {
 		return webClient.get().uri(constants.getCertificateDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>(){});
+	}
+
+	public List<SchoolReportDistribution> getSchoolReportForPosting(String accessToken) {
+		UUID correlationID = UUID.randomUUID();
+		final ParameterizedTypeReference<List<SchoolReportDistribution>> responseType = new ParameterizedTypeReference<>() {
+		};
+		return webClient.get().uri(constants.getSchoolReportPostingList())
+				.headers(h -> {
+					h.setBearerAuth(accessToken);
+					h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+				}).retrieve().bodyToMono(responseType).block();
 	}
 
 }

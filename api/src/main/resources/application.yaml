@@ -151,10 +151,18 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/userrequest/%s
     get-certificate-types:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/certificatetype/%s
+    update-school-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreports?mincode=%s&reportTypeCode=%s
+    get-school-report-list:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistributionrun
   grad-distribution-api:
     merge-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MER?batchId=%s&activityCode=%s
+    merge-n-upload-yearly:
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MERYER?batchId=%s&activityCode=%s
     reprint-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/RPR?batchId=%s&activityCode=%s
     blanks-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/BCPR?batchId=%s
+    read-n-post:
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSR?batchId=%s

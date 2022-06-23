@@ -3,14 +3,12 @@ package ca.bc.gov.educ.api.batchgraduation.config;
 import ca.bc.gov.educ.api.batchgraduation.listener.*;
 import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.SchoolReportDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.processor.*;
 import ca.bc.gov.educ.api.batchgraduation.reader.*;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.writer.BlankDistributionRunWriter;
-import ca.bc.gov.educ.api.batchgraduation.writer.DistributionRunWriter;
-import ca.bc.gov.educ.api.batchgraduation.writer.RegGradAlgBatchPerformanceWriter;
-import ca.bc.gov.educ.api.batchgraduation.writer.TvrRunBatchPerformanceWriter;
+import ca.bc.gov.educ.api.batchgraduation.writer.*;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -33,10 +31,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableBatchProcessing
 public class BatchJobConfig {
 
-	@Autowired
-	JobRegistry jobRegistry;
-
     // Partitioning for Regular Grad Run updates
+
+    @Autowired
+    JobRegistry jobRegistry;
 
     @Bean
     @StepScope
@@ -508,6 +506,69 @@ public class BatchJobConfig {
                 .end()
                 .build();
     }
+
+    //
+    @Bean
+    @StepScope
+    public ItemProcessor<SchoolReportDistribution,SchoolReportDistribution> itemProcessorSchoolReportRun() {
+        return new SchoolReportRunProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<SchoolReportDistribution> itemReaderSchoolReportRun() {
+        return new SchoolReportRunReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<SchoolReportDistribution> itemWriterSchoolReportRun() {
+        return new SchoolReportRunWriter();
+    }
+
+
+    // Partitioning for Regular Grad Run updates
+    @Bean
+    public Step masterStepSchoolReportRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepSchoolReportRun")
+                .partitioner(slaveStepSchoolReportRun(stepBuilderFactory).getName(), partitionerSchoolReportRun())
+                .step(slaveStepSchoolReportRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public SchoolReportRunPartitioner partitionerSchoolReportRun() {
+        return new SchoolReportRunPartitioner();
+    }
+
+
+    @Bean
+    public Step slaveStepSchoolReportRun(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepSchoolReportRun")
+                .<SchoolReportDistribution, SchoolReportDistribution>chunk(1)
+                .reader(itemReaderSchoolReportRun())
+                .processor(itemProcessorSchoolReportRun())
+                .writer(itemWriterSchoolReportRun())
+                .build();
+    }
+
+    /**
+     * Creates a bean that represents our batch job.
+     */
+    @Bean(name="SchoolReportBatchJob")
+    public Job schoolReportBatchJob(SchoolReportRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("SchoolReportBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepSchoolReportRun(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    //
 
     //
     @Bean
