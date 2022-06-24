@@ -184,6 +184,11 @@ public class RestUtils {
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         try {
             String accessToken = summary.getAccessToken();
+            GraduationStudentRecord batchItem = this.getGradStatusForBatch(item.getStudentID(),accessToken);
+            item.setPen(batchItem.getPen());
+            item.setLegalFirstName(batchItem.getLegalFirstName());
+            item.setLegalMiddleNames(batchItem.getLegalMiddleNames());
+            item.setLegalLastName(batchItem.getLegalLastName());
             AlgorithmResponse algorithmResponse = this.runProjectedGradAlgorithm(item.getStudentID(), accessToken,summary.getBatchId());
             if(algorithmResponse.getException() != null) {
                 ProcessError error = new ProcessError();
@@ -245,6 +250,14 @@ public class RestUtils {
                 })
                 .body(BodyInserters.fromValue(stuList))
                 .retrieve().bodyToMono(responseType).block();
+    }
+
+
+    public SchoolReportDistribution processSchoolReportPosting(SchoolReportDistribution item, SchoolReportSummaryDTO summary) {
+        summary.setProcessedCount(summary.getProcessedCount() + 1L);
+        summary.getGlobalList().add(item);
+        LOGGER.info("Report Type Thread : {} Processed: {} Type: {} from {}",Thread.currentThread().getName(), summary.getProcessedCount(), item.getReportTypeCode(), summary.getReadCount());
+        return item;
     }
 
     public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary) {
@@ -330,6 +343,24 @@ public class RestUtils {
         return result;
     }
 
+    public DistributionResponse readAndPostSchoolReports(Long batchId,String accessToken, Map<String, DistributionPrintRequest> mapDist) {
+        UUID correlationID = UUID.randomUUID();
+        DistributionResponse result = webClient.post()
+                .uri(String.format(constants.getReadAndPost(),batchId))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
+                .body(BodyInserters.fromValue(mapDist))
+                .retrieve()
+                .bodyToMono(DistributionResponse.class)
+                .block();
+
+        if(result != null)
+            LOGGER.info("Read and Post Success {}",result.getMergeProcessResponse());
+        return  result;
+    }
+
     public void createAndStoreSchoolReports(String accessToken, Map<String, SchoolReportRequest> mapDist) {
         UUID correlationID = UUID.randomUUID();
         Integer result = webClient.post()
@@ -349,8 +380,14 @@ public class RestUtils {
 
     public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String activityCode) {
         UUID correlationID = UUID.randomUUID();
+        String url;
+        if(activityCode.equalsIgnoreCase("YEARENDDIST")) {
+            url= String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
+        }else {
+            url = String.format(constants.getMergeAndUpload(),batchId,activityCode);
+        }
         DistributionResponse result = webClient.post()
-                .uri(String.format(constants.getMergeAndUpload(),batchId,activityCode))
+                .uri(url)
                 .headers(h -> {
                     h.setBearerAuth(accessToken);
                     h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
@@ -409,6 +446,16 @@ public class RestUtils {
                 }).retrieve().bodyToMono(boolean.class).block();
     }
 
+    public void updateSchoolReportRecord(String schoolOfRecord, String reportTypeCode,String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        webClient.get().uri(String.format(constants.getUpdateStudentCredential(),schoolOfRecord,reportTypeCode))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                }).retrieve().bodyToMono(boolean.class).block();
+    }
+
+
     public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req, String accessToken) {
         UUID correlationID = UUID.randomUUID();
         final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
@@ -441,4 +488,14 @@ public class RestUtils {
                 h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
         }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
     }
+
+    public GraduationStudentRecord getGradStatusForBatch(UUID studentID, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        return webClient.get().uri(String.format(constants.getReadGradStudentRecordBatch(),studentID))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
+    }
+
 }
