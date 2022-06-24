@@ -154,7 +154,7 @@ endpoint:
     update-school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreports?mincode=%s&reportTypeCode=%s
     get-school-report-list:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistributionrun
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistribution
   grad-distribution-api:
     merge-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MER?batchId=%s&activityCode=%s
