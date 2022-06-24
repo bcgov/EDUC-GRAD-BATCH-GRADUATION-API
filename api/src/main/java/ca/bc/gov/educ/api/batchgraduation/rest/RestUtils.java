@@ -346,7 +346,7 @@ public class RestUtils {
     public DistributionResponse readAndPostSchoolReports(Long batchId,String accessToken, Map<String, DistributionPrintRequest> mapDist) {
         UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
-                .uri(constants.getReadAndPost())
+                .uri(String.format(constants.getReadAndPost(),batchId))
                 .headers(h -> {
                     h.setBearerAuth(accessToken);
                     h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
