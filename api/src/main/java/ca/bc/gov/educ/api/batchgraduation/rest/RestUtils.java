@@ -154,7 +154,7 @@ public class RestUtils {
         final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.get()
-                .uri(constants.getGradStudentListSchoolReport())
+                .uri(String.format(constants.getGradStudentListSchoolReport(),schoolOfRecord))
                 .headers(h -> {
                     h.setBearerAuth(accessToken);
                     h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
