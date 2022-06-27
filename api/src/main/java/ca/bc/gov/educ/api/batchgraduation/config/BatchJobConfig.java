@@ -80,6 +80,16 @@ public class BatchJobConfig {
                 .build();
     }
 
+    @Bean
+    public Step masterStepErrorRegGradRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepErrorRegGradRetry")
+                .partitioner(graduationJobErrorStep(stepBuilderFactory).getName(), partitionerRegGrad())
+                .step(graduationJobErrorStep(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
 
     @Bean
     public RegGradAlgPartitioner partitionerRegGrad() {
@@ -116,6 +126,7 @@ public class BatchJobConfig {
                 .listener(listener)
                 .start(masterStepRegGrad(stepBuilderFactory,constants))
                 .next(masterStepErrorRegGrad(stepBuilderFactory,constants))
+                .next(masterStepErrorRegGradRetry(stepBuilderFactory,constants))
                 .build();
     }
 
@@ -167,6 +178,16 @@ public class BatchJobConfig {
     }
 
     @Bean
+    public Step masterStepErrorTvrRunRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepErrorTvrRunRetry")
+                .partitioner(tvrJobErrorStep(stepBuilderFactory).getName(), partitionerTvrRun())
+                .step(tvrJobErrorStep(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
     public TvrRunPartitioner partitionerTvrRun() {
         return new TvrRunPartitioner();
     }
@@ -202,6 +223,7 @@ public class BatchJobConfig {
                 .listener(listener)
                 .start(masterStepTvrRun(stepBuilderFactory,constants))
                 .next(masterStepErrorTvrRun(stepBuilderFactory,constants))
+                .next(masterStepErrorTvrRunRetry(stepBuilderFactory,constants))
                 .build();
     }
 

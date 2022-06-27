@@ -11,13 +11,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.partition.support.SimplePartitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class SpcRegGradAlgPartitioner extends SimplePartitioner {
 
@@ -28,9 +30,6 @@ public class SpcRegGradAlgPartitioner extends SimplePartitioner {
 
     @Autowired
     RestUtils restUtils;
-
-    public SpcRegGradAlgPartitioner() {}
-
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
@@ -59,6 +58,7 @@ public class SpcRegGradAlgPartitioner extends SimplePartitioner {
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+                summaryDTO.initializeProgramCountMap();
                 List<GraduationStudentRecord> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

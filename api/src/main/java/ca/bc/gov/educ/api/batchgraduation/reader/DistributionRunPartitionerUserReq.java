@@ -1,8 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -13,9 +15,11 @@ import org.springframework.batch.core.partition.support.SimplePartitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class DistributionRunPartitionerUserReq extends SimplePartitioner {
 
@@ -26,9 +30,6 @@ public class DistributionRunPartitionerUserReq extends SimplePartitioner {
 
     @Autowired
     RestUtils restUtils;
-
-    public DistributionRunPartitionerUserReq() {}
-
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
@@ -57,6 +58,7 @@ public class DistributionRunPartitionerUserReq extends SimplePartitioner {
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+                summaryDTO.initializeCredentialCountMap();
                 List<StudentCredentialDistribution> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

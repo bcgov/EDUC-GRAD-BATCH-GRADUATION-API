@@ -31,9 +31,6 @@ public class SchoolReportRunPartitioner extends SimplePartitioner {
     @Autowired
     GraduationReportService graduationReportService;
 
-    public SchoolReportRunPartitioner() {}
-
-
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         ResponseObj res = restUtils.getTokenResponseObject();
@@ -52,6 +49,7 @@ public class SchoolReportRunPartitioner extends SimplePartitioner {
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 SchoolReportSummaryDTO summaryDTO = new SchoolReportSummaryDTO();
+                summaryDTO.initializeCredentialCountMap();
                 List<SchoolReportDistribution> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

@@ -23,18 +23,7 @@ public class AlgorithmSummaryDTO {
   private String exception;
 
   // stats
-  private Map<String, Long> programCountMap = new HashMap<>() {{
-    put("2018-EN", 0L);
-    put("2018-PF", 0L);
-    put("2004-EN", 0L);
-    put("2004-PF", 0L);
-    put("1996-EN", 0L);
-    put("1996-PF", 0L);
-    put("1986-EN", 0L);
-    put("1950", 0L);
-    put("NOPROG", 0L);
-    put("SCCP", 0L);
-  }};
+  private Map<String, Long> programCountMap = new HashMap<>();
 
   private Map<String, SchoolReportRequest> mapDist = new HashMap<>();
 
@@ -44,7 +33,26 @@ public class AlgorithmSummaryDTO {
   public void increment(String programCode) {
     programCountMap.computeIfPresent(programCode,(key, val) -> val + 1);
   }
-  public void updateError(UUID studentID,ProcessError newError) {
-    errors.computeIfPresent(studentID,(key, val) -> newError);
+  public void updateError(UUID studentID,String errMsg, String errorDesc) {
+    ProcessError obj = errors.get(studentID);
+    if(obj == null) {
+      obj = new ProcessError();
+    }
+    obj.setReason(errMsg);
+    obj.setDetail(errorDesc);
+    errors.put(studentID,obj);
+  }
+
+  public void initializeProgramCountMap() {
+    programCountMap.put("2018-EN", 0L);
+    programCountMap.put("2018-PF", 0L);
+    programCountMap.put("2004-EN", 0L);
+    programCountMap.put("2004-PF", 0L);
+    programCountMap.put("1996-EN", 0L);
+    programCountMap.put("1996-PF", 0L);
+    programCountMap.put("1986-EN", 0L);
+    programCountMap.put("1950", 0L);
+    programCountMap.put("NOPROG", 0L);
+    programCountMap.put("SCCP", 0L);
   }
 }

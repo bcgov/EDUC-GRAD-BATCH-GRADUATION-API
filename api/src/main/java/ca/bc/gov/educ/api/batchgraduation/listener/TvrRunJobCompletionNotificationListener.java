@@ -42,7 +42,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("TVR Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
+	    	LOGGER.info("TVR Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 	    	JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
@@ -64,7 +64,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(summaryDTO.getGlobalList(),summaryDTO.getMapDist(),jobExecutionId,obj.getAccess_token());
+			processGlobalList(summaryDTO.getGlobalList(),summaryDTO.getMapDist(),obj.getAccess_token());
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -81,7 +81,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
-			LOGGER.info(" Errors:		   {}", summaryDTO.getErrors().size());
+			LOGGER.info(" Errors:{}", summaryDTO.getErrors().size());
 			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
 			summaryDTO.getErrors().forEach((e,v) -> {
 				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e, v.getReason(), v.getDetail());
@@ -94,7 +94,6 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 
 			if(!eList.isEmpty()) {
 				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
-				jobLauncherController.launchTvrRunJob();
 			}
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			AlgorithmSummaryDTO finalSummaryDTO = summaryDTO;
@@ -106,11 +105,11 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 		}
     }
 
-	private void processGlobalList(List<GraduationStudentRecord> cList, Map<String, SchoolReportRequest> mapDist, Long batchId, String accessToken) {
+	private void processGlobalList(List<GraduationStudentRecord> cList, Map<String, SchoolReportRequest> mapDist, String accessToken) {
 		List<String> uniqueSchoolList = cList.stream().map(GraduationStudentRecord::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		List<GraduationStudentRecord> finalCList = cList;
 		uniqueSchoolList.forEach(usl->{
-			List<GraduationStudentRecord> stdList = finalCList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0).collect(Collectors.toList());
+			List<GraduationStudentRecord> stdList = restUtils.getStudentListByMinCode(usl,accessToken);
 			schoolReportRequest(stdList,usl,mapDist);
 		});
 		restUtils.createAndStoreSchoolReports(accessToken,mapDist);
