@@ -444,7 +444,7 @@ public class RestUtils {
 
     public void updateSchoolReportRecord(String schoolOfRecord, String reportTypeCode,String accessToken) {
         UUID correlationID = UUID.randomUUID();
-        webClient.get().uri(String.format(constants.getUpdateStudentCredential(),schoolOfRecord,reportTypeCode))
+        webClient.get().uri(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode))
                 .headers(h -> {
                     h.setBearerAuth(accessToken);
                     h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());

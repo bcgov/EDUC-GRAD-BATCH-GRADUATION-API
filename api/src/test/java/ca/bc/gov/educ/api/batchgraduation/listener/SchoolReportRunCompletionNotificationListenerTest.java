@@ -96,7 +96,10 @@ public class SchoolReportRunCompletionNotificationListenerTest {
 
 
         List<SchoolReportDistribution> scdList = new ArrayList<>();
-        SchoolReportDistribution scd = new SchoolReportDistribution(new UUID(1,1),"GRAD","05005001");
+        SchoolReportDistribution scd = new SchoolReportDistribution();
+        scd.setId(new UUID(1,1));
+        scd.setReportTypeCode("GRAD");
+        scd.setSchoolOfRecord("05005001");
         scdList.add(scd);
 
         SchoolReportSummaryDTO summaryDTO = new SchoolReportSummaryDTO();
