@@ -1,14 +1,14 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.partition.support.SimplePartitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +30,6 @@ public class DistributionRunPartitioner extends SimplePartitioner {
     @Autowired
     ParallelDataFetch parallelDataFetch;
 
-    public DistributionRunPartitioner() {}
-
-
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         ResponseObj res = restUtils.getTokenResponseObject();
@@ -43,8 +40,10 @@ public class DistributionRunPartitioner extends SimplePartitioner {
         Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
-        credentialList.addAll(parallelDTO.transcriptList());
-        credentialList.addAll(parallelDTO.certificateList());
+        if(parallelDTO != null) {
+            credentialList.addAll(parallelDTO.transcriptList());
+            credentialList.addAll(parallelDTO.certificateList());
+        }
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
@@ -55,6 +54,7 @@ public class DistributionRunPartitioner extends SimplePartitioner {
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+                summaryDTO.initializeCredentialCountMap();
                 List<StudentCredentialDistribution> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

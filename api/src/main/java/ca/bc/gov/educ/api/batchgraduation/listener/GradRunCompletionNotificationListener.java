@@ -45,7 +45,7 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("Grad Algorithm Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
+	    	LOGGER.info("Grad Algorithm Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 	    	JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
@@ -80,10 +80,10 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 
 			batchGradAlgorithmJobHistoryRepository.save(ent);
 			
-			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
-			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
+			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
+			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
-			LOGGER.info(" Errors:		   {}", summaryDTO.getErrors().size());
+			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
 			summaryDTO.getErrors().forEach((e,v) -> {
 				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e, v.getReason(), v.getDetail());
@@ -95,7 +95,6 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 			});
 			if(!eList.isEmpty()) {
 				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
-				jobLauncherController.launchRegGradJob();
 			}
 
 			LOGGER.info(" --------------------------------------------------------------------------------------");

@@ -19,8 +19,6 @@ public class RegGradAlgPartitioner extends SimplePartitioner {
     @Autowired
     RestUtils restUtils;
 
-    public RegGradAlgPartitioner() {}
-
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         ResponseObj res = restUtils.getTokenResponseObject();
@@ -40,6 +38,7 @@ public class RegGradAlgPartitioner extends SimplePartitioner {
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+                summaryDTO.initializeProgramCountMap();
                 List<GraduationStudentRecord> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

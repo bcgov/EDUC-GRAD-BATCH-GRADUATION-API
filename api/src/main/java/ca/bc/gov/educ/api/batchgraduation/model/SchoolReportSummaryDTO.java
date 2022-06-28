@@ -22,13 +22,14 @@ public class SchoolReportSummaryDTO {
   private String exception;
 
   // stats
-  private Map<String, Long> credentialCountMap = new HashMap<>() {{
-    put("GRAD", 0L);
-    put("NONGRAD", 0L);
-    put("NONGRADPRJ", 0L);
-    put("ACHV", 0L);
-  }};
+  private Map<String, Long> credentialCountMap = new HashMap<>();
 
+  public void initializeCredentialCountMap() {
+    credentialCountMap.put("GRAD", 0L);
+    credentialCountMap.put("NONGRAD", 0L);
+    credentialCountMap.put("NONGRADPRJ", 0L);
+    credentialCountMap.put("ACHV", 0L);
+  }
 
   private Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
 
@@ -36,10 +37,6 @@ public class SchoolReportSummaryDTO {
   private String accessToken;
 
   public void increment(String programCode) {
-    Long count = credentialCountMap.get(programCode);
-    if (count != null) {
-      count++;
-      credentialCountMap.put(programCode, count);
-    }
+    credentialCountMap.computeIfPresent(programCode,(key, val) -> val + 1);
   }
 }

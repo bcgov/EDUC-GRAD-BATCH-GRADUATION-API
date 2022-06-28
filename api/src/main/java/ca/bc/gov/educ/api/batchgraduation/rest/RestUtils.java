@@ -149,6 +149,19 @@ public class RestUtils {
         return res != null ?res.getGraduationStudentRecords():new ArrayList<>();
     }
 
+    public List<GraduationStudentRecord> getStudentListByMinCode(String schoolOfRecord,String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        };
+        return this.webClient.get()
+                .uri(String.format(constants.getGradStudentListSchoolReport(),schoolOfRecord))
+                .headers(h -> {
+                    h.setBearerAuth(accessToken);
+                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                })
+                .retrieve().bodyToMono(responseType).block();
+    }
+
     public GraduationStudentRecord processStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
         LOGGER.info(STUDENT_PROCESS,Thread.currentThread().getName(),item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
@@ -156,11 +169,7 @@ public class RestUtils {
             String accessToken = summary.getAccessToken();
             AlgorithmResponse algorithmResponse = this.runGradAlgorithm(item.getStudentID(), accessToken,item.getProgramCompletionDate(),summary.getBatchId());
             if(algorithmResponse.getException() != null) {
-                ProcessError error = new ProcessError();
-                error.setStudentID(item.getStudentID().toString());
-                error.setReason(algorithmResponse.getException().getExceptionName());
-                error.setDetail(algorithmResponse.getException().getExceptionDetails());
-                summary.updateError(item.getStudentID(),error);
+                summary.updateError(item.getStudentID(),algorithmResponse.getException().getExceptionName(),algorithmResponse.getException().getExceptionDetails());
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
                 return null;
             }
@@ -168,11 +177,7 @@ public class RestUtils {
             summary.getSuccessfulStudentIDs().add(item.getStudentID());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
-            ProcessError error = new ProcessError();
-            error.setStudentID(item.getStudentID().toString());
-            error.setReason("GRAD-GRADUATION-API IS DOWN");
-            error.setDetail("Graduation API is unavailable at this moment");
-            summary.updateError(item.getStudentID(),error);
+            summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count : {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
             return null;
@@ -191,11 +196,7 @@ public class RestUtils {
             item.setLegalLastName(batchItem.getLegalLastName());
             AlgorithmResponse algorithmResponse = this.runProjectedGradAlgorithm(item.getStudentID(), accessToken,summary.getBatchId());
             if(algorithmResponse.getException() != null) {
-                ProcessError error = new ProcessError();
-                error.setStudentID(item.getStudentID().toString());
-                error.setReason(algorithmResponse.getException().getExceptionName());
-                error.setDetail(algorithmResponse.getException().getExceptionDetails());
-                summary.updateError(item.getStudentID(),error);
+                summary.updateError(item.getStudentID(),algorithmResponse.getException().getExceptionName(),algorithmResponse.getException().getExceptionDetails());
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
                 return null;
             }
@@ -206,11 +207,7 @@ public class RestUtils {
             summary.getGlobalList().add(item);
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
-            ProcessError error = new ProcessError();
-            error.setStudentID(item.getStudentID().toString());
-            error.setReason("GRAD-GRADUATION-API IS DOWN");
-            error.setDetail("Graduation API is unavailable at this moment");
-            summary.updateError(item.getStudentID(),error);
+            summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count: {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
             return null;
@@ -403,7 +400,7 @@ public class RestUtils {
     }
 
 
-    public DistributionResponse createBlankCredentialsAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
+    public void createBlankCredentialsAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
         UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
                 .uri(String.format(constants.getCreateBlanksAndUpload(),batchId))
@@ -417,7 +414,6 @@ public class RestUtils {
                 .block();
         if(result != null)
             LOGGER.info("Create and Upload Success {}",result.getMergeProcessResponse());
-        return  result;
     }
 
     public DistributionResponse createReprintAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist, String activityCode) {

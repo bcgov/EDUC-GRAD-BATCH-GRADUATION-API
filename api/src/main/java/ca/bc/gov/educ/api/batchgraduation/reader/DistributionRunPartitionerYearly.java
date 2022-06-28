@@ -30,9 +30,6 @@ public class DistributionRunPartitionerYearly extends SimplePartitioner {
     @Autowired
     ParallelDataFetch parallelDataFetch;
 
-    public DistributionRunPartitionerYearly() {}
-
-
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         ResponseObj res = restUtils.getTokenResponseObject();
@@ -43,8 +40,10 @@ public class DistributionRunPartitionerYearly extends SimplePartitioner {
         Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredDataYearly(accessToken);
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
-        credentialList.addAll(parallelDTO.transcriptList());
-        credentialList.addAll(parallelDTO.certificateList());
+        if(parallelDTO != null) {
+            credentialList.addAll(parallelDTO.transcriptList());
+            credentialList.addAll(parallelDTO.certificateList());
+        }
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
@@ -55,6 +54,7 @@ public class DistributionRunPartitionerYearly extends SimplePartitioner {
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+                summaryDTO.initializeCredentialCountMap();
                 List<StudentCredentialDistribution> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());
