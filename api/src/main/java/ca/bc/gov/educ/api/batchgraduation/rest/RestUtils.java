@@ -189,11 +189,11 @@ public class RestUtils {
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         try {
             String accessToken = summary.getAccessToken();
-            GraduationStudentRecord batchItem = this.getGradStatusForBatch(item.getStudentID(),accessToken);
-            item.setPen(batchItem.getPen());
-            item.setLegalFirstName(batchItem.getLegalFirstName());
-            item.setLegalMiddleNames(batchItem.getLegalMiddleNames());
-            item.setLegalLastName(batchItem.getLegalLastName());
+//            GraduationStudentRecord batchItem = this.getGradStatusForBatch(item.getStudentID(),accessToken);
+//            item.setPen(batchItem.getPen());
+//            item.setLegalFirstName(batchItem.getLegalFirstName());
+//            item.setLegalMiddleNames(batchItem.getLegalMiddleNames());
+//            item.setLegalLastName(batchItem.getLegalLastName());
             AlgorithmResponse algorithmResponse = this.runProjectedGradAlgorithm(item.getStudentID(), accessToken,summary.getBatchId());
             if(algorithmResponse.getException() != null) {
                 summary.updateError(item.getStudentID(),algorithmResponse.getException().getExceptionName(),algorithmResponse.getException().getExceptionDetails());
@@ -201,8 +201,8 @@ public class RestUtils {
                 return null;
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
-            GraduationStudentRecord gItem = this.getGradStatus(item.getStudentID(),accessToken);
-            item.setStudentProjectedGradData(gItem.getStudentProjectedGradData());
+//            GraduationStudentRecord gItem = this.getGradStatus(item.getStudentID(),accessToken);
+//            item.setStudentProjectedGradData(gItem.getStudentProjectedGradData());
             summary.getSuccessfulStudentIDs().add(item.getStudentID());
             summary.getGlobalList().add(item);
             return algorithmResponse.getGraduationStudentRecord();
