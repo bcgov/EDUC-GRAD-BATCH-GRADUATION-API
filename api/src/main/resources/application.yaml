@@ -153,7 +153,7 @@ endpoint:
     get-certificate-types:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/certificatetype/%s
     update-school-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreports?mincode=%s&reportTypeCode=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
     get-school-report-list:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistribution
   grad-distribution-api:
