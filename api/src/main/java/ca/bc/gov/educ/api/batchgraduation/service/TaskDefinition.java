@@ -43,6 +43,9 @@ public class TaskDefinition implements Runnable{
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, jobType.getValue());
+        if(task.getLocalDownload() != null && task.getLocalDownload().equalsIgnoreCase("Y")) {
+            builder.addString("LocalDownload",task.getLocalDownload());
+        }
         if(task.getCredentialType() != null) {
             builder.addString(CREDENTIAL_TYPE,task.getCredentialType());
         }

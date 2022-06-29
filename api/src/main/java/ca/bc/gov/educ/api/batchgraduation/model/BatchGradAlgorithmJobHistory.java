@@ -1,14 +1,11 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
-import java.util.Date;
-import java.util.UUID;
-
-import org.springframework.stereotype.Component;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.stereotype.Component;
 
-import javax.persistence.Column;
+import java.util.Date;
+import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -25,4 +22,5 @@ public class BatchGradAlgorithmJobHistory extends BaseModel{
 	private String status;
 	private String triggerBy;
 	private String jobType;
+	private String localDownload;
 }

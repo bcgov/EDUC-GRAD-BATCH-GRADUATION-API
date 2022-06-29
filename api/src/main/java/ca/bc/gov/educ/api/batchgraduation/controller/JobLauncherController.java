@@ -309,6 +309,7 @@ public class JobLauncherController {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
+        builder.addString("LocalDownload",studentSearchRequest.getLocalDownload());
         DistributionSummaryDTO validate = validateInputDisRun(studentSearchRequest);
         if(validate != null) {
             return ResponseEntity.status(400).body(validate);

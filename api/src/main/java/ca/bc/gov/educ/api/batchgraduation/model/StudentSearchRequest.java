@@ -17,11 +17,11 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class StudentSearchRequest implements Serializable {
-    List<String> schoolOfRecords;
-    List<String> districts;
-    List<String> schoolCategoryCodes;
-    List<String> pens;
-    List<String> programs;
+    private List<String> schoolOfRecords;
+    private List<String> districts;
+    private List<String> schoolCategoryCodes;
+    private List<String> pens;
+    private List<String> programs;
 
     @JsonFormat(pattern = "yyyy/MM/dd")
     Date gradDateFrom;
@@ -29,4 +29,5 @@ public class StudentSearchRequest implements Serializable {
     Date gradDateTo;
 
     Boolean validateInput;
+    String localDownload;
 }

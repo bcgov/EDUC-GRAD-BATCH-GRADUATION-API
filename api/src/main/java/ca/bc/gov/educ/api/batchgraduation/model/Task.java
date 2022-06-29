@@ -9,4 +9,5 @@ public class Task {
     private StudentSearchRequest payload;
     private BlankCredentialRequest blankPayLoad;
     private String credentialType;
+    private String localDownload;
 }
