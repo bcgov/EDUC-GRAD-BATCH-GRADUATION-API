@@ -45,6 +45,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
 			String credentialType = jobParameters.getString("credentialType");
+			String localDownLoad = jobParameters.getString("LocalDownload");
 			BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new BlankDistributionSummaryDTO();
@@ -64,6 +65,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			ent.setStatus(status);
 			ent.setTriggerBy(jobTrigger);
 			ent.setJobType(jobType);
+			ent.setLocalDownload(localDownLoad);
 
 			batchGradAlgorithmJobHistoryRepository.save(ent);
 			
