@@ -341,6 +341,7 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
         builder.addString(CREDENTIALTYPE,credentialType);
+        builder.addString("LocalDownload",blankCredentialRequest.getLocalDownload());
         BlankDistributionSummaryDTO validate = validateInputBlankDisRun(blankCredentialRequest);
         if(validate != null) {
             return ResponseEntity.status(400).body(validate);

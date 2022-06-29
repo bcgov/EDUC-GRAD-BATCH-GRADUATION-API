@@ -18,4 +18,5 @@ public class BlankCredentialRequest implements Serializable {
     private List<String> schoolOfRecords;
     private List<String> credentialTypeCode;
     private int quantity;
+    String localDownload;
 }
