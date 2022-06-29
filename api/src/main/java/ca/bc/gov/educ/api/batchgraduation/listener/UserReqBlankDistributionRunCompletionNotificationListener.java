@@ -54,7 +54,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token());
+			processGlobalList(credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad);
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -92,7 +92,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 		}
     }
 
-	private void processGlobalList(String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken) {
+	private void processGlobalList(String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String localDownload) {
 		List<String> uniqueSchoolList = cList.stream().map(BlankCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
 			List<BlankCredentialDistribution> yed4List = new ArrayList<>();
@@ -117,7 +117,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR");
 			certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB");
 		});
-		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, mapDist);
+		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, mapDist,localDownload);
 	}
 
 	private void transcriptPrintFile(List<BlankCredentialDistribution> yed4List, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {

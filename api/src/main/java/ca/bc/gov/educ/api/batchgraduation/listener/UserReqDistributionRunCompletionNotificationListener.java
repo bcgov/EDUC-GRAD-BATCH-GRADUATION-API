@@ -58,7 +58,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),credentialType,obj.getAccess_token());
+			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),credentialType,obj.getAccess_token(),localDownLoad);
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -96,7 +96,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 		}
     }
 
-	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String credentialType, String accessToken) {
+	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String credentialType, String accessToken,String localDownload) {
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = new ArrayList<>();
@@ -128,9 +128,9 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
 			}
 			if (credentialType.equalsIgnoreCase("RC")) {
-				disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist,activityCode);
+				disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist,activityCode,localDownload);
 			} else {
-				disres = restUtils.mergeAndUpload(batchId, accessToken, mapDist,activityCode);
+				disres = restUtils.mergeAndUpload(batchId, accessToken, mapDist,activityCode,localDownload);
 			}
 		}
 		if(disres != null) {

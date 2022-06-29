@@ -158,12 +158,12 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistribution
   grad-distribution-api:
     merge-n-upload:
-      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MER?batchId=%s&activityCode=%s
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MER?batchId=%s&activityCode=%s&localDownload=%s
     merge-n-upload-yearly:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MERYER?batchId=%s&activityCode=%s
     reprint-n-upload:
-      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/RPR?batchId=%s&activityCode=%s
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/RPR?batchId=%s&activityCode=%s&localDownload=%s
     blanks-n-upload:
-      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/BCPR?batchId=%s
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/BCPR?batchId=%s&localDownload=%s
     read-n-post:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSR?batchId=%s

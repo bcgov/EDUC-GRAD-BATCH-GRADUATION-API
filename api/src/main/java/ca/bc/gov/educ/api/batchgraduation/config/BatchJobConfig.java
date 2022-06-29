@@ -56,6 +56,13 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderRegErrorRetryGrad() {
+        return new RecalculateStudentErrorRetryReader();
+    }
+
+
+    @Bean
+    @StepScope
     public ItemWriter<GraduationStudentRecord> itemWriterRegGrad() {
         return new RegGradAlgBatchPerformanceWriter();
     }
@@ -83,8 +90,8 @@ public class BatchJobConfig {
     @Bean
     public Step masterStepErrorRegGradRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepErrorRegGradRetry")
-                .partitioner(graduationJobErrorStep(stepBuilderFactory).getName(), partitionerRegGrad())
-                .step(graduationJobErrorStep(stepBuilderFactory))
+                .partitioner(graduationJobErrorRetryStep(stepBuilderFactory).getName(), partitionerRegGrad())
+                .step(graduationJobErrorRetryStep(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
                 .build();
@@ -101,6 +108,16 @@ public class BatchJobConfig {
         return stepBuilderFactory.get("graduationJobErrorStep")
                 .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
                 .reader(itemReaderRegErrorGrad())
+                .processor(itemProcessorRegGrad())
+                .writer(itemWriterRegGrad())
+                .build();
+    }
+
+    @Bean
+    public Step graduationJobErrorRetryStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("graduationJobErrorRetryStep")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderRegErrorRetryGrad())
                 .processor(itemProcessorRegGrad())
                 .writer(itemWriterRegGrad())
                 .build();
@@ -153,6 +170,12 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderTvrErrorRetryRun() {
+        return new RecalculateProjectedGradRunErrorRetryReader();
+    }
+
+    @Bean
+    @StepScope
     public ItemWriter<GraduationStudentRecord> itemWriterTvrRun() {
         return new TvrRunBatchPerformanceWriter();
     }
@@ -180,8 +203,8 @@ public class BatchJobConfig {
     @Bean
     public Step masterStepErrorTvrRunRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepErrorTvrRunRetry")
-                .partitioner(tvrJobErrorStep(stepBuilderFactory).getName(), partitionerTvrRun())
-                .step(tvrJobErrorStep(stepBuilderFactory))
+                .partitioner(tvrJobErrorRetryStep(stepBuilderFactory).getName(), partitionerTvrRun())
+                .step(tvrJobErrorRetryStep(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
                 .build();
@@ -208,6 +231,16 @@ public class BatchJobConfig {
         return stepBuilderFactory.get("tvrJobErrorStep")
                 .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
                 .reader(itemReaderTvrErrorRun())
+                .processor(itemProcessorTvrRun())
+                .writer(itemWriterTvrRun())
+                .build();
+    }
+
+    @Bean
+    public Step tvrJobErrorRetryStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("tvrJobErrorRetryStep")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderTvrErrorRetryRun())
                 .processor(itemProcessorTvrRun())
                 .writer(itemWriterTvrRun())
                 .build();
