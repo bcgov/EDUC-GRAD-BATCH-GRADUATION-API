@@ -298,14 +298,14 @@ public class RestUtilsTest {
         };
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getReprintAndUpload(),batchId))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getReprintAndUpload(),batchId,activityCode,null))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
 
 
-        val result = this.restUtils.createReprintAndUpload(batchId,null,new HashMap<>(), activityCode);
+        val result = this.restUtils.createReprintAndUpload(batchId,null,new HashMap<>(), activityCode,null);
         assertThat(result).isNotNull();
     }
 
@@ -317,14 +317,14 @@ public class RestUtilsTest {
         Long batchId = 3344L;
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getMergeAndUpload(),batchId))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getMergeAndUpload(),batchId,activityCode,null))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
 
 
-        val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode);
+        val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,null);
         assertThat(result).isNotNull();
     }
 

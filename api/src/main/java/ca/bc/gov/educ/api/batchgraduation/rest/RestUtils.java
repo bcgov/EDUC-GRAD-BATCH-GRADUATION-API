@@ -368,13 +368,13 @@ public class RestUtils {
             LOGGER.info("Create and Store School Report Success {}",result);
     }
 
-    public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String activityCode) {
+    public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String activityCode,String localDownload) {
         UUID correlationID = UUID.randomUUID();
         String url;
         if(activityCode.equalsIgnoreCase("YEARENDDIST")) {
             url= String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
         }else {
-            url = String.format(constants.getMergeAndUpload(),batchId,activityCode);
+            url = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
         DistributionResponse result = webClient.post()
                 .uri(url)
@@ -393,10 +393,10 @@ public class RestUtils {
     }
 
 
-    public void createBlankCredentialsAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist) {
+    public void createBlankCredentialsAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String localDownload) {
         UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
-                .uri(String.format(constants.getCreateBlanksAndUpload(),batchId))
+                .uri(String.format(constants.getCreateBlanksAndUpload(),batchId,localDownload))
                 .headers(h -> {
                     h.setBearerAuth(accessToken);
                     h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
@@ -409,10 +409,10 @@ public class RestUtils {
             LOGGER.info("Create and Upload Success {}",result.getMergeProcessResponse());
     }
 
-    public DistributionResponse createReprintAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist, String activityCode) {
+    public DistributionResponse createReprintAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist, String activityCode,String localDownload) {
         UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
-                .uri(String.format(constants.getReprintAndUpload(),batchId,activityCode))
+                .uri(String.format(constants.getReprintAndUpload(),batchId,activityCode,localDownload))
                 .headers(h -> {
                     h.setBearerAuth(accessToken);
                     h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
