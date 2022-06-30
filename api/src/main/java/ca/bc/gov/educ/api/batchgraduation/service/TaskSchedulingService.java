@@ -62,10 +62,12 @@ public class TaskSchedulingService {
               sJobs.setJobId(k.getJId());
               sJobs.setJobName(k.getJobName());
               sJobs.setScheduledBy(k.getJobUser());
-              if(v.isDone()) {
-                  sJobs.setStatus("Completed");
-              }else {
-                  sJobs.setStatus("In Queue");
+              if(v != null) {
+                  if (v.isDone()) {
+                      sJobs.setStatus("Completed");
+                  } else {
+                      sJobs.setStatus("In Queue");
+                  }
               }
               list.add(sJobs);
             });
