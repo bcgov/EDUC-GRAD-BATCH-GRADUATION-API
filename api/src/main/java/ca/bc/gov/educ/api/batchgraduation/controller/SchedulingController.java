@@ -41,8 +41,9 @@ public class SchedulingController {
     @DeleteMapping(EducGradBatchGraduationApiConstants.REMOVE_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
-    public void removeJob(@RequestParam int jobId,@RequestParam String jobName, @RequestParam String jobUser) {
-        taskSchedulingService.removeScheduledTask(jobId,jobName,jobUser);
+    public void removeJob(@RequestParam String jobKey) {
+        String[] jK =   jobKey.split(":");
+        taskSchedulingService.removeScheduledTask(Integer.parseInt(jK[0]),jK[1],jK[2]);
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.LIST_JOBS)
