@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
+import ca.bc.gov.educ.api.batchgraduation.model.JobKey;
 import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,40 +19,37 @@ public class TaskSchedulingService {
 
     @Autowired TaskScheduler taskScheduler;
 
-    Map<String, ScheduledFuture<?>> jobsMap = new HashMap<>();
+    Map<JobKey, ScheduledFuture<?>> jobsMap = new HashMap<>();
+    private Random rand = new Random();
 
-    public void scheduleATask(String jobId, Runnable tasklet, String cronExpression) {
-        logger.info("Scheduling task with job id: {} and cron expression {}",jobId,cronExpression);
-        boolean canCreate=true;
-        String[] arrKey =   jobId.split(":");
-        for (Map.Entry<String, ScheduledFuture<?>> entry : jobsMap.entrySet()) {
-            String jId = entry.getKey();
-            if (jId.contains(cronExpression) && jId.contains(arrKey[0]) && jId.contains(arrKey[2])) {
-                canCreate = false;
-                break;
-            }
-        }
-        if(jobsMap.get(jobId) != null) {
-            ScheduledFuture<?> taskSchd = jobsMap.get(jobId);
+    public void scheduleATask(String jobData, Runnable tasklet, String cronExpression) {
+        String[] arrKey =   jobData.split(":");
+        JobKey newJk = new JobKey();
+        newJk.setJId(rand.nextInt(999999));
+        newJk.setJobUser(arrKey[1]);
+        newJk.setJobName(arrKey[0]);
+        logger.info("Scheduling task with job id: {} and cron expression {}",newJk.getJId(),cronExpression);
+        if(jobsMap.get(newJk) != null) {
+            ScheduledFuture<?> taskSchd = jobsMap.get(newJk);
             if(taskSchd.isDone()){
                 ScheduledFuture<?> scheduledTask = taskScheduler.schedule(tasklet, new CronTrigger(cronExpression, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
-                jobsMap.put(jobId, scheduledTask);
-            }else {
-                if(canCreate) {
-                    ScheduledFuture<?> sTask = taskScheduler.schedule(tasklet, new CronTrigger(cronExpression, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
-                    jobsMap.put(jobId, sTask);
-                }
+                jobsMap.put(newJk, scheduledTask);
             }
+        }else {
+            ScheduledFuture<?> sTask = taskScheduler.schedule(tasklet, new CronTrigger(cronExpression, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
+            jobsMap.put(newJk, sTask);
         }
-        ScheduledFuture<?> sTask = taskScheduler.schedule(tasklet, new CronTrigger(cronExpression, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
-        jobsMap.put(jobId, sTask);
     }
 
-    public void removeScheduledTask(String jobId) {
-        ScheduledFuture<?> scheduledTask = jobsMap.get(jobId);
+    public void removeScheduledTask(int jobId, String jobName,String jobUser ) {
+        JobKey jKey = new JobKey();
+        jKey.setJobName(jobName);
+        jKey.setJId(jobId);
+        jKey.setJobUser(jobUser);
+        ScheduledFuture<?> scheduledTask = jobsMap.get(jKey);
         if(scheduledTask != null) {
             scheduledTask.cancel(true);
-            jobsMap.put(jobId, null);
+            jobsMap.put(jKey, null);
         }
     }
 
@@ -59,11 +57,10 @@ public class TaskSchedulingService {
         List<ScheduledJobs> list = new ArrayList<>();
         if(!jobsMap.isEmpty()) {
             jobsMap.forEach((k,v)->{
-              String[] arrKey =   k.split(":");
               ScheduledJobs sJobs = new ScheduledJobs();
-              sJobs.setJobId(k);
-              sJobs.setJobName(arrKey[0]);
-              sJobs.setScheduledBy(arrKey[2]);
+              sJobs.setJobId(k.getJId());
+              sJobs.setJobName(k.getJobName());
+              sJobs.setScheduledBy(k.getJobUser());
               if(v.isDone()) {
                   sJobs.setStatus("Completed");
               }else {
