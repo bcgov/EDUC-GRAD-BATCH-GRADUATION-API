@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class ScheduledJobs {
     private int jobId;
+    private String rowId;
     private String jobName;
     private String scheduledBy;
     private String status;

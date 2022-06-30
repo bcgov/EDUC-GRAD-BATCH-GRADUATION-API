@@ -58,6 +58,7 @@ public class TaskSchedulingService {
         if(!jobsMap.isEmpty()) {
             jobsMap.forEach((k,v)->{
               ScheduledJobs sJobs = new ScheduledJobs();
+              sJobs.setRowId(k.getJId()+":"+k.getJobName()+":"+k.getJobUser());
               sJobs.setJobId(k.getJId());
               sJobs.setJobName(k.getJobName());
               sJobs.setScheduledBy(k.getJobUser());
