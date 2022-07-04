@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
+import ca.bc.gov.educ.api.batchgraduation.model.JobKey;
 import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +9,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
@@ -18,56 +20,47 @@ public class TaskSchedulingService {
 
     @Autowired TaskScheduler taskScheduler;
 
-    Map<String, ScheduledFuture<?>> jobsMap = new HashMap<>();
+    Map<JobKey, ScheduledFuture<?>> jobsMap = new HashMap<>();
+    private final Random rand = new SecureRandom();
 
-    public void scheduleATask(String jobId, Runnable tasklet, String cronExpression) {
-        logger.info("Scheduling task with job id: {} and cron expression {}",jobId,cronExpression);
-        boolean canCreate=true;
-        String[] arrKey =   jobId.split(":");
-        for (Map.Entry<String, ScheduledFuture<?>> entry : jobsMap.entrySet()) {
-            String jId = entry.getKey();
-            if (jId.contains(cronExpression) && jId.contains(arrKey[0]) && jId.contains(arrKey[2])) {
-                canCreate = false;
-                break;
-            }
-        }
-        if(jobsMap.get(jobId) != null) {
-            ScheduledFuture<?> taskSchd = jobsMap.get(jobId);
-            if(taskSchd.isDone()){
-                ScheduledFuture<?> scheduledTask = taskScheduler.schedule(tasklet, new CronTrigger(cronExpression, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
-                jobsMap.put(jobId, scheduledTask);
-            }else {
-                if(canCreate) {
-                    ScheduledFuture<?> sTask = taskScheduler.schedule(tasklet, new CronTrigger(cronExpression, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
-                    jobsMap.put(jobId, sTask);
-                }
-            }
-        }
+    public void scheduleATask(String jobUser,String jobName, Runnable tasklet, String cronExpression) {
+        logger.info("Scheduled Task {} by {}",jobName,jobUser);
+        JobKey newJk = new JobKey();
+        newJk.setJId(rand.nextInt(999999));
+        newJk.setJobUser(jobUser);
+        newJk.setJobName(jobName);
         ScheduledFuture<?> sTask = taskScheduler.schedule(tasklet, new CronTrigger(cronExpression, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
-        jobsMap.put(jobId, sTask);
+        jobsMap.put(newJk, sTask);
     }
 
-    public void removeScheduledTask(String jobId) {
-        ScheduledFuture<?> scheduledTask = jobsMap.get(jobId);
+    public void removeScheduledTask(int jobId, String jobName,String jobUser ) {
+        JobKey jKey = new JobKey();
+        jKey.setJobName(jobName);
+        jKey.setJId(jobId);
+        jKey.setJobUser(jobUser);
+        ScheduledFuture<?> scheduledTask = jobsMap.get(jKey);
         if(scheduledTask != null) {
             scheduledTask.cancel(true);
-            jobsMap.put(jobId, null);
+            jobsMap.remove(jKey);
         }
+        logger.info("Task removed {}",jobId);
     }
 
     public List<ScheduledJobs> listScheduledJobs() {
         List<ScheduledJobs> list = new ArrayList<>();
         if(!jobsMap.isEmpty()) {
             jobsMap.forEach((k,v)->{
-              String[] arrKey =   k.split(":");
               ScheduledJobs sJobs = new ScheduledJobs();
-              sJobs.setJobId(k);
-              sJobs.setJobName(arrKey[0]);
-              sJobs.setScheduledBy(arrKey[2]);
-              if(v.isDone()) {
-                  sJobs.setStatus("Completed");
-              }else {
-                  sJobs.setStatus("In Queue");
+              sJobs.setRowId(k.getJId()+"_"+k.getJobName()+"_"+k.getJobUser());
+              sJobs.setJobId(k.getJId());
+              sJobs.setJobName(k.getJobName());
+              sJobs.setScheduledBy(k.getJobUser());
+              if(v != null) {
+                  if (v.isDone()) {
+                      sJobs.setStatus("Completed");
+                  } else {
+                      sJobs.setStatus("In Queue");
+                  }
               }
               list.add(sJobs);
             });

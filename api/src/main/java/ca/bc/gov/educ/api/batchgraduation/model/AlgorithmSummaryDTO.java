@@ -25,8 +25,6 @@ public class AlgorithmSummaryDTO {
   // stats
   private Map<String, Long> programCountMap = new HashMap<>();
 
-  private Map<String, SchoolReportRequest> mapDist = new HashMap<>();
-
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private String accessToken;
 

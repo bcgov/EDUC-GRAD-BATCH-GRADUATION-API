@@ -64,7 +64,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(summaryDTO.getGlobalList(),summaryDTO.getMapDist(),obj.getAccess_token());
+			processGlobalList(summaryDTO.getGlobalList(),obj.getAccess_token());
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -97,35 +97,13 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			}
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			AlgorithmSummaryDTO finalSummaryDTO = summaryDTO;
-			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
-				String key = e.getKey();
-				LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getProgramCountMap().get(key));
-			});
+			summaryDTO.getProgramCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getProgramCountMap().get(key)));
 			LOGGER.info("=======================================================================================");
 		}
     }
 
-	private void processGlobalList(List<GraduationStudentRecord> cList, Map<String, SchoolReportRequest> mapDist, String accessToken) {
+	private void processGlobalList(List<GraduationStudentRecord> cList, String accessToken) {
 		List<String> uniqueSchoolList = cList.stream().map(GraduationStudentRecord::getSchoolOfRecord).distinct().collect(Collectors.toList());
-		List<GraduationStudentRecord> finalCList = cList;
-		uniqueSchoolList.forEach(usl->{
-			List<GraduationStudentRecord> stdList = restUtils.getStudentListByMinCode(usl,accessToken);
-			schoolReportRequest(stdList,usl,mapDist);
-		});
-		restUtils.createAndStoreSchoolReports(accessToken,mapDist);
-	}
-
-	private void schoolReportRequest(List<GraduationStudentRecord> studentList, String usl, Map<String,SchoolReportRequest> mapDist) {
-		if(!studentList.isEmpty()) {
-			if(mapDist.get(usl) != null) {
-				SchoolReportRequest srr = mapDist.get(usl);
-				srr.setStudentList(studentList);
-				mapDist.put(usl,srr);
-			}else{
-				SchoolReportRequest srr = new SchoolReportRequest();
-				srr.setStudentList(studentList);
-				mapDist.put(usl,srr);
-			}
-		}
+		restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList);
 	}
 }

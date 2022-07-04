@@ -18,6 +18,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
@@ -33,14 +35,15 @@ public class SchedulingController {
     @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
     public void scheduleATask(@RequestBody Task task) {
         taskDefinition.setTask(task);
-        taskSchedulingService.scheduleATask(task.getJobName() + ":" + task.getCronExpression() + ":" + ThreadLocalStateUtil.getCurrentUser(), taskDefinition, task.getCronExpression());
+        taskSchedulingService.scheduleATask(ThreadLocalStateUtil.getCurrentUser(),task.getJobName() , taskDefinition, task.getCronExpression());
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.REMOVE_JOB)
+    @DeleteMapping(EducGradBatchGraduationApiConstants.REMOVE_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
     public void removeJob(@PathVariable String jobId) {
-        taskSchedulingService.removeScheduledTask(jobId);
+        String[] jK =   jobId.split("_");
+        taskSchedulingService.removeScheduledTask(Integer.parseInt(jK[0]),jK[1],jK[2]);
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.LIST_JOBS)
