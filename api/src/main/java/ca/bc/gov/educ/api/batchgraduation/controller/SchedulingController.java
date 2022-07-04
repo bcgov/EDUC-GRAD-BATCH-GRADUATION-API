@@ -35,14 +35,14 @@ public class SchedulingController {
     @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
     public void scheduleATask(@RequestBody Task task) {
         taskDefinition.setTask(task);
-        taskSchedulingService.scheduleATask(task.getJobName() + ":" + ThreadLocalStateUtil.getCurrentUser(), taskDefinition, task.getCronExpression());
+        taskSchedulingService.scheduleATask(ThreadLocalStateUtil.getCurrentUser(),task.getJobName() , taskDefinition, task.getCronExpression());
     }
 
     @DeleteMapping(EducGradBatchGraduationApiConstants.REMOVE_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
     public void removeJob(@PathVariable String jobId) {
-        String[] jK =   jobId.split(":");
+        String[] jK =   jobId.split("_");
         taskSchedulingService.removeScheduledTask(Integer.parseInt(jK[0]),jK[1],jK[2]);
     }
 
