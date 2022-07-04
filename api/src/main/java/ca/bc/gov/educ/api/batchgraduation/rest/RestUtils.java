@@ -162,6 +162,7 @@ public class RestUtils {
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
             summary.getSuccessfulStudentIDs().add(item.getStudentID());
+            summary.getGlobalList().add(item);
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
@@ -338,10 +339,10 @@ public class RestUtils {
         return  result;
     }
 
-    public void createAndStoreSchoolReports(String accessToken, List<String> uniqueSchools) {
+    public void createAndStoreSchoolReports(String accessToken, List<String> uniqueSchools,String type) {
         UUID correlationID = UUID.randomUUID();
         Integer result = webClient.post()
-                .uri(constants.getCreateAndStore())
+                .uri(String.format(constants.getCreateAndStore(),type))
                 .headers(h -> {
                     h.setBearerAuth(accessToken);
                     h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());

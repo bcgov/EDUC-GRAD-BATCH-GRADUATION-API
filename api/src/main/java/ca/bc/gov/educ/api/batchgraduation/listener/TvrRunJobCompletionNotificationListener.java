@@ -104,6 +104,6 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 
 	private void processGlobalList(List<GraduationStudentRecord> cList, String accessToken) {
 		List<String> uniqueSchoolList = cList.stream().map(GraduationStudentRecord::getSchoolOfRecord).distinct().collect(Collectors.toList());
-		restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList);
+		restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList,"TVRRUN");
 	}
 }
