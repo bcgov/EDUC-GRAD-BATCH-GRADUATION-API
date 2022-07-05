@@ -14,16 +14,22 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
  * This bean schedules and runs our Spring Batch job.
  */
+@PropertySource("classpath:/batch.properties")
 @Component
 public class BatchJobLauncher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BatchJobLauncher.class);
+
+    @Value("${batch.regular.grad.job.enabled}")
+    private boolean regularGradJobEnabled;
 
     @Autowired
     @Qualifier("GraduationBatchJob")
@@ -52,10 +58,10 @@ public class BatchJobLauncher {
 
 
 
-    @Scheduled(cron = "0 0 16 * * *")
+    @Scheduled(cron = "${batch.regular.grad.job.cron}")
     @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runRegularGradAlgorithm() {
-        LOGGER.info("Batch Job was started");
+        LOGGER.info("Batch Job was started {}",regularGradJobEnabled);
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, "BATCH");

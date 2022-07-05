@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
+import ca.bc.gov.educ.api.batchgraduation.config.PropertiesWriter;
 import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskDefinition;
@@ -18,8 +19,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
@@ -29,6 +28,9 @@ public class SchedulingController {
 
     @Autowired TaskSchedulingService taskSchedulingService;
     @Autowired TaskDefinition taskDefinition;
+
+    @Autowired
+    PropertiesWriter batchPropertiesConfig;
 
     @PostMapping(EducGradBatchGraduationApiConstants.SCHEDULE_JOBS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
@@ -55,5 +57,13 @@ public class SchedulingController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.UPDATE_PARAM)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
+    public ResponseEntity<Void> updateParams() {
+        batchPropertiesConfig.writeToApplicationProperties();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
