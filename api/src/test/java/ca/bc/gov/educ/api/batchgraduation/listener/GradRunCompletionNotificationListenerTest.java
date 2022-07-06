@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.After;
@@ -99,6 +100,9 @@ public class GradRunCompletionNotificationListenerTest {
         ent.setJobType(jobType);
 
         ex.setExecutionContext(jobContext);
+        ResponseObj obj = new ResponseObj();
+        obj.setAccess_token("asdasd");
+        Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
         gradRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);

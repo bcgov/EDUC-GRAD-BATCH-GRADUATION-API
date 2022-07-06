@@ -149,19 +149,6 @@ public class RestUtils {
         return res != null ?res.getGraduationStudentRecords():new ArrayList<>();
     }
 
-    public List<GraduationStudentRecord> getStudentListByMinCode(String schoolOfRecord,String accessToken) {
-        UUID correlationID = UUID.randomUUID();
-        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
-        };
-        return this.webClient.get()
-                .uri(String.format(constants.getGradStudentListSchoolReport(),schoolOfRecord))
-                .headers(h -> {
-                    h.setBearerAuth(accessToken);
-                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
-                })
-                .retrieve().bodyToMono(responseType).block();
-    }
-
     public GraduationStudentRecord processStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
         LOGGER.info(STUDENT_PROCESS,Thread.currentThread().getName(),item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
@@ -175,6 +162,7 @@ public class RestUtils {
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
             summary.getSuccessfulStudentIDs().add(item.getStudentID());
+            summary.getGlobalList().add(item);
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
@@ -351,15 +339,15 @@ public class RestUtils {
         return  result;
     }
 
-    public void createAndStoreSchoolReports(String accessToken, Map<String, SchoolReportRequest> mapDist) {
+    public void createAndStoreSchoolReports(String accessToken, List<String> uniqueSchools,String type) {
         UUID correlationID = UUID.randomUUID();
         Integer result = webClient.post()
-                .uri(constants.getCreateAndStore())
+                .uri(String.format(constants.getCreateAndStore(),type))
                 .headers(h -> {
                     h.setBearerAuth(accessToken);
                     h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
                 })
-                .body(BodyInserters.fromValue(mapDist))
+                .body(BodyInserters.fromValue(uniqueSchools))
                 .retrieve()
                 .bodyToMono(Integer.class)
                 .block();

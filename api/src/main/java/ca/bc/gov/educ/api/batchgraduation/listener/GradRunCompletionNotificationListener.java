@@ -4,6 +4,8 @@ import ca.bc.gov.educ.api.batchgraduation.controller.JobLauncherController;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class GradRunCompletionNotificationListener extends JobExecutionListenerSupport {
@@ -65,8 +68,9 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 
 			int failedRecords = summaryDTO.getErrors().size();			
 			Long processedStudents = summaryDTO.getProcessedCount();
-			Long expectedStudents = summaryDTO.getReadCount();			
-			
+			Long expectedStudents = summaryDTO.getReadCount();
+			ResponseObj obj = restUtils.getTokenResponseObject();
+			processGlobalList(summaryDTO.getGlobalList(),obj.getAccess_token());
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -99,11 +103,13 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			AlgorithmSummaryDTO finalSummaryDTO = summaryDTO;
-			summaryDTO.getProgramCountMap().entrySet().stream().forEach(e -> {
-				String key = e.getKey();
-				LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getProgramCountMap().get(key));
-			});
+			summaryDTO.getProgramCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getProgramCountMap().get(key)));
 			LOGGER.info("=======================================================================================");
 		}
     }
+
+	private void processGlobalList(List<GraduationStudentRecord> cList, String accessToken) {
+		List<String> uniqueSchoolList = cList.stream().map(GraduationStudentRecord::getSchoolOfRecord).distinct().collect(Collectors.toList());
+		restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList,"REGALG");
+	}
 }
