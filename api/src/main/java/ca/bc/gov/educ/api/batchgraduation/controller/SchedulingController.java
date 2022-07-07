@@ -1,8 +1,9 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
-import ca.bc.gov.educ.api.batchgraduation.config.PropertiesWriter;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessing;
 import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
+import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskDefinition;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
@@ -28,9 +29,8 @@ public class SchedulingController {
 
     @Autowired TaskSchedulingService taskSchedulingService;
     @Autowired TaskDefinition taskDefinition;
+    @Autowired GradDashboardService gradDashboardService;
 
-    @Autowired
-    PropertiesWriter batchPropertiesConfig;
 
     @PostMapping(EducGradBatchGraduationApiConstants.SCHEDULE_JOBS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
@@ -59,11 +59,25 @@ public class SchedulingController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.UPDATE_PARAM)
+    @GetMapping(EducGradBatchGraduationApiConstants.PROCESSING_LIST)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
-    public ResponseEntity<Void> updateParams() {
-        batchPropertiesConfig.writeToApplicationProperties();
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<List<BatchProcessing>> processingList() {
+        List<BatchProcessing> res = gradDashboardService.getProcessingList();
+        if(res.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.UPDATE_ENABLED)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Toggle Scheduled job availability", description = "Toggle Scheduled job availability", tags = { "Schedule" })
+    public ResponseEntity<BatchProcessing> processingList(@PathVariable String jobType) {
+        BatchProcessing res = gradDashboardService.toggleProcess(jobType);
+        if(res == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 }

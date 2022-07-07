@@ -36,6 +36,9 @@ public class EducGradBatchGraduationApiConstants {
     public static final String REMOVE_JOB = "/schedule/remove/{jobId}";
     public static final String LIST_JOBS = "/schedule/listjobs";
 
+    public static final String PROCESSING_LIST = "/processing/all";
+    public static final String UPDATE_ENABLED = "/processing/toggle/{jobType}";
+
     public static final String UPDATE_PARAM = "/parameters";
 
     // Data Conversion
