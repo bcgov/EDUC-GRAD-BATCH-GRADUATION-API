@@ -1,5 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 /**
  * This bean schedules and runs our Spring Batch job.
@@ -46,61 +50,76 @@ public class BatchJobLauncher {
     @Autowired
     private JobExplorer jobExplorer;
 
+    @Autowired
+    private BatchProcessingRepository batchProcessingRepository;
+
     private static final String TIME="time";
     private static final String JOB_TRIGGER="jobTrigger";
+    private static final String BATCH_TRIGGER = "BATCH";
     private static final String JOB_TYPE="jobType";
+    private static final String BATCH_STARTED = "Batch Job was started";
+    private static final String BATCH_ENDED = "Batch Job was stopped";
+    private static final String ERROR_MSG = "Error {}";
 
 
 
-    @Scheduled(cron = "0 0 16 * * *")
+    @Scheduled(cron = "${batch.regalg.cron}")
     @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runRegularGradAlgorithm() {
-        LOGGER.info("Batch Job was started");
+        LOGGER.info(BATCH_STARTED);
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, "BATCH");
+        builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
         builder.addString(JOB_TYPE, "REGALG");
-        try {
-            jobLauncher.run(graduationBatchJob, builder.toJobParameters());
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                | JobParametersInvalidException | IllegalArgumentException e) {
-            LOGGER.debug("Error {}",e.getLocalizedMessage());
+        Optional<BatchProcessingEntity> bPresent = batchProcessingRepository.findByJobType("REGALG");
+        if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
+            try {
+                jobLauncher.run(graduationBatchJob, builder.toJobParameters());
+            } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                    | JobParametersInvalidException | IllegalArgumentException e) {
+                LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
+            }
         }
-        LOGGER.info("Batch Job was stopped");
+        LOGGER.info(BATCH_ENDED);
     }
 
-    @Scheduled(cron = "0 0 20 * * *")
+    @Scheduled(cron = "${batch.tvrrun.cron}")
     @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runTranscriptVerificationReportProcess() {
-        LOGGER.info("Batch Job was started");
+        LOGGER.info(BATCH_STARTED);
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, "BATCH");
+        builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
         builder.addString(JOB_TYPE, "TVRRUN");
-
-        try {
-            jobLauncher.run(tvrBatchJob, builder.toJobParameters());
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                | JobParametersInvalidException | IllegalArgumentException e) {
-            LOGGER.debug("Error {}",e.getLocalizedMessage());
+        Optional<BatchProcessingEntity> bPresent = batchProcessingRepository.findByJobType("TVRRUN");
+        if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
+            try {
+                jobLauncher.run(tvrBatchJob, builder.toJobParameters());
+            } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                    | JobParametersInvalidException | IllegalArgumentException e) {
+                LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
+            }
         }
-        LOGGER.info("Batch Job was stopped");
+        LOGGER.info(BATCH_ENDED);
     }
 
-    @Scheduled(cron = "0 0 23 * * *")
+    @Scheduled(cron = "${batch.schrep.cron}")
     @SchedulerLock(name = "SchoolReportBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runSchoolReportPosting() {
-        LOGGER.info("Batch Job was started");
+        LOGGER.info(BATCH_STARTED);
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, "BATCH");
+        builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
         builder.addString(JOB_TYPE, "SCHREP");
-        try {
-            jobLauncher.run(schoolReportBatchJob, builder.toJobParameters());
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                | JobParametersInvalidException | IllegalArgumentException e) {
-            LOGGER.debug("Error {}",e.getLocalizedMessage());
+        Optional<BatchProcessingEntity> bPresent = batchProcessingRepository.findByJobType("SCHREP");
+        if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
+            try {
+                jobLauncher.run(schoolReportBatchJob, builder.toJobParameters());
+            } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                    | JobParametersInvalidException | IllegalArgumentException e) {
+                LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
+            }
         }
-        LOGGER.info("Batch Job was stopped");
+        LOGGER.info(BATCH_ENDED);
     }
 }

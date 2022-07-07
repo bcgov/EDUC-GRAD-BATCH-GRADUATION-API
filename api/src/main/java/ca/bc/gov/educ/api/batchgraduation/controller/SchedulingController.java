@@ -1,7 +1,9 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
+import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessing;
 import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
+import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskDefinition;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
@@ -18,8 +20,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
@@ -29,6 +29,8 @@ public class SchedulingController {
 
     @Autowired TaskSchedulingService taskSchedulingService;
     @Autowired TaskDefinition taskDefinition;
+    @Autowired GradDashboardService gradDashboardService;
+
 
     @PostMapping(EducGradBatchGraduationApiConstants.SCHEDULE_JOBS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
@@ -53,6 +55,28 @@ public class SchedulingController {
         List<ScheduledJobs> res = taskSchedulingService.listScheduledJobs();
         if(res.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.PROCESSING_LIST)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
+    public ResponseEntity<List<BatchProcessing>> processingList() {
+        List<BatchProcessing> res = gradDashboardService.getProcessingList();
+        if(res.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.UPDATE_ENABLED)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Toggle Scheduled job availability", description = "Toggle Scheduled job availability", tags = { "Schedule" })
+    public ResponseEntity<BatchProcessing> processingList(@PathVariable String jobType) {
+        BatchProcessing res = gradDashboardService.toggleProcess(jobType);
+        if(res == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
