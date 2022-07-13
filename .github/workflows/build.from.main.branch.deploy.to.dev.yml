@@ -49,7 +49,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
-          registry: ${{ env.DOCKER_ARTIFACTORY_REPO }}
+          registry: ${{ secrets.DOCKER_ARTIFACTORY_REPO }}
           username: ${{ secrets.DOCKER_ARTIFACTORY_USERNAME }}
           password: ${{ secrets.DOCKER_ARTIFACTORY_ACCESS_TOKEN }}
 
