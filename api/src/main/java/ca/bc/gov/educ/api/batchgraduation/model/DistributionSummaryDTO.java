@@ -23,12 +23,14 @@ public class DistributionSummaryDTO {
   private String credentialType;
 
   // stats
-  private Map<String, Long> credentialCountMap = new HashMap<>() {{
-    put("YED4", 0L);
-    put("YED2", 0L);
-    put("YEDR", 0L);
-    put("YEDB", 0L);
-  }};
+  private Map<String, Long> credentialCountMap = new HashMap<>();
+
+  public void initializeCredentialCountMap() {
+    credentialCountMap.put("YED4", 0L);
+    credentialCountMap.put("YED2", 0L);
+    credentialCountMap.put("YEDR", 0L);
+    credentialCountMap.put("YEDB", 0L);
+  }
 
   private Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
 
@@ -36,10 +38,6 @@ public class DistributionSummaryDTO {
   private String accessToken;
 
   public void increment(String programCode) {
-    Long count = credentialCountMap.get(programCode);
-    if (count != null) {
-      count++;
-      credentialCountMap.put(programCode, count);
-    }
+    credentialCountMap.computeIfPresent(programCode,(key, val) -> val + 1);
   }
 }

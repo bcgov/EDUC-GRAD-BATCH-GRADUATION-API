@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -52,6 +51,7 @@ public class JobLauncherController {
     private static final String DISTRUNUSER = "DISTRUNUSER";
     private static final String CREDENTIALTYPE = "credentialType";
     private static final String DISDTO = "distributionSummaryDTO";
+    private static final String SCHREPORT = "SCHREP";
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
@@ -69,7 +69,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Manual Reg Grad Job", description = "Run Manual Reg Grad Job", tags = { "Reg Grad" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public ResponseEntity<AlgorithmSummaryDTO> launchRegGradJob() {
         logger.debug("launchRegGradJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -95,7 +94,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Manual TVR Job", description = "Run Manual TVR Job", tags = { "TVR" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public ResponseEntity<AlgorithmSummaryDTO> launchTvrRunJob() {
         logger.debug("launchTvrRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -113,7 +111,6 @@ public class JobLauncherController {
             summaryDTO.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(summaryDTO);
         }
-
     }
 
     @PostMapping(EducGradBatchGraduationApiConstants.LOAD_STUDENT_IDS)
@@ -161,7 +158,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized Regular Grad Runs", description = "Run specialized Regular Grad runs", tags = { "Reg Grad" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    @SchedulerLock(name = "SpecialGraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public ResponseEntity<AlgorithmSummaryDTO> launchRegGradSpecialJob(@RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchRegGradSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -217,7 +213,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized TVR runs", tags = { "TVR" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    @SchedulerLock(name = "SpecialTvrRunBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public ResponseEntity<AlgorithmSummaryDTO> launchTvrRunSpecialJob(@RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchTvrRunSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -247,7 +242,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    @SchedulerLock(name = "DistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "30m")
     public ResponseEntity<DistributionSummaryDTO> launchDistributionRunJob() {
         logger.debug("launchDistributionRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -272,7 +266,6 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    @SchedulerLock(name = "YearlyDistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "60m")
     public ResponseEntity<DistributionSummaryDTO> launchYearlyDistributionRunJob() {
         logger.debug("launchYearlyDistributionRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -310,13 +303,13 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    @SchedulerLock(name = "UserReqDistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "30m")
     public ResponseEntity<DistributionSummaryDTO> launchUserReqDisRunSpecialJob(@PathVariable String credentialType,@RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchUserReqDisRunSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
+        builder.addString("LocalDownload",studentSearchRequest.getLocalDownload());
         DistributionSummaryDTO validate = validateInputDisRun(studentSearchRequest);
         if(validate != null) {
             return ResponseEntity.status(400).body(validate);
@@ -341,13 +334,14 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized User Req Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    @SchedulerLock(name = "blankDistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "30m")
-    public ResponseEntity<BlankDistributionSummaryDTO> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest) {
+    public ResponseEntity<BlankDistributionSummaryDTO> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest,@PathVariable String credentialType) {
         logger.debug("launchUserReqDisRunSpecialJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
+        builder.addString(CREDENTIALTYPE,credentialType);
+        builder.addString("LocalDownload",blankCredentialRequest.getLocalDownload());
         BlankDistributionSummaryDTO validate = validateInputBlankDisRun(blankCredentialRequest);
         if(validate != null) {
             return ResponseEntity.status(400).body(validate);
@@ -361,6 +355,30 @@ public class JobLauncherController {
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
             BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
+        }
+
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_SCHOOL_REPORT_RUN_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Nightly School Report Runs", description = "Run Nightly School Report Runs", tags = { "School Report" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<SchoolReportSummaryDTO> launchSchoolReportRunJob() {
+        logger.debug("launchSchoolReportRunJob");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, SCHREPORT);
+        try {
+            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("SchoolReportBatchJob"), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            SchoolReportSummaryDTO summaryDTO = (SchoolReportSummaryDTO)jobContext.get(DISDTO);
+            return ResponseEntity.ok(summaryDTO);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | NoSuchJobException e) {
+            SchoolReportSummaryDTO summaryDTO = new SchoolReportSummaryDTO();
             summaryDTO.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(summaryDTO);
         }

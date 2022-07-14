@@ -1,8 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,6 +35,9 @@ public class GradDashboardServiceTest {
     BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
 
     @MockBean
+    BatchProcessingRepository batchProcessingRepository;
+
+    @MockBean
     private RestUtils restUtils;
 
     @MockBean
@@ -55,6 +60,42 @@ public class GradDashboardServiceTest {
         GradDashboard dash = gradDashboardService.getDashboardInfo();
         assertThat(dash).isNotNull();
         assertThat(dash.getTotalBatchRuns()).isEqualTo(1);
+
+    }
+
+    @Test
+    public void testgetProcessingList() {
+
+        List<BatchProcessingEntity> list = new ArrayList<>();
+        BatchProcessingEntity hist = new BatchProcessingEntity();
+        hist.setEnabled("Y");
+        hist.setJobType("REGALG");
+        hist.setScheduleOccurrence("D");
+        list.add(hist);
+        when(batchProcessingRepository.findAll()).thenReturn(list);
+        List<BatchProcessing> dash = gradDashboardService.getProcessingList();
+        assertThat(dash).isNotNull();
+        assertThat(dash.get(0).getEnabled()).isEqualTo("Y");
+
+    }
+
+    @Test
+    public void testUpdateProcessing() {
+        String jobType = "REGALG";
+        BatchProcessingEntity hist = new BatchProcessingEntity();
+        hist.setEnabled("Y");
+        hist.setJobType("REGALG");
+        hist.setScheduleOccurrence("D");
+
+        BatchProcessingEntity hist2 = new BatchProcessingEntity();
+        hist2.setEnabled("N");
+        hist2.setJobType("REGALG");
+        hist2.setScheduleOccurrence("D");
+        when(batchProcessingRepository.findByJobType(jobType)).thenReturn(Optional.of(hist));
+        when(batchProcessingRepository.save(hist2)).thenReturn(hist2);
+        BatchProcessing dash = gradDashboardService.toggleProcess(jobType);
+        assertThat(dash).isNotNull();
+        assertThat(dash.getEnabled()).isEqualTo("N");
 
     }
 

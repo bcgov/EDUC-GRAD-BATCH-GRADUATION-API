@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.After;
@@ -22,10 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -77,7 +75,7 @@ public class GradRunCompletionNotificationListenerTest {
         summaryDTO.setAccessToken("123");
         summaryDTO.setBatchId(121L);
         summaryDTO.setProcessedCount(10);
-        summaryDTO.setErrors(new ArrayList<>());
+        summaryDTO.setErrors(new HashMap<>());
         jobContext.put("summaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
@@ -102,6 +100,9 @@ public class GradRunCompletionNotificationListenerTest {
         ent.setJobType(jobType);
 
         ex.setExecutionContext(jobContext);
+        ResponseObj obj = new ResponseObj();
+        obj.setAccess_token("asdasd");
+        Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
         gradRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
@@ -121,7 +122,7 @@ public class GradRunCompletionNotificationListenerTest {
         summaryDTO.setAccessToken("123");
         summaryDTO.setBatchId(121L);
         summaryDTO.setProcessedCount(10);
-        summaryDTO.setErrors(new ArrayList<>());
+        summaryDTO.setErrors(new HashMap<>());
         jobContext.put("summaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();

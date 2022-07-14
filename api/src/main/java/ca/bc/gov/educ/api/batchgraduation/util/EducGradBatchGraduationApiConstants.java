@@ -21,15 +21,25 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_TVR_RUN_BATCH_JOB = "/executetvrrunbatchjob";
     public static final String EXECUTE_DIS_RUN_BATCH_JOB = "/executedisrunbatchjob";
     public static final String EXECUTE_YEARLY_DIS_RUN_BATCH_JOB = "/executeyearlydisrunbatchjob";
+    public static final String EXECUTE_SCHOOL_REPORT_RUN_BATCH_JOB = "/executeschoolreportbatchjob";
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
     public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
     public static final String EXECUTE_SPECIALIZED_USER_REQ_RUNS = "/userrequestdisrun/{credentialType}";
-    public static final String EXECUTE_SPECIALIZED_BLANK_USER_REQ_RUNS = "/userrequestblankdisrun";
+    public static final String EXECUTE_SPECIALIZED_BLANK_USER_REQ_RUNS = "/userrequestblankdisrun/{credentialType}";
     
     public static final String BATCH_DASHBOARD = "/dashboard";
     public static final String BATCH_ERRORS = "/dashboard/errors/{batchId}";
     public static final String BATCH_SUMMARY = "/dashboard/summary";
+
+    public static final String SCHEDULE_JOBS = "/schedule/add";
+    public static final String REMOVE_JOB = "/schedule/remove/{jobId}";
+    public static final String LIST_JOBS = "/schedule/listjobs";
+
+    public static final String PROCESSING_LIST = "/processing/all";
+    public static final String UPDATE_ENABLED = "/processing/toggle/{jobType}";
+
+    public static final String UPDATE_PARAM = "/parameters";
 
     // Data Conversion
     public static final String EXECUTE_DATA_CONVERSION_BATCH_JOB = "/executeGradStudentDataConversionJob";
@@ -42,9 +52,9 @@ public class EducGradBatchGraduationApiConstants {
     public static final String TRAX_DATE_FORMAT = "yyyyMM";
     
     public static final String DEFAULT_CREATED_BY = "API_GRAD_BATCH";
-    public static final Date DEFAULT_CREATED_TIMESTAMP = new Date();
+    protected static final Date DEFAULT_CREATED_TIMESTAMP = new Date();
     public static final String DEFAULT_UPDATED_BY = "API_GRAD_BATCH";
-    public static final Date DEFAULT_UPDATED_TIMESTAMP = new Date();
+    protected static final Date DEFAULT_UPDATED_TIMESTAMP = new Date();
 
     @Value("${authorization.user}")
     private String userName;
@@ -101,6 +111,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-distribution-api.merge-n-upload.url}")
     private String mergeAndUpload;
 
+    @Value("${endpoint.grad-distribution-api.merge-n-upload-yearly.url}")
+    private String mergeAndUploadYearly;
+
     @Value("${endpoint.grad-distribution-api.reprint-n-upload.url}")
     private String reprintAndUpload;
 
@@ -121,5 +134,20 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-api.schoolreport.url}")
     private String createAndStore;
+
+    @Value("${endpoint.grad-distribution-api.read-n-post.url}")
+    private String readAndPost;
+
+    @Value("${endpoint.grad-student-api.read-grad-student-record}")
+    private String readGradStudentRecord;
+
+    @Value("${endpoint.grad-student-api.read-grad-student-record-batch}")
+    private String readGradStudentRecordBatch;
+
+    @Value("${endpoint.grad-graduation-report-api.get-school-report-list.url}")
+    private String schoolReportPostingList;
+
+    @Value("${endpoint.grad-graduation-report-api.update-school-report.url}")
+    private String updateSchoolReport;
 
 }

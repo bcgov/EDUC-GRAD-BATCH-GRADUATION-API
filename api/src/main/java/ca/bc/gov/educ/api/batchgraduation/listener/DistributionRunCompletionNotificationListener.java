@@ -6,7 +6,6 @@ import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -16,7 +15,6 @@ import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,15 +32,13 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
     
     @Autowired
     private RestUtils restUtils;
-
-	private ParallelDataFetch parallelDataFetch;
     
     @Override
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
+	    	LOGGER.info("Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 	    	JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
@@ -77,7 +73,7 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
-			LOGGER.info(" Errors:		   {}", summaryDTO.getErrors().size());
+			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
 			summaryDTO.getErrors().forEach(e -> {
 				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail());
@@ -90,65 +86,6 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			if(!eList.isEmpty())
 				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
 
-			LOGGER.info(" --------------------------------------------------------------------------------------");
-			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
-			summaryDTO.getCredentialCountMap().entrySet().stream().forEach(e -> {
-				String key = e.getKey();
-				LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key));
-			});
-			LOGGER.info("=======================================================================================");
-		}else if (jobExecution.getStatus() == BatchStatus.FAILED) {
-			long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
-			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("Distribution Job failed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
-
-			ExecutionContext jobContext = jobExecution.getExecutionContext();
-			Long jobExecutionId = jobExecution.getId();
-			String status = jobExecution.getStatus().toString();
-			Date startTime = jobExecution.getStartTime();
-			Date endTime = jobExecution.getEndTime();
-			
-			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
-			if(summaryDTO == null) {
-				summaryDTO = new DistributionSummaryDTO();
-			}
-			int failedRecords = 0;			
-			Mono<DistributionDataParallelDTO> list = parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken());
-			DistributionDataParallelDTO parallelDTO = list.block();
-			if(parallelDTO != null ) {
-				failedRecords = parallelDTO.certificateList().size()+parallelDTO.transcriptList().size();
-			}	
-			
-			Long processedStudents = summaryDTO.getProcessedCount();
-			Long expectedStudents = summaryDTO.getReadCount();			
-			
-			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
-			ent.setActualStudentsProcessed(processedStudents);
-			ent.setExpectedStudentsProcessed(expectedStudents);
-			ent.setFailedStudentsProcessed(failedRecords);
-			ent.setJobExecutionId(jobExecutionId);
-			ent.setStartTime(startTime);
-			ent.setEndTime(endTime);
-			ent.setStatus(status);
-			
-			batchGradAlgorithmJobHistoryRepository.save(ent);
-			
-			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
-			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
-			LOGGER.info(" --------------------------------------------------------------------------------------");
-			LOGGER.info(" Errors		 : {}", summaryDTO.getErrors().size());
-			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
-			summaryDTO.getErrors().forEach(e -> {
-				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail());
-				BatchGradAlgorithmErrorHistoryEntity errorHistory = new BatchGradAlgorithmErrorHistoryEntity();
-				errorHistory.setStudentID(UUID.fromString(e.getStudentID()));
-				errorHistory.setJobExecutionId(jobExecutionId);
-				errorHistory.setError(e.getReason() + "-" + e.getDetail());
-				eList.add(errorHistory);
-			});
-
-			if(!eList.isEmpty())
-				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().entrySet().stream().forEach(e -> {
@@ -174,7 +111,7 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR");
 			certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB");
 		});
-		DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode);
+		DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,null);
 		if(disres != null) {
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());

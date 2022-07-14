@@ -16,7 +16,6 @@ import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,6 +48,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
+			String localDownLoad = jobParameters.getString("LocalDownload");
 			String credentialType = jobParameters.getString("credentialType");
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
@@ -58,7 +58,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),credentialType,obj.getAccess_token());
+			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),credentialType,obj.getAccess_token(),localDownLoad);
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -69,6 +69,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			ent.setStatus(status);
 			ent.setTriggerBy(jobTrigger);
 			ent.setJobType(jobType);
+			ent.setLocalDownload(localDownLoad);
 
 			batchGradAlgorithmJobHistoryRepository.save(ent);
 			
@@ -88,62 +89,6 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			if(!eList.isEmpty())
 				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
 
-			LOGGER.info(LOG_SEPARATION_SINGLE);
-			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
-			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
-			LOGGER.info(LOG_SEPARATION);
-		}else if (jobExecution.getStatus() == BatchStatus.FAILED) {
-			long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
-			LOGGER.info(LOG_SEPARATION);
-	    	LOGGER.info("Distribution Job failed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
-
-			ExecutionContext jobContext = jobExecution.getExecutionContext();
-			Long jobExecutionId = jobExecution.getId();
-			String status = jobExecution.getStatus().toString();
-			Date startTime = jobExecution.getStartTime();
-			Date endTime = jobExecution.getEndTime();
-			
-			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
-			if(summaryDTO == null) {
-				summaryDTO = new DistributionSummaryDTO();
-			}
-			int failedRecords = 0;			
-			Mono<DistributionDataParallelDTO> list = parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken());
-			DistributionDataParallelDTO parallelDTO = list.block();
-			if(parallelDTO != null ) {
-				failedRecords = parallelDTO.certificateList().size()+parallelDTO.transcriptList().size();
-			}	
-			
-			Long processedStudents = summaryDTO.getProcessedCount();
-			Long expectedStudents = summaryDTO.getReadCount();			
-			
-			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
-			ent.setActualStudentsProcessed(processedStudents);
-			ent.setExpectedStudentsProcessed(expectedStudents);
-			ent.setFailedStudentsProcessed(failedRecords);
-			ent.setJobExecutionId(jobExecutionId);
-			ent.setStartTime(startTime);
-			ent.setEndTime(endTime);
-			ent.setStatus(status);
-			
-			batchGradAlgorithmJobHistoryRepository.save(ent);
-			
-			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
-			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
-			LOGGER.info(LOG_SEPARATION_SINGLE);
-			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
-			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
-			summaryDTO.getErrors().forEach(e -> {
-				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail());
-				BatchGradAlgorithmErrorHistoryEntity errorHistory = new BatchGradAlgorithmErrorHistoryEntity();
-				errorHistory.setStudentID(UUID.fromString(e.getStudentID()));
-				errorHistory.setJobExecutionId(jobExecutionId);
-				errorHistory.setError(e.getReason() + "-" + e.getDetail());
-				eList.add(errorHistory);
-			});
-
-			if(!eList.isEmpty())
-				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
@@ -151,7 +96,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 		}
     }
 
-	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String credentialType, String accessToken) {
+	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String credentialType, String accessToken,String localDownload) {
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = new ArrayList<>();
@@ -183,14 +128,14 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
 			}
 			if (credentialType.equalsIgnoreCase("RC")) {
-				disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist,activityCode);
+				disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist,activityCode,localDownload);
 			} else {
-				disres = restUtils.mergeAndUpload(batchId, accessToken, mapDist,activityCode);
+				disres = restUtils.mergeAndUpload(batchId, accessToken, mapDist,activityCode,localDownload);
 			}
 		}
 		if(disres != null) {
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			updateBackStudentRecords(cList,batchId,activityCode,accessToken);
+			updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());
 		}
 	}
 

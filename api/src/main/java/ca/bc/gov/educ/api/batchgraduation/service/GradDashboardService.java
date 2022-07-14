@@ -5,10 +5,13 @@ import java.util.stream.Collectors;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchJobExecutionEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchJobExecutionRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.transformer.BatchProcessingTransformer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,13 +28,17 @@ public class GradDashboardService extends GradService {
 	private final BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
 	private final BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer;
 	private final BatchJobExecutionRepository batchJobExecutionRepository;
+	private final BatchProcessingTransformer batchProcessingTransformer;
+	private final BatchProcessingRepository batchProcessingRepository;
 	private final RestUtils restUtils;
 
-    public GradDashboardService(BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository,BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer,BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository,RestUtils restUtils,BatchJobExecutionRepository batchJobExecutionRepository) {
+    public GradDashboardService(BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository,BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer,BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository,RestUtils restUtils,BatchJobExecutionRepository batchJobExecutionRepository,BatchProcessingRepository batchProcessingRepository,BatchProcessingTransformer batchProcessingTransformer) {
     	this.batchGradAlgorithmJobHistoryRepository = batchGradAlgorithmJobHistoryRepository;
     	this.batchGradAlgorithmJobHistoryTransformer = batchGradAlgorithmJobHistoryTransformer;
+		this.batchProcessingTransformer = batchProcessingTransformer;
 		this.batchGradAlgorithmErrorHistoryRepository = batchGradAlgorithmErrorHistoryRepository;
 		this.batchJobExecutionRepository = batchJobExecutionRepository;
+		this.batchProcessingRepository = batchProcessingRepository;
 		this.restUtils = restUtils;
 	}
 
@@ -40,7 +47,7 @@ public class GradDashboardService extends GradService {
     	start();
     	GradDashboard gradDash = new GradDashboard();
     	List<BatchGradAlgorithmJobHistory> infoDetailsList= batchGradAlgorithmJobHistoryTransformer.transformToDTO(batchGradAlgorithmJobHistoryRepository.findAll());
-    	Collections.sort(infoDetailsList, Comparator.comparing(BatchGradAlgorithmJobHistory::getStartTime).reversed());  
+    	infoDetailsList.sort(Comparator.comparing(BatchGradAlgorithmJobHistory::getStartTime).reversed());
     	if(!infoDetailsList.isEmpty()) {
     		BatchGradAlgorithmJobHistory info = infoDetailsList.get(0);
     		gradDash.setLastActualStudentsProcessed(info.getActualStudentsProcessed());
@@ -104,4 +111,21 @@ public class GradDashboardService extends GradService {
 		edb.setNumberOfElements(pagedData.getNumberOfElements());
 		return edb;
     }
+
+    public List<BatchProcessing> getProcessingList() {
+		return batchProcessingTransformer.transformToDTO(batchProcessingRepository.findAll());
+    }
+
+
+	public BatchProcessing toggleProcess(String jobType) {
+		Optional<BatchProcessingEntity> opt = batchProcessingRepository.findByJobType(jobType);
+		if(opt.isPresent()) {
+			BatchProcessingEntity ent = opt.get();
+			ent.setUpdateUser(null);
+			ent.setUpdateDate(null);
+			ent.setEnabled(ent.getEnabled().equalsIgnoreCase("Y")?"N":"Y");
+			return batchProcessingTransformer.transformToDTO(batchProcessingRepository.save(ent));
+		}
+		return null;
+	}
 }

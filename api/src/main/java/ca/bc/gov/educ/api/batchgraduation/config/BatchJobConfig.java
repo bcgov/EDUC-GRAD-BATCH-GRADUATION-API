@@ -3,14 +3,12 @@ package ca.bc.gov.educ.api.batchgraduation.config;
 import ca.bc.gov.educ.api.batchgraduation.listener.*;
 import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.SchoolReportDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.processor.*;
 import ca.bc.gov.educ.api.batchgraduation.reader.*;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.writer.BlankDistributionRunWriter;
-import ca.bc.gov.educ.api.batchgraduation.writer.DistributionRunWriter;
-import ca.bc.gov.educ.api.batchgraduation.writer.RegGradAlgBatchPerformanceWriter;
-import ca.bc.gov.educ.api.batchgraduation.writer.TvrRunBatchPerformanceWriter;
+import ca.bc.gov.educ.api.batchgraduation.writer.*;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -33,10 +31,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableBatchProcessing
 public class BatchJobConfig {
 
-	@Autowired
-	JobRegistry jobRegistry;
-
     // Partitioning for Regular Grad Run updates
+
+    @Autowired
+    JobRegistry jobRegistry;
 
     @Bean
     @StepScope
@@ -49,6 +47,19 @@ public class BatchJobConfig {
     public ItemReader<GraduationStudentRecord> itemReaderRegGrad() {
         return new RecalculateStudentReader();
     }
+
+    @Bean
+    @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderRegErrorGrad() {
+        return new RecalculateStudentErrorReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderRegErrorRetryGrad() {
+        return new RecalculateStudentErrorRetryReader();
+    }
+
 
     @Bean
     @StepScope
@@ -67,8 +78,49 @@ public class BatchJobConfig {
     }
 
     @Bean
+    public Step masterStepErrorRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepErrorRegGrad")
+                .partitioner(graduationJobErrorStep(stepBuilderFactory).getName(), partitionerRegGrad())
+                .step(graduationJobErrorStep(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
+    public Step masterStepErrorRegGradRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepErrorRegGradRetry")
+                .partitioner(graduationJobErrorRetryStep(stepBuilderFactory).getName(), partitionerRegGrad())
+                .step(graduationJobErrorRetryStep(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+
+    @Bean
     public RegGradAlgPartitioner partitionerRegGrad() {
         return new RegGradAlgPartitioner();
+    }
+
+    @Bean
+    public Step graduationJobErrorStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("graduationJobErrorStep")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderRegErrorGrad())
+                .processor(itemProcessorRegGrad())
+                .writer(itemWriterRegGrad())
+                .build();
+    }
+
+    @Bean
+    public Step graduationJobErrorRetryStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("graduationJobErrorRetryStep")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderRegErrorRetryGrad())
+                .processor(itemProcessorRegGrad())
+                .writer(itemWriterRegGrad())
+                .build();
     }
 
     @Bean
@@ -89,8 +141,9 @@ public class BatchJobConfig {
         return jobBuilderFactory.get("GraduationBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepRegGrad(stepBuilderFactory,constants))
-                .end()
+                .start(masterStepRegGrad(stepBuilderFactory,constants))
+                .next(masterStepErrorRegGrad(stepBuilderFactory,constants))
+                .next(masterStepErrorRegGradRetry(stepBuilderFactory,constants))
                 .build();
     }
 
@@ -111,6 +164,18 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderTvrErrorRun() {
+        return new RecalculateProjectedGradRunErrorReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<GraduationStudentRecord> itemReaderTvrErrorRetryRun() {
+        return new RecalculateProjectedGradRunErrorRetryReader();
+    }
+
+    @Bean
+    @StepScope
     public ItemWriter<GraduationStudentRecord> itemWriterTvrRun() {
         return new TvrRunBatchPerformanceWriter();
     }
@@ -120,6 +185,26 @@ public class BatchJobConfig {
         return stepBuilderFactory.get("masterStepTvrRun")
                 .partitioner(tvrJobStep(stepBuilderFactory).getName(), partitionerTvrRun())
                 .step(tvrJobStep(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
+    public Step masterStepErrorTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepErrorTvrRun")
+                .partitioner(tvrJobErrorStep(stepBuilderFactory).getName(), partitionerTvrRun())
+                .step(tvrJobErrorStep(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
+    public Step masterStepErrorTvrRunRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepErrorTvrRunRetry")
+                .partitioner(tvrJobErrorRetryStep(stepBuilderFactory).getName(), partitionerTvrRun())
+                .step(tvrJobErrorRetryStep(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
                 .build();
@@ -141,6 +226,26 @@ public class BatchJobConfig {
                 .build();
     }
 
+    @Bean
+    public Step tvrJobErrorStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("tvrJobErrorStep")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderTvrErrorRun())
+                .processor(itemProcessorTvrRun())
+                .writer(itemWriterTvrRun())
+                .build();
+    }
+
+    @Bean
+    public Step tvrJobErrorRetryStep(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("tvrJobErrorRetryStep")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderTvrErrorRetryRun())
+                .processor(itemProcessorTvrRun())
+                .writer(itemWriterTvrRun())
+                .build();
+    }
+
     /**
      * Creates a bean that represents our batch job.
      */
@@ -149,8 +254,9 @@ public class BatchJobConfig {
         return jobBuilderFactory.get("tvrBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepTvrRun(stepBuilderFactory,constants))
-                .end()
+                .start(masterStepTvrRun(stepBuilderFactory,constants))
+                .next(masterStepErrorTvrRun(stepBuilderFactory,constants))
+                .next(masterStepErrorTvrRunRetry(stepBuilderFactory,constants))
                 .build();
     }
 
@@ -455,6 +561,69 @@ public class BatchJobConfig {
                 .end()
                 .build();
     }
+
+    //
+    @Bean
+    @StepScope
+    public ItemProcessor<SchoolReportDistribution,SchoolReportDistribution> itemProcessorSchoolReportRun() {
+        return new SchoolReportRunProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<SchoolReportDistribution> itemReaderSchoolReportRun() {
+        return new SchoolReportRunReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<SchoolReportDistribution> itemWriterSchoolReportRun() {
+        return new SchoolReportRunWriter();
+    }
+
+
+    // Partitioning for Regular Grad Run updates
+    @Bean
+    public Step masterStepSchoolReportRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepSchoolReportRun")
+                .partitioner(slaveStepSchoolReportRun(stepBuilderFactory).getName(), partitionerSchoolReportRun())
+                .step(slaveStepSchoolReportRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public SchoolReportRunPartitioner partitionerSchoolReportRun() {
+        return new SchoolReportRunPartitioner();
+    }
+
+
+    @Bean
+    public Step slaveStepSchoolReportRun(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepSchoolReportRun")
+                .<SchoolReportDistribution, SchoolReportDistribution>chunk(1)
+                .reader(itemReaderSchoolReportRun())
+                .processor(itemProcessorSchoolReportRun())
+                .writer(itemWriterSchoolReportRun())
+                .build();
+    }
+
+    /**
+     * Creates a bean that represents our batch job.
+     */
+    @Bean(name="SchoolReportBatchJob")
+    public Job schoolReportBatchJob(SchoolReportRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("SchoolReportBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepSchoolReportRun(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    //
 
     //
     @Bean

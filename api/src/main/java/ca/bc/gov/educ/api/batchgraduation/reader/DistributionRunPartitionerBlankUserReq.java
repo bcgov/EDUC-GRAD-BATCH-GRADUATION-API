@@ -29,6 +29,7 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
     public Map<String, ExecutionContext> partition(int gridSize) {
         JobParameters jobParameters = context.getJobParameters();
         String searchRequest = jobParameters.getString("searchRequest");
+        String credentialType = jobParameters.getString("credentialType");
         BlankCredentialRequest req = null;
         try {
             req = new ObjectMapper().readValue(searchRequest, BlankCredentialRequest.class);
@@ -49,6 +50,7 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
                 List<BlankCredentialDistribution> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());
+                summaryDTO.setCredentialType(credentialType);
                 executionContext.put("summary", summaryDTO);
                 executionContext.put("index",0);
                 String key = "partition" + i;
