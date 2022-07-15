@@ -116,6 +116,10 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/updateschoolreports?mincode=%s&reportTypeCode=%s
     get-school-report-list:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreportdistributionrun
+    update-student-credential-posting:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcredential/posting?studentID=%s&credentialTypeCode=%s
+    get-student-report-list:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/gettranscriptsandreportsforposting
   grad-distribution-api:
     merge-n-upload:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/MER?batchId=%s&activityCode=%s&localDownload=%s
@@ -127,3 +131,5 @@ endpoint:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/BCPR?batchId=%s&activityCode=%s&localDownload=%s
     read-n-post:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/PSR?batchId=%s&localDownload=%s
+    read-n-post-student-reports:
+      url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/PSTR?batchId=%s

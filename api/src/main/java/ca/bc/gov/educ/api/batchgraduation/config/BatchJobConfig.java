@@ -1,10 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
 import ca.bc.gov.educ.api.batchgraduation.listener.*;
-import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
-import ca.bc.gov.educ.api.batchgraduation.model.SchoolReportDistribution;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.processor.*;
 import ca.bc.gov.educ.api.batchgraduation.reader.*;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
@@ -35,6 +32,12 @@ public class BatchJobConfig {
 
     @Autowired
     JobRegistry jobRegistry;
+
+    /**
+     * Regular Grad Algorithm Run
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
 
     @Bean
     @StepScope
@@ -133,9 +136,6 @@ public class BatchJobConfig {
                 .build();
     }
 
-    /**
-     * Creates a bean that represents our batch job.
-     */
     @Bean(name="GraduationBatchJob")
     public Job graduationBatchJob(GradRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory,JobBuilderFactory jobBuilderFactory,EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("GraduationBatchJob")
@@ -148,7 +148,11 @@ public class BatchJobConfig {
     }
 
 
-    // Partitioning for Regular TVR Run updates
+    /**
+     * TVR Projected Grad Run
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
 
     @Bean
     @StepScope
@@ -246,9 +250,6 @@ public class BatchJobConfig {
                 .build();
     }
 
-    /**
-     * Creates a bean that represents our batch job.
-     */
     @Bean(name="tvrBatchJob")
     public Job tvrBatchJob(TvrRunJobCompletionNotificationListener listener,StepBuilderFactory stepBuilderFactory,JobBuilderFactory jobBuilderFactory,EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("tvrBatchJob")
@@ -260,7 +261,12 @@ public class BatchJobConfig {
                 .build();
     }
 
-    //
+    /**
+     * Special Regular Grad Algorithm Run
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
+
     @Bean
     @StepScope
     public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorSpcRegGrad() {
@@ -278,6 +284,50 @@ public class BatchJobConfig {
     public ItemWriter<GraduationStudentRecord> itemWriterSpcRegGrad() {
         return new TvrRunBatchPerformanceWriter();
     }
+
+
+
+    @Bean
+    public Step masterStepSpcRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepSpcRegGrad")
+                .partitioner(slaveStepSpcRegGrad(stepBuilderFactory).getName(), partitionerSpcRegGrad())
+                .step(slaveStepSpcRegGrad(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public SpcRegGradAlgPartitioner partitionerSpcRegGrad() {
+        return new SpcRegGradAlgPartitioner();
+    }
+
+    @Bean
+    public Step slaveStepSpcRegGrad(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepSpcRegGrad")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderSpcRegGrad())
+                .processor(itemProcessorSpcRegGrad())
+                .writer(itemWriterSpcRegGrad())
+                .build();
+    }
+
+    @Bean(name="SpecialGraduationBatchJob")
+    public Job specialGraduationBatchJob(SpecialRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("SpecialGraduationBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepSpcRegGrad(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    /**
+     * Special TVR Projected Grad Run
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
 
     @Bean
     @StepScope
@@ -297,14 +347,13 @@ public class BatchJobConfig {
         return new RegGradAlgBatchPerformanceWriter();
     }
 
-    // Partitioning for Regular Grad Run updates
     @Bean
-    public Step masterStepSpcRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return stepBuilderFactory.get("masterStepSpcRegGrad")
-                .partitioner(slaveStepSpcRegGrad(stepBuilderFactory).getName(), partitionerSpcRegGrad())
-                .step(slaveStepSpcRegGrad(stepBuilderFactory))
-                .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+    public Step slaveStepSpcTvrRun(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepSpcTvrRun")
+                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .reader(itemReaderSpcTvrRun())
+                .processor(itemProcessorSpcTvrRun())
+                .writer(itemWriterSpcTvrRun())
                 .build();
     }
 
@@ -318,49 +367,6 @@ public class BatchJobConfig {
                 .build();
     }
 
-    @Bean
-    @StepScope
-    public SpcRegGradAlgPartitioner partitionerSpcRegGrad() {
-        return new SpcRegGradAlgPartitioner();
-    }
-
-
-    @Bean
-    public Step slaveStepSpcRegGrad(StepBuilderFactory stepBuilderFactory) {
-        return stepBuilderFactory.get("slaveStepSpcRegGrad")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
-                .reader(itemReaderSpcRegGrad())
-                .processor(itemProcessorSpcRegGrad())
-                .writer(itemWriterSpcRegGrad())
-                .build();
-    }
-
-    @Bean
-    public Step slaveStepSpcTvrRun(StepBuilderFactory stepBuilderFactory) {
-        return stepBuilderFactory.get("slaveStepSpcTvrRun")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
-                .reader(itemReaderSpcTvrRun())
-                .processor(itemProcessorSpcTvrRun())
-                .writer(itemWriterSpcTvrRun())
-                .build();
-    }
-
-    /**
-     * Creates a bean that represents our batch job.
-     */
-    @Bean(name="SpecialGraduationBatchJob")
-    public Job specialGraduationBatchJob(SpecialRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return jobBuilderFactory.get("SpecialGraduationBatchJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .flow(masterStepSpcRegGrad(stepBuilderFactory,constants))
-                .end()
-                .build();
-    }
-
-    /**
-     * Creates a bean that represents our batch job.
-     */
     @Bean(name="SpecialTvrRunBatchJob")
     public Job specialTvrRunBatchJob(SpecialRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("SpecialTvrRunBatchJob")
@@ -371,9 +377,12 @@ public class BatchJobConfig {
                 .build();
     }
 
-    //
+    /**
+     * Monthly Distribution Run
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
 
-    //
     @Bean
     @StepScope
     public ItemProcessor<StudentCredentialDistribution,StudentCredentialDistribution> itemProcessorDisRun() {
@@ -390,35 +399,6 @@ public class BatchJobConfig {
     @StepScope
     public ItemWriter<StudentCredentialDistribution> itemWriterDisRun() {
         return new DistributionRunWriter();
-    }
-
-    //
-    @Bean
-    @StepScope
-    public ItemProcessor<BlankCredentialDistribution,BlankCredentialDistribution> itemProcessorBlankDisRun() {
-        return new BlankDistributionRunProcessor();
-    }
-
-    @Bean
-    @StepScope
-    public ItemReader<BlankCredentialDistribution> itemReaderBlankDisRun() {
-        return new BlankDistributionRunReader();
-    }
-
-    @Bean
-    @StepScope
-    public ItemWriter<BlankCredentialDistribution> itemWriterBlankDisRun() {
-        return new BlankDistributionRunWriter();
-    }
-    // Partitioning for Regular Grad Run updates
-    @Bean
-    public Step masterStepDisRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return stepBuilderFactory.get("masterStepDisRun")
-                .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRun())
-                .step(slaveStepDisRun(stepBuilderFactory))
-                .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
-                .build();
     }
 
     @Bean
@@ -439,18 +419,15 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step slaveStepBlankDisRun(StepBuilderFactory stepBuilderFactory) {
-        return stepBuilderFactory.get("slaveStepBlankDisRun")
-                .<BlankCredentialDistribution, BlankCredentialDistribution>chunk(1)
-                .reader(itemReaderBlankDisRun())
-                .processor(itemProcessorBlankDisRun())
-                .writer(itemWriterBlankDisRun())
+    public Step masterStepDisRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepDisRun")
+                .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRun())
+                .step(slaveStepDisRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
                 .build();
     }
 
-    /**
-     * Creates a bean that represents our batch job.
-     */
     @Bean(name="DistributionBatchJob")
     public Job distributionBatchJob(DistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("DistributionBatchJob")
@@ -461,9 +438,18 @@ public class BatchJobConfig {
                 .build();
     }
 
-    //
+    /**
+     * Yearly Distribution Run
+     * ItemProcessor,ItemReader and ItemWriter common with monthly distribution run
+     * Partitioner separate
+     */
 
-    // Partitioning for Regular Grad Run updates
+    @Bean
+    @StepScope
+    public DistributionRunPartitionerYearly partitionerDisRunYearly() {
+        return new DistributionRunPartitionerYearly();
+    }
+
     @Bean
     public Step masterStepDisRunYearly(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepDisRunYearly")
@@ -474,6 +460,28 @@ public class BatchJobConfig {
                 .build();
     }
 
+    @Bean(name="YearlyDistributionBatchJob")
+    public Job distributionBatchJobYearly(DistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("YearlyDistributionBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepDisRunYearly(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    /**
+     * User Distribution Run
+     * ItemProcessor,ItemReader and ItemWriter common with monthly distribution run
+     * Partitioner separate
+     */
+
+    @Bean
+    @StepScope
+    public DistributionRunPartitionerUserReq partitionerDisRunUserReq() {
+        return new DistributionRunPartitionerUserReq();
+    }
+
     @Bean
     public Step masterStepUserReqDisRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepUserReqDisRun")
@@ -481,6 +489,57 @@ public class BatchJobConfig {
                 .step(slaveStepDisRun(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean(name="UserReqDistributionBatchJob")
+    public Job distributionBatchJobUserReq(UserReqDistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("UserReqDistributionBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepUserReqDisRun(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    /**
+     * User Blank Credential Distribution Run
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
+
+    @Bean
+    @StepScope
+    public ItemProcessor<BlankCredentialDistribution,BlankCredentialDistribution> itemProcessorBlankDisRun() {
+        return new BlankDistributionRunProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<BlankCredentialDistribution> itemReaderBlankDisRun() {
+        return new BlankDistributionRunReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<BlankCredentialDistribution> itemWriterBlankDisRun() {
+        return new BlankDistributionRunWriter();
+    }
+
+
+    @Bean
+    @StepScope
+    public DistributionRunPartitionerBlankUserReq partitionerDisRunBlankUserReq() {
+        return new DistributionRunPartitionerBlankUserReq();
+    }
+
+    @Bean
+    public Step slaveStepBlankDisRun(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepBlankDisRun")
+                .<BlankCredentialDistribution, BlankCredentialDistribution>chunk(1)
+                .reader(itemReaderBlankDisRun())
+                .processor(itemProcessorBlankDisRun())
+                .writer(itemWriterBlankDisRun())
                 .build();
     }
 
@@ -494,64 +553,7 @@ public class BatchJobConfig {
                 .build();
     }
 
-    @Bean
-    @StepScope
-    public DistributionRunPartitionerYearly partitionerDisRunYearly() {
-        return new DistributionRunPartitionerYearly();
-    }
 
-
-    @Bean
-    @StepScope
-    public DistributionRunPartitionerUserReq partitionerDisRunUserReq() {
-        return new DistributionRunPartitionerUserReq();
-    }
-
-    @Bean
-    @StepScope
-    public DistributionRunPartitionerBlankUserReq partitionerDisRunBlankUserReq() {
-        return new DistributionRunPartitionerBlankUserReq();
-    }
-
-    @Bean
-    public Step slaveStepDisRunYearly(StepBuilderFactory stepBuilderFactory) {
-        return stepBuilderFactory.get("slaveStepDisRun")
-                .<StudentCredentialDistribution, StudentCredentialDistribution>chunk(1)
-                .reader(itemReaderDisRun())
-                .processor(itemProcessorDisRun())
-                .writer(itemWriterDisRun())
-                .build();
-    }
-
-    /**
-     * Creates a bean that represents our batch job.
-     */
-    @Bean(name="YearlyDistributionBatchJob")
-    public Job distributionBatchJobYearly(DistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return jobBuilderFactory.get("YearlyDistributionBatchJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .flow(masterStepDisRunYearly(stepBuilderFactory,constants))
-                .end()
-                .build();
-    }
-
-    /**
-     * Creates a bean that represents our batch job.
-     */
-    @Bean(name="UserReqDistributionBatchJob")
-    public Job distributionBatchJobUserReq(UserReqDistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return jobBuilderFactory.get("UserReqDistributionBatchJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .flow(masterStepUserReqDisRun(stepBuilderFactory,constants))
-                .end()
-                .build();
-    }
-
-    /**
-     * Creates a bean that represents our batch job.
-     */
     @Bean(name="blankDistributionBatchJob")
     public Job blankDistributionBatchJobUserReq(UserReqBlankDistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("blankDistributionBatchJob")
@@ -562,7 +564,12 @@ public class BatchJobConfig {
                 .build();
     }
 
-    //
+    /**
+     * School Report Posting to TSW Run
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
+
     @Bean
     @StepScope
     public ItemProcessor<SchoolReportDistribution,SchoolReportDistribution> itemProcessorSchoolReportRun() {
@@ -581,24 +588,11 @@ public class BatchJobConfig {
         return new SchoolReportRunWriter();
     }
 
-
-    // Partitioning for Regular Grad Run updates
-    @Bean
-    public Step masterStepSchoolReportRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return stepBuilderFactory.get("masterStepSchoolReportRun")
-                .partitioner(slaveStepSchoolReportRun(stepBuilderFactory).getName(), partitionerSchoolReportRun())
-                .step(slaveStepSchoolReportRun(stepBuilderFactory))
-                .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
-                .build();
-    }
-
     @Bean
     @StepScope
     public SchoolReportRunPartitioner partitionerSchoolReportRun() {
         return new SchoolReportRunPartitioner();
     }
-
 
     @Bean
     public Step slaveStepSchoolReportRun(StepBuilderFactory stepBuilderFactory) {
@@ -610,9 +604,16 @@ public class BatchJobConfig {
                 .build();
     }
 
-    /**
-     * Creates a bean that represents our batch job.
-     */
+    @Bean
+    public Step masterStepSchoolReportRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepSchoolReportRun")
+                .partitioner(slaveStepSchoolReportRun(stepBuilderFactory).getName(), partitionerSchoolReportRun())
+                .step(slaveStepSchoolReportRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
     @Bean(name="SchoolReportBatchJob")
     public Job schoolReportBatchJob(SchoolReportRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("SchoolReportBatchJob")
@@ -623,9 +624,67 @@ public class BatchJobConfig {
                 .build();
     }
 
-    //
 
-    //
+    /**
+     * Student Transcript and TVR Report Posting to TSW Run
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
+
+    @Bean
+    @StepScope
+    public ItemProcessor<SchoolStudentCredentialDistribution,SchoolStudentCredentialDistribution> itemProcessorStudentReportRun() {
+        return new StudentReportRunProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<SchoolStudentCredentialDistribution> itemReaderStudentReportRun() {
+        return new StudentReportRunReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<SchoolStudentCredentialDistribution> itemWriterStudentReportRun() {
+        return new StudentReportRunWriter();
+    }
+
+    @Bean
+    @StepScope
+    public StudentReportRunPartitioner partitionerStudentReportRun() {
+        return new StudentReportRunPartitioner();
+    }
+
+    @Bean
+    public Step slaveStepStudentReportRun(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepStudentReportRun")
+                .<SchoolStudentCredentialDistribution, SchoolStudentCredentialDistribution>chunk(1)
+                .reader(itemReaderStudentReportRun())
+                .processor(itemProcessorStudentReportRun())
+                .writer(itemWriterStudentReportRun())
+                .build();
+    }
+
+    @Bean
+    public Step masterStepStudentReportRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepSchoolReportRun")
+                .partitioner(slaveStepStudentReportRun(stepBuilderFactory).getName(), partitionerStudentReportRun())
+                .step(slaveStepStudentReportRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+    @Bean(name="StudentReportBatchJob")
+    public Job studentReportBatchJob(StudentReportRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("StudentReportBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepStudentReportRun(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
     @Bean
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {
         JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();

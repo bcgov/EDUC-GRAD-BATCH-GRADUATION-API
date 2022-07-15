@@ -22,6 +22,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_DIS_RUN_BATCH_JOB = "/executedisrunbatchjob";
     public static final String EXECUTE_YEARLY_DIS_RUN_BATCH_JOB = "/executeyearlydisrunbatchjob";
     public static final String EXECUTE_SCHOOL_REPORT_RUN_BATCH_JOB = "/executeschoolreportbatchjob";
+    public static final String EXECUTE_STUDENT_REPORT_RUN_BATCH_JOB = "/executestudentreportbatchjob";
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
     public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
@@ -123,6 +124,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-report-api.update-student-credential.url}")
     private String updateStudentCredential;
 
+    @Value("${endpoint.grad-graduation-report-api.update-student-credential-posting.url}")
+    private String updateStudentCredentialPosting;
+
     @Value("${endpoint.grad-graduation-report-api.get-certificate-types.url}")
     private String certificateTypes;
 
@@ -138,6 +142,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-distribution-api.read-n-post.url}")
     private String readAndPost;
 
+    @Value("${endpoint.grad-distribution-api.read-n-post-student-reports.url}")
+    private String readAndPostStudentReports;
+
     @Value("${endpoint.grad-student-api.read-grad-student-record}")
     private String readGradStudentRecord;
 
@@ -149,5 +156,8 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-report-api.update-school-report.url}")
     private String updateSchoolReport;
+
+    @Value("${endpoint.grad-graduation-report-api.get-student-report-list.url}")
+    private String studentReportPostingList;
 
 }

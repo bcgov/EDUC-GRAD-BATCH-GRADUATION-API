@@ -52,6 +52,7 @@ public class JobLauncherController {
     private static final String CREDENTIALTYPE = "credentialType";
     private static final String DISDTO = "distributionSummaryDTO";
     private static final String SCHREPORT = "SCHREP";
+    private static final String STUDREPORT = "STUDREP";
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
@@ -374,7 +375,31 @@ public class JobLauncherController {
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("SchoolReportBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
-            SchoolReportSummaryDTO summaryDTO = (SchoolReportSummaryDTO)jobContext.get(DISDTO);
+            SchoolReportSummaryDTO summaryDTO = (SchoolReportSummaryDTO)jobContext.get("schoolReportSummaryDTO");
+            return ResponseEntity.ok(summaryDTO);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | NoSuchJobException e) {
+            SchoolReportSummaryDTO summaryDTO = new SchoolReportSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
+        }
+
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_STUDENT_REPORT_RUN_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Nightly Student Report Runs", description = "Run Nightly Student Report Runs", tags = { "Student Report" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<SchoolReportSummaryDTO> launchStudentReportRunJob() {
+        logger.debug("launchSchoolReportRunJob");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, STUDREPORT);
+        try {
+            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("StudentReportBatchJob"), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            SchoolReportSummaryDTO summaryDTO = (SchoolReportSummaryDTO)jobContext.get("studentReportSummaryDTO");
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {

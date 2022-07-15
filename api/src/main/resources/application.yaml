@@ -119,6 +119,8 @@ batch:
     cron: ${TVR_RUN_CRON}
   schrep:
     cron: ${SCH_REP_CRON}
+  studrep:
+    cron: ${STUD_REP_CRON}
 
 
 #Endpoints
@@ -162,6 +164,10 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
     get-school-report-list:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistribution
+    update-student-credential-posting:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcredential/posting?studentID=%s&credentialTypeCode=%s
+    get-student-report-list:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsandreportsforposting
   grad-distribution-api:
     merge-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MER?batchId=%s&activityCode=%s&localDownload=%s
@@ -173,3 +179,5 @@ endpoint:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/BCPR?batchId=%s&localDownload=%s
     read-n-post:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSR?batchId=%s
+    read-n-post-student-reports:
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSTR?batchId=%s

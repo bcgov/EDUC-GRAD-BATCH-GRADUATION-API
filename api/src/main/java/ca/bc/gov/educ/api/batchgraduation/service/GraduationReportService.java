@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.SchoolReportDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.SchoolStudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +23,20 @@ public class GraduationReportService {
 	EducGradBatchGraduationApiConstants constants;
 	
 	public Mono<List<StudentCredentialDistribution>> getTranscriptList(String accessToken) {
-		return webClient.get().uri(constants.getTranscriptDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>(){});
+		return webClient.get().uri(constants.getTranscriptDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<>() {
+		});
 	}
 
 	public Mono<List<StudentCredentialDistribution>> getTranscriptListYearly(String accessToken) {
-		return webClient.get().uri(constants.getTranscriptYearlyDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>(){});
+		return webClient.get().uri(constants.getTranscriptYearlyDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<>() {
+		});
 	}
 
 
 
 	public Mono<List<StudentCredentialDistribution>> getCertificateList(String accessToken) {
-		return webClient.get().uri(constants.getCertificateDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>(){});
+		return webClient.get().uri(constants.getCertificateDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<>() {
+		});
 	}
 
 	public List<SchoolReportDistribution> getSchoolReportForPosting(String accessToken) {
@@ -45,5 +49,18 @@ public class GraduationReportService {
 					h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
 				}).retrieve().bodyToMono(responseType).block();
 	}
+
+	public List<SchoolStudentCredentialDistribution> getStudentReportForPosting(String accessToken) {
+		UUID correlationID = UUID.randomUUID();
+		final ParameterizedTypeReference<List<SchoolStudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
+		};
+		return webClient.get().uri(constants.getStudentReportPostingList())
+				.headers(h -> {
+					h.setBearerAuth(accessToken);
+					h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+				}).retrieve().bodyToMono(responseType).block();
+	}
+
+
 
 }
