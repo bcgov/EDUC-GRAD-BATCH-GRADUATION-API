@@ -391,7 +391,7 @@ public class JobLauncherController {
     @Operation(summary = "Run Nightly Student Report Runs", description = "Run Nightly Student Report Runs", tags = { "Student Report" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<SchoolReportSummaryDTO> launchStudentReportRunJob() {
-        logger.debug("launchSchoolReportRunJob");
+        logger.debug("launchStudentReportRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
