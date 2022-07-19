@@ -65,11 +65,11 @@ objects:
                     name: grad-client-secret
               resources: 
                 requests:
-                  cpu: "250m"
-                  memory: "1Gi"
-                limits:
                   cpu: "500m"
-                  memory: "2.5Gi"
+                  memory: "3Gi"
+                limits:
+                  cpu: "750m"
+                  memory: "5Gi"
       test: false
   - apiVersion: v1
     kind: Service
