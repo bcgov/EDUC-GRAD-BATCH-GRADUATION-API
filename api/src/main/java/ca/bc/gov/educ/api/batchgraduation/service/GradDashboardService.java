@@ -117,8 +117,8 @@ public class GradDashboardService extends GradService {
     }
 
 
-	public BatchProcessing toggleProcess(String jobType) {
-		Optional<BatchProcessingEntity> opt = batchProcessingRepository.findByJobType(jobType);
+	public BatchProcessing toggleProcess(UUID processingId) {
+		Optional<BatchProcessingEntity> opt = batchProcessingRepository.findById(processingId);
 		if(opt.isPresent()) {
 			BatchProcessingEntity ent = opt.get();
 			ent.setUpdateUser(null);
