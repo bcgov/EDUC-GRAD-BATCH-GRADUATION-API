@@ -58,7 +58,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),credentialType,obj.getAccess_token(),localDownLoad);
+
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -92,6 +92,9 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
+
+			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
+			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),credentialType,obj.getAccess_token(),localDownLoad);
 			LOGGER.info(LOG_SEPARATION);
 		}
     }

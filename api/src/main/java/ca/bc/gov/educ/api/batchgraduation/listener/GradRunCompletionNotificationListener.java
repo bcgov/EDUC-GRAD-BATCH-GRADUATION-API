@@ -70,7 +70,6 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(summaryDTO.getGlobalList(),obj.getAccess_token());
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -104,6 +103,9 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			AlgorithmSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getProgramCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getProgramCountMap().get(key)));
+
+			LOGGER.info(" Creating Reports ---------------------------------------------------------------------");
+			processGlobalList(summaryDTO.getGlobalList(),obj.getAccess_token());
 			LOGGER.info("=======================================================================================");
 		}
     }
