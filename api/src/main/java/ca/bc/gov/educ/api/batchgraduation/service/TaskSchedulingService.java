@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class TaskSchedulingService {
@@ -58,7 +59,7 @@ public class TaskSchedulingService {
               sJobs.setScheduledBy(k.getJobUser());
               sJobs.setCronExpression(k.getCronExpression());
               if(v != null) {
-                  if (v.isDone()) {
+                  if (v.getDelay(TimeUnit.MINUTES) < 0) {
                       sJobs.setStatus("Completed");
                   } else {
                       sJobs.setStatus("In Queue");
