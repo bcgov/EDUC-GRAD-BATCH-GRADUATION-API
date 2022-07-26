@@ -20,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
@@ -70,11 +71,11 @@ public class SchedulingController {
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.UPDATE_ENABLED)
+    @PutMapping(EducGradBatchGraduationApiConstants.UPDATE_ENABLED)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Toggle Scheduled job availability", description = "Toggle Scheduled job availability", tags = { "Schedule" })
-    public ResponseEntity<BatchProcessing> processingList(@PathVariable String jobType) {
-        BatchProcessing res = gradDashboardService.toggleProcess(jobType);
+    public ResponseEntity<BatchProcessing> processingList(@PathVariable UUID processingId) {
+        BatchProcessing res = gradDashboardService.toggleProcess(processingId);
         if(res == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

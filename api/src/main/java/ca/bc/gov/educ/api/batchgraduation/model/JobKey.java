@@ -7,6 +7,7 @@ public class JobKey {
     private int jId;
     private String jobUser;
     private String jobName;
+    private String cronExpression;
 
     @Override
     public boolean equals(Object o)

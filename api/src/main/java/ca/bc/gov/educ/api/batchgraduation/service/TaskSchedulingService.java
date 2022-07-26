@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class TaskSchedulingService {
@@ -29,11 +30,12 @@ public class TaskSchedulingService {
         newJk.setJId(rand.nextInt(999999));
         newJk.setJobUser(jobUser);
         newJk.setJobName(jobName);
+        newJk.setCronExpression(cronExpression);
         ScheduledFuture<?> sTask = taskScheduler.schedule(tasklet, new CronTrigger(cronExpression, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
         jobsMap.put(newJk, sTask);
     }
 
-    public void removeScheduledTask(int jobId, String jobName,String jobUser ) {
+    public void removeScheduledTask(int jobId, String jobName,String jobUser) {
         JobKey jKey = new JobKey();
         jKey.setJobName(jobName);
         jKey.setJId(jobId);
@@ -55,8 +57,9 @@ public class TaskSchedulingService {
               sJobs.setJobId(k.getJId());
               sJobs.setJobName(k.getJobName());
               sJobs.setScheduledBy(k.getJobUser());
+              sJobs.setCronExpression(k.getCronExpression());
               if(v != null) {
-                  if (v.isDone()) {
+                  if (v.getDelay(TimeUnit.MINUTES) < 0) {
                       sJobs.setStatus("Completed");
                   } else {
                       sJobs.setStatus("In Queue");
