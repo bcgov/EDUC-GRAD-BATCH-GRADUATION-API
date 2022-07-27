@@ -46,6 +46,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			String jobType = jobParameters.getString("jobType");
 			String credentialType = jobParameters.getString("credentialType");
 			String localDownLoad = jobParameters.getString("LocalDownload");
+			String properName = jobParameters.getString("properName");
 			BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new BlankDistributionSummaryDTO();
@@ -89,12 +90,12 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			processGlobalList(credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad);
+			processGlobalList(credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,properName);
 			LOGGER.info(LOG_SEPARATION);
 		}
     }
 
-	private void processGlobalList(String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String localDownload) {
+	private void processGlobalList(String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String localDownload,String properName) {
 		List<String> uniqueSchoolList = cList.stream().map(BlankCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
 			List<BlankCredentialDistribution> yed4List = new ArrayList<>();
@@ -114,63 +115,13 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 				}
 			}
 
-			transcriptPrintFile(yed4List,batchId,usl,mapDist);
-			certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2");
-			certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR");
-			certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB");
+			SupportListener.blankTranscriptPrintFile(yed4List,batchId,usl,mapDist,properName);
+			SupportListener.blankCertificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",properName);
+			SupportListener.blankCertificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
+			SupportListener.blankCertificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
 		});
 		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, mapDist,localDownload);
 	}
 
-	private void transcriptPrintFile(List<BlankCredentialDistribution> yed4List, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
-		if(!yed4List.isEmpty()) {
-			TranscriptPrintRequest tpReq = new TranscriptPrintRequest();
-			tpReq.setBatchId(batchId);
-			tpReq.setPsId(usl +" " +batchId);
-			tpReq.setCount(yed4List.size());
-			tpReq.setBlankTranscriptList(yed4List);
-			if(mapDist.get(usl) != null) {
-				DistributionPrintRequest dist = mapDist.get(usl);
-				dist.setTranscriptPrintRequest(tpReq);
-				dist.setTotal(dist.getTotal()+1);
-				mapDist.put(usl,dist);
-			}else{
-				DistributionPrintRequest dist = new DistributionPrintRequest();
-				dist.setTranscriptPrintRequest(tpReq);
-				dist.setTotal(dist.getTotal()+1);
-				mapDist.put(usl,dist);
-			}
-		}
-	}
 
-	private void certificatePrintFile(List<BlankCredentialDistribution> cList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist, String certificatePaperType) {
-		if(!cList.isEmpty()) {
-			CertificatePrintRequest tpReq = new CertificatePrintRequest();
-			tpReq.setBatchId(batchId);
-			tpReq.setPsId(usl +" " +batchId);
-			tpReq.setCount(cList.size());
-			tpReq.setBlankCertificateList(cList);
-			if(mapDist.get(usl) != null) {
-				DistributionPrintRequest dist = mapDist.get(usl);
-				if(certificatePaperType.compareTo("YED2") == 0)
-					dist.setYed2CertificatePrintRequest(tpReq);
-				if(certificatePaperType.compareTo("YEDR") == 0)
-					dist.setYedrCertificatePrintRequest(tpReq);
-				if(certificatePaperType.compareTo("YEDB") == 0)
-					dist.setYedbCertificatePrintRequest(tpReq);
-				dist.setTotal(dist.getTotal()+1);
-				mapDist.put(usl,dist);
-			}else{
-				DistributionPrintRequest dist = new DistributionPrintRequest();
-				if(certificatePaperType.compareTo("YED2") == 0)
-					dist.setYed2CertificatePrintRequest(tpReq);
-				if(certificatePaperType.compareTo("YEDR") == 0)
-					dist.setYedrCertificatePrintRequest(tpReq);
-				if(certificatePaperType.compareTo("YEDB") == 0)
-					dist.setYedbCertificatePrintRequest(tpReq);
-				dist.setTotal(dist.getTotal()+1);
-				mapDist.put(usl,dist);
-			}
-		}
-	}
 }

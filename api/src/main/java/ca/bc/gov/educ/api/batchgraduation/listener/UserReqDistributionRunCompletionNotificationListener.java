@@ -50,6 +50,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			String jobType = jobParameters.getString("jobType");
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String credentialType = jobParameters.getString("credentialType");
+			String properName = jobParameters.getString("properName");
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new DistributionSummaryDTO();
@@ -94,12 +95,12 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),credentialType,obj.getAccess_token(),localDownLoad);
+			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),credentialType,obj.getAccess_token(),localDownLoad,properName);
 			LOGGER.info(LOG_SEPARATION);
 		}
     }
 
-	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String credentialType, String accessToken,String localDownload) {
+	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String credentialType, String accessToken,String localDownload,String properName) {
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = new ArrayList<>();
@@ -117,10 +118,10 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
 				}
 			}
-			transcriptPrintFile(yed4List,batchId,usl,mapDist);
-			certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2");
-			certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR");
-			certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB");
+			SupportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,properName);
+			SupportListener.certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",properName);
+			SupportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
+			SupportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
 		});
 		DistributionResponse disres = null;
 		String activityCode = null;
@@ -145,55 +146,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
 		cList.forEach(scd->	restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken));
 	}
-	private void transcriptPrintFile(List<StudentCredentialDistribution> yed4List, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
-		if(!yed4List.isEmpty()) {
-			TranscriptPrintRequest tpReq = new TranscriptPrintRequest();
-			tpReq.setBatchId(batchId);
-			tpReq.setPsId(usl +" " +batchId);
-			tpReq.setCount(yed4List.size());
-			tpReq.setTranscriptList(yed4List);
-			if(mapDist.get(usl) != null) {
-				DistributionPrintRequest dist = mapDist.get(usl);
-				dist.setTranscriptPrintRequest(tpReq);
-				dist.setTotal(dist.getTotal()+1);
-				mapDist.put(usl,dist);
-			}else{
-				DistributionPrintRequest dist = new DistributionPrintRequest();
-				dist.setTranscriptPrintRequest(tpReq);
-				dist.setTotal(dist.getTotal()+1);
-				mapDist.put(usl,dist);
-			}
-		}
-	}
 
-	private void certificatePrintFile(List<StudentCredentialDistribution> cList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist, String certificatePaperType) {
-		if(!cList.isEmpty()) {
-			CertificatePrintRequest tpReq = new CertificatePrintRequest();
-			tpReq.setBatchId(batchId);
-			tpReq.setPsId(usl +" " +batchId);
-			tpReq.setCount(cList.size());
-			tpReq.setCertificateList(cList);
-			if(mapDist.get(usl) != null) {
-				DistributionPrintRequest dist = mapDist.get(usl);
-				if(certificatePaperType.compareTo("YED2") == 0)
-					dist.setYed2CertificatePrintRequest(tpReq);
-				if(certificatePaperType.compareTo("YEDR") == 0)
-					dist.setYedrCertificatePrintRequest(tpReq);
-				if(certificatePaperType.compareTo("YEDB") == 0)
-					dist.setYedbCertificatePrintRequest(tpReq);
-				dist.setTotal(dist.getTotal()+1);
-				mapDist.put(usl,dist);
-			}else{
-				DistributionPrintRequest dist = new DistributionPrintRequest();
-				if(certificatePaperType.compareTo("YED2") == 0)
-					dist.setYed2CertificatePrintRequest(tpReq);
-				if(certificatePaperType.compareTo("YEDR") == 0)
-					dist.setYedrCertificatePrintRequest(tpReq);
-				if(certificatePaperType.compareTo("YEDB") == 0)
-					dist.setYedbCertificatePrintRequest(tpReq);
-				dist.setTotal(dist.getTotal()+1);
-				mapDist.put(usl,dist);
-			}
-		}
-	}
+
+
 }

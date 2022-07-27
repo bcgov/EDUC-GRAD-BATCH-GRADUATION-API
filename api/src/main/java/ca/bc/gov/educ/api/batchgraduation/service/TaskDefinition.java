@@ -29,6 +29,7 @@ public class TaskDefinition implements Runnable{
     private static final String MANUAL = "MANUAL";
     private static final String CREDENTIAL_TYPE = "credentialType";
     private static final String ERROR_MSG = "Error {}";
+    private static final String USER_PROPER_NAME = "properName";
 
     @Autowired JobLauncher jobLauncher;
     @Autowired JobRegistry jobRegistry;
@@ -48,6 +49,9 @@ public class TaskDefinition implements Runnable{
         }
         if(task.getCredentialType() != null) {
             builder.addString(CREDENTIAL_TYPE,task.getCredentialType());
+        }
+        if(task.getProperUserName() != null) {
+            builder.addString(USER_PROPER_NAME,task.getProperUserName());
         }
         if(task.getPayload() != null) {
             AlgorithmSummaryDTO validate = validateInput(task.getPayload());
