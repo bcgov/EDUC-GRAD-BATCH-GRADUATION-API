@@ -73,6 +73,9 @@ public class TaskDefinitionTest {
         task.setProperUserName(null);
         task.setDeliveredToUser(false);
         task.setCredentialType(null);
+        task.setLocalDownload("Y");
+        task.setDeliveredToUser(true);
+        task.setCredentialType("OT");
         BlankCredentialRequest bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
         bReq.setSchoolOfRecords(List.of("123112311"));
