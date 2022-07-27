@@ -10,4 +10,6 @@ public class Task {
     private BlankCredentialRequest blankPayLoad;
     private String credentialType;
     private String localDownload;
+    private boolean deliveredToUser;
+    private String properUserName;
 }

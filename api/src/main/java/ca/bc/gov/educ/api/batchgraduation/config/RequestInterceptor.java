@@ -20,7 +20,7 @@ public class RequestInterceptor implements AsyncHandlerInterceptor {
 
 
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 		// for async this is called twice so need a check to avoid setting twice.
 		if (request.getAttribute("startTime") == null) {
 			final long startTime = Instant.now().toEpochMilli();
@@ -34,6 +34,7 @@ public class RequestInterceptor implements AsyncHandlerInterceptor {
 			Jwt jwt = (Jwt) authenticationToken.getCredentials();
 			String username = JwtUtil.getName(jwt);
 			ThreadLocalStateUtil.setCurrentUser(username);
+			ThreadLocalStateUtil.setProperName(JwtUtil.getUserProperName(jwt));
 		}
 		
 		return true;

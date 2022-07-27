@@ -37,6 +37,9 @@ public class SchedulingController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
     public void scheduleATask(@RequestBody Task task) {
+        if(task.isDeliveredToUser()) {
+            task.setProperUserName(ThreadLocalStateUtil.getProperName());
+        }
         taskDefinition.setTask(task);
         taskSchedulingService.scheduleATask(ThreadLocalStateUtil.getCurrentUser(),task.getJobName() , taskDefinition, task.getCronExpression());
     }
