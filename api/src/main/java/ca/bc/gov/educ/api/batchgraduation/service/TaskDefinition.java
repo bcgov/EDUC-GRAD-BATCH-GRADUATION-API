@@ -53,17 +53,11 @@ public class TaskDefinition implements Runnable{
         if(task.getProperUserName() != null) {
             builder.addString(USER_PROPER_NAME,task.getProperUserName());
         }
-        if(task.getPayload() != null) {
-            AlgorithmSummaryDTO validate = validateInput(task.getPayload());
-            if (validate == null) {
-                try {
-                    String studentSearchData = new ObjectMapper().writeValueAsString(task.getPayload());
-                    executeBatchJob(builder, taskType,studentSearchData);
-                }catch (JsonProcessingException e) {
-                    LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
-                }
-            }
-        }
+        validatePayLoad(task,builder,taskType);
+        validateBlankPayLoad(task,builder,taskType);
+    }
+
+    private void validateBlankPayLoad(Task task,JobParametersBuilder builder, TaskSelection taskType) {
         if(task.getBlankPayLoad() != null) {
             BlankDistributionSummaryDTO validate = validateInputBlankDisRun(task.getBlankPayLoad());
             if (validate == null) {
@@ -75,9 +69,20 @@ public class TaskDefinition implements Runnable{
                 }
             }
         }
-
     }
-
+    private void validatePayLoad(Task task,JobParametersBuilder builder, TaskSelection taskType) {
+        if(task.getPayload() != null) {
+            AlgorithmSummaryDTO validate = validateInput(task.getPayload());
+            if (validate == null) {
+                try {
+                    String studentSearchData = new ObjectMapper().writeValueAsString(task.getPayload());
+                    executeBatchJob(builder, taskType,studentSearchData);
+                }catch (JsonProcessingException e) {
+                    LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
+                }
+            }
+        }
+    }
     private void executeBatchJob(JobParametersBuilder builder, TaskSelection taskType, String data) {
         builder.addString(SEARCH_REQUEST, data);
         try {
