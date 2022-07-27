@@ -76,6 +76,7 @@ public class TaskDefinitionTest {
         task.setLocalDownload("Y");
         task.setDeliveredToUser(true);
         task.setCredentialType("OT");
+        task.setProperUserName("GREG");
         BlankCredentialRequest bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
         bReq.setSchoolOfRecords(List.of("123112311"));
@@ -122,6 +123,14 @@ public class TaskDefinitionTest {
         taskDefinition.setTask(task);
         Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
         taskDefinition.run();
+
+        bReq = new BlankCredentialRequest();
+        bReq.setQuantity(5);
+        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setCredentialTypeCode(List.of("E"));
+        task.setBlankPayLoad(bReq);
+        taskDefinition.setTask(task);
+        taskDefinition.run();
         assertNotNull(task);
     }
 
@@ -144,6 +153,59 @@ public class TaskDefinitionTest {
         taskDefinition.setTask(task);
         Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
         taskDefinition.run();
+        assertNotNull(task);
+    }
+
+    @Test
+    public void testRun_withemptyregularpayload2() throws NoSuchJobException {
+        Task task = new Task();
+
+        task.setJobName("SGBJ");
+        task.setCronExpression("0 0 20 * * *");
+        task.setProperUserName(null);
+        task.setDeliveredToUser(false);
+        task.setCredentialType(null);
+        StudentSearchRequest bReq = new StudentSearchRequest();
+        bReq.setPens(new ArrayList<>());
+        bReq.setDistricts(List.of("003"));
+        bReq.setPrograms(new ArrayList<>());
+        bReq.setSchoolCategoryCodes(new ArrayList<>());
+        bReq.setSchoolOfRecords(new ArrayList<>());
+        task.setPayload(bReq);
+        taskDefinition.setTask(task);
+        Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        taskDefinition.run();
+
+        bReq = new StudentSearchRequest();
+        bReq.setPens(new ArrayList<>());
+        bReq.setDistricts(new ArrayList<>());
+        bReq.setPrograms(List.of("003"));
+        bReq.setSchoolCategoryCodes(new ArrayList<>());
+        bReq.setSchoolOfRecords(new ArrayList<>());
+        task.setPayload(bReq);
+        taskDefinition.setTask(task);
+        taskDefinition.run();
+
+        bReq = new StudentSearchRequest();
+        bReq.setPens(new ArrayList<>());
+        bReq.setDistricts(new ArrayList<>());
+        bReq.setPrograms(new ArrayList<>());
+        bReq.setSchoolCategoryCodes(List.of("003"));
+        bReq.setSchoolOfRecords(new ArrayList<>());
+        task.setPayload(bReq);
+        taskDefinition.setTask(task);
+        taskDefinition.run();
+
+        bReq = new StudentSearchRequest();
+        bReq.setPens(new ArrayList<>());
+        bReq.setDistricts(new ArrayList<>());
+        bReq.setPrograms(new ArrayList<>());
+        bReq.setSchoolCategoryCodes(new ArrayList<>());
+        bReq.setSchoolOfRecords(List.of("003"));
+        task.setPayload(bReq);
+        taskDefinition.setTask(task);
+        taskDefinition.run();
+
         assertNotNull(task);
     }
 
