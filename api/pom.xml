@@ -25,7 +25,20 @@
             src/main/java/ca/bc/gov/educ/api/batchgraduation/processor/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/reader/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/writer/**
+            src/test/java/ca/bc/gov/educ/api/batchgraduation/**
         </sonar.exclusions>
+        <sonar.coverage.exclusions>
+            src/main/resources/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/config/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/model/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/entity/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/transformer/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/util/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/processor/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/reader/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/writer/**
+            src/test/java/ca/bc/gov/educ/api/batchgraduation/**
+        </sonar.coverage.exclusions>
         <java.version>11</java.version>
         <maven.compiler.version>3.10.1</maven.compiler.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
@@ -79,14 +92,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

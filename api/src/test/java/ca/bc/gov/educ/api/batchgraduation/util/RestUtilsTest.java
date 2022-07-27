@@ -2,6 +2,8 @@ package ca.bc.gov.educ.api.batchgraduation.util;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -27,6 +29,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import lombok.val;
 import reactor.core.publisher.Mono;
+
+import javax.validation.constraints.AssertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -127,6 +131,415 @@ public class RestUtilsTest {
         assertThat(result.getPen()).isEqualTo(pen);
     }
 
+    @Test
+    public void testGetStudentsForSpecialGradRun_with_APICallSuccess() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+
+        StudentSearchRequest req = new StudentSearchRequest();
+        req.setPens(Arrays.asList(pen));
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        GraduationStudentRecordSearchResult res = new GraduationStudentRecordSearchResult();
+        res.setGraduationStudentRecords(Arrays.asList(graduationStatus));
+
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentApiStudentForSpcGradListUrl(), studentID))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStudentRecordSearchResult.class)).thenReturn(Mono.just(res));
+
+        var result = this.restUtils.getStudentsForSpecialGradRun(req, "123");
+        assertThat(result).isNotNull();
+        assertThat(result.get(0).getPen()).isEqualTo(pen);
+    }
+    @Test
+    public void testProcessStudent() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+        final Long batchId = 9879L;
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        AlgorithmResponse alres = new AlgorithmResponse();
+        alres.setGraduationStudentRecord(graduationStatus);
+        alres.setStudentOptionalProgram(null);
+
+        AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
+        summary.setBatchId(batchId);
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getGraduationApiUrl(), studentID,batchId))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(alres));
+
+        GraduationStudentRecord response = this.restUtils.processStudent(graduationStatus,summary);
+        assertThat(response.getStudentID()).isEqualTo(studentID);
+    }
+
+    @Test
+    public void testProcessStudent_witherrors() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+        final Long batchId = 9879L;
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        AlgorithmResponse alres = new AlgorithmResponse();
+        alres.setGraduationStudentRecord(graduationStatus);
+        alres.setStudentOptionalProgram(null);
+
+        AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getGraduationApiUrl(), studentID,batchId))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(alres));
+
+        GraduationStudentRecord response = this.restUtils.processStudent(graduationStatus,summary);
+        assertNull(response);
+    }
+
+    @Test
+    public void testProcessStudent_witherrors2() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+        final Long batchId = 9879L;
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        AlgorithmResponse alres = new AlgorithmResponse();
+        alres.setGraduationStudentRecord(null);
+        alres.setStudentOptionalProgram(null);
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        exceptionMessage.setExceptionName("REPAPI DOWN");
+        exceptionMessage.setExceptionDetails("DOWN DOWN DOWN");
+        alres.setException(exceptionMessage);
+
+        AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
+        summary.setBatchId(batchId);
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getGraduationApiUrl(), studentID,batchId))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(alres));
+
+        GraduationStudentRecord response = this.restUtils.processStudent(graduationStatus,summary);
+        assertNull(response);
+    }
+
+    @Test
+    public void testProcessProjectedStudent() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+        final Long batchId = 9879L;
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        AlgorithmResponse alres = new AlgorithmResponse();
+        alres.setGraduationStudentRecord(graduationStatus);
+        alres.setStudentOptionalProgram(null);
+
+        AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
+        summary.setBatchId(batchId);
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,batchId))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(alres));
+
+        GraduationStudentRecord response = this.restUtils.processProjectedGradStudent(graduationStatus,summary);
+        assertThat(response.getStudentID()).isEqualTo(studentID);
+    }
+
+    @Test
+    public void testProcessProjectedStudent_witherrors() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+        final Long batchId = 9879L;
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        AlgorithmResponse alres = new AlgorithmResponse();
+        alres.setGraduationStudentRecord(graduationStatus);
+        alres.setStudentOptionalProgram(null);
+
+        AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,batchId))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(alres));
+
+        GraduationStudentRecord response = this.restUtils.processProjectedGradStudent(graduationStatus,summary);
+        assertNull(response);
+    }
+
+    @Test
+    public void testProcessProjectedStudent_witherrors2() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+        final Long batchId = 9879L;
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        AlgorithmResponse alres = new AlgorithmResponse();
+        alres.setGraduationStudentRecord(null);
+        alres.setStudentOptionalProgram(null);
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        exceptionMessage.setExceptionName("REPAPI DOWN");
+        exceptionMessage.setExceptionDetails("DOWN DOWN DOWN");
+        alres.setException(exceptionMessage);
+
+        AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
+        summary.setBatchId(batchId);
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,batchId))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(alres));
+
+        GraduationStudentRecord response = this.restUtils.processProjectedGradStudent(graduationStatus,summary);
+        assertNull(response);
+    }
+
+    @Test
+    public void testGetStudentData_withlist() {
+
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+
+        List<UUID> studentList = Arrays.asList(studentID);
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(constants.getGradStudentApiStudentDataListUrl())).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(graduationStatus)));
+
+        List<GraduationStudentRecord> resList =  this.restUtils.getStudentData(studentList,"abc");
+        assertNotNull(resList);
+        assertThat(resList).hasSize(1);
+    }
+
+    @Test
+    public void testprocessSchoolReportPosting() {
+        SchoolReportDistribution item = new SchoolReportDistribution();
+        item.setSchoolOfRecord("123123123");
+        item.setReportTypeCode("GRADREG");
+        item.setId(UUID.randomUUID());
+
+        SchoolReportSummaryDTO summary = new SchoolReportSummaryDTO();
+        summary.setBatchId(44545L);
+        SchoolReportDistribution res = this.restUtils.processSchoolReportPosting(item,summary);
+        assertNotNull(res);
+        assertThat(res.getSchoolOfRecord()).isEqualTo("123123123");
+
+    }
+
+    @Test
+    public void testProcessDistribution() {
+
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+        final Long batchId = 9879L;
+        final String mincode = "123121111";
+        List<StudentCredentialDistribution> globalList = new ArrayList<>();
+
+        StudentCredentialDistribution scd = new StudentCredentialDistribution();
+        scd.setStudentGrade("12");
+        scd.setId(UUID.randomUUID());
+        scd.setPaperType("YED4");
+        scd.setSchoolOfRecord(mincode);
+        scd.setStudentID(studentID);
+        globalList.add(scd);
+
+
+
+
+        DistributionSummaryDTO summary = new DistributionSummaryDTO();
+        summary.setBatchId(batchId);
+        summary.setGlobalList(globalList);
+
+        StudentCredentialDistribution res = this.restUtils.processDistribution(scd,summary);
+        assertNotNull(res);
+    }
+
+    @Test
+    public void testProcessDistribution_elsecase() {
+
+        final UUID studentID = UUID.randomUUID();
+        final UUID studentID2 = UUID.randomUUID();
+        final Long batchId = 9879L;
+        final String mincode = "123121111";
+        List<StudentCredentialDistribution> globalList = new ArrayList<>();
+
+        StudentCredentialDistribution scd = new StudentCredentialDistribution();
+        scd.setStudentGrade("12");
+        scd.setId(UUID.randomUUID());
+        scd.setPaperType("YED4");
+        scd.setSchoolOfRecord(mincode);
+        scd.setStudentID(studentID);
+        globalList.add(scd);
+
+        StudentCredentialDistribution scd2 = new StudentCredentialDistribution();
+        scd2.setStudentGrade("12");
+        scd2.setId(UUID.randomUUID());
+        scd2.setPaperType("YED4");
+        scd2.setSchoolOfRecord(mincode);
+        scd2.setStudentID(studentID2);
+
+
+        GraduationStudentRecordDistribution grd = new GraduationStudentRecordDistribution();
+        grd.setStudentID(studentID2);
+        grd.setProgram("2018-EN");
+        grd.setStudentGrade("12");
+        grd.setSchoolOfRecord("454445444");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentInfo(),studentID2))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStudentRecordDistribution.class)).thenReturn(Mono.just(grd));
+
+        DistributionSummaryDTO summary = new DistributionSummaryDTO();
+        summary.setBatchId(batchId);
+        summary.setGlobalList(globalList);
+
+        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary);
+        assertNotNull(res);
+    }
+
+    @Test
+    public void testProcessBlankDistribution() {
+        final String credentialType = "OT";
+        BlankDistributionSummaryDTO summary = new BlankDistributionSummaryDTO();
+        summary.setCredentialType("OT");
+        summary.setBatchId(4564L);
+
+        BlankCredentialDistribution bcd = new BlankCredentialDistribution();
+        bcd.setQuantity(5);
+        bcd.setSchoolOfRecord("11231111");
+        bcd.setCredentialTypeCode("BC1996-PUB");
+
+        BlankCredentialDistribution res = this.restUtils.processBlankDistribution(bcd,summary);
+        assertNotNull(res);
+    }
+
+    @Test
+    public void testProcessBlankDistribution_OC() {
+        final String credentialType = "OC";
+        BlankDistributionSummaryDTO summary = new BlankDistributionSummaryDTO();
+        summary.setCredentialType("OC");
+        summary.setBatchId(4564L);
+
+        GradCertificateTypes certificateTypes = new GradCertificateTypes();
+        certificateTypes.setPaperType("YED2");
+        certificateTypes.setCode("E");
+        certificateTypes.setDescription("SDS");
+        certificateTypes.setLabel("fere");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getCertificateTypes(),"E"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GradCertificateTypes.class)).thenReturn(Mono.just(certificateTypes));
+
+        BlankCredentialDistribution bcd = new BlankCredentialDistribution();
+        bcd.setQuantity(5);
+        bcd.setSchoolOfRecord("11231111");
+        bcd.setCredentialTypeCode("E");
+
+        BlankCredentialDistribution res = this.restUtils.processBlankDistribution(bcd,summary);
+        assertNotNull(res);
+    }
+
+    @Test
+    public void testReadAndPostSchoolReports() {
+        final Long batchId = 9879L;
+
+        DistributionResponse res = new DistributionResponse();
+        res.setMergeProcessResponse("Done");
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getReadAndPost(),batchId))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(res));
+
+        DistributionResponse response = this.restUtils.readAndPostSchoolReports(batchId,"abc",new HashMap<>());
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testCreateBlankCredentialsAndUpload() {
+        final Long batchId = 9879L;
+
+        DistributionResponse res = new DistributionResponse();
+        res.setMergeProcessResponse("Done");
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateBlanksAndUpload(),batchId,"N"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(res));
+
+        this.restUtils.createBlankCredentialsAndUpload(batchId,"abc",new HashMap<>(),"N");
+        assertNotNull(res);
+    }
+
+    @Test
+    public void testcreateAndStoreSchoolReports() {
+        final String type = "NONGRADPRJ";
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStore(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        this.restUtils.createAndStoreSchoolReports("Abc",new ArrayList<>(),type);
+        assertNotNull(type);
+    }
     @Test
     public void testRunGradAlgorithm() {
         final String studentID = UUID.randomUUID().toString();
@@ -343,6 +756,86 @@ public class RestUtilsTest {
 
         GraduationStudentRecordDistribution res = this.restUtils.getStudentData(studentID.toString(),null);
         assertThat(res).isNotNull();
+    }
+
+    @Test
+    public void testupdateStudentGradRecord() {
+        final UUID studentID = UUID.randomUUID();
+        final String activityCode = "USERDISOC";
+        final Long batchId = 4567L;
+
+        GraduationStudentRecord rec = new GraduationStudentRecord();
+        rec.setStudentID(studentID);
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentRecord(),studentID,batchId,activityCode))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(rec));
+
+        this.restUtils.updateStudentGradRecord(studentID,batchId,activityCode,"acb");
+        assertNotNull(rec);
+
+    }
+
+    @Test
+    public void testUpdateSchoolReportRecord() {
+        final String mincode = "123213123";
+        String reportTypeCode = "E";
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getUpdateSchoolReport(),mincode,reportTypeCode))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(boolean.class)).thenReturn(Mono.just(true));
+
+        this.restUtils.updateSchoolReportRecord(mincode,reportTypeCode,null);
+        assertThat(reportTypeCode).isEqualTo("E");
+    }
+
+    @Test
+    public void testGetStudentByPenFromStudentAPI() {
+        final UUID studentID = UUID.randomUUID();
+
+        final String pen = "123456789";
+
+        List<LoadStudentData> loadStudentData = new ArrayList<>();
+        LoadStudentData lSD = new LoadStudentData();
+        lSD.setPen(pen);
+        lSD.setStudentGrade("12");
+        lSD.setHonoursStanding("N");
+        lSD.setProgramCode("2018-EN");
+        loadStudentData.add(lSD);
+
+        final Student student = new Student();
+        student.setStudentID(studentID.toString());
+        student.setPen(pen);
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getPenStudentApiByPenUrl(), pen))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
+        };
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(student)));
+
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentApiGradStatusUrl(), studentID))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(graduationStatus));
+
+
+        Integer res = this.restUtils.getStudentByPenFromStudentAPI(loadStudentData,"abc");
+        assertThat(res).isEqualTo(1);
+
     }
 
 }

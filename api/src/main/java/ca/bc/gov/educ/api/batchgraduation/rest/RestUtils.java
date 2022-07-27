@@ -251,7 +251,6 @@ public class RestUtils {
         }else {
             GraduationStudentRecordDistribution stuRec =this.getStudentData(item.getStudentID().toString(),accessToken);
             if (stuRec != null) {
-                item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
                 item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
@@ -455,24 +454,6 @@ public class RestUtils {
             h.setBearerAuth(accessToken);
             h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
         }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
-    }
-
-    public GraduationStudentRecord getGradStatus(UUID studentID, String accessToken) {
-        UUID correlationID = UUID.randomUUID();
-        return webClient.get().uri(String.format(constants.getReadGradStudentRecord(),studentID))
-            .headers(h -> {
-                h.setBearerAuth(accessToken);
-                h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
-        }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
-    }
-
-    public GraduationStudentRecord getGradStatusForBatch(UUID studentID, String accessToken) {
-        UUID correlationID = UUID.randomUUID();
-        return webClient.get().uri(String.format(constants.getReadGradStudentRecordBatch(),studentID))
-                .headers(h -> {
-                    h.setBearerAuth(accessToken);
-                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
-                }).retrieve().bodyToMono(GraduationStudentRecord.class).block();
     }
 
 }
