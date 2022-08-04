@@ -227,7 +227,7 @@
         <plugin>
           <groupId>org.hibernate.orm.tooling</groupId>
           <artifactId>hibernate-enhance-maven-plugin</artifactId>
-          <version>6.1.1.Final</version>
+          <version>6.1.2.Final</version>
         </plugin>
         <plugin>
           <groupId>org.springframework.boot</groupId>
