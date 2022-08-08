@@ -23,18 +23,18 @@ public class GraduationReportService {
 	EducGradBatchGraduationApiConstants constants;
 	
 	public Mono<List<StudentCredentialDistribution>> getTranscriptList(String accessToken) {
-		return webClient.get().uri(constants.getTranscriptDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<>() {
+		return webClient.get().uri(constants.getTranscriptDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>() {
 		});
 	}
 
 	public Mono<List<StudentCredentialDistribution>> getTranscriptListYearly(String accessToken) {
-		return webClient.get().uri(constants.getTranscriptYearlyDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<>(){});
+		return webClient.get().uri(constants.getTranscriptYearlyDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>(){});
 	}
 
 
 
 	public Mono<List<StudentCredentialDistribution>> getCertificateList(String accessToken) {
-		return webClient.get().uri(constants.getCertificateDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<>(){});
+		return webClient.get().uri(constants.getCertificateDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>(){});
 	}
 
 	public List<SchoolReportDistribution> getSchoolReportForPosting(String accessToken) {
