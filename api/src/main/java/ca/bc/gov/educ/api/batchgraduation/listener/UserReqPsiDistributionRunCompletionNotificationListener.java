@@ -1,10 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.model.BlankDistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionPrintRequest;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -18,16 +15,15 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class UserReqBlankDistributionRunCompletionNotificationListener extends JobExecutionListenerSupport {
+public class UserReqPsiDistributionRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserReqBlankDistributionRunCompletionNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserReqPsiDistributionRunCompletionNotificationListener.class);
     private static final String LOG_SEPARATION = "=======================================================================================";
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
@@ -40,7 +36,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info(LOG_SEPARATION);
-	    	LOGGER.info("Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
+	    	LOGGER.info("PSI Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 	    	JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
@@ -49,17 +45,16 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
-			String credentialType = jobParameters.getString("credentialType");
-			String localDownLoad = jobParameters.getString("LocalDownload");
-			String properName = jobParameters.getString("properName");
-			BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
+			String transmissionType = jobParameters.getString("transmissionType");
+			PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
 			if(summaryDTO == null) {
-				summaryDTO = new BlankDistributionSummaryDTO();
+				summaryDTO = new PsiDistributionSummaryDTO();
 			}
 			int failedRecords = summaryDTO.getErrors().size();			
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
+
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -70,7 +65,6 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			ent.setStatus(status);
 			ent.setTriggerBy(jobTrigger);
 			ent.setJobType(jobType);
-			ent.setLocalDownload(localDownLoad);
 
 			batchGradAlgorithmJobHistoryRepository.save(ent);
 			
@@ -79,42 +73,34 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 			LOGGER.info(LOG_SEPARATION_SINGLE);
-			BlankDistributionSummaryDTO finalSummaryDTO = summaryDTO;
+			PsiDistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			processGlobalList(credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,properName);
+			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),transmissionType);
 			LOGGER.info(LOG_SEPARATION);
 		}
     }
 
-	private void processGlobalList(String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String localDownload,String properName) {
-		List<String> uniqueSchoolList = cList.stream().map(BlankCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
-		uniqueSchoolList.forEach(usl->{
-			List<BlankCredentialDistribution> yed4List = new ArrayList<>();
-			List<BlankCredentialDistribution> yed2List = new ArrayList<>();
-			List<BlankCredentialDistribution> yedrList = new ArrayList<>();
-			List<BlankCredentialDistribution> yedbList = new ArrayList<>();
-
-			if(credentialType != null) {
-				if (credentialType.equalsIgnoreCase("OT")) {
-					yed4List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
-				}
-
-				if (credentialType.equalsIgnoreCase("OC")) {
-					yed2List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
-					yedrList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
-					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
-				}
-			}
-
-			SupportListener.blankTranscriptPrintFile(yed4List,batchId,usl,mapDist,properName);
-			SupportListener.blankCertificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",properName);
-			SupportListener.blankCertificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
-			SupportListener.blankCertificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
+	private void processGlobalList(List<PsiCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String transmissionType) {
+		List<String> uniquePSIList = cList.stream().map(PsiCredentialDistribution::getPsiCode).distinct().collect(Collectors.toList());
+		String localDownload = transmissionType.equalsIgnoreCase("FTP")?"Y":"N";
+		uniquePSIList.forEach(upl->{
+			List<PsiCredentialDistribution> yed4List = cList.stream().filter(scd -> scd.getPsiCode().compareTo(upl) == 0).collect(Collectors.toList());
+			SupportListener.psiPrintFile(yed4List,batchId,upl,mapDist);
 		});
-		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, mapDist,localDownload);
+		DistributionResponse disres = restUtils.mergePsiAndUpload(batchId, accessToken, mapDist,localDownload);
+		String activityCode = transmissionType.equalsIgnoreCase("PAPER")?"USERDISTPSIP":"USERDISTPISF";
+		if(disres != null) {
+			ResponseObj obj = restUtils.getTokenResponseObject();
+			updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());
+		}
 	}
+
+	private void updateBackStudentRecords(List<PsiCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
+		cList.forEach(scd->	restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken));
+	}
+
 
 
 }

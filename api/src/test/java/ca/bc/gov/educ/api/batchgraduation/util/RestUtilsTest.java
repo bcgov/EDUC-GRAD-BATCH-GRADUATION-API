@@ -507,6 +507,73 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testProcessPsiDistribution() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "1232131231";
+        final Long batchId = 9879L;
+        List<PsiCredentialDistribution> globalList = new ArrayList<>();
+
+        PsiCredentialDistribution scd = new PsiCredentialDistribution();
+        scd.setPen(pen);
+        scd.setPsiYear("2021");
+        scd.setPsiCode("001");
+        scd.setStudentID(studentID);
+        globalList.add(scd);
+
+        PsiDistributionSummaryDTO summary = new PsiDistributionSummaryDTO();
+        summary.setBatchId(batchId);
+        summary.setGlobalList(globalList);
+
+        PsiCredentialDistribution bcd = new PsiCredentialDistribution();
+        bcd.setPen(pen);
+        bcd.setPsiCode("002");
+        bcd.setPsiYear("2021");
+
+        PsiCredentialDistribution res = this.restUtils.processPsiDistribution(bcd,summary);
+        assertNotNull(res);
+    }
+
+    @Test
+    public void testProcessPsiDistribution_else() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "1232131231";
+        final String pen2 = "12321312";
+        final Long batchId = 9879L;
+        List<PsiCredentialDistribution> globalList = new ArrayList<>();
+
+        PsiCredentialDistribution scd = new PsiCredentialDistribution();
+        scd.setPen(pen);
+        scd.setPsiYear("2021");
+        scd.setStudentID(studentID);
+        globalList.add(scd);
+
+        PsiDistributionSummaryDTO summary = new PsiDistributionSummaryDTO();
+        summary.setBatchId(batchId);
+        summary.setGlobalList(globalList);
+
+        PsiCredentialDistribution bcd = new PsiCredentialDistribution();
+        bcd.setPen(pen2);
+        bcd.setPsiCode("001");
+        bcd.setPsiYear("2021");
+
+        final Student student = new Student();
+        student.setStudentID(studentID.toString());
+        student.setPen(pen2);
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getPenStudentApiByPenUrl(), pen2))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
+        };
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(student)));
+
+        PsiCredentialDistribution res = this.restUtils.processPsiDistribution(bcd,summary);
+        assertNotNull(res);
+    }
+
+    @Test
     public void testCreateBlankCredentialsAndUpload() {
         final Long batchId = 9879L;
 
@@ -738,6 +805,24 @@ public class RestUtilsTest {
 
 
         val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,null);
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void testMergePSIAndUpload() {
+        DistributionResponse req = new DistributionResponse();
+        req.setMergeProcessResponse("Merged");
+        Long batchId = 3344L;
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getMergePsiAndUpload(),batchId,"Y"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
+
+
+        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y");
         assertThat(result).isNotNull();
     }
 
