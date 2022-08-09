@@ -643,6 +643,26 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testReadAndPostSchoolReports_null() {
+        final Long batchId = 9879L;
+
+        DistributionResponse res = new DistributionResponse();
+        res.setMergeProcessResponse("Done");
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getReadAndPost(),batchId))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
+        when(this.inputResponsePSI.block()).thenReturn(null);
+
+        DistributionResponse response = this.restUtils.readAndPostSchoolReports(batchId,"abc",new HashMap<>());
+        assertNotNull(response);
+    }
+
+    @Test
     public void testProcessPsiDistribution() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "1232131231";
@@ -789,6 +809,7 @@ public class RestUtilsTest {
     }
 
 
+
     @Test
     public void testcreateAndStoreSchoolReports_null() {
         final String type = "NONGRADPRJ";
@@ -821,6 +842,23 @@ public class RestUtilsTest {
         this.restUtils.createAndStoreSchoolReports("Abc",new ArrayList<>(),type);
         assertNotNull(type);
     }
+
+    @Test
+    public void testcreateAndStoreSchoolReports_0() {
+        final String type = "NONGRADPRJ";
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStore(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
+
+        this.restUtils.createAndStoreSchoolReports("Abc",new ArrayList<>(),type);
+        assertNotNull(type);
+    }
+
     @Test
     public void testRunGradAlgorithm() {
         final String studentID = UUID.randomUUID().toString();
