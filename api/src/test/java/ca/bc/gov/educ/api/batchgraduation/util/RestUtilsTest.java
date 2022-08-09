@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.BodyInserter;
@@ -44,6 +45,11 @@ public class RestUtilsTest {
 
     @Autowired
     private EducGradBatchGraduationApiConstants constants;
+
+    @Mock
+    private Mono<GradCertificateTypes> inputResponse;
+    @Mock
+    private Mono<GraduationStudentRecordDistribution> inputResponseGSR;
 
     @Mock
     private WebClient.RequestHeadersSpec requestHeadersMock;
@@ -444,6 +450,52 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testProcessDistribution_elsecase_null() {
+
+        final UUID studentID = UUID.randomUUID();
+        final UUID studentID2 = UUID.randomUUID();
+        final Long batchId = 9879L;
+        final String mincode = "123121111";
+        List<StudentCredentialDistribution> globalList = new ArrayList<>();
+
+        StudentCredentialDistribution scd = new StudentCredentialDistribution();
+        scd.setStudentGrade("12");
+        scd.setId(UUID.randomUUID());
+        scd.setPaperType("YED4");
+        scd.setSchoolOfRecord(mincode);
+        scd.setStudentID(studentID);
+        globalList.add(scd);
+
+        StudentCredentialDistribution scd2 = new StudentCredentialDistribution();
+        scd2.setStudentGrade("12");
+        scd2.setId(UUID.randomUUID());
+        scd2.setPaperType("YED4");
+        scd2.setSchoolOfRecord(mincode);
+        scd2.setStudentID(studentID2);
+
+
+        GraduationStudentRecordDistribution grd = new GraduationStudentRecordDistribution();
+        grd.setStudentID(studentID2);
+        grd.setProgram("2018-EN");
+        grd.setStudentGrade("12");
+        grd.setSchoolOfRecord("454445444");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentInfo(),studentID2))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStudentRecordDistribution.class)).thenReturn(inputResponseGSR);
+        when(this.inputResponseGSR.block()).thenReturn(null);
+
+        DistributionSummaryDTO summary = new DistributionSummaryDTO();
+        summary.setBatchId(batchId);
+        summary.setGlobalList(globalList);
+
+        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary);
+        assertNotNull(res);
+    }
+
+    @Test
     public void testProcessBlankDistribution() {
         final String credentialType = "OT";
         BlankDistributionSummaryDTO summary = new BlankDistributionSummaryDTO();
@@ -458,6 +510,22 @@ public class RestUtilsTest {
         BlankCredentialDistribution res = this.restUtils.processBlankDistribution(bcd,summary);
         assertNotNull(res);
     }
+    @Test
+    public void testProcessBlankDistribution_null() {
+        final String credentialType = null;
+        BlankDistributionSummaryDTO summary = new BlankDistributionSummaryDTO();
+        summary.setCredentialType(null);
+        summary.setBatchId(4564L);
+
+        BlankCredentialDistribution bcd = new BlankCredentialDistribution();
+        bcd.setQuantity(5);
+        bcd.setSchoolOfRecord("11231111");
+        bcd.setCredentialTypeCode("BC1996-PUB");
+
+        BlankCredentialDistribution res = this.restUtils.processBlankDistribution(bcd,summary);
+        assertNotNull(res);
+    }
+
 
     @Test
     public void testProcessBlankDistribution_OC() {
@@ -477,6 +545,35 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GradCertificateTypes.class)).thenReturn(Mono.just(certificateTypes));
+
+        BlankCredentialDistribution bcd = new BlankCredentialDistribution();
+        bcd.setQuantity(5);
+        bcd.setSchoolOfRecord("11231111");
+        bcd.setCredentialTypeCode("E");
+
+        BlankCredentialDistribution res = this.restUtils.processBlankDistribution(bcd,summary);
+        assertNotNull(res);
+    }
+
+    @Test
+    public void testProcessBlankDistribution_OC_null() {
+        final String credentialType = "OC";
+        BlankDistributionSummaryDTO summary = new BlankDistributionSummaryDTO();
+        summary.setCredentialType("OC");
+        summary.setBatchId(4564L);
+
+        GradCertificateTypes certificateTypes = new GradCertificateTypes();
+        certificateTypes.setPaperType("YED2");
+        certificateTypes.setCode("E");
+        certificateTypes.setDescription("SDS");
+        certificateTypes.setLabel("fere");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getCertificateTypes(),"E"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GradCertificateTypes.class)).thenReturn(inputResponse);
+        when(this.inputResponse.block()).thenReturn(null);
 
         BlankCredentialDistribution bcd = new BlankCredentialDistribution();
         bcd.setQuantity(5);
@@ -568,6 +665,46 @@ public class RestUtilsTest {
         final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
         };
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(student)));
+
+        PsiCredentialDistribution res = this.restUtils.processPsiDistribution(bcd,summary);
+        assertNotNull(res);
+    }
+
+    @Test
+    public void testProcessPsiDistribution_else_2() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "1232131231";
+        final String pen2 = "12321312";
+        final Long batchId = 9879L;
+        List<PsiCredentialDistribution> globalList = new ArrayList<>();
+
+        PsiCredentialDistribution scd = new PsiCredentialDistribution();
+        scd.setPen(pen);
+        scd.setPsiYear("2021");
+        scd.setStudentID(studentID);
+        globalList.add(scd);
+
+        PsiDistributionSummaryDTO summary = new PsiDistributionSummaryDTO();
+        summary.setBatchId(batchId);
+        summary.setGlobalList(globalList);
+
+        PsiCredentialDistribution bcd = new PsiCredentialDistribution();
+        bcd.setPen(pen2);
+        bcd.setPsiCode("001");
+        bcd.setPsiYear("2021");
+
+        final Student student = new Student();
+        student.setStudentID(studentID.toString());
+        student.setPen(pen2);
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getPenStudentApiByPenUrl(), pen2))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
+        };
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(new ArrayList<>()));
 
         PsiCredentialDistribution res = this.restUtils.processPsiDistribution(bcd,summary);
         assertNotNull(res);

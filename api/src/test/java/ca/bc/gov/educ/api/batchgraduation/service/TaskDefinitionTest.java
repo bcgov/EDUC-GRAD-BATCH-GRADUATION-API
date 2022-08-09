@@ -209,4 +209,46 @@ public class TaskDefinitionTest {
         assertNotNull(task);
     }
 
+    @Test
+    public void testRun_withpsipayload() throws NoSuchJobException {
+        Task task = new Task();
+
+        task.setJobName("URPDBJ");
+        task.setCronExpression("0 0 20 * * *");
+        task.setProperUserName(null);
+        task.setDeliveredToUser(false);
+        task.setCredentialType(null);
+
+        PsiCredentialRequest bReq = new PsiCredentialRequest();
+        bReq.setPsiCodes(List.of("12312311145"));
+        bReq.setPsiYear("2021");
+        task.setPsiPayLoad(bReq);
+
+        taskDefinition.setTask(task);
+        Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        taskDefinition.run();
+        assertNotNull(task);
+    }
+
+    @Test
+    public void testRun_withpsipayload_validatenotnull() throws NoSuchJobException {
+        Task task = new Task();
+
+        task.setJobName("URPDBJ");
+        task.setCronExpression("0 0 20 * * *");
+        task.setProperUserName(null);
+        task.setDeliveredToUser(false);
+        task.setCredentialType(null);
+
+        PsiCredentialRequest bReq = new PsiCredentialRequest();
+        bReq.setPsiCodes(List.of("12312311145"));
+        bReq.setPsiYear("");
+        task.setPsiPayLoad(bReq);
+
+        taskDefinition.setTask(task);
+        Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        taskDefinition.run();
+        assertNotNull(task);
+    }
+
 }
