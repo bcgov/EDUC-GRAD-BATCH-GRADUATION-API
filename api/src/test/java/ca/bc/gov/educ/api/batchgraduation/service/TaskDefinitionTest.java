@@ -164,6 +164,34 @@ public class TaskDefinitionTest {
     }
 
     @Test
+    public void testRun_withemptyblankpayload_3() throws NoSuchJobException {
+        Task task = new Task();
+
+        task.setJobName("SGBJ");
+        task.setCronExpression("0 0 20 * * *");
+        task.setProperUserName(null);
+        task.setDeliveredToUser(false);
+        task.setCredentialType(null);
+        BlankCredentialRequest bReq = new BlankCredentialRequest();
+        bReq.setQuantity(5);
+        bReq.setSchoolOfRecords(List.of("E"));
+        bReq.setCredentialTypeCode(new ArrayList<>());
+        task.setBlankPayLoad(bReq);
+        taskDefinition.setTask(task);
+        Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        taskDefinition.run();
+
+        bReq = new BlankCredentialRequest();
+        bReq.setQuantity(5);
+        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setCredentialTypeCode(List.of("E"));
+        task.setBlankPayLoad(bReq);
+        taskDefinition.setTask(task);
+        taskDefinition.run();
+        assertNotNull(task);
+    }
+
+    @Test
     public void testRun_withemptyregularpayload() throws NoSuchJobException {
         Task task = new Task();
 
