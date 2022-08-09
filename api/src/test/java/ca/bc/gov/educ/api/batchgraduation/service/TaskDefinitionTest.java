@@ -124,14 +124,6 @@ public class TaskDefinitionTest {
         taskDefinition.setTask(task);
         Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
         taskDefinition.run();
-
-        bReq = new BlankCredentialRequest();
-        bReq.setQuantity(5);
-        bReq.setSchoolOfRecords(new ArrayList<>());
-        bReq.setCredentialTypeCode(List.of("E"));
-        task.setBlankPayLoad(bReq);
-        taskDefinition.setTask(task);
-        taskDefinition.run();
         assertNotNull(task);
     }
 
