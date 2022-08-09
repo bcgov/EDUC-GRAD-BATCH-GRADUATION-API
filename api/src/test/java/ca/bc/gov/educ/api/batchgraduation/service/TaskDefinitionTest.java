@@ -218,6 +218,8 @@ public class TaskDefinitionTest {
         task.setProperUserName(null);
         task.setDeliveredToUser(false);
         task.setCredentialType(null);
+        task.setTransmissionType("PAPER");
+        task.setLocalDownload("N");
 
         PsiCredentialRequest bReq = new PsiCredentialRequest();
         bReq.setPsiCodes(List.of("12312311145"));

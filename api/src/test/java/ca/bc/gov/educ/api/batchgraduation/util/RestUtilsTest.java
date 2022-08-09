@@ -50,6 +50,14 @@ public class RestUtilsTest {
     private Mono<GradCertificateTypes> inputResponse;
     @Mock
     private Mono<GraduationStudentRecordDistribution> inputResponseGSR;
+    @Mock
+    private Mono<GraduationStudentRecordSearchResult> inputResponseSR;
+
+    @Mock
+    private Mono<DistributionResponse> inputResponsePSI;
+
+    @Mock
+    private Mono<Integer> inputResponseI;
 
     @Mock
     private WebClient.RequestHeadersSpec requestHeadersMock;
@@ -161,10 +169,41 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecordSearchResult.class)).thenReturn(Mono.just(res));
 
+
         var result = this.restUtils.getStudentsForSpecialGradRun(req, "123");
         assertThat(result).isNotNull();
         assertThat(result.get(0).getPen()).isEqualTo(pen);
     }
+
+    @Test
+    public void testGetStudentsForSpecialGradRun_with_APICallSuccess_null() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+
+        StudentSearchRequest req = new StudentSearchRequest();
+        req.setPens(Arrays.asList(pen));
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        GraduationStudentRecordSearchResult res = new GraduationStudentRecordSearchResult();
+        res.setGraduationStudentRecords(Arrays.asList(graduationStatus));
+
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentApiStudentForSpcGradListUrl(), studentID))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStudentRecordSearchResult.class)).thenReturn(inputResponseSR);
+        when(this.inputResponseSR.block()).thenReturn(null);
+
+        var result = this.restUtils.getStudentsForSpecialGradRun(req, "123");
+        assertThat(result).isNotNull().isEmpty();
+    }
+
     @Test
     public void testProcessStudent() {
         final UUID studentID = UUID.randomUUID();
@@ -730,6 +769,44 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testCreateBlankCredentialsAndUpload_null() {
+        final Long batchId = 9879L;
+
+        DistributionResponse res = new DistributionResponse();
+        res.setMergeProcessResponse("Done");
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateBlanksAndUpload(),batchId,"N"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
+        when(this.inputResponsePSI.block()).thenReturn(null);
+
+        this.restUtils.createBlankCredentialsAndUpload(batchId,"abc",new HashMap<>(),"N");
+        assertNotNull(res);
+    }
+
+
+    @Test
+    public void testcreateAndStoreSchoolReports_null() {
+        final String type = "NONGRADPRJ";
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStore(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(inputResponseI);
+        when(this.inputResponseI.block()).thenReturn(null);
+
+        this.restUtils.createAndStoreSchoolReports("Abc",new ArrayList<>(),type);
+        assertNotNull(type);
+    }
+
+    @Test
     public void testcreateAndStoreSchoolReports() {
         final String type = "NONGRADPRJ";
 
@@ -927,6 +1004,28 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testCreateReprintAndUpload_null() {
+        String activityCode = "USERDISTRC";
+        DistributionResponse req = new DistributionResponse();
+        req.setMergeProcessResponse("Merged");
+        Long batchId = 3344L;
+        final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getReprintAndUpload(),batchId,activityCode,null))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
+        when(this.inputResponsePSI.block()).thenReturn(null);
+
+
+        val result = this.restUtils.createReprintAndUpload(batchId,null,new HashMap<>(), activityCode,null);
+        assertThat(result).isNull();
+    }
+
+    @Test
     public void testMergeAndUpload() {
         String activityCode = "USERDISTOC";
         DistributionResponse req = new DistributionResponse();
@@ -944,6 +1043,26 @@ public class RestUtilsTest {
         val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,null);
         assertThat(result).isNotNull();
     }
+    @Test
+    public void testMergeAndUpload_null() {
+        String activityCode = "USERDISTOC";
+        DistributionResponse req = new DistributionResponse();
+        req.setMergeProcessResponse("Merged");
+        Long batchId = 3344L;
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getMergeAndUpload(),batchId,activityCode,null))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
+        when(this.inputResponsePSI.block()).thenReturn(null);
+
+
+        val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,null);
+        assertThat(result).isNull();
+    }
+
 
     @Test
     public void testMergePSIAndUpload() {
@@ -957,6 +1076,25 @@ public class RestUtilsTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
+
+
+        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y");
+        assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void testMergePSIAndUpload_null() {
+        DistributionResponse req = new DistributionResponse();
+        req.setMergeProcessResponse("Merged");
+        Long batchId = 3344L;
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getMergePsiAndUpload(),batchId,"Y"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
+        when(this.inputResponsePSI.block()).thenReturn(null);
 
 
         val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y");
