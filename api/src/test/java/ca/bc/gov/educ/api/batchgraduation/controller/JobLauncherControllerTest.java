@@ -8,7 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.JobExecution;
@@ -80,7 +79,7 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TYPE, REGALG);
 
         try {
-            Mockito.when(jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchRegGradJob();
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -97,7 +96,7 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, SCHREPORT);
         try {
-            Mockito.when(jobLauncher.run(jobRegistry.getJob("SchoolReportBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("SchoolReportBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchSchoolReportRunJob();
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -114,7 +113,7 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
         try {
-            Mockito.when(jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchTvrRunJob();
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -165,7 +164,7 @@ public class JobLauncherControllerTest {
         StudentSearchRequest req = new StudentSearchRequest();
         req.setPens(Arrays.asList("123213123"));
         try {
-            Mockito.when(jobLauncher.run(jobRegistry.getJob("SpecialTvrRunBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("SpecialTvrRunBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchTvrRunSpecialJob(req);
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -226,7 +225,7 @@ public class JobLauncherControllerTest {
         StudentSearchRequest req = new StudentSearchRequest();
         req.setPens(Arrays.asList("123213123"));
         try {
-            Mockito.when(jobLauncher.run(jobRegistry.getJob("UserReqDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("UserReqDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchUserReqDisRunSpecialJob("OT",req);
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -290,7 +289,7 @@ public class JobLauncherControllerTest {
         req.setCredentialTypeCode(Arrays.asList("123213123"));
         req.setSchoolOfRecords(List.of("23213112"));
         try {
-            Mockito.when(jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchUserReqBlankDisRunSpecialJob(req,"OT");
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -311,7 +310,7 @@ public class JobLauncherControllerTest {
         req.setSchoolOfRecords(Arrays.asList("123213123"));
         req.setCredentialTypeCode(new ArrayList<>());
         try {
-            Mockito.when(jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchUserReqBlankDisRunSpecialJob(req,"OT");
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -333,7 +332,7 @@ public class JobLauncherControllerTest {
         req.setSchoolOfRecords(new ArrayList<>());
 
         try {
-            Mockito.when(jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchUserReqBlankDisRunSpecialJob(req,"OT");
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -349,7 +348,7 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNYEAREND);
         try {
-            Mockito.when(jobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchYearlyDistributionRunJob();
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -423,16 +422,16 @@ public class JobLauncherControllerTest {
         dash.setLastExpectedStudentsProcessed("20");
         dash.setLastFailedStudentsProcessed("10");
 
-        Mockito.when(gradDashboardService.getDashboardInfo()).thenReturn(dash);
+        org.mockito.Mockito.when(gradDashboardService.getDashboardInfo()).thenReturn(dash);
         jobLauncherController.loadDashboard();
-        Mockito.verify(gradDashboardService).getDashboardInfo();
+        org.mockito.Mockito.verify(gradDashboardService).getDashboardInfo();
     }
 
     @Test
     public void testLoadDashboard_null() {
-        Mockito.when(gradDashboardService.getDashboardInfo()).thenReturn(null);
+        org.mockito.Mockito.when(gradDashboardService.getDashboardInfo()).thenReturn(null);
         jobLauncherController.loadDashboard();
-        Mockito.verify(gradDashboardService).getDashboardInfo();
+        org.mockito.Mockito.verify(gradDashboardService).getDashboardInfo();
     }
 
     @Test
@@ -442,15 +441,15 @@ public class JobLauncherControllerTest {
         dash.setNumber(0);
         dash.setSize(10);
 
-        Mockito.when(gradDashboardService.getBatchSummary(0,10)).thenReturn(dash);
+        org.mockito.Mockito.when(gradDashboardService.getBatchSummary(0,10)).thenReturn(dash);
         jobLauncherController.loadSummary(0,10);
-        Mockito.verify(gradDashboardService).getBatchSummary(0,10);
+        org.mockito.Mockito.verify(gradDashboardService).getBatchSummary(0,10);
     }
     @Test
     public void testloadSummary_null() {
-        Mockito.when(gradDashboardService.getBatchSummary(0,10)).thenReturn(null);
+        org.mockito.Mockito.when(gradDashboardService.getBatchSummary(0,10)).thenReturn(null);
         jobLauncherController.loadSummary(0,10);
-        Mockito.verify(gradDashboardService).getBatchSummary(0,10);
+        org.mockito.Mockito.verify(gradDashboardService).getBatchSummary(0,10);
     }
 
 
@@ -461,15 +460,15 @@ public class JobLauncherControllerTest {
         dash.setNumber(0);
         dash.setSize(10);
 
-        Mockito.when(gradDashboardService.getErrorInfo(1234L,0,10,"accessToken")).thenReturn(dash);
+        org.mockito.Mockito.when(gradDashboardService.getErrorInfo(1234L,0,10,"accessToken")).thenReturn(dash);
         jobLauncherController.loadError(1234L,0,10,"accessToken");
-        Mockito.verify(gradDashboardService).getErrorInfo(1234L,0,10,"accessToken");
+        org.mockito.Mockito.verify(gradDashboardService).getErrorInfo(1234L,0,10,"accessToken");
     }
 
     @Test
     public void testLoadError_null() {
-        Mockito.when(gradDashboardService.getDashboardInfo()).thenReturn(null);
+        org.mockito.Mockito.when(gradDashboardService.getDashboardInfo()).thenReturn(null);
         jobLauncherController.loadDashboard();
-        Mockito.verify(gradDashboardService).getDashboardInfo();
+        org.mockito.Mockito.verify(gradDashboardService).getDashboardInfo();
     }
 }
