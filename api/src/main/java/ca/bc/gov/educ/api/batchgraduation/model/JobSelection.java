@@ -4,6 +4,7 @@ public enum JobSelection {
 	SGBJ ("REGALG"),
 	STBJ ("TVRRUN"),
 	URDBJ ("DISTRUNUSER"),
+    URPDBJ ("PSIRUN"),
     BDBJ ("DISTRUNUSER");
 
     private final String value;

@@ -40,6 +40,8 @@ public class GradSearchStudent {
 	private String schoolOfRecordindependentAffiliation;
 	private String studentGrade;
 	private String studentStatus;
+	private String transcriptEligibility;
+	private String certificateEligibility;
 	  
 	  
 }

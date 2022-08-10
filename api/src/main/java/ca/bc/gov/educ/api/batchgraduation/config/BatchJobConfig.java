@@ -624,6 +624,68 @@ public class BatchJobConfig {
                 .build();
     }
 
+    /**
+     * User PSI Credential Distribution Run
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
+
+    @Bean
+    @StepScope
+    public ItemProcessor<PsiCredentialDistribution,PsiCredentialDistribution> itemProcessorPsiDisRun() {
+        return new PsiDistributionRunProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<PsiCredentialDistribution> itemReaderPsiDisRun() {
+        return new PsiDistributionRunReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<PsiCredentialDistribution> itemWriterPsiDisRun() {
+        return new PsiDistributionRunWriter();
+    }
+
+
+    @Bean
+    @StepScope
+    public DistributionRunPartitionerPsiUserReq partitionerDisRunPsiUserReq() {
+        return new DistributionRunPartitionerPsiUserReq();
+    }
+
+    @Bean
+    public Step slaveStepPsiDisRun(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepPsiDisRun")
+                .<PsiCredentialDistribution, PsiCredentialDistribution>chunk(1)
+                .reader(itemReaderPsiDisRun())
+                .processor(itemProcessorPsiDisRun())
+                .writer(itemWriterPsiDisRun())
+                .build();
+    }
+
+    @Bean
+    public Step masterStepPsiUserReqDisRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepPsiUserReqDisRun")
+                .partitioner(slaveStepPsiDisRun(stepBuilderFactory).getName(), partitionerDisRunPsiUserReq())
+                .step(slaveStepPsiDisRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .build();
+    }
+
+
+    @Bean(name="psiDistributionBatchJob")
+    public Job psiDistributionBatchJobUserReq(UserReqPsiDistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("psiDistributionBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepPsiUserReqDisRun(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
     @Bean
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {
         JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();

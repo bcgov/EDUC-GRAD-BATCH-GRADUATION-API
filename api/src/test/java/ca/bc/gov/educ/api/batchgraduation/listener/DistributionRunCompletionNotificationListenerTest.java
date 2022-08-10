@@ -27,10 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,6 +94,9 @@ public class DistributionRunCompletionNotificationListenerTest {
         ExecutionContext jobContext = new ExecutionContext();
 
 
+        Map<String,DistributionPrintRequest> mapDist = new HashMap<>();
+        DistributionPrintRequest dpR = new DistributionPrintRequest();
+
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
         scd.setId(new UUID(1,1));
@@ -142,7 +142,23 @@ public class DistributionRunCompletionNotificationListenerTest {
 
         List<StudentCredentialDistribution> tList = new ArrayList<>();
         tList.add(scd);
+        TranscriptPrintRequest tr = new TranscriptPrintRequest();
+        tr.setTranscriptList(tList);
+        CertificatePrintRequest cr = new CertificatePrintRequest();
+        cr.setCertificateList(cList);
+        cr.setPsId("05005001 121");
+        cr.setCount(1);
+        cr.setBatchId(121L);
+        dpR.setYed2CertificatePrintRequest(cr);
+        dpR.setTotal(1);
+        SchoolDistributionRequest schoolDistributionRequest = new SchoolDistributionRequest();
+        schoolDistributionRequest.setBatchId(121L);
+        schoolDistributionRequest.setPsId("05005001 121");
+        schoolDistributionRequest.setCount(1);
+        schoolDistributionRequest.setStudentList(scdList);
+        dpR.setSchoolDistributionRequest(schoolDistributionRequest);
 
+        mapDist.put("05005001",dpR);
         DistributionDataParallelDTO dp = new DistributionDataParallelDTO(tList,cList);
 
         ParameterizedTypeReference<List<StudentCredentialDistribution>> tListRes = new ParameterizedTypeReference<>() {
@@ -169,6 +185,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
         Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
+        Mockito.when(restUtils.mergeAndUpload(121L,"asdasd",mapDist,"YEARENDDIST",null)).thenReturn(new DistributionResponse());
         distributionRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);

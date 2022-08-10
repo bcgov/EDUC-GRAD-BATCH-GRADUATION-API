@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -49,9 +50,12 @@ public class JobLauncherController {
     private static final String DISTRUNMONTH = "DISTRUNMONTH";
     private static final String DISTRUNYEAREND = "DISTRUNYEAREND";
     private static final String DISTRUNUSER = "DISTRUNUSER";
+    private static final String PSIDISTRUN = "PSIRUN";
     private static final String CREDENTIALTYPE = "credentialType";
+    private static final String TRANMISSION_TYPE = "transmissionType";
     private static final String DISDTO = "distributionSummaryDTO";
     private static final String SCHREPORT = "SCHREP";
+    private static final String LOCALDOWNLOAD = "LocalDownload";
 
     private final JobLauncher jobLauncher;
     private final JobRegistry jobRegistry;
@@ -309,7 +313,7 @@ public class JobLauncherController {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
-        builder.addString("LocalDownload",studentSearchRequest.getLocalDownload());
+        builder.addString(LOCALDOWNLOAD,studentSearchRequest.getLocalDownload());
         DistributionSummaryDTO validate = validateInputDisRun(studentSearchRequest);
         if(validate != null) {
             return ResponseEntity.status(400).body(validate);
@@ -341,7 +345,7 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
         builder.addString(CREDENTIALTYPE,credentialType);
-        builder.addString("LocalDownload",blankCredentialRequest.getLocalDownload());
+        builder.addString(LOCALDOWNLOAD,blankCredentialRequest.getLocalDownload());
         BlankDistributionSummaryDTO validate = validateInputBlankDisRun(blankCredentialRequest);
         if(validate != null) {
             return ResponseEntity.status(400).body(validate);
@@ -383,5 +387,47 @@ public class JobLauncherController {
             return ResponseEntity.status(500).body(summaryDTO);
         }
 
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_PSI_USER_REQ_RUNS)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Specialized User Req PSI Runs", description = "Run specialized PSI Distribution runs", tags = { "PSIs" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<PsiDistributionSummaryDTO> launchUserReqPsiDisRunSpecialJob(@RequestBody PsiCredentialRequest psiCredentialRequest,@PathVariable String transmissionType) {
+        logger.debug("launchUserReqPsiDisRunSpecialJob");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, PSIDISTRUN);
+        builder.addString(TRANMISSION_TYPE,transmissionType);
+        if(transmissionType.equalsIgnoreCase("FTP"))
+            builder.addString(LOCALDOWNLOAD,"Y");
+
+        PsiDistributionSummaryDTO validate = validateInputPsiDisRun(psiCredentialRequest);
+        if(validate != null) {
+            return ResponseEntity.status(400).body(validate);
+        }
+        try {
+            String searchData = new ObjectMapper().writeValueAsString(psiCredentialRequest);
+            builder.addString(SEARCH_REQUEST, searchData);
+            JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("psiDistributionBatchJob"), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
+            return ResponseEntity.ok(summaryDTO);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
+            PsiDistributionSummaryDTO summaryDTO = new PsiDistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
+        }
+
+    }
+
+    private PsiDistributionSummaryDTO validateInputPsiDisRun(PsiCredentialRequest psiCredentialRequest) {
+        if(psiCredentialRequest.getPsiCodes().isEmpty() || StringUtils.isBlank(psiCredentialRequest.getPsiYear())) {
+            PsiDistributionSummaryDTO summaryDTO = new PsiDistributionSummaryDTO();
+            summaryDTO.setException("Please provide both parameters");
+            return summaryDTO;
+        }
+        return null;
     }
 }

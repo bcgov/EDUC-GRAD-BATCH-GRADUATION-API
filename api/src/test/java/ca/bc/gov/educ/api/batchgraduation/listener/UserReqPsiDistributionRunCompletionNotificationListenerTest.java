@@ -1,15 +1,17 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
-import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
+import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -19,11 +21,15 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -31,17 +37,33 @@ import static org.mockito.MockitoAnnotations.openMocks;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class SpecialRunCompletionNotificationListenerTest {
+public class UserReqPsiDistributionRunCompletionNotificationListenerTest {
 
     private static final String TIME = "time";
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
 
+    @Mock
+    WebClient.RequestHeadersSpec requestHeadersMock;
+    @Mock WebClient.RequestHeadersUriSpec requestHeadersUriMock;
+    @Mock WebClient.ResponseSpec responseMock;
+    @Mock WebClient.RequestBodySpec requestBodyMock;
+    @Mock WebClient.RequestBodyUriSpec requestBodyUriMock;
+
     @Autowired
-    private SpecialRunCompletionNotificationListener specialRunCompletionNotificationListener;
+    private UserReqPsiDistributionRunCompletionNotificationListener userReqPsiDistributionRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
     @MockBean
     RestUtils restUtils;
+
+    @Autowired
+    EducGradBatchGraduationApiConstants constants;
+
+    @Autowired
+    ParallelDataFetch parallelDataFetch;
+
+    @Autowired
+    GraduationReportService graduationReportService;
 
     @MockBean
     WebClient webClient;
@@ -61,22 +83,37 @@ public class SpecialRunCompletionNotificationListenerTest {
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, "MANUAL");
-        builder.addString(JOB_TYPE, "TVRRUN");
+        builder.addString(JOB_TYPE, "PSIRUN");
+        builder.addString("transmissionType","FTP");
 
-        JobExecution ex = new JobExecution(121L);
+        JobExecution ex = new JobExecution(new JobInstance(121L,"psiDistributionBatchJob"), builder.toJobParameters(), null);
         ex.setStatus(BatchStatus.COMPLETED);
         ex.setStartTime(new Date());
         ex.setEndTime(new Date());
         ex.setId(121L);
-        ExecutionContext jobContext = new ExecutionContext();
+        ExecutionContext jobContext = ex.getExecutionContext();
 
+        final UUID studentID = UUID.randomUUID();
+        List<PsiCredentialDistribution> scdList = new ArrayList<>();
+        PsiCredentialDistribution scd = new PsiCredentialDistribution();
+        scd.setPsiCode("001");
+        scd.setPsiYear("2021");
+        scd.setStudentID(studentID);
+        scd.setPen("232131131");
+        scd = new PsiCredentialDistribution();
+        scd.setPsiCode("003");
+        scd.setPsiYear("2021");
+        scd.setStudentID(studentID);
+        scd.setPen("232131131");
+        scdList.add(scd);
 
-        AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
+        PsiDistributionSummaryDTO summaryDTO = new PsiDistributionSummaryDTO();
         summaryDTO.setAccessToken("123");
         summaryDTO.setBatchId(121L);
         summaryDTO.setProcessedCount(10);
-        summaryDTO.setErrors(new HashMap<>());
-        jobContext.put("summaryDTO", summaryDTO);
+        summaryDTO.setErrors(new ArrayList<>());
+        summaryDTO.setGlobalList(scdList);
+        jobContext.put("psiDistributionSummaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
@@ -87,6 +124,7 @@ public class SpecialRunCompletionNotificationListenerTest {
         Date endTime = ex.getEndTime();
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
+        String transmissionType = jobParameters.getString("transmissionType");
 
         BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
         ent.setActualStudentsProcessed(processedStudents);
@@ -100,63 +138,17 @@ public class SpecialRunCompletionNotificationListenerTest {
         ent.setJobType(jobType);
 
         ex.setExecutionContext(jobContext);
-        specialRunCompletionNotificationListener.afterJob(ex);
 
-        assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
-    }
+        List<PsiCredentialDistribution> cList = new ArrayList<>();
+        cList.add(scd);
 
-    @Test
-    public void testAfterJob_witherror() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
-        JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, "MANUAL");
-        builder.addString(JOB_TYPE, "TVRRUN");
+        ParameterizedTypeReference<List<PsiCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
+        };
 
-        JobExecution ex = new JobExecution(121L);
-        ex.setStatus(BatchStatus.COMPLETED);
-        ex.setStartTime(new Date());
-        ex.setEndTime(new Date());
-        ex.setId(121L);
-        ExecutionContext jobContext = new ExecutionContext();
-
-
-        AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-        summaryDTO.setAccessToken("123");
-        summaryDTO.setBatchId(121L);
-        summaryDTO.setProcessedCount(10);
-
-        ProcessError er = new ProcessError();
-        er.setReason("ERE");
-        er.setDetail("erer");
-        er.setStudentID(UUID.randomUUID().toString());
-        Map<UUID,ProcessError> mapP = new HashMap<>();
-        mapP.put(UUID.randomUUID(),er);
-        summaryDTO.setErrors(mapP);
-        jobContext.put("spcRunAlgSummaryDTO", summaryDTO);
-
-        JobParameters jobParameters = ex. getJobParameters();
-        int failedRecords = summaryDTO.getErrors().size();
-        Long processedStudents = summaryDTO.getProcessedCount();
-        Long expectedStudents = summaryDTO.getReadCount();
-        String status = ex.getStatus().toString();
-        Date startTime = ex.getStartTime();
-        Date endTime = ex.getEndTime();
-        String jobTrigger = jobParameters.getString("jobTrigger");
-        String jobType = jobParameters.getString("jobType");
-
-        BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
-        ent.setActualStudentsProcessed(processedStudents);
-        ent.setExpectedStudentsProcessed(expectedStudents);
-        ent.setFailedStudentsProcessed(failedRecords);
-        ent.setJobExecutionId(121L);
-        ent.setStartTime(startTime);
-        ent.setEndTime(endTime);
-        ent.setStatus(status);
-        ent.setTriggerBy(jobTrigger);
-        ent.setJobType(jobType);
-
-        ex.setExecutionContext(jobContext);
-        specialRunCompletionNotificationListener.afterJob(ex);
+        ResponseObj obj = new ResponseObj();
+        obj.setAccess_token("asdasd");
+        Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
+        userReqPsiDistributionRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
     }

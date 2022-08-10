@@ -22,6 +22,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_DIS_RUN_BATCH_JOB = "/executedisrunbatchjob";
     public static final String EXECUTE_YEARLY_DIS_RUN_BATCH_JOB = "/executeyearlydisrunbatchjob";
     public static final String EXECUTE_SCHOOL_REPORT_RUN_BATCH_JOB = "/executeschoolreportbatchjob";
+    public static final String EXECUTE_SPECIALIZED_PSI_USER_REQ_RUNS = "/executepsireportbatchjob";
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
     public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
@@ -111,6 +112,10 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-distribution-api.merge-n-upload.url}")
     private String mergeAndUpload;
 
+    @Value("${endpoint.grad-distribution-api.merge-psi-n-upload.url}")
+    private String mergePsiAndUpload;
+
+
     @Value("${endpoint.grad-distribution-api.merge-n-upload-yearly.url}")
     private String mergeAndUploadYearly;
 
@@ -149,5 +154,8 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-report-api.update-school-report.url}")
     private String updateSchoolReport;
+
+    @Value("${endpoint.grad-trax-api.get-psi-student-list.url}")
+    private String psiStudentList;
 
 }

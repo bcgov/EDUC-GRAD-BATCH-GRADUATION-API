@@ -24,13 +24,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,6 +55,7 @@ public class SchoolReportRunCompletionNotificationListenerTest {
     @Autowired
     private SchoolReportRunCompletionNotificationListener schoolReportRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
+
     @MockBean
     RestUtils restUtils;
 
@@ -87,7 +86,7 @@ public class SchoolReportRunCompletionNotificationListenerTest {
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "SCHREP");
 
-        JobExecution ex = new JobExecution(121L);
+        JobExecution ex = new JobExecution(new JobInstance(121L,"SchoolReportBatchJob"), builder.toJobParameters(), null);
         ex.setStatus(BatchStatus.COMPLETED);
         ex.setStartTime(new Date());
         ex.setEndTime(new Date());
@@ -120,6 +119,19 @@ public class SchoolReportRunCompletionNotificationListenerTest {
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
 
+        Map<String,DistributionPrintRequest> mapDist = new HashMap<>();
+        DistributionPrintRequest dpr =new DistributionPrintRequest();
+        SchoolReportPostRequest schoolReportPostRequest = new SchoolReportPostRequest();
+        SchoolReportDistribution dO = new SchoolReportDistribution();
+        dO.setSchoolOfRecord("05005001");
+        dO.setReportTypeCode("GRAD");
+        dO.setId(new UUID(1,1));
+        schoolReportPostRequest.setBatchId(121L);
+        schoolReportPostRequest.setPsId("05005001 121");
+        schoolReportPostRequest.setGradReport(dO);
+        dpr.setSchoolReportPostRequest(schoolReportPostRequest);
+        dpr.setTotal(1);
+        mapDist.put("05005001",dpr);
         BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
         ent.setActualStudentsProcessed(processedStudents);
         ent.setExpectedStudentsProcessed(expectedStudents);
@@ -145,6 +157,15 @@ public class SchoolReportRunCompletionNotificationListenerTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(cList));
 
+        when(this.restUtils.readAndPostSchoolReports(121L,"asdasd",mapDist)).thenReturn(new DistributionResponse());
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(constants.getUpdateSchoolReport(),scd.getSchoolOfRecord(),scd.getReportTypeCode())).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(boolean.class)).thenReturn(Mono.just(true));
 
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");

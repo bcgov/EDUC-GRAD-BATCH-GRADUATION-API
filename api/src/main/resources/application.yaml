@@ -173,3 +173,8 @@ endpoint:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/BCPR?batchId=%s&localDownload=%s
     read-n-post:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSR?batchId=%s
+    merge-psi-n-upload:
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSPR?batchId=%s&localDownload=%s
+  grad-trax-api:
+    get-psi-student-list:
+      url: ${GRAD_TRAX_API}api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s

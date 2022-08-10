@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
@@ -16,7 +15,9 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -38,7 +39,7 @@ public class SchoolReportRunCompletionNotificationListener extends JobExecutionL
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("School Report Posting  Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus().toString());
+	    	LOGGER.info("School Report Posting  Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 	    	JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
@@ -55,7 +56,6 @@ public class SchoolReportRunCompletionNotificationListener extends JobExecutionL
 			Long processedStudents = summaryDTO.getProcessedCount();
 			Long expectedStudents = summaryDTO.getReadCount();
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token());
 			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
 			ent.setActualStudentsProcessed(processedStudents);
 			ent.setExpectedStudentsProcessed(expectedStudents);
@@ -72,25 +72,13 @@ public class SchoolReportRunCompletionNotificationListener extends JobExecutionL
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
-			LOGGER.info(" Errors:		   {}", summaryDTO.getErrors().size());
-			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
-			summaryDTO.getErrors().forEach(e -> {
-				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail());
-				BatchGradAlgorithmErrorHistoryEntity errorHistory = new BatchGradAlgorithmErrorHistoryEntity();
-				errorHistory.setStudentID(UUID.fromString(e.getStudentID()));
-				errorHistory.setJobExecutionId(jobExecutionId);
-				errorHistory.setError(e.getReason() + "-" + e.getDetail());
-				eList.add(errorHistory);
-			});
-			if(!eList.isEmpty())
-				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
-
+			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			SchoolReportSummaryDTO finalSummaryDTO = summaryDTO;
-			summaryDTO.getCredentialCountMap().entrySet().stream().forEach(e -> {
-				String key = e.getKey();
-				LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key));
-			});
+			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
+
+			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
+			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token());
 			LOGGER.info("=======================================================================================");
 		}
     }
@@ -112,9 +100,7 @@ public class SchoolReportRunCompletionNotificationListener extends JobExecutionL
 	}
 
 	private void updateBackStudentRecords(List<SchoolReportDistribution> cList,String accessToken) {
-		cList.forEach(scd-> {
-			restUtils.updateSchoolReportRecord(scd.getSchoolOfRecord(),scd.getReportTypeCode(),accessToken);
-		});
+		cList.forEach(scd->restUtils.updateSchoolReportRecord(scd.getSchoolOfRecord(),scd.getReportTypeCode(),accessToken));
 	}
 
 	private void schoolReportPrintFile(SchoolReportDistribution gradReport, SchoolReportDistribution nongradReport, SchoolReportDistribution nongradprjReport, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
