@@ -47,18 +47,19 @@ public class TaskSchedulingService {
 
     public List<UserScheduledJobs> listScheduledJobs() {
         List<UserScheduledJobs> jobs = userScheduledJobsTransformer.transformToDTO(userScheduledJobsRepository.findAll());
-        jobs.forEach(job-> {
-            if(jobsMap.containsKey(job.getId()) && job.getStatus().equalsIgnoreCase("COMPLETED")) {
-                ScheduledFuture<?> scheduledTask = jobsMap.get(job.getId());
-                if(scheduledTask != null) {
-                    scheduledTask.cancel(true);
-                    jobsMap.remove(job.getId());
-                }
-            }
-        });
+        jobs.forEach(job-> checkNUpdateMap(jobsMap,job));
         return jobs;
     }
 
+    public void checkNUpdateMap(Map<UUID, ScheduledFuture<?>> jobsMap, UserScheduledJobs job) {
+        if(jobsMap.containsKey(job.getId()) && job.getStatus().equalsIgnoreCase("COMPLETED")) {
+            ScheduledFuture<?> scheduledTask = jobsMap.get(job.getId());
+            if(scheduledTask != null) {
+                scheduledTask.cancel(true);
+                jobsMap.remove(job.getId());
+            }
+        }
+    }
     public void saveUserScheduledJobs(Task task) {
         JobProperName jName = JobProperName.valueOf(StringUtils.toRootUpperCase(task.getJobName()));
         UserScheduledJobsEntity entity = new UserScheduledJobsEntity();
@@ -68,7 +69,7 @@ public class TaskSchedulingService {
         try {
             entity.setJobParameters(new ObjectMapper().writeValueAsString(task));
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            logger.debug("Error {}",e.getLocalizedMessage());
         }
         entity.setStatus("QUEUED");
         entity = userScheduledJobsRepository.save(entity);

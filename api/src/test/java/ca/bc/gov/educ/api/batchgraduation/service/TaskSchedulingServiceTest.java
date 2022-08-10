@@ -1,25 +1,28 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.JobKey;
 import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
+import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,17 +39,18 @@ public class TaskSchedulingServiceTest {
     @Autowired
     TaskDefinition taskDefinition;
 
-    @MockBean
+    @Autowired
     TaskScheduler taskScheduler;
 
     @MockBean
     private RestUtils restUtils;
 
     @MockBean
+    private UserScheduledJobsRepository userScheduledJobsRepository;
+
+    @MockBean
     WebClient webClient;
 
-    @Mock
-    Map<JobKey, ScheduledFuture<?>> jobsMap = new HashMap<>();
 
     @Test
     public void testScheduleATask() {
@@ -69,8 +73,34 @@ public class TaskSchedulingServiceTest {
 
     @Test
     public void testListScheduledJobs() {
+        UUID jobId = UUID.randomUUID();
+
+        UserScheduledJobsEntity jobs = new UserScheduledJobsEntity();
+        jobs.setId(jobId);
+        jobs.setJobName("Blah");
+        jobs.setJobCode("BKSS");
+        jobs.setStatus("COMPLETED");
+        Mockito.when(userScheduledJobsRepository.findAll()).thenReturn(List.of(jobs));
+
         List<UserScheduledJobs> res = taskSchedulingService.listScheduledJobs();
         assertNotNull(res);
+    }
+
+    @Test
+    public void testcheckNUpdateMap() {
+        UUID jobId = UUID.randomUUID();
+
+        UserScheduledJobs jobs = new UserScheduledJobs();
+        jobs.setId(jobId);
+        jobs.setJobName("Blah");
+        jobs.setJobCode("BKSS");
+        jobs.setStatus("COMPLETED");
+
+        Map<UUID, ScheduledFuture<?>> jobsMap = new HashMap<>();
+        ScheduledFuture<?> sTask = taskScheduler.schedule(taskDefinition, new CronTrigger("0 12 23 5 7 *", TimeZone.getTimeZone(TimeZone.getDefault().getID())));
+        jobsMap.put(jobId,sTask);
+        taskSchedulingService.checkNUpdateMap(jobsMap,jobs);
+        assertThat(jobs).isNotNull();
     }
 
     @Test
@@ -78,6 +108,23 @@ public class TaskSchedulingServiceTest {
         Task task = new Task();
         task.setCronExpression("213211");
         task.setJobName("URDBJ");
+
+        UserScheduledJobsEntity entity = new UserScheduledJobsEntity();
+        entity.setJobCode(task.getJobName());
+        entity.setJobName("User Req Distribution Batch Job");
+        entity.setCronExpression(task.getCronExpression());
+        try {
+            entity.setJobParameters(new ObjectMapper().writeValueAsString(task));
+        } catch (JsonProcessingException ignored) {}
+
+        entity.setStatus("QUEUED");
+
+        UserScheduledJobsEntity ent2 = new UserScheduledJobsEntity();
+        ent2.setId(UUID.randomUUID());
+        ent2.setJobName("FREE");
+        ent2.setJobParameters("Adsad");
+
+        Mockito.when(userScheduledJobsRepository.save(entity)).thenReturn(ent2);
         taskSchedulingService.saveUserScheduledJobs(task);
         assertThat(task).isNotNull();
     }
