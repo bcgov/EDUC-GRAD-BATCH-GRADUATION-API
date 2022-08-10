@@ -1,7 +1,14 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.model.JobKey;
-import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
+import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
+import ca.bc.gov.educ.api.batchgraduation.model.JobProperName;
+import ca.bc.gov.educ.api.batchgraduation.model.Task;
+import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
+import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
+import ca.bc.gov.educ.api.batchgraduation.transformer.UserScheduledJobsTransformer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +16,8 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class TaskSchedulingService {
@@ -20,55 +25,54 @@ public class TaskSchedulingService {
     private static final Logger logger = LoggerFactory.getLogger(TaskSchedulingService.class);
 
     @Autowired TaskScheduler taskScheduler;
+    @Autowired UserScheduledJobsRepository userScheduledJobsRepository;
+    @Autowired UserScheduledJobsTransformer userScheduledJobsTransformer;
 
-    Map<JobKey, ScheduledFuture<?>> jobsMap = new HashMap<>();
-    private final Random rand = new SecureRandom();
+    Map<UUID, ScheduledFuture<?>> jobsMap = new HashMap<>();
 
-    public void scheduleATask(String jobUser,String jobName, Runnable tasklet, String cronExpression) {
-        logger.info("Scheduled Task {} by {}",jobName,jobUser);
-        JobKey newJk = new JobKey();
-        newJk.setJId(rand.nextInt(999999));
-        newJk.setJobUser(jobUser);
-        newJk.setJobName(jobName);
-        newJk.setCronExpression(cronExpression);
+    public void scheduleATask(UUID jobId,Runnable tasklet, String cronExpression) {
+        logger.info("Scheduled Task {}",jobId);
         ScheduledFuture<?> sTask = taskScheduler.schedule(tasklet, new CronTrigger(cronExpression, TimeZone.getTimeZone(TimeZone.getDefault().getID())));
-        jobsMap.put(newJk, sTask);
+        jobsMap.put(jobId, sTask);
     }
 
-    public void removeScheduledTask(int jobId, String jobName,String jobUser) {
-        JobKey jKey = new JobKey();
-        jKey.setJobName(jobName);
-        jKey.setJId(jobId);
-        jKey.setJobUser(jobUser);
-        ScheduledFuture<?> scheduledTask = jobsMap.get(jKey);
+    public void removeScheduledTask(UUID jobId) {
+        ScheduledFuture<?> scheduledTask = jobsMap.get(jobId);
         if(scheduledTask != null) {
             scheduledTask.cancel(true);
-            jobsMap.remove(jKey);
+            jobsMap.remove(jobId);
         }
         logger.info("Task removed {}",jobId);
     }
 
-    public List<ScheduledJobs> listScheduledJobs() {
-        List<ScheduledJobs> list = new ArrayList<>();
-        if(!jobsMap.isEmpty()) {
-            jobsMap.forEach((k,v)->{
-              ScheduledJobs sJobs = new ScheduledJobs();
-              sJobs.setRowId(k.getJId()+"_"+k.getJobName()+"_"+k.getJobUser());
-              sJobs.setJobId(k.getJId());
-              sJobs.setJobName(k.getJobName());
-              sJobs.setScheduledBy(k.getJobUser());
-              sJobs.setCronExpression(k.getCronExpression());
-              if(v != null) {
-                  if (v.getDelay(TimeUnit.MINUTES) < 0) {
-                      sJobs.setStatus("Completed");
-                  } else {
-                      sJobs.setStatus("In Queue");
-                  }
-              }
-              list.add(sJobs);
-            });
-            return list;
+    public List<UserScheduledJobs> listScheduledJobs() {
+        List<UserScheduledJobs> jobs = userScheduledJobsTransformer.transformToDTO(userScheduledJobsRepository.findAll());
+        jobs.forEach(job-> {
+            if(jobsMap.containsKey(job.getId()) && job.getStatus().equalsIgnoreCase("COMPLETED")) {
+                ScheduledFuture<?> scheduledTask = jobsMap.get(job.getId());
+                if(scheduledTask != null) {
+                    scheduledTask.cancel(true);
+                    jobsMap.remove(job.getId());
+                }
+            }
+        });
+        return jobs;
+    }
+
+    public void saveUserScheduledJobs(Task task) {
+        JobProperName jName = JobProperName.valueOf(StringUtils.toRootUpperCase(task.getJobName()));
+        UserScheduledJobsEntity entity = new UserScheduledJobsEntity();
+        entity.setJobCode(task.getJobName());
+        entity.setJobName(jName.getValue());
+        entity.setCronExpression(task.getCronExpression());
+        try {
+            entity.setJobParameters(new ObjectMapper().writeValueAsString(task));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         }
-        return new ArrayList<>();
+        entity.setStatus("QUEUED");
+        entity = userScheduledJobsRepository.save(entity);
+        task.setJobIdReference(entity.getId());
+        task.setJobParams(entity.getJobParameters());
     }
 }

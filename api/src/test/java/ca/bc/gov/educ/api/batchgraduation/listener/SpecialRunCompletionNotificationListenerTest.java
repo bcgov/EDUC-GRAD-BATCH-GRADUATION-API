@@ -111,6 +111,7 @@ public class SpecialRunCompletionNotificationListenerTest {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "TVRRUN");
+        builder.addString("userScheduled", UUID.randomUUID().toString());
 
         JobExecution ex = new JobExecution(121L);
         ex.setStatus(BatchStatus.COMPLETED);

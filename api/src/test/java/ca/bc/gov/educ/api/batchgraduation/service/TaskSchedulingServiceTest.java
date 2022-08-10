@@ -2,6 +2,8 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.JobKey;
 import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
+import ca.bc.gov.educ.api.batchgraduation.model.Task;
+import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,23 +52,34 @@ public class TaskSchedulingServiceTest {
     public void testScheduleATask() {
         String jobUser = "John Doe";
         String jobName="SGBJ";
-        taskSchedulingService.scheduleATask(jobUser,jobName,taskDefinition,"0 5 20 * * *");
+        Task task = new Task();
+        task.setJobName(jobName);
+        task.setJobIdReference(UUID.randomUUID());
+        taskSchedulingService.scheduleATask(task.getJobIdReference(),taskDefinition,"0 5 20 * * *");
         assertThat(jobName).isEqualTo("SGBJ");
     }
 
     @Test
     public void testRemoveScheduledTask() {
-        int jobId=21311;
+        UUID jobId= UUID.randomUUID();
         String jobName="SGBJ";
-        String jobUser="John Doe";
-        taskSchedulingService.removeScheduledTask(jobId,jobName,jobUser);
+        taskSchedulingService.removeScheduledTask(jobId);
         assertThat(jobName).isEqualTo("SGBJ");
     }
 
     @Test
     public void testListScheduledJobs() {
-        List<ScheduledJobs> res = taskSchedulingService.listScheduledJobs();
+        List<UserScheduledJobs> res = taskSchedulingService.listScheduledJobs();
         assertNotNull(res);
+    }
+
+    @Test
+    public void testsaveUserScheduledJobs() {
+        Task task = new Task();
+        task.setCronExpression("213211");
+        task.setJobName("URDBJ");
+        taskSchedulingService.saveUserScheduledJobs(task);
+        assertThat(task).isNotNull();
     }
 
 

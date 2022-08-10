@@ -1,9 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +16,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -28,7 +27,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Job
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
 	@Autowired BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-	@Autowired BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
+	@Autowired UserScheduledJobsRepository userScheduledJobsRepository;
     @Autowired RestUtils restUtils;
     
     @Override
@@ -46,6 +45,12 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Job
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
 			String transmissionType = jobParameters.getString("transmissionType");
+
+			String userScheduledId = jobParameters.getString("userScheduled");
+			if(userScheduledId != null) {
+				updateUserScheduledJobs(userScheduledId);
+			}
+
 			PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new PsiDistributionSummaryDTO();
@@ -102,5 +107,13 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Job
 	}
 
 
+	private void updateUserScheduledJobs(String userScheduledId) {
+		Optional<UserScheduledJobsEntity> entOpt = userScheduledJobsRepository.findById(UUID.fromString(userScheduledId));
+		if(entOpt.isPresent()) {
+			UserScheduledJobsEntity ent = entOpt.get();
+			ent.setStatus("COMPLETED");
+			userScheduledJobsRepository.save(ent);
+		}
+	}
 
 }

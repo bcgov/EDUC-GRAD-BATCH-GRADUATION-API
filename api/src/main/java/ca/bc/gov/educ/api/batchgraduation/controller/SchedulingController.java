@@ -1,8 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessing;
-import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
+import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskDefinition;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
@@ -40,23 +40,23 @@ public class SchedulingController {
         if(task.isDeliveredToUser()) {
             task.setProperUserName(ThreadLocalStateUtil.getProperName());
         }
+        taskSchedulingService.saveUserScheduledJobs(task);
         taskDefinition.setTask(task);
-        taskSchedulingService.scheduleATask(ThreadLocalStateUtil.getCurrentUser(),task.getJobName() , taskDefinition, task.getCronExpression());
+        taskSchedulingService.scheduleATask(task.getJobIdReference(),taskDefinition, task.getCronExpression());
     }
 
     @DeleteMapping(EducGradBatchGraduationApiConstants.REMOVE_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
     public void removeJob(@PathVariable String jobId) {
-        String[] jK =   jobId.split("_");
-        taskSchedulingService.removeScheduledTask(Integer.parseInt(jK[0]),jK[1],jK[2]);
+        taskSchedulingService.removeScheduledTask(UUID.fromString(jobId));
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.LIST_JOBS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Schedule Jobs", description = "Schedule Jobs", tags = { "Schedule" })
-    public ResponseEntity<List<ScheduledJobs>> listJobs() {
-        List<ScheduledJobs> res = taskSchedulingService.listScheduledJobs();
+    public ResponseEntity<List<UserScheduledJobs>> listJobs() {
+        List<UserScheduledJobs> res = taskSchedulingService.listScheduledJobs();
         if(res.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

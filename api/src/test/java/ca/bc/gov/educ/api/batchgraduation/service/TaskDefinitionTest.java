@@ -116,6 +116,8 @@ public class TaskDefinitionTest {
         task.setProperUserName(null);
         task.setDeliveredToUser(false);
         task.setCredentialType(null);
+        task.setJobIdReference(null);
+        task.setJobParams("342342");
         BlankCredentialRequest bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
         bReq.setSchoolOfRecords(new ArrayList<>());
@@ -136,6 +138,8 @@ public class TaskDefinitionTest {
         task.setProperUserName(null);
         task.setDeliveredToUser(false);
         task.setCredentialType(null);
+        task.setJobIdReference(UUID.randomUUID());
+        task.setJobParams(null);
         BlankCredentialRequest bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
         bReq.setSchoolOfRecords(new ArrayList<>());
@@ -164,6 +168,8 @@ public class TaskDefinitionTest {
         task.setProperUserName(null);
         task.setDeliveredToUser(false);
         task.setCredentialType(null);
+        task.setJobIdReference(UUID.randomUUID());
+        task.setJobParams("342342");
         BlankCredentialRequest bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
         bReq.setSchoolOfRecords(List.of("E"));
