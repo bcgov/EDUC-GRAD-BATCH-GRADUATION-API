@@ -57,6 +57,12 @@ public class TaskDefinition implements Runnable{
         if(task.getTransmissionType() != null) {
             builder.addString(TRANMISSION_TYPE,task.getTransmissionType());
         }
+        if(task.getJobIdReference() != null) {
+            builder.addString("userScheduled",task.getJobIdReference().toString());
+        }
+        if(task.getJobParams() != null) {
+            builder.addString("userScheduledParam",task.getJobParams());
+        }
         validatePsiPayLoad(task,builder,taskType);
         validatePayLoad(task,builder,taskType);
         validateBlankPayLoad(task,builder,taskType);

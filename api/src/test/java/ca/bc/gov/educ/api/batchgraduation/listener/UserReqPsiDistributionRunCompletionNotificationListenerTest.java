@@ -85,6 +85,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListenerTest {
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "PSIRUN");
         builder.addString("transmissionType","FTP");
+        builder.addString("userScheduled", UUID.randomUUID().toString());
 
         JobExecution ex = new JobExecution(new JobInstance(121L,"psiDistributionBatchJob"), builder.toJobParameters(), null);
         ex.setStatus(BatchStatus.COMPLETED);

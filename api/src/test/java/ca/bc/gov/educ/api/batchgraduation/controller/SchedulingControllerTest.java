@@ -65,9 +65,11 @@ public class SchedulingControllerTest {
         task.setCredentialType("OT");
         task.setCronExpression("0 34 4 5 6 *");
         task.setJobName("SRBJ");
-        Mockito.doNothing().when(taskSchedulingService).scheduleATask(null,"SRBJ",taskDefinition,"0 34 4 5 6 *");
+        UUID jobId = UUID.randomUUID();
+        task.setJobIdReference(jobId);
+        Mockito.doNothing().when(taskSchedulingService).scheduleATask(jobId,taskDefinition,"0 34 4 5 6 *");
         schedulingController.scheduleATask(task);
-        Mockito.verify(taskSchedulingService).scheduleATask(null,"SRBJ",taskDefinition,"0 34 4 5 6 *");
+        Mockito.verify(taskSchedulingService).scheduleATask(jobId,taskDefinition,"0 34 4 5 6 *");
     }
     @Test
     public void testscheduleATask_2() {
@@ -76,29 +78,31 @@ public class SchedulingControllerTest {
         task.setCronExpression("0 34 4 5 6 *");
         task.setJobName("SRBJ");
         task.setDeliveredToUser(true);
-        Mockito.doNothing().when(taskSchedulingService).scheduleATask(null,"SRBJ",taskDefinition,"0 34 4 5 6 *");
+        UUID jobId = UUID.randomUUID();
+        task.setJobIdReference(jobId);
+        Mockito.doNothing().when(taskSchedulingService).scheduleATask(jobId,taskDefinition,"0 34 4 5 6 *");
         schedulingController.scheduleATask(task);
-        Mockito.verify(taskSchedulingService).scheduleATask(null,"SRBJ",taskDefinition,"0 34 4 5 6 *");
+        Mockito.verify(taskSchedulingService).scheduleATask(jobId,taskDefinition,"0 34 4 5 6 *");
     }
 
     @Test
     public void testRemoveJob() {
-        String jobId = "123131_SRBJ_SKS";
-        Mockito.doNothing().when(taskSchedulingService).removeScheduledTask(123131,"SRBJ","SKS");
-        schedulingController.removeJob(jobId);
-        Mockito.verify(taskSchedulingService).removeScheduledTask(123131,"SRBJ","SKS");
+        UUID jobId = UUID.randomUUID();
+        Mockito.doNothing().when(taskSchedulingService).removeScheduledTask(jobId);
+        schedulingController.removeJob(jobId.toString());
+        Mockito.verify(taskSchedulingService).removeScheduledTask(jobId);
     }
 
     @Test
     public void testListJobs() {
-        ScheduledJobs sJobs = new ScheduledJobs();
+        UserScheduledJobs sJobs = new UserScheduledJobs();
         sJobs.setStatus("COMPLETED");
-        sJobs.setScheduledBy("SKS");
+        sJobs.setCreateUser("SKS");
         sJobs.setJobName("SRBJ");
-        sJobs.setRowId("1231123_SRBJ_SKS");
+        sJobs.setId(UUID.randomUUID());
         sJobs.setCronExpression("0 34 4 5 6 *");
         Mockito.when(taskSchedulingService.listScheduledJobs()).thenReturn(List.of(sJobs));
-        ResponseEntity<List<ScheduledJobs>> res = schedulingController.listJobs();
+        ResponseEntity<List<UserScheduledJobs>> res = schedulingController.listJobs();
         assertThat(res.getBody()).hasSize(1);
     }
 
@@ -111,7 +115,7 @@ public class SchedulingControllerTest {
         sJobs.setRowId("1231123_SRBJ_SKS");
         sJobs.setCronExpression("0 34 4 5 6 *");
         Mockito.when(taskSchedulingService.listScheduledJobs()).thenReturn(new ArrayList<>());
-        ResponseEntity<List<ScheduledJobs>> res = schedulingController.listJobs();
+        ResponseEntity<List<UserScheduledJobs>> res = schedulingController.listJobs();
         assertThat(res.getBody()).isNull();
     }
 
@@ -130,7 +134,7 @@ public class SchedulingControllerTest {
     @Test
     public void testprocessingList_empty() {
         Mockito.when(taskSchedulingService.listScheduledJobs()).thenReturn(new ArrayList<>());
-        ResponseEntity<List<ScheduledJobs>> res = schedulingController.listJobs();
+        ResponseEntity<List<UserScheduledJobs>> res = schedulingController.listJobs();
         assertThat(res.getBody()).isNull();
     }
 

@@ -89,6 +89,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "TVRRUN");
         builder.addString("credentialType","OT");
+        builder.addString("userScheduled", UUID.randomUUID().toString());
 
         JobExecution ex = new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), builder.toJobParameters(), null);
         ex.setStatus(BatchStatus.COMPLETED);

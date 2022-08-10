@@ -686,6 +686,47 @@ public class BatchJobConfig {
                 .build();
     }
 
+    /**
+     * User Scheduled Jobs Refreshing Map on startup
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
+
+    @Bean
+    public ItemProcessor<UserScheduledJobs,UserScheduledJobs> itemProcessorUserScheduled() {
+        return new UserScheduledProcessor();
+    }
+
+    @Bean
+    public ItemReader<UserScheduledJobs> itemReaderUserScheduled() {
+        return new UserScheduledReader();
+    }
+
+    @Bean
+    public ItemWriter<UserScheduledJobs> itemWriterUserScheduled() {
+        return new UserScheduledWriter();
+    }
+
+    @Bean
+    public Step slaveStepUserScheduled(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepUserScheduled")
+                .<UserScheduledJobs, UserScheduledJobs>chunk(1)
+                .reader(itemReaderUserScheduled())
+                .processor(itemProcessorUserScheduled())
+                .writer(itemWriterUserScheduled())
+                .build();
+    }
+
+    @Bean(name="userScheduledBatchJobRefresher")
+    public Job userScheduledBatchJobQueueRefresher(UserScheduledCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("userScheduledBatchJobRefresher")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(slaveStepUserScheduled(stepBuilderFactory))
+                .end()
+                .build();
+    }
+
     @Bean
     public JobRegistryBeanPostProcessor jobRegistryBeanPostProcessor() {
         JobRegistryBeanPostProcessor postProcessor = new JobRegistryBeanPostProcessor();

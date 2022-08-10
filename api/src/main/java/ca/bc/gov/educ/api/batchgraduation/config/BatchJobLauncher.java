@@ -42,6 +42,10 @@ public class BatchJobLauncher {
     private Job schoolReportBatchJob;
 
     @Autowired
+    @Qualifier("userScheduledBatchJobRefresher")
+    private Job userScheduledBatchJobRefresher;
+
+    @Autowired
     private JobLauncher jobLauncher;
 
     @Autowired
@@ -120,6 +124,21 @@ public class BatchJobLauncher {
                 LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
             }
         }
+        LOGGER.info(BATCH_ENDED);
+    }
+
+    @Scheduled(fixedDelayString = "PT30M")
+    public void refreshUserScheduledQueue() {
+        LOGGER.info(BATCH_STARTED);
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        try {
+            jobLauncher.run(userScheduledBatchJobRefresher, builder.toJobParameters());
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | IllegalArgumentException e) {
+            LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
+        }
+
         LOGGER.info(BATCH_ENDED);
     }
 }

@@ -2,6 +2,8 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class Task {
     private String cronExpression;
@@ -14,4 +16,6 @@ public class Task {
     private boolean deliveredToUser;
     private String properUserName;
     private String transmissionType;
+    private UUID jobIdReference;
+    private String jobParams;
 }

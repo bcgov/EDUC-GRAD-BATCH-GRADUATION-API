@@ -2,9 +2,11 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
@@ -29,6 +31,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 
 	@Autowired BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
 	@Autowired BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
+	@Autowired UserScheduledJobsRepository userScheduledJobsRepository;
     @Autowired RestUtils restUtils;
 	ParallelDataFetch parallelDataFetch;
 
@@ -51,6 +54,11 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String credentialType = jobParameters.getString("credentialType");
 			String properName = jobParameters.getString("properName");
+			String userScheduledId = jobParameters.getString("userScheduled");
+			if(userScheduledId != null) {
+				updateUserScheduledJobs(userScheduledId);
+			}
+
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new DistributionSummaryDTO();
@@ -147,6 +155,15 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 		cList.forEach(scd->	restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken));
 	}
 
+
+	private void updateUserScheduledJobs(String userScheduledId) {
+		Optional<UserScheduledJobsEntity> entOpt = userScheduledJobsRepository.findById(UUID.fromString(userScheduledId));
+		if(entOpt.isPresent()) {
+			UserScheduledJobsEntity ent = entOpt.get();
+			ent.setStatus("COMPLETED");
+			userScheduledJobsRepository.save(ent);
+		}
+	}
 
 
 }
