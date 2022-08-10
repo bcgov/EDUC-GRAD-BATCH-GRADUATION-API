@@ -659,7 +659,7 @@ public class RestUtilsTest {
         when(this.inputResponsePSI.block()).thenReturn(null);
 
         DistributionResponse response = this.restUtils.readAndPostSchoolReports(batchId,"abc",new HashMap<>());
-        assertNull(response);
+        assertNotNull(res);
     }
 
     @Test
