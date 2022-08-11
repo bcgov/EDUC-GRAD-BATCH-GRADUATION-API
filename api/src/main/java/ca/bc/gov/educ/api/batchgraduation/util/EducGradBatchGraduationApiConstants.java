@@ -22,7 +22,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_DIS_RUN_BATCH_JOB = "/executedisrunbatchjob";
     public static final String EXECUTE_YEARLY_DIS_RUN_BATCH_JOB = "/executeyearlydisrunbatchjob";
     public static final String EXECUTE_SCHOOL_REPORT_RUN_BATCH_JOB = "/executeschoolreportbatchjob";
-    public static final String EXECUTE_SPECIALIZED_PSI_USER_REQ_RUNS = "/executepsireportbatchjob";
+    public static final String EXECUTE_SPECIALIZED_PSI_USER_REQ_RUNS = "/executepsireportbatchjob/{transmissionType}";
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
     public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
