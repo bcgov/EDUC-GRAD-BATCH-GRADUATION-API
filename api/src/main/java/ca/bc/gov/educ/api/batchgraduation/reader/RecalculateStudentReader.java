@@ -21,7 +21,7 @@ public class RecalculateStudentReader extends BaseReader {
     public GraduationStudentRecord read() throws Exception {
         LOGGER.info("*** Reading the information of the next student");
 
-        if (nxtStudentForProcessing % 50 == 0) {
+        if (nxtStudentForProcessing % 15 == 0) {
             fetchAccessToken();
         }
         summaryDTO.setReadCount(studentList.size());
