@@ -4,17 +4,13 @@ import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import org.junit.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.boot.actuate.autoconfigure.metrics.MetricsProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -87,23 +83,6 @@ public class JobLauncherControllerTest {
 
         assertThat(builder).isNotNull();
     }
-
-    @Test
-    public void testlaunchSchoolReportRunJob() {
-        boolean exceptionIsThrown = false;
-        JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, MANUAL);
-        builder.addString(JOB_TYPE, SCHREPORT);
-        try {
-            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("SchoolReportBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
-            jobLauncherController.launchSchoolReportRunJob();
-        } catch (Exception e) {
-            exceptionIsThrown = true;
-        }
-        assertThat(builder).isNotNull();
-    }
-
 
     @Test
     public void testTVRJob() {

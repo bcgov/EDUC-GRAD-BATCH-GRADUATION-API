@@ -117,9 +117,6 @@ batch:
     cron: ${REG_ALG_CRON}
   tvrrun:
     cron: ${TVR_RUN_CRON}
-  schrep:
-    cron: ${SCH_REP_CRON}
-
 
 #Endpoints
 endpoint:

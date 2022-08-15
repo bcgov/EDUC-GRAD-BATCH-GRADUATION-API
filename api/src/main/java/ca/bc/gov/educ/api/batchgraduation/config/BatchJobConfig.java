@@ -567,7 +567,7 @@ public class BatchJobConfig {
     /**
      * School Report Posting to TSW Run
      * ItemProcessor,ItemReader and ItemWriter
-     * Partitioner
+     * Partitione
      */
 
     @Bean
@@ -611,16 +611,6 @@ public class BatchJobConfig {
                 .step(slaveStepSchoolReportRun(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
-                .build();
-    }
-
-    @Bean(name="SchoolReportBatchJob")
-    public Job schoolReportBatchJob(SchoolReportRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return jobBuilderFactory.get("SchoolReportBatchJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .flow(masterStepSchoolReportRun(stepBuilderFactory,constants))
-                .end()
                 .build();
     }
 
