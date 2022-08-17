@@ -565,66 +565,6 @@ public class BatchJobConfig {
     }
 
     /**
-     * School Report Posting to TSW Run
-     * ItemProcessor,ItemReader and ItemWriter
-     * Partitioner
-     */
-
-    @Bean
-    @StepScope
-    public ItemProcessor<SchoolReportDistribution,SchoolReportDistribution> itemProcessorSchoolReportRun() {
-        return new SchoolReportRunProcessor();
-    }
-
-    @Bean
-    @StepScope
-    public ItemReader<SchoolReportDistribution> itemReaderSchoolReportRun() {
-        return new SchoolReportRunReader();
-    }
-
-    @Bean
-    @StepScope
-    public ItemWriter<SchoolReportDistribution> itemWriterSchoolReportRun() {
-        return new SchoolReportRunWriter();
-    }
-
-    @Bean
-    @StepScope
-    public SchoolReportRunPartitioner partitionerSchoolReportRun() {
-        return new SchoolReportRunPartitioner();
-    }
-
-    @Bean
-    public Step slaveStepSchoolReportRun(StepBuilderFactory stepBuilderFactory) {
-        return stepBuilderFactory.get("slaveStepSchoolReportRun")
-                .<SchoolReportDistribution, SchoolReportDistribution>chunk(1)
-                .reader(itemReaderSchoolReportRun())
-                .processor(itemProcessorSchoolReportRun())
-                .writer(itemWriterSchoolReportRun())
-                .build();
-    }
-
-    @Bean
-    public Step masterStepSchoolReportRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return stepBuilderFactory.get("masterStepSchoolReportRun")
-                .partitioner(slaveStepSchoolReportRun(stepBuilderFactory).getName(), partitionerSchoolReportRun())
-                .step(slaveStepSchoolReportRun(stepBuilderFactory))
-                .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
-                .build();
-    }
-
-    @Bean(name="SchoolReportBatchJob")
-    public Job schoolReportBatchJob(SchoolReportRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return jobBuilderFactory.get("SchoolReportBatchJob")
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .flow(masterStepSchoolReportRun(stepBuilderFactory,constants))
-                .end()
-                .build();
-    }
-
-    /**
      * User PSI Credential Distribution Run
      * ItemProcessor,ItemReader and ItemWriter
      * Partitioner

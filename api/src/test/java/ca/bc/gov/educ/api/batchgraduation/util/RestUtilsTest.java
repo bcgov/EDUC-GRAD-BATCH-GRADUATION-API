@@ -401,21 +401,6 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testprocessSchoolReportPosting() {
-        SchoolReportDistribution item = new SchoolReportDistribution();
-        item.setSchoolOfRecord("123123123");
-        item.setReportTypeCode("GRADREG");
-        item.setId(UUID.randomUUID());
-
-        SchoolReportSummaryDTO summary = new SchoolReportSummaryDTO();
-        summary.setBatchId(44545L);
-        SchoolReportDistribution res = this.restUtils.processSchoolReportPosting(item,summary);
-        assertNotNull(res);
-        assertThat(res.getSchoolOfRecord()).isEqualTo("123123123");
-
-    }
-
-    @Test
     public void testProcessDistribution() {
 
         final UUID studentID = UUID.randomUUID();
@@ -620,45 +605,6 @@ public class RestUtilsTest {
         bcd.setCredentialTypeCode("E");
 
         BlankCredentialDistribution res = this.restUtils.processBlankDistribution(bcd,summary);
-        assertNotNull(res);
-    }
-
-    @Test
-    public void testReadAndPostSchoolReports() {
-        final Long batchId = 9879L;
-
-        DistributionResponse res = new DistributionResponse();
-        res.setMergeProcessResponse("Done");
-
-        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getReadAndPost(),batchId))).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
-        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(res));
-
-        DistributionResponse response = this.restUtils.readAndPostSchoolReports(batchId,"abc",new HashMap<>());
-        assertNotNull(response);
-    }
-
-    @Test
-    public void testReadAndPostSchoolReports_null() {
-        final Long batchId = 9879L;
-
-        DistributionResponse res = new DistributionResponse();
-        res.setMergeProcessResponse("Done");
-
-        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getReadAndPost(),batchId))).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
-        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
-        when(this.inputResponsePSI.block()).thenReturn(null);
-
-        DistributionResponse response = this.restUtils.readAndPostSchoolReports(batchId,"abc",new HashMap<>());
         assertNotNull(res);
     }
 

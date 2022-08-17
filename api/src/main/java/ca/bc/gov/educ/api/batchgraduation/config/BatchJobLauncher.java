@@ -38,10 +38,6 @@ public class BatchJobLauncher {
     private Job tvrBatchJob;
 
     @Autowired
-    @Qualifier("SchoolReportBatchJob")
-    private Job schoolReportBatchJob;
-
-    @Autowired
     @Qualifier("userScheduledBatchJobRefresher")
     private Job userScheduledBatchJobRefresher;
 
@@ -99,26 +95,6 @@ public class BatchJobLauncher {
         if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
             try {
                 jobLauncher.run(tvrBatchJob, builder.toJobParameters());
-            } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                    | JobParametersInvalidException | IllegalArgumentException e) {
-                LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
-            }
-        }
-        LOGGER.info(BATCH_ENDED);
-    }
-
-    @Scheduled(cron = "${batch.schrep.cron}")
-    @SchedulerLock(name = "SchoolReportBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
-    public void runSchoolReportPosting() {
-        LOGGER.info(BATCH_STARTED);
-        JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
-        builder.addString(JOB_TYPE, "SCHREP");
-        Optional<BatchProcessingEntity> bPresent = batchProcessingRepository.findByJobType("SCHREP");
-        if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
-            try {
-                jobLauncher.run(schoolReportBatchJob, builder.toJobParameters());
             } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                     | JobParametersInvalidException | IllegalArgumentException e) {
                 LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());

@@ -72,8 +72,6 @@ batch:
     cron: 0 0 16 * * *
   tvrrun:
     cron: 0 0 22 * * *
-  schrep:
-    cron: 0 0 2 * * *
 
 #Endpoints
 endpoint:

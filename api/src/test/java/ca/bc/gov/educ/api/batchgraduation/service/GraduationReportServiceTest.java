@@ -75,28 +75,6 @@ public class GraduationReportServiceTest {
     }
 
     @Test
-    public void testGetSchoolReportForPosting() {
-
-        SchoolReportDistribution scd = new SchoolReportDistribution();
-        scd.setId(new UUID(1,1));
-        scd.setReportTypeCode("GRAD");
-        scd.setSchoolOfRecord("05005001");
-
-        ParameterizedTypeReference<List<SchoolReportDistribution>> tListRes = new ParameterizedTypeReference<>() {
-        };
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getSchoolReportPostingList())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(List.of(scd)));
-
-        List<SchoolReportDistribution> res = graduationReportService.getSchoolReportForPosting("accessToken");
-        assertThat(res).isNotNull().hasSize(1);
-
-    }
-
-    @Test
     public void testGetPsiStudentsForRun() {
 
         String transmissionType="PAPER";

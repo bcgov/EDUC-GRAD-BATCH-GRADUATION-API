@@ -231,14 +231,6 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
-
-    public SchoolReportDistribution processSchoolReportPosting(SchoolReportDistribution item, SchoolReportSummaryDTO summary) {
-        summary.setProcessedCount(summary.getProcessedCount() + 1L);
-        summary.getGlobalList().add(item);
-        LOGGER.info("Report Type Thread : {} Processed: {} Type: {} from {}",Thread.currentThread().getName(), summary.getProcessedCount(), item.getReportTypeCode(), summary.getReadCount());
-        return item;
-    }
-
     public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary) {
         LOGGER.info(STUDENT_PROCESS,Thread.currentThread().getName(),item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
@@ -336,24 +328,6 @@ public class RestUtils {
             LOGGER.info("*** Fetched # of Graduation Record : {}",result.getStudentID());
 
         return result;
-    }
-
-    public DistributionResponse readAndPostSchoolReports(Long batchId,String accessToken, Map<String, DistributionPrintRequest> mapDist) {
-        UUID correlationID = UUID.randomUUID();
-        DistributionResponse result = webClient.post()
-                .uri(String.format(constants.getReadAndPost(),batchId))
-                .headers(h -> {
-                    h.setBearerAuth(accessToken);
-                    h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
-                })
-                .body(BodyInserters.fromValue(mapDist))
-                .retrieve()
-                .bodyToMono(DistributionResponse.class)
-                .block();
-
-        if(result != null)
-            LOGGER.info("Read and Post Success {}",result.getMergeProcessResponse());
-        return  result;
     }
 
     public void createAndStoreSchoolReports(String accessToken, List<String> uniqueSchools,String type) {
