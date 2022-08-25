@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
