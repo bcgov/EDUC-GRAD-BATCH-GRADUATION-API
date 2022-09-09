@@ -89,8 +89,9 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "TVRRUN");
         builder.addString("credentialType","OT");
+        builder.addString("userScheduled", UUID.randomUUID().toString());
 
-        JobExecution ex = new JobExecution(121L);new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), builder.toJobParameters(), null);
+        JobExecution ex = new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), builder.toJobParameters(), null);
         ex.setStatus(BatchStatus.COMPLETED);
         ex.setStartTime(new Date());
         ex.setEndTime(new Date());
@@ -102,6 +103,25 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         scd.setCredentialTypeCode("E");
         scd.setPaperType("YED2");
         scd.setSchoolOfRecord("05005001");
+        scd = new BlankCredentialDistribution();
+        scd.setCredentialTypeCode("EI");
+        scd.setPaperType("YEDR");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new BlankCredentialDistribution();
+        scd.setCredentialTypeCode("S");
+        scd.setPaperType("YED4");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new BlankCredentialDistribution();
+        scd.setCredentialTypeCode("S");
+        scd.setPaperType("YEDB");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new BlankCredentialDistribution();
+        scd.setCredentialTypeCode("X");
+        scd.setPaperType("YED4");
+        scd.setSchoolOfRecord("05005001");
         scdList.add(scd);
 
         BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
@@ -110,7 +130,97 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         summaryDTO.setProcessedCount(10);
         summaryDTO.setErrors(new ArrayList<>());
         summaryDTO.setGlobalList(scdList);
-        jobContext.put("distributionSummaryDTO", summaryDTO);
+        jobContext.put("blankDistributionSummaryDTO", summaryDTO);
+
+        JobParameters jobParameters = ex. getJobParameters();
+        int failedRecords = summaryDTO.getErrors().size();
+        Long processedStudents = summaryDTO.getProcessedCount();
+        Long expectedStudents = summaryDTO.getReadCount();
+        String status = ex.getStatus().toString();
+        Date startTime = ex.getStartTime();
+        Date endTime = ex.getEndTime();
+        String jobTrigger = jobParameters.getString("jobTrigger");
+        String jobType = jobParameters.getString("jobType");
+        String credentialType = jobParameters.getString("credentialType");
+
+        BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
+        ent.setActualStudentsProcessed(processedStudents);
+        ent.setExpectedStudentsProcessed(expectedStudents);
+        ent.setFailedStudentsProcessed(failedRecords);
+        ent.setJobExecutionId(121L);
+        ent.setStartTime(startTime);
+        ent.setEndTime(endTime);
+        ent.setStatus(status);
+        ent.setTriggerBy(jobTrigger);
+        ent.setJobType(jobType);
+
+        ex.setExecutionContext(jobContext);
+
+        List<BlankCredentialDistribution> cList = new ArrayList<>();
+        cList.add(scd);
+
+        List<BlankCredentialDistribution> tList = new ArrayList<>();
+        tList.add(scd);
+
+        ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
+        };
+
+        ResponseObj obj = new ResponseObj();
+        obj.setAccess_token("asdasd");
+        Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
+        userReqBlankDistributionRunCompletionNotificationListener.afterJob(ex);
+
+        assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
+    }
+
+    @Test
+    public void testAfterJob_OC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, "MANUAL");
+        builder.addString(JOB_TYPE, "TVRRUN");
+        builder.addString("credentialType","OC");
+
+        JobExecution ex = new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), builder.toJobParameters(), null);
+        ex.setStatus(BatchStatus.COMPLETED);
+        ex.setStartTime(new Date());
+        ex.setEndTime(new Date());
+        ex.setId(121L);
+        ExecutionContext jobContext = ex.getExecutionContext();
+
+        List<BlankCredentialDistribution> scdList = new ArrayList<>();
+        BlankCredentialDistribution scd = new BlankCredentialDistribution();
+        scd.setCredentialTypeCode("E");
+        scd.setPaperType("YED2");
+        scd.setSchoolOfRecord("05005001");
+        scd = new BlankCredentialDistribution();
+        scd.setCredentialTypeCode("EI");
+        scd.setPaperType("YEDR");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new BlankCredentialDistribution();
+        scd.setCredentialTypeCode("S");
+        scd.setPaperType("YED4");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new BlankCredentialDistribution();
+        scd.setCredentialTypeCode("X");
+        scd.setPaperType("YED4");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new BlankCredentialDistribution();
+        scd.setCredentialTypeCode("S");
+        scd.setPaperType("YEDB");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+
+        BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
+        summaryDTO.setAccessToken("123");
+        summaryDTO.setBatchId(121L);
+        summaryDTO.setProcessedCount(10);
+        summaryDTO.setErrors(new ArrayList<>());
+        summaryDTO.setGlobalList(scdList);
+        jobContext.put("blankDistributionSummaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();

@@ -1,10 +1,13 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
+import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.BlankDistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.DistributionPrintRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +30,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
 	@Autowired BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-	@Autowired BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
+	@Autowired UserScheduledJobsRepository userScheduledJobsRepository;
     @Autowired RestUtils restUtils;
     
     @Override
@@ -47,6 +50,10 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			String credentialType = jobParameters.getString("credentialType");
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String properName = jobParameters.getString("properName");
+			String userScheduledId = jobParameters.getString("userScheduled");
+			if(userScheduledId != null) {
+				updateUserScheduledJobs(userScheduledId);
+			}
 			BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new BlankDistributionSummaryDTO();
@@ -73,18 +80,6 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
-			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
-			summaryDTO.getErrors().forEach(e -> {
-				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail());
-				BatchGradAlgorithmErrorHistoryEntity errorHistory = new BatchGradAlgorithmErrorHistoryEntity();
-				errorHistory.setStudentID(UUID.fromString(e.getStudentID()));
-				errorHistory.setJobExecutionId(jobExecutionId);
-				errorHistory.setError(e.getReason() + "-" + e.getDetail());
-				eList.add(errorHistory);
-			});
-			if(!eList.isEmpty())
-				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
-
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			BlankDistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
@@ -123,5 +118,13 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, mapDist,localDownload);
 	}
 
+	private void updateUserScheduledJobs(String userScheduledId) {
+		Optional<UserScheduledJobsEntity> entOpt = userScheduledJobsRepository.findById(UUID.fromString(userScheduledId));
+		if(entOpt.isPresent()) {
+			UserScheduledJobsEntity ent = entOpt.get();
+			ent.setStatus("COMPLETED");
+			userScheduledJobsRepository.save(ent);
+		}
+	}
 
 }

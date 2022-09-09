@@ -11,24 +11,24 @@ import java.util.Map;
 
 @Data
 @NoArgsConstructor
-public class SchoolReportSummaryDTO {
+public class PsiDistributionSummaryDTO {
 
   private Long batchId;
   private long readCount = 0L;
   private long processedCount = 0L;
 
   private List<ProcessError> errors = new ArrayList<>();
-  private List<SchoolReportDistribution> globalList = new ArrayList<>();
+  private List<PsiCredentialDistribution> globalList = new ArrayList<>();
   private String exception;
 
   // stats
   private Map<String, Long> credentialCountMap = new HashMap<>();
 
   public void initializeCredentialCountMap() {
-    credentialCountMap.put("GRAD", 0L);
-    credentialCountMap.put("NONGRAD", 0L);
-    credentialCountMap.put("NONGRADPRJ", 0L);
-    credentialCountMap.put("ACHV", 0L);
+    credentialCountMap.put("YED4", 0L);
+    credentialCountMap.put("YED2", 0L);
+    credentialCountMap.put("YEDR", 0L);
+    credentialCountMap.put("YEDB", 0L);
   }
 
   private Map<String, DistributionPrintRequest> mapDist = new HashMap<>();

@@ -92,8 +92,9 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "TVRRUN");
         builder.addString("credentialType","OT");
+        builder.addString("userScheduled", UUID.randomUUID().toString());
 
-        JobExecution ex = new JobExecution(121L);new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), builder.toJobParameters(), null);
+        JobExecution ex = new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), builder.toJobParameters(), null);
         ex.setStatus(BatchStatus.COMPLETED);
         ex.setStartTime(new Date());
         ex.setEndTime(new Date());
@@ -106,6 +107,142 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         scd.setStudentID(new UUID(2,2));
         scd.setCredentialTypeCode("E");
         scd.setPaperType("YED2");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new StudentCredentialDistribution();
+        scd.setId(new UUID(1,1));
+        scd.setStudentID(new UUID(2,2));
+        scd.setCredentialTypeCode("BC1996-PUB");
+        scd.setPaperType("YED4");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new StudentCredentialDistribution();
+        scd.setId(new UUID(1,1));
+        scd.setStudentID(new UUID(2,2));
+        scd.setCredentialTypeCode("S");
+        scd.setPaperType("YEDB");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new StudentCredentialDistribution();
+        scd.setId(new UUID(1,1));
+        scd.setStudentID(new UUID(2,2));
+        scd.setCredentialTypeCode("X");
+        scd.setPaperType("YEDR");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+        summaryDTO.setAccessToken("123");
+        summaryDTO.setBatchId(121L);
+        summaryDTO.setCredentialType("OT");
+        summaryDTO.setProcessedCount(10);
+        summaryDTO.setErrors(new ArrayList<>());
+        summaryDTO.setGlobalList(scdList);
+        jobContext.put("distributionSummaryDTO", summaryDTO);
+
+        JobParameters jobParameters = ex. getJobParameters();
+        int failedRecords = summaryDTO.getErrors().size();
+        Long processedStudents = summaryDTO.getProcessedCount();
+        Long expectedStudents = summaryDTO.getReadCount();
+        String status = ex.getStatus().toString();
+        Date startTime = ex.getStartTime();
+        Date endTime = ex.getEndTime();
+        String jobTrigger = jobParameters.getString("jobTrigger");
+        String jobType = jobParameters.getString("jobType");
+        String credentialType = jobParameters.getString("credentialType");
+
+        BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
+        ent.setActualStudentsProcessed(processedStudents);
+        ent.setExpectedStudentsProcessed(expectedStudents);
+        ent.setFailedStudentsProcessed(failedRecords);
+        ent.setJobExecutionId(121L);
+        ent.setStartTime(startTime);
+        ent.setEndTime(endTime);
+        ent.setStatus(status);
+        ent.setTriggerBy(jobTrigger);
+        ent.setJobType(jobType);
+
+        ex.setExecutionContext(jobContext);
+
+        List<StudentCredentialDistribution> cList = new ArrayList<>();
+        cList.add(scd);
+
+        List<StudentCredentialDistribution> tList = new ArrayList<>();
+        tList.add(scd);
+
+        DistributionDataParallelDTO dp = new DistributionDataParallelDTO(tList,cList);
+
+        ParameterizedTypeReference<List<StudentCredentialDistribution>> tListRes = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getTranscriptDistributionList())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
+
+        ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getCertificateDistributionList())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(cListRes)).thenReturn(Mono.just(cList));
+
+        ResponseObj obj = new ResponseObj();
+        obj.setAccess_token("asdasd");
+        Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
+        Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
+        Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
+        Mockito.when(parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
+        userReqDistributionRunCompletionNotificationListener.afterJob(ex);
+
+        assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
+    }
+
+    @Test
+    public void testAfterJob_OC() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, "MANUAL");
+        builder.addString(JOB_TYPE, "TVRRUN");
+        builder.addString("credentialType","OC");
+
+        JobExecution ex = new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), builder.toJobParameters(), null);
+        ex.setStatus(BatchStatus.COMPLETED);
+        ex.setStartTime(new Date());
+        ex.setEndTime(new Date());
+        ex.setId(121L);
+        ExecutionContext jobContext = ex.getExecutionContext();
+
+        List<StudentCredentialDistribution> scdList = new ArrayList<>();
+        StudentCredentialDistribution scd = new StudentCredentialDistribution();
+        scd.setId(new UUID(1,1));
+        scd.setStudentID(new UUID(2,2));
+        scd.setCredentialTypeCode("E");
+        scd.setPaperType("YED2");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new StudentCredentialDistribution();
+        scd.setId(new UUID(1,1));
+        scd.setStudentID(new UUID(2,2));
+        scd.setCredentialTypeCode("BC1996-PUB");
+        scd.setPaperType("YED4");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new StudentCredentialDistribution();
+        scd.setId(new UUID(1,1));
+        scd.setStudentID(new UUID(2,2));
+        scd.setCredentialTypeCode("S");
+        scd.setPaperType("YEDB");
+        scd.setSchoolOfRecord("05005001");
+        scdList.add(scd);
+        scd = new StudentCredentialDistribution();
+        scd.setId(new UUID(1,1));
+        scd.setStudentID(new UUID(2,2));
+        scd.setCredentialTypeCode("X");
+        scd.setPaperType("YEDR");
         scd.setSchoolOfRecord("05005001");
         scdList.add(scd);
 

@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
+import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.After;
@@ -105,9 +106,15 @@ public class SpecialRunCompletionNotificationListenerTest {
     }
 
     @Test
-    public void testAfterJob_Failed() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+    public void testAfterJob_witherror() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, "MANUAL");
+        builder.addString(JOB_TYPE, "TVRRUN");
+        builder.addString("userScheduled", UUID.randomUUID().toString());
+
         JobExecution ex = new JobExecution(121L);
-        ex.setStatus(BatchStatus.FAILED);
+        ex.setStatus(BatchStatus.COMPLETED);
         ex.setStartTime(new Date());
         ex.setEndTime(new Date());
         ex.setId(121L);
@@ -118,8 +125,15 @@ public class SpecialRunCompletionNotificationListenerTest {
         summaryDTO.setAccessToken("123");
         summaryDTO.setBatchId(121L);
         summaryDTO.setProcessedCount(10);
-        summaryDTO.setErrors(new HashMap<>());
-        jobContext.put("summaryDTO", summaryDTO);
+
+        ProcessError er = new ProcessError();
+        er.setReason("ERE");
+        er.setDetail("erer");
+        er.setStudentID(UUID.randomUUID().toString());
+        Map<UUID,ProcessError> mapP = new HashMap<>();
+        mapP.put(UUID.randomUUID(),er);
+        summaryDTO.setErrors(mapP);
+        jobContext.put("spcRunAlgSummaryDTO", summaryDTO);
 
         JobParameters jobParameters = ex. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
@@ -143,13 +157,6 @@ public class SpecialRunCompletionNotificationListenerTest {
         ent.setJobType(jobType);
 
         ex.setExecutionContext(jobContext);
-
-        List<GraduationStudentRecord> list = new ArrayList<>();
-        GraduationStudentRecord grd = new GraduationStudentRecord();
-        grd.setStudentID(new UUID(1,1));
-        grd.setProgram("2018-EN");
-        list.add(grd);
-        Mockito.when(restUtils.getStudentsForAlgorithm(summaryDTO.getAccessToken())).thenReturn(list);
         specialRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);

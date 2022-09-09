@@ -4,6 +4,7 @@ public enum TaskSelection {
 	SGBJ ("SpecialGraduationBatchJob"),
 	STBJ ("SpecialTvrRunBatchJob"),
 	URDBJ ("UserReqDistributionBatchJob"),
+    URPDBJ("psiDistributionBatchJob"),
     BDBJ ("blankDistributionBatchJob");
 
     private final String value;

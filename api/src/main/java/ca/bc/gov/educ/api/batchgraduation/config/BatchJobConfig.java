@@ -565,61 +565,104 @@ public class BatchJobConfig {
     }
 
     /**
-     * School Report Posting to TSW Run
+     * User PSI Credential Distribution Run
      * ItemProcessor,ItemReader and ItemWriter
      * Partitioner
      */
 
     @Bean
     @StepScope
-    public ItemProcessor<SchoolReportDistribution,SchoolReportDistribution> itemProcessorSchoolReportRun() {
-        return new SchoolReportRunProcessor();
+    public ItemProcessor<PsiCredentialDistribution,PsiCredentialDistribution> itemProcessorPsiDisRun() {
+        return new PsiDistributionRunProcessor();
     }
 
     @Bean
     @StepScope
-    public ItemReader<SchoolReportDistribution> itemReaderSchoolReportRun() {
-        return new SchoolReportRunReader();
+    public ItemReader<PsiCredentialDistribution> itemReaderPsiDisRun() {
+        return new PsiDistributionRunReader();
     }
 
     @Bean
     @StepScope
-    public ItemWriter<SchoolReportDistribution> itemWriterSchoolReportRun() {
-        return new SchoolReportRunWriter();
+    public ItemWriter<PsiCredentialDistribution> itemWriterPsiDisRun() {
+        return new PsiDistributionRunWriter();
     }
+
 
     @Bean
     @StepScope
-    public SchoolReportRunPartitioner partitionerSchoolReportRun() {
-        return new SchoolReportRunPartitioner();
+    public DistributionRunPartitionerPsiUserReq partitionerDisRunPsiUserReq() {
+        return new DistributionRunPartitionerPsiUserReq();
     }
 
     @Bean
-    public Step slaveStepSchoolReportRun(StepBuilderFactory stepBuilderFactory) {
-        return stepBuilderFactory.get("slaveStepSchoolReportRun")
-                .<SchoolReportDistribution, SchoolReportDistribution>chunk(1)
-                .reader(itemReaderSchoolReportRun())
-                .processor(itemProcessorSchoolReportRun())
-                .writer(itemWriterSchoolReportRun())
+    public Step slaveStepPsiDisRun(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepPsiDisRun")
+                .<PsiCredentialDistribution, PsiCredentialDistribution>chunk(1)
+                .reader(itemReaderPsiDisRun())
+                .processor(itemProcessorPsiDisRun())
+                .writer(itemWriterPsiDisRun())
                 .build();
     }
 
     @Bean
-    public Step masterStepSchoolReportRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return stepBuilderFactory.get("masterStepSchoolReportRun")
-                .partitioner(slaveStepSchoolReportRun(stepBuilderFactory).getName(), partitionerSchoolReportRun())
-                .step(slaveStepSchoolReportRun(stepBuilderFactory))
+    public Step masterStepPsiUserReqDisRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepPsiUserReqDisRun")
+                .partitioner(slaveStepPsiDisRun(stepBuilderFactory).getName(), partitionerDisRunPsiUserReq())
+                .step(slaveStepPsiDisRun(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
                 .build();
     }
 
-    @Bean(name="SchoolReportBatchJob")
-    public Job schoolReportBatchJob(SchoolReportRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
-        return jobBuilderFactory.get("SchoolReportBatchJob")
+
+    @Bean(name="psiDistributionBatchJob")
+    public Job psiDistributionBatchJobUserReq(UserReqPsiDistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("psiDistributionBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepSchoolReportRun(stepBuilderFactory,constants))
+                .flow(masterStepPsiUserReqDisRun(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    /**
+     * User Scheduled Jobs Refreshing Map on startup
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
+
+    @Bean
+    public ItemProcessor<UserScheduledJobs,UserScheduledJobs> itemProcessorUserScheduled() {
+        return new UserScheduledProcessor();
+    }
+
+    @Bean
+    public ItemReader<UserScheduledJobs> itemReaderUserScheduled() {
+        return new UserScheduledReader();
+    }
+
+    @Bean
+    public ItemWriter<UserScheduledJobs> itemWriterUserScheduled() {
+        return new UserScheduledWriter();
+    }
+
+    @Bean
+    public Step slaveStepUserScheduled(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepUserScheduled")
+                .<UserScheduledJobs, UserScheduledJobs>chunk(1)
+                .reader(itemReaderUserScheduled())
+                .processor(itemProcessorUserScheduled())
+                .writer(itemWriterUserScheduled())
+                .build();
+    }
+
+    @Bean(name="userScheduledBatchJobRefresher")
+    public Job userScheduledBatchJobQueueRefresher(UserScheduledCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("userScheduledBatchJobRefresher")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(slaveStepUserScheduled(stepBuilderFactory))
                 .end()
                 .build();
     }

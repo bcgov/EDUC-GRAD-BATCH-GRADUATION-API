@@ -30,6 +30,7 @@ public class TaskDefinition implements Runnable{
     private static final String CREDENTIAL_TYPE = "credentialType";
     private static final String ERROR_MSG = "Error {}";
     private static final String USER_PROPER_NAME = "properName";
+    private static final String TRANMISSION_TYPE = "transmissionType";
 
     @Autowired JobLauncher jobLauncher;
     @Autowired JobRegistry jobRegistry;
@@ -53,6 +54,16 @@ public class TaskDefinition implements Runnable{
         if(task.getProperUserName() != null) {
             builder.addString(USER_PROPER_NAME,task.getProperUserName());
         }
+        if(task.getTransmissionType() != null) {
+            builder.addString(TRANMISSION_TYPE,task.getTransmissionType());
+        }
+        if(task.getJobIdReference() != null) {
+            builder.addString("userScheduled",task.getJobIdReference().toString());
+        }
+        if(task.getJobParams() != null) {
+            builder.addString("userScheduledParam",task.getJobParams());
+        }
+        validatePsiPayLoad(task,builder,taskType);
         validatePayLoad(task,builder,taskType);
         validateBlankPayLoad(task,builder,taskType);
     }
@@ -64,6 +75,20 @@ public class TaskDefinition implements Runnable{
                 try {
                     String blankSearchData = new ObjectMapper().writeValueAsString(task.getBlankPayLoad());
                     executeBatchJob(builder, taskType,blankSearchData);
+                } catch (JsonProcessingException e) {
+                    LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
+                }
+            }
+        }
+    }
+
+    private void validatePsiPayLoad(Task task,JobParametersBuilder builder, TaskSelection taskType) {
+        if(task.getPsiPayLoad() != null) {
+            PsiDistributionSummaryDTO validate = validateInputPsiDisRun(task.getPsiPayLoad());
+            if (validate == null) {
+                try {
+                    String psiSearchData = new ObjectMapper().writeValueAsString(task.getPsiPayLoad());
+                    executeBatchJob(builder, taskType,psiSearchData);
                 } catch (JsonProcessingException e) {
                     LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
                 }
@@ -111,6 +136,15 @@ public class TaskDefinition implements Runnable{
     private BlankDistributionSummaryDTO validateInputBlankDisRun(BlankCredentialRequest blankCredentialRequest) {
         if(blankCredentialRequest.getSchoolOfRecords().isEmpty() || blankCredentialRequest.getCredentialTypeCode().isEmpty()) {
             BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
+            summaryDTO.setException("Please provide both parameters");
+            return summaryDTO;
+        }
+        return null;
+    }
+
+    private PsiDistributionSummaryDTO validateInputPsiDisRun(PsiCredentialRequest psiCredentialRequest) {
+        if(psiCredentialRequest.getPsiCodes().isEmpty() || StringUtils.isBlank(psiCredentialRequest.getPsiYear())) {
+            PsiDistributionSummaryDTO summaryDTO = new PsiDistributionSummaryDTO();
             summaryDTO.setException("Please provide both parameters");
             return summaryDTO;
         }

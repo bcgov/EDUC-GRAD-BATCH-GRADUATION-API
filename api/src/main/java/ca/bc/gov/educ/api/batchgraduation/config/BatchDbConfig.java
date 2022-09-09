@@ -75,6 +75,7 @@ public class BatchDbConfig {
         config.setKeepaliveTime(keepAliveTime);
         config.setIdleTimeout(keepAliveTime);
         config.addDataSourceProperty("socketTimeout", maxLifetime);
+        config.addDataSourceProperty("oracle.jdbc.javaNetNio", "false");
 
         return new HikariDataSource(config);
     }
@@ -85,7 +86,7 @@ public class BatchDbConfig {
         LocalContainerEntityManagerFactoryBean em
                 = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(batchDataSource());
-        em.setPackagesToScan(new String[] {"ca.bc.gov.educ.api.batchgraduation.entity"});
+        em.setPackagesToScan("ca.bc.gov.educ.api.batchgraduation.entity");
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);

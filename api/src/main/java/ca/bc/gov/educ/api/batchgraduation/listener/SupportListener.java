@@ -9,6 +9,20 @@ public class SupportListener {
     private SupportListener() {
     }
 
+    public static void psiPrintFile(List<PsiCredentialDistribution> yed4List, Long batchId, String usl, Map<String, DistributionPrintRequest> mapDist) {
+        if(!yed4List.isEmpty()) {
+            PsiCredentialPrintRequest tpReq = new PsiCredentialPrintRequest();
+            tpReq.setBatchId(batchId);
+            tpReq.setPsId(usl +" " +batchId);
+            tpReq.setCount(yed4List.size());
+            tpReq.setPsiList(yed4List);
+            DistributionPrintRequest dist = new DistributionPrintRequest();
+            dist.setPsiCredentialPrintRequest(tpReq);
+            dist.setTotal(dist.getTotal()+1);
+            mapDist.put(usl,dist);
+        }
+    }
+
     public static void transcriptPrintFile(List<StudentCredentialDistribution> yed4List, Long batchId, String usl, Map<String, DistributionPrintRequest> mapDist, String properName) {
         if(!yed4List.isEmpty()) {
             TranscriptPrintRequest tpReq = new TranscriptPrintRequest();

@@ -72,8 +72,6 @@ batch:
     cron: 0 0 16 * * *
   tvrrun:
     cron: 0 0 22 * * *
-  schrep:
-    cron: 0 0 2 * * *
 
 #Endpoints
 endpoint:
@@ -127,3 +125,8 @@ endpoint:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/BCPR?batchId=%s&localDownload=%s
     read-n-post:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/PSR?batchId=%s
+    merge-psi-n-upload:
+      url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/PSPR?batchId=%s&localDownload=%s
+  grad-trax-api:
+    get-psi-student-list:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s

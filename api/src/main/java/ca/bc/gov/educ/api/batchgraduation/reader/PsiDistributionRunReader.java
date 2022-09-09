@@ -1,24 +1,24 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.SchoolReportDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
-public class SchoolReportRunReader extends SchoolReportRunBaseReader {
+public class PsiDistributionRunReader extends PsiDistributionRunBaseReader {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchoolReportRunReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PsiDistributionRunReader.class);
 
     @Value("#{stepExecutionContext['index']}")
     private Integer nxtCredentialForProcessing;
 
     @Value("#{stepExecutionContext['data']}")
-    List<SchoolReportDistribution> credentialList;
+    List<PsiCredentialDistribution> credentialList;
 
     @Override
-    public SchoolReportDistribution read() throws Exception {
+    public PsiCredentialDistribution read() throws Exception {
         LOGGER.info("*** Reading the information of the next Credential");
 
         if (nxtCredentialForProcessing % 300 == 0) {
@@ -26,14 +26,14 @@ public class SchoolReportRunReader extends SchoolReportRunBaseReader {
         }
         summaryDTO.setReadCount(credentialList.size());
 
-        SchoolReportDistribution nextCredential = null;
+        PsiCredentialDistribution nextCredential = null;
         
         if (nxtCredentialForProcessing < credentialList.size()) {
             nextCredential = credentialList.get(nxtCredentialForProcessing);
-            LOGGER.info("*** Found Report Type [{}] - School ID: {} in total {}", nxtCredentialForProcessing + 1, nextCredential.getSchoolOfRecord(), summaryDTO.getReadCount());
+            LOGGER.info("*** Found Credential[{}] - Student ID: {} in total {}", nxtCredentialForProcessing + 1, nextCredential.getPen(), summaryDTO.getReadCount());
             nxtCredentialForProcessing++;
         }else {
-        	aggregate("schoolReportSummaryDTO");
+        	aggregate("psiDistributionSummaryDTO");
         }
         return nextCredential;
     }

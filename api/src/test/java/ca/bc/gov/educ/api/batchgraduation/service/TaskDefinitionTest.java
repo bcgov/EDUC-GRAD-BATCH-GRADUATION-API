@@ -99,6 +99,7 @@ public class TaskDefinitionTest {
         task.setCredentialType(null);
         StudentSearchRequest bReq = new StudentSearchRequest();
         bReq.setPens(List.of("12312311145"));
+        bReq.setSchoolCategoryCodes(new ArrayList<>());
         task.setPayload(bReq);
         taskDefinition.setTask(task);
         Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
@@ -115,9 +116,63 @@ public class TaskDefinitionTest {
         task.setProperUserName(null);
         task.setDeliveredToUser(false);
         task.setCredentialType(null);
+        task.setJobIdReference(null);
+        task.setJobParams("342342");
         BlankCredentialRequest bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
         bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setCredentialTypeCode(new ArrayList<>());
+        task.setBlankPayLoad(bReq);
+        taskDefinition.setTask(task);
+        Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        taskDefinition.run();
+        assertNotNull(task);
+    }
+
+    @Test
+    public void testRun_withemptyblankpayload_2() throws NoSuchJobException {
+        Task task = new Task();
+
+        task.setJobName("SGBJ");
+        task.setCronExpression("0 0 20 * * *");
+        task.setProperUserName(null);
+        task.setDeliveredToUser(false);
+        task.setCredentialType(null);
+        task.setJobIdReference(UUID.randomUUID());
+        task.setJobParams(null);
+        BlankCredentialRequest bReq = new BlankCredentialRequest();
+        bReq.setQuantity(5);
+        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setCredentialTypeCode(List.of("E"));
+        task.setBlankPayLoad(bReq);
+        taskDefinition.setTask(task);
+        Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        taskDefinition.run();
+
+        bReq = new BlankCredentialRequest();
+        bReq.setQuantity(5);
+        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setCredentialTypeCode(List.of("E"));
+        task.setBlankPayLoad(bReq);
+        taskDefinition.setTask(task);
+        taskDefinition.run();
+        assertNotNull(task);
+    }
+
+    @Test
+    public void testRun_withemptyblankpayload_3() throws NoSuchJobException {
+        Task task = new Task();
+
+        task.setJobName("SGBJ");
+        task.setCronExpression("0 0 20 * * *");
+        task.setProperUserName(null);
+        task.setDeliveredToUser(false);
+        task.setCredentialType(null);
+        task.setJobIdReference(UUID.randomUUID());
+        task.setJobParams("342342");
+        BlankCredentialRequest bReq = new BlankCredentialRequest();
+        bReq.setQuantity(5);
+        bReq.setSchoolOfRecords(List.of("E"));
         bReq.setCredentialTypeCode(new ArrayList<>());
         task.setBlankPayLoad(bReq);
         taskDefinition.setTask(task);
@@ -206,6 +261,92 @@ public class TaskDefinitionTest {
         taskDefinition.setTask(task);
         taskDefinition.run();
 
+        assertNotNull(task);
+    }
+
+    @Test
+    public void testRun_withpsipayload() throws NoSuchJobException {
+        Task task = new Task();
+
+        task.setJobName("URPDBJ");
+        task.setCronExpression("0 0 20 * * *");
+        task.setProperUserName(null);
+        task.setDeliveredToUser(false);
+        task.setCredentialType(null);
+        task.setTransmissionType("PAPER");
+        task.setLocalDownload("N");
+
+        PsiCredentialRequest bReq = new PsiCredentialRequest();
+        bReq.setPsiCodes(List.of("12312311145"));
+        bReq.setPsiYear("2021");
+        task.setPsiPayLoad(bReq);
+
+        taskDefinition.setTask(task);
+        Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        taskDefinition.run();
+        assertNotNull(task);
+    }
+
+    @Test
+    public void testRun_withpsipayload_validatenotnull() throws NoSuchJobException {
+        Task task = new Task();
+
+        task.setJobName("URPDBJ");
+        task.setCronExpression("0 0 20 * * *");
+        task.setProperUserName(null);
+        task.setDeliveredToUser(false);
+        task.setCredentialType(null);
+
+        PsiCredentialRequest bReq = new PsiCredentialRequest();
+        bReq.setPsiCodes(List.of("12312311145"));
+        bReq.setPsiYear("");
+        task.setPsiPayLoad(bReq);
+
+        taskDefinition.setTask(task);
+        Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        taskDefinition.run();
+        assertNotNull(task);
+    }
+
+    @Test
+    public void testRun_withpsipayload_validatenotnull_2() throws NoSuchJobException {
+        Task task = new Task();
+
+        task.setJobName("URPDBJ");
+        task.setCronExpression("0 0 20 * * *");
+        task.setProperUserName(null);
+        task.setDeliveredToUser(false);
+        task.setCredentialType(null);
+
+        PsiCredentialRequest bReq = new PsiCredentialRequest();
+        bReq.setPsiCodes(new ArrayList<>());
+        bReq.setPsiYear("2021");
+        task.setPsiPayLoad(bReq);
+
+        taskDefinition.setTask(task);
+        Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        taskDefinition.run();
+        assertNotNull(task);
+    }
+
+    @Test
+    public void testRun_withpsipayload_validatenotnull_3() throws NoSuchJobException {
+        Task task = new Task();
+
+        task.setJobName("URPDBJ");
+        task.setCronExpression("0 0 20 * * *");
+        task.setProperUserName(null);
+        task.setDeliveredToUser(false);
+        task.setCredentialType(null);
+
+        PsiCredentialRequest bReq = new PsiCredentialRequest();
+        bReq.setPsiCodes(new ArrayList<>());
+        bReq.setPsiYear("");
+        task.setPsiPayLoad(bReq);
+
+        taskDefinition.setTask(task);
+        Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        taskDefinition.run();
         assertNotNull(task);
     }
 

@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.PsiDistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,23 +13,23 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Map;
 
-public abstract class SchoolReportRunBaseReader implements ItemReader<SchoolReportDistribution> {
+public abstract class PsiDistributionRunBaseReader implements ItemReader<PsiCredentialDistribution> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SchoolReportRunBaseReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PsiDistributionRunBaseReader.class);
 
     @Autowired
     RestUtils restUtils;
 
     @Value("#{stepExecutionContext['summary']}")
-    SchoolReportSummaryDTO summaryDTO;
+    PsiDistributionSummaryDTO summaryDTO;
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution jobExecution;
 
     protected void aggregate(String summaryContextName) {
-        SchoolReportSummaryDTO totalSummaryDTO = (SchoolReportSummaryDTO)jobExecution.getExecutionContext().get(summaryContextName);
+        PsiDistributionSummaryDTO totalSummaryDTO = (PsiDistributionSummaryDTO)jobExecution.getExecutionContext().get(summaryContextName);
         if (totalSummaryDTO == null) {
-            totalSummaryDTO = new SchoolReportSummaryDTO();
+            totalSummaryDTO = new PsiDistributionSummaryDTO();
             jobExecution.getExecutionContext().put(summaryContextName, totalSummaryDTO);
         }
         totalSummaryDTO.setBatchId(summaryDTO.getBatchId());
