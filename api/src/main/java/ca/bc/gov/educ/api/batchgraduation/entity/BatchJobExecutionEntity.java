@@ -2,11 +2,10 @@ package ca.bc.gov.educ.api.batchgraduation.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.Date;
-import java.util.UUID;
 
 @Data
 @Entity
@@ -17,6 +16,9 @@ public class BatchJobExecutionEntity {
 	@Id
 	@Column(name = "JOB_EXECUTION_ID", nullable = false)
     private Long jobExecutionId;
+
+	@Column(name = "JOB_INSTANCE_ID", nullable = false)
+	private Long id;
 
 	@Column(name = "CREATE_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -32,4 +34,20 @@ public class BatchJobExecutionEntity {
 	
 	@Column(name = "STATUS", nullable = true)
     private String status;
+
+	@Column(name = "VERSION")
+	private Long version;
+
+	@Column(name = "EXIT_CODE", length = 2500)
+	private String exitCode;
+
+	@Column(name = "EXIT_MESSAGE", length = 2500)
+	private String exitMessage;
+
+	@Column(name = "LAST_UPDATED")
+	private Instant lastUpdated;
+
+	@Column(name = "JOB_CONFIGURATION_LOCATION", length = 2500)
+	private String jobConfigurationLocation;
+
 }
