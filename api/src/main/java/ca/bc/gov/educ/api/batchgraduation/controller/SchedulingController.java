@@ -77,8 +77,8 @@ public class SchedulingController {
     @PutMapping(EducGradBatchGraduationApiConstants.UPDATE_ENABLED)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Toggle Scheduled job availability", description = "Toggle Scheduled job availability", tags = { "Schedule" })
-    public ResponseEntity<BatchProcessing> processingList(@PathVariable UUID processingId) {
-        BatchProcessing res = gradDashboardService.toggleProcess(processingId);
+    public ResponseEntity<BatchProcessing> processingList(@PathVariable String jobType) {
+        BatchProcessing res = gradDashboardService.toggleProcess(jobType);
         if(res == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
