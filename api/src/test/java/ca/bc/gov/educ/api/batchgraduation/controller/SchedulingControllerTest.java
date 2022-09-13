@@ -141,20 +141,20 @@ public class SchedulingControllerTest {
     @Test
     public void testprocessingList_2() {
         BatchProcessing sJobs = new BatchProcessing();
-        sJobs.setJobType("PSIRUN");
+        String jobType = "PSIRUN";
+        sJobs.setJobType(jobType);
         sJobs.setId(UUID.randomUUID());
         sJobs.setEnabled("Y");
         sJobs.setCronExpression("0 34 4 5 6 *");
-        Mockito.when(gradDashboardService.toggleProcess(sJobs.getId())).thenReturn(sJobs);
-        ResponseEntity<BatchProcessing> res = schedulingController.processingList(sJobs.getId());
+        Mockito.when(gradDashboardService.toggleProcess(jobType)).thenReturn(sJobs);
+        ResponseEntity<BatchProcessing> res = schedulingController.processingList(jobType);
         assertThat(res.getBody()).isNotNull();
     }
 
     @Test
     public void testprocessingList_3() {
-        UUID id = UUID.randomUUID();
-        Mockito.when(gradDashboardService.toggleProcess(id)).thenReturn(null);
-        ResponseEntity<BatchProcessing> res = schedulingController.processingList(id);
+        Mockito.when(gradDashboardService.toggleProcess("TVRRUN")).thenReturn(null);
+        ResponseEntity<BatchProcessing> res = schedulingController.processingList("TVRRUN");
         assertThat(res.getBody()).isNull();
     }
 }

@@ -95,19 +95,19 @@ public class GradDashboardServiceTest {
 
     @Test
     public void testUpdateProcessing() {
-        UUID processingId = UUID.randomUUID();
+        String jobType = "REGALG";
         BatchProcessingEntity hist = new BatchProcessingEntity();
         hist.setEnabled("Y");
-        hist.setJobType("REGALG");
+        hist.setJobType(jobType);
         hist.setScheduleOccurrence("D");
 
         BatchProcessingEntity hist2 = new BatchProcessingEntity();
         hist2.setEnabled("N");
-        hist2.setJobType("REGALG");
+        hist2.setJobType(jobType);
         hist2.setScheduleOccurrence("D");
-        when(batchProcessingRepository.findById(processingId)).thenReturn(Optional.of(hist));
+        when(batchProcessingRepository.findByJobType(jobType)).thenReturn(Optional.of(hist));
         when(batchProcessingRepository.save(hist2)).thenReturn(hist2);
-        BatchProcessing dash = gradDashboardService.toggleProcess(processingId);
+        BatchProcessing dash = gradDashboardService.toggleProcess(jobType);
         assertThat(dash).isNotNull();
         assertThat(dash.getEnabled()).isEqualTo("N");
 
