@@ -61,10 +61,10 @@ public class CodeService {
 	}
 
 	public BatchJobType updateBatchJobType(@Valid BatchJobType batchJobType) {
-		Optional<BatchJobTypeEntity> BatchJobTypeOptional = batchJobTypeRepository.findById(batchJobType.getCode());
+		Optional<BatchJobTypeEntity> batchJobTypeOptional = batchJobTypeRepository.findById(batchJobType.getCode());
 		BatchJobTypeEntity sourceObject = batchJobTypeTransformer.transformToEntity(batchJobType);
-		if(BatchJobTypeOptional.isPresent()) {
-			BatchJobTypeEntity gradEnity = BatchJobTypeOptional.get();
+		if(batchJobTypeOptional.isPresent()) {
+			BatchJobTypeEntity gradEnity = batchJobTypeOptional.get();
 			BeanUtils.copyProperties(sourceObject,gradEnity,CREATED_BY,CREATED_TIMESTAMP);
 			return batchJobTypeTransformer.transformToDTO(batchJobTypeRepository.save(gradEnity));
 		}else {
