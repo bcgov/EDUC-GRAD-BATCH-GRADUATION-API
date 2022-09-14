@@ -62,8 +62,7 @@ class CodeServiceTest {
 		gradBatchJobTypeList.add(obj);
 		Mockito.when(batchJobTypeRepository.findAll()).thenReturn(gradBatchJobTypeList);
 		var result = codeService.getAllBatchJobTypeCodeList();
-		assertThat(result).isNotNull();
-		assertThat(result).isNotEmpty();
+		assertThat(result).isNotNull().isNotEmpty();
 	}
 	
 	@Test
