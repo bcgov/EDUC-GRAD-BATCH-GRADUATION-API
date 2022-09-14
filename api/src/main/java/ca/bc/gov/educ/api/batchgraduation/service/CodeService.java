@@ -40,7 +40,7 @@ public class CodeService {
 	}
 
 	@Transactional
-	public BatchJobType getSpecificBatchJobTypeCodeTypeCode(String tranTypeCode) {
+	public BatchJobType getSpecificBatchJobTypeCode(String tranTypeCode) {
 		Optional<BatchJobTypeEntity> entity = batchJobTypeRepository.findById(StringUtils.toRootUpperCase(tranTypeCode));
 		if (entity.isPresent()) {
 			return batchJobTypeTransformer.transformToDTO(entity);

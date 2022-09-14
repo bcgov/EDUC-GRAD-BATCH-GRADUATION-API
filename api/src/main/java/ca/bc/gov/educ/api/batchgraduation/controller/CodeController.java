@@ -63,7 +63,7 @@ public class CodeController {
             @ApiResponse(responseCode = "204", description = "NO CONTENT")})
     public ResponseEntity<BatchJobType> getSpecificBatchJobTypeCode(@PathVariable String batchJobTypeCode) {
         logger.debug("getSpecificBatchJobTypeCode : ");
-        BatchJobType gradResponse = codeService.getSpecificBatchJobTypeCodeTypeCode(batchJobTypeCode);
+        BatchJobType gradResponse = codeService.getSpecificBatchJobTypeCode(batchJobTypeCode);
         if (gradResponse != null) {
             return response.GET(gradResponse);
         } else {
