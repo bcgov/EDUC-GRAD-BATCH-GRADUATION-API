@@ -47,7 +47,7 @@ public class JobLauncherController {
     private static final String MANUAL = "MANUAL";
     private static final String TVRRUN = "TVRRUN";
     private static final String REGALG = "REGALG";
-    private static final String DISTRUNMONTH = "DISTRUNMONTH";
+    private static final String DISTRUN = "DISTRUN";
     private static final String DISTRUNYEAREND = "DISTRUNYEAREND";
     private static final String DISTRUNUSER = "DISTRUNUSER";
     private static final String PSIDISTRUN = "PSIRUN";
@@ -251,7 +251,7 @@ public class JobLauncherController {
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
-        builder.addString(JOB_TYPE, DISTRUNMONTH);
+        builder.addString(JOB_TYPE, DISTRUN);
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
