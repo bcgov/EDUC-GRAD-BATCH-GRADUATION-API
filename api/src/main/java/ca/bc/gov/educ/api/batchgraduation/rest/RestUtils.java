@@ -13,13 +13,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
@@ -31,26 +29,41 @@ public class RestUtils {
     private static final String MERGE_MSG="Merge and Upload Success {}";
     private final EducGradBatchGraduationApiConstants constants;
 
+    private ResponseObjCache responseObjCache;
+
     private final WebClient webClient;
 
     @Autowired
-    public RestUtils(final EducGradBatchGraduationApiConstants constants, final WebClient webClient) {
+    public RestUtils(final EducGradBatchGraduationApiConstants constants, final WebClient webClient, ResponseObjCache objCache) {
         this.constants = constants;
         this.webClient = webClient;
+        this.responseObjCache = objCache;
     }
 
     public ResponseObj getTokenResponseObject() {
+        if(responseObjCache.isExpired()){
+            responseObjCache.setResponseObj(getResponseObj());
+        }
+        return responseObjCache.getResponseObj();
+    }
+
+    @Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
+    private ResponseObj getResponseObj() {
         HttpHeaders httpHeadersKC = EducGradBatchGraduationApiUtils.getHeaders(
                 constants.getUserName(), constants.getPassword());
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
         map.add("grant_type", "client_credentials");
-        LOGGER.debug("url = {}",constants.getTokenUrl());
         return this.webClient.post().uri(constants.getTokenUrl())
                 .headers(h -> h.addAll(httpHeadersKC))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(map))
                 .retrieve()
                 .bodyToMono(ResponseObj.class).block();
+    }
+
+    public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
+        LOGGER.error("Could not contact {} after many attempts.", constants.getTokenUrl(), exception);
+        return null;
     }
 
     public List<Student> getStudentsByPen(String pen, String accessToken) {
