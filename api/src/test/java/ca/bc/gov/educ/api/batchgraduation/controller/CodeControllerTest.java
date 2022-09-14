@@ -18,7 +18,7 @@ import java.util.List;
 
 
 @ExtendWith(MockitoExtension.class)
-public class CodeControllerTest {
+class CodeControllerTest {
 
 	@Mock
 	private CodeService codeService;
@@ -36,7 +36,7 @@ public class CodeControllerTest {
 	MessageHelper messagesHelper;
 	
 	@Test
-	public void testGetAllBatchJobTypeCodeList() {
+	void testGetAllBatchJobTypeCodeList() {
 		List<BatchJobType> batchJobTypes = new ArrayList<>();
 		BatchJobType obj = new BatchJobType();
 		obj.setCode("DC");
@@ -61,7 +61,7 @@ public class CodeControllerTest {
 	}
 	
 	@Test
-	public void testGetSpecificBatchJobTypeCode() {
+	void testGetSpecificBatchJobTypeCode() {
 		String batchJobType = "DC";
 		BatchJobType obj = new BatchJobType();
 		obj.setCode("DC");
@@ -76,7 +76,7 @@ public class CodeControllerTest {
 	}
 	
 	@Test
-	public void testGetSpecificBatchJobTypeCode_noContent() {
+	void testGetSpecificBatchJobTypeCode_noContent() {
 		String batchJobType = "AB";
 		Mockito.when(codeService.getSpecificBatchJobTypeCode(batchJobType)).thenReturn(null);
 		codeController.getSpecificBatchJobTypeCode(batchJobType);
@@ -84,7 +84,7 @@ public class CodeControllerTest {
 	}
 	
 	@Test
-	public void testCreateBatchJobTypeCode() {
+	void testCreateBatchJobTypeCode() {
 		BatchJobType obj = new BatchJobType();
 		obj.setCode("DC");
 		obj.setDescription("Data Correction by School");
@@ -98,7 +98,7 @@ public class CodeControllerTest {
 	}
 	
 	@Test
-	public void testUpdateBatchJobTypeCode() {
+	void testUpdateBatchJobTypeCode() {
 		BatchJobType obj = new BatchJobType();
 		obj.setCode("DC");
 		obj.setDescription("Data Correction by School");
@@ -112,7 +112,7 @@ public class CodeControllerTest {
 	}
 	
 	@Test
-	public void testDeleteBatchJobTypeCode() {
+	void testDeleteBatchJobTypeCode() {
 		String statusCode = "DC";
 		Mockito.when(codeService.deleteBatchJobType(statusCode)).thenReturn(1);
 		codeController.deleteBatchJobType(statusCode);

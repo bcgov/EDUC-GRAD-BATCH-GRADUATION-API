@@ -20,12 +20,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @SuppressWarnings({"rawtypes"})
-public class CodeServiceTest {
+class CodeServiceTest {
 
 	@Autowired
 	private CodeService codeService;
@@ -40,7 +42,7 @@ public class CodeServiceTest {
 	GradValidation validation;
 	
 	@Test
-	public void testGetAllBatchJobTypesCodeList() {
+	void testGetAllBatchJobTypesCodeList() {
 		List<BatchJobTypeEntity> gradBatchJobTypeList = new ArrayList<>();
 		BatchJobTypeEntity obj = new BatchJobTypeEntity();
 		obj.setCode("REGALG");
@@ -59,12 +61,12 @@ public class CodeServiceTest {
 		obj.setUpdateDate(new Date(System.currentTimeMillis()));
 		gradBatchJobTypeList.add(obj);
 		Mockito.when(batchJobTypeRepository.findAll()).thenReturn(gradBatchJobTypeList);
-		codeService.getAllBatchJobTypeCodeList();
+		assertThat(codeService.getAllBatchJobTypeCodeList()).isNotNull();
 	}
 	
 	@Test
-	public void testGetSpecificBatchJobTypeCode() {
-		String certCode = "E";
+	void testGetSpecificBatchJobTypeCode() {
+		String code = "TVRRUN";
 		BatchJobType obj = new BatchJobType();
 		obj.setCode("TVRRUN");
 		obj.setDescription("Student Achievement Report (TVR)");
@@ -81,19 +83,19 @@ public class CodeServiceTest {
 		objEntity.setCreateDate(new Date(System.currentTimeMillis()));
 		objEntity.setUpdateDate(new Date(System.currentTimeMillis()));
 		Optional<BatchJobTypeEntity> ent = Optional.of(objEntity);
-		Mockito.when(batchJobTypeRepository.findById(certCode)).thenReturn(ent);
-		codeService.getSpecificBatchJobTypeCode(certCode);
+		Mockito.when(batchJobTypeRepository.findById(code)).thenReturn(ent);
+		assertThat(codeService.getSpecificBatchJobTypeCode(code)).isNotNull();
 	}
 	
 	@Test
-	public void testGetSpecificBatchJobTypeCodeReturnsNull() {
-		String certCode = "TVRRUN";
-		Mockito.when(batchJobTypeRepository.findById(certCode)).thenReturn(Optional.empty());
-		codeService.getSpecificBatchJobTypeCode(certCode);
+	void testGetSpecificBatchJobTypeCodeReturnsNull() {
+		String code = "TVRRUN";
+		Mockito.when(batchJobTypeRepository.findById(code)).thenReturn(Optional.empty());
+		assertThat(codeService.getSpecificBatchJobTypeCode(code)).isNotNull();
 	}
 	
 	@Test
-	public void testCreateBatchJobType() {
+	void testCreateBatchJobType() {
 		BatchJobType obj = new BatchJobType();
 		obj.setCode("PSIRUN");
 		obj.setDescription("PSI Run FTP / Paper");
@@ -110,12 +112,12 @@ public class CodeServiceTest {
 		objEntity.setUpdateDate(new Date(System.currentTimeMillis()));
 		Mockito.when(batchJobTypeRepository.findById(obj.getCode())).thenReturn(Optional.empty());
 		Mockito.when(batchJobTypeRepository.save(objEntity)).thenReturn(objEntity);
-		codeService.createBatchJobType(obj);
+		assertThat(codeService.createBatchJobType(obj)).isNotNull();
 		
 	}
 	
 	@Test(expected = GradBusinessRuleException.class)
-	public void testCreateBatchJobType_codeAlreadyExists() {
+	void testCreateBatchJobType_codeAlreadyExists() {
 		BatchJobType obj = new BatchJobType();
 		obj.setCode("PSIRUN");
 		obj.setDescription("PSI Run FTP / Paper");
@@ -132,12 +134,12 @@ public class CodeServiceTest {
 		objEntity.setUpdateDate(new Date(System.currentTimeMillis()));
 		Optional<BatchJobTypeEntity> ent = Optional.of(objEntity);
 		Mockito.when(batchJobTypeRepository.findById(obj.getCode())).thenReturn(ent);
-		codeService.createBatchJobType(obj);
+		assertThat(codeService.createBatchJobType(obj)).isNotNull();
 		
 	}
 	
 	@Test
-	public void testUpdateBatchJobType() {
+	void testUpdateBatchJobType() {
 		BatchJobType obj = new BatchJobType();
 		obj.setCode("REGALG");
 		obj.setDescription("Graduation Algorithm");
@@ -155,11 +157,11 @@ public class CodeServiceTest {
 		Optional<BatchJobTypeEntity> ent = Optional.of(objEntity);
 		Mockito.when(batchJobTypeRepository.findById(obj.getCode())).thenReturn(ent);
 		Mockito.when(batchJobTypeRepository.save(objEntity)).thenReturn(objEntity);
-		codeService.updateBatchJobType(obj);		
+		assertThat(codeService.updateBatchJobType(obj)).isNotNull();
 	}
 	
 	@Test(expected = GradBusinessRuleException.class)
-	public void testUpdateBatchJobType_codeAlreadyExists() {
+	void testUpdateBatchJobType_codeAlreadyExists() {
 		BatchJobType obj = new BatchJobType();
 		obj.setCode("REGALG");
 		obj.setDescription("Graduation Algorithm");
@@ -175,7 +177,7 @@ public class CodeServiceTest {
 		objEntity.setCreateDate(new Date(System.currentTimeMillis()));
 		objEntity.setUpdateDate(new Date(System.currentTimeMillis()));
 		Mockito.when(batchJobTypeRepository.findById(obj.getCode())).thenReturn(Optional.empty());
-		codeService.updateBatchJobType(obj);
+		assertThat(codeService.updateBatchJobType(obj)).isNotNull();
 		
 	}
 
