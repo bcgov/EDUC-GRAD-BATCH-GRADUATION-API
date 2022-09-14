@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchJobType;
 import ca.bc.gov.educ.api.batchgraduation.model.JobProperName;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
@@ -26,6 +27,7 @@ public class TaskSchedulingService {
 
     @Autowired TaskScheduler taskScheduler;
     @Autowired UserScheduledJobsRepository userScheduledJobsRepository;
+    @Autowired CodeService codeService;
     @Autowired UserScheduledJobsTransformer userScheduledJobsTransformer;
 
     Map<UUID, ScheduledFuture<?>> jobsMap = new HashMap<>();
@@ -60,11 +62,16 @@ public class TaskSchedulingService {
             }
         }
     }
-    public void saveUserScheduledJobs(Task task) {
+    public void saveUserScheduledJobs(Task task, String batchJobTypeCode) {
         JobProperName jName = JobProperName.valueOf(StringUtils.toRootUpperCase(task.getJobName()));
+        String jobName = jName.getValue();
+        BatchJobType jobType = codeService.getSpecificBatchJobTypeCode(batchJobTypeCode);
+        if(jobType != null) {
+            jobName = jobType.getLabel();
+        }
         UserScheduledJobsEntity entity = new UserScheduledJobsEntity();
         entity.setJobCode(task.getJobName());
-        entity.setJobName(jName.getValue());
+        entity.setJobName(jobName);
         entity.setCronExpression(task.getCronExpression());
         try {
             entity.setJobParameters(new ObjectMapper().writeValueAsString(task));
