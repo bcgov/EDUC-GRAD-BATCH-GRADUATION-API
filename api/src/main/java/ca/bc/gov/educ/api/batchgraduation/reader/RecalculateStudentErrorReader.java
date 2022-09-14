@@ -10,11 +10,7 @@ public class RecalculateStudentErrorReader extends BaseReader {
 
     @Override
     public GraduationStudentRecord read() throws Exception {
-        LOGGER.info("*** Reading the information of the next student");
-
-        if (nxtStudentForProcessing % 15 == 0) {
-            fetchAccessToken();
-        }
+        fetchAccessToken();
         GraduationStudentRecord nextStudent = null;
         summaryDTO.setReadCount(0);
         if (nxtStudentForProcessing < studentList.size()) {

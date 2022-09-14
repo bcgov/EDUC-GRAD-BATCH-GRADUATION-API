@@ -10,15 +10,9 @@ public class RecalculateProjectedGradRunErrorRetryReader extends BaseReader {
 
     @Override
     public GraduationStudentRecord read() throws Exception {
-        LOGGER.info("*** Reading the information of the next student");
-
-        if (nxtStudentForProcessing % 15 == 0) {
-            fetchAccessToken();
-        }
+        fetchAccessToken();
         summaryDTO.setReadCount(0);
-
         GraduationStudentRecord nextStudent = null;
-        
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
             LOGGER.info("*** Error Found student[{}] - Student ID: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getStudentID(), summaryDTO.getReadCount());
