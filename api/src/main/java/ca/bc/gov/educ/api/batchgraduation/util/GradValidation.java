@@ -87,9 +87,7 @@ public class GradValidation {
     		throw new GradBusinessRuleException();
     	}
     }
-    
-    
-    
+
     public boolean hasErrors() {
     	return !errorList.get().isEmpty();
     }

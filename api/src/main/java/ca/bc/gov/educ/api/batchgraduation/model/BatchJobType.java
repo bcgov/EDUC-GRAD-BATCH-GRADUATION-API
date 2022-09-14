@@ -17,7 +17,6 @@ public class BatchJobType extends BaseModel {
 	private Integer displayOrder;
 	private Date effectiveDate;
 	private Date expiryDate;
-	private String paperType;
 	
 	@Override
 	public String toString() {

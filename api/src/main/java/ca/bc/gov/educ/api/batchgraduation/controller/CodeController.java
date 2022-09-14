@@ -21,7 +21,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping(EducGradBatchGraduationApiConstants.API_ROOT_MAPPING)
+@RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
 @CrossOrigin
 @OpenAPIDefinition(info = @Info(title = "API for Code Tables Data.",
         description = "This API is for Reading Code Tables data.", version = "1"),
@@ -79,6 +79,7 @@ public class CodeController {
     public ResponseEntity<ApiResponseModel<BatchJobType>> createBatchJobType(
             @Valid @RequestBody BatchJobType batchJobType) {
         logger.debug("createBatchJobType : ");
+        validation.clear();
         validation.requiredField(batchJobType.getCode(), BATCH_JOB_TYPE_CODE);
         validation.requiredField(batchJobType.getDescription(), "Batch Job Type Description");
         if (validation.hasErrors()) {
@@ -96,6 +97,7 @@ public class CodeController {
     public ResponseEntity<ApiResponseModel<BatchJobType>> updateBatchJobType(
             @Valid @RequestBody BatchJobType batchJobType) {
         logger.info("updateBatchJobType : ");
+        validation.clear();
         validation.requiredField(batchJobType.getCode(), BATCH_JOB_TYPE_CODE);
         validation.requiredField(batchJobType.getDescription(), "Batch Job Type Description");
         if (validation.hasErrors()) {
@@ -112,6 +114,7 @@ public class CodeController {
             @ApiResponse(responseCode = "400", description = "BAD REQUEST")})
     public ResponseEntity<Void> deleteBatchJobType(@Valid @PathVariable String batchJobTypeCode) {
         logger.debug("deleteBatchJobType : ");
+        validation.clear();
         validation.requiredField(batchJobTypeCode, BATCH_JOB_TYPE_CODE);
         if (validation.hasErrors()) {
             validation.stopOnErrors();
