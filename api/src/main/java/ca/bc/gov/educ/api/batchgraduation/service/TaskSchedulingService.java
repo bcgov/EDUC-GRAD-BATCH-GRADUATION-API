@@ -62,10 +62,10 @@ public class TaskSchedulingService {
             }
         }
     }
-    public void saveUserScheduledJobs(Task task, String runType) {
+    public void saveUserScheduledJobs(Task task, String batchJobTypeCode) {
         JobProperName jName = JobProperName.valueOf(StringUtils.toRootUpperCase(task.getJobName()));
         String jobName = jName.getValue();
-        BatchJobType jobType = codeService.getSpecificBatchJobTypeCode(runType);
+        BatchJobType jobType = codeService.getSpecificBatchJobTypeCode(batchJobTypeCode);
         if(jobType != null) {
             jobName = jobType.getLabel();
         }
