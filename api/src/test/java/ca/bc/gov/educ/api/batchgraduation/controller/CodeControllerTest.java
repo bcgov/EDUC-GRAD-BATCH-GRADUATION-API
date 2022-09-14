@@ -39,16 +39,16 @@ class CodeControllerTest {
 	void testGetAllBatchJobTypeCodeList() {
 		List<BatchJobType> batchJobTypes = new ArrayList<>();
 		BatchJobType obj = new BatchJobType();
-		obj.setCode("DC");
-		obj.setDescription("Data Correction by School");
+		obj.setCode("REGALG");
+		obj.setDescription("Graduation Algorithm");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
 		obj.setCreateDate(new Date(System.currentTimeMillis()));
 		obj.setUpdateDate(new Date(System.currentTimeMillis()));
 		batchJobTypes.add(obj);
 		obj = new BatchJobType();
-		obj.setCode("CC");
-		obj.setDescription("Courses not complete");
+		obj.setCode("TVRRUN");
+		obj.setDescription("Student Achievement Report (TVR)");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
 		obj.setCreateDate(new Date(System.currentTimeMillis()));
@@ -62,10 +62,10 @@ class CodeControllerTest {
 	
 	@Test
 	void testGetSpecificBatchJobTypeCode() {
-		String batchJobType = "DC";
+		String batchJobType = "TVRRUN";
 		BatchJobType obj = new BatchJobType();
-		obj.setCode("DC");
-		obj.setDescription("Data Correction by School");
+		obj.setCode("TVRRUN");
+		obj.setDescription("Student Achievement Report (TVR)");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
 		obj.setCreateDate(new Date(System.currentTimeMillis()));
@@ -77,7 +77,7 @@ class CodeControllerTest {
 	
 	@Test
 	void testGetSpecificBatchJobTypeCode_noContent() {
-		String batchJobType = "AB";
+		String batchJobType = "TVRRUN";
 		Mockito.when(codeService.getSpecificBatchJobTypeCode(batchJobType)).thenReturn(null);
 		codeController.getSpecificBatchJobTypeCode(batchJobType);
 		Mockito.verify(codeService).getSpecificBatchJobTypeCode(batchJobType);
@@ -86,8 +86,8 @@ class CodeControllerTest {
 	@Test
 	void testCreateBatchJobTypeCode() {
 		BatchJobType obj = new BatchJobType();
-		obj.setCode("DC");
-		obj.setDescription("Data Correction by School");
+		obj.setCode("PSIRUN");
+		obj.setDescription("PSI Run FTP / Paper");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
 		obj.setCreateDate(new Date(System.currentTimeMillis()));
@@ -100,8 +100,8 @@ class CodeControllerTest {
 	@Test
 	void testUpdateBatchJobTypeCode() {
 		BatchJobType obj = new BatchJobType();
-		obj.setCode("DC");
-		obj.setDescription("Data Correction by School");
+		obj.setCode("REGALG");
+		obj.setDescription("Graduation Algorithm");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
 		obj.setCreateDate(new Date(System.currentTimeMillis()));
@@ -113,7 +113,7 @@ class CodeControllerTest {
 	
 	@Test
 	void testDeleteBatchJobTypeCode() {
-		String statusCode = "DC";
+		String statusCode = "REGALG";
 		Mockito.when(codeService.deleteBatchJobType(statusCode)).thenReturn(1);
 		codeController.deleteBatchJobType(statusCode);
 		Mockito.verify(codeService).deleteBatchJobType(statusCode);

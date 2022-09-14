@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchJobType;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.sql.Date;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
@@ -47,6 +50,9 @@ public class TaskSchedulingServiceTest {
 
     @MockBean
     WebClient webClient;
+
+    @Mock
+    private CodeService codeService;
 
 
     @Test
@@ -121,8 +127,19 @@ public class TaskSchedulingServiceTest {
         ent2.setJobName("FREE");
         ent2.setJobParameters("Adsad");
 
+        String batchJobType = "TVRRUN";
+
+        BatchJobType obj = new BatchJobType();
+        obj.setCode(batchJobType);
+        obj.setDescription("Student Achievement Report (TVR)");
+        obj.setCreateUser("GRADUATION");
+        obj.setUpdateUser("GRADUATION");
+        obj.setCreateDate(new java.sql.Date(System.currentTimeMillis()));
+        obj.setUpdateDate(new Date(System.currentTimeMillis()));
+        Mockito.when(codeService.getSpecificBatchJobTypeCode(batchJobType)).thenReturn(obj);
+
         Mockito.when(userScheduledJobsRepository.save(entity)).thenReturn(ent2);
-        taskSchedulingService.saveUserScheduledJobs(task, "TVRRUN");
+        taskSchedulingService.saveUserScheduledJobs(task, batchJobType);
         assertThat(task).isNotNull();
     }
 
