@@ -7,15 +7,12 @@ import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public abstract class BaseReader implements ItemReader<GraduationStudentRecord> {
 
@@ -24,8 +21,11 @@ public abstract class BaseReader implements ItemReader<GraduationStudentRecord> 
     @Autowired
     RestUtils restUtils;
 
+    @Value("#{stepExecutionContext['index']}")
+    protected Integer nxtStudentForProcessing;
+
     @Value("#{stepExecutionContext['data']}")
-    List<GraduationStudentRecord> partitionData;
+    protected List<GraduationStudentRecord> studentList;
 
     @Value("#{stepExecutionContext['summary']}")
     AlgorithmSummaryDTO summaryDTO;
