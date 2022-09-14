@@ -91,15 +91,22 @@ springdoc:
 #Resilience
 resilience4j.retry:
   instances:
+    rt-getToken:
+      maxAttempts: 35
+      waitDuration: 5s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
     reggradrun:
-      maxRetryAttempts: ${MAX_RETRY_ATTEMPTS}
+      maxAttempts: ${MAX_RETRY_ATTEMPTS}
       waitDuration: 2s
       retryExceptions:
         - org.springframework.web.client.HttpServerErrorException
       ignoreExceptions:
         - java.lang.NullPointerException
     tvrrun:
-      maxRetryAttempts: ${MAX_RETRY_ATTEMPTS}
+      maxAttempts: ${MAX_RETRY_ATTEMPTS}
       waitDuration: 2s
       retryExceptions:
         - org.springframework.web.client.HttpServerErrorException
