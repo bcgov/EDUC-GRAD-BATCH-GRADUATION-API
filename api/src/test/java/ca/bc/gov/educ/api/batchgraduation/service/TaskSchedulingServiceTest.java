@@ -1,8 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.JobKey;
-import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
@@ -11,7 +9,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -125,7 +122,7 @@ public class TaskSchedulingServiceTest {
         ent2.setJobParameters("Adsad");
 
         Mockito.when(userScheduledJobsRepository.save(entity)).thenReturn(ent2);
-        taskSchedulingService.saveUserScheduledJobs(task);
+        taskSchedulingService.saveUserScheduledJobs(task, "TVRRUN");
         assertThat(task).isNotNull();
     }
 
