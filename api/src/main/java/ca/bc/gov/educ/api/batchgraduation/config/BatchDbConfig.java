@@ -72,9 +72,8 @@ public class BatchDbConfig {
         config.setMaximumPoolSize(maxPoolSize);
         config.setMaxLifetime(maxLifetime);
         config.setConnectionTimeout(connectionTimeout);
-        // not required as idle connection should be removed from the pool right away
-//        config.setKeepaliveTime(keepAliveTime);
-        config.setIdleTimeout(keepAliveTime / 2);
+        config.setKeepaliveTime(30000); // set to minimum allowed value - 30 seconds
+        config.setIdleTimeout(10000);  // set to minimum allowed value  - 10 seconds
         config.addDataSourceProperty("socketTimeout", maxLifetime);
         config.addDataSourceProperty("oracle.jdbc.javaNetNio", "false");
 
