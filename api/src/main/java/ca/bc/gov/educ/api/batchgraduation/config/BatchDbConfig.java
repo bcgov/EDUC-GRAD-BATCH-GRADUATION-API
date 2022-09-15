@@ -68,14 +68,13 @@ public class BatchDbConfig {
         config.setPassword(batchPassword);
         config.setPoolName(batchPoolName);
 
-        config.setMinimumIdle(20);
+        config.setMinimumIdle(15);
         config.setMaximumPoolSize(maxPoolSize);
         config.setMaxLifetime(maxLifetime);
         config.setConnectionTimeout(connectionTimeout);
-        // not required as an idle connection should be removed from the db pool right away.
-//        config.setKeepaliveTime(30000);
+        config.setKeepaliveTime(60000); // 1 minute
         config.setIdleTimeout(120000);  // 2 minutes
-//        config.addDataSourceProperty("socketTimeout", maxLifetime);
+        config.addDataSourceProperty("socketTimeout", maxLifetime);
         config.addDataSourceProperty("oracle.jdbc.javaNetNio", "false");
 
         return new HikariDataSource(config);
