@@ -19,11 +19,7 @@ public class SpecialProjectedGradRunReader extends BaseReader {
 
     @Override
     public GraduationStudentRecord read() throws Exception {
-        LOGGER.info("*** Reading the information of the next student");
-
-        if (nxtStudentForProcessing % 50 == 0) {
-            fetchAccessToken();
-        }
+        fetchAccessToken();
         summaryDTO.setReadCount(studentList.size());
 
         GraduationStudentRecord nextStudent = null;

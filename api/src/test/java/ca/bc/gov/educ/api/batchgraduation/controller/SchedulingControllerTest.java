@@ -145,14 +145,14 @@ public class SchedulingControllerTest {
         sJobs.setEnabled("Y");
         sJobs.setCronExpression("0 34 4 5 6 *");
         Mockito.when(gradDashboardService.toggleProcess(jobType)).thenReturn(sJobs);
-        ResponseEntity<BatchProcessing> res = schedulingController.processingList(jobType);
+        ResponseEntity<BatchProcessing> res = schedulingController.toggleProcess(jobType);
         assertThat(res.getBody()).isNotNull();
     }
 
     @Test
     public void testprocessingList_3() {
         Mockito.when(gradDashboardService.toggleProcess("TVRRUN")).thenReturn(null);
-        ResponseEntity<BatchProcessing> res = schedulingController.processingList("TVRRUN");
+        ResponseEntity<BatchProcessing> res = schedulingController.toggleProcess("TVRRUN");
         assertThat(res.getBody()).isNull();
     }
 }

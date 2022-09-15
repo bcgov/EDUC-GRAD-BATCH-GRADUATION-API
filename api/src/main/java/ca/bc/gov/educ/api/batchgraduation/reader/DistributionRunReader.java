@@ -19,11 +19,7 @@ public class DistributionRunReader extends DistributionRunBaseReader {
 
     @Override
     public StudentCredentialDistribution read() throws Exception {
-        LOGGER.info("*** Reading the information of the next Credential");
-
-        if (nxtCredentialForProcessing % 300 == 0) {
-            fetchAccessToken();
-        }
+        fetchAccessToken();
         summaryDTO.setReadCount(credentialList.size());
 
         StudentCredentialDistribution nextCredential = null;
