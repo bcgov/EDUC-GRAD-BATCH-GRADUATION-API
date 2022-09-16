@@ -3,30 +3,24 @@ package ca.bc.gov.educ.api.batchgraduation.config;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
 
-@Configuration
-@Profile("!test")
-@EnableJpaRepositories(
-        basePackages = {
-                "ca.bc.gov.educ.api.batchgraduation.repository"
-        },
-        entityManagerFactoryRef = "batchEntityManager",
-        transactionManagerRef = "batchTransactionManager"
-)
-@EnableTransactionManagement
+//@Configuration
+//@Profile("!test")
+//@EnableJpaRepositories(
+//        basePackages = {
+//                "ca.bc.gov.educ.api.batchgraduation.repository"
+//        },
+//        entityManagerFactoryRef = "batchEntityManager",
+//        transactionManagerRef = "batchTransactionManager"
+//)
+//@EnableTransactionManagement
 public class BatchDbConfig {
     // Hikari Pool
     @Value("${spring.db-connection.hikari.maximum-pool-size}")
@@ -57,8 +51,8 @@ public class BatchDbConfig {
     @Value("${spring.db-connection.password}")
     private String batchPassword;
 
-    @Primary
-    @Bean
+//    @Primary
+//    @Bean
     public DataSource batchDataSource() {
         HikariConfig config = new HikariConfig();
 
@@ -74,14 +68,14 @@ public class BatchDbConfig {
         config.setConnectionTimeout(connectionTimeout);
         config.setKeepaliveTime(240000); // 4 minutes
         config.setIdleTimeout(300000);  // 5 minutes
-        config.addDataSourceProperty("socketTimeout", maxLifetime);
+        config.addDataSourceProperty("socketTimeout", 36000000);
         config.addDataSourceProperty("oracle.jdbc.javaNetNio", "false");
 
         return new HikariDataSource(config);
     }
 
-    @Primary
-    @Bean
+//    @Primary
+//    @Bean
     public LocalContainerEntityManagerFactoryBean batchEntityManager() {
         LocalContainerEntityManagerFactoryBean em
                 = new LocalContainerEntityManagerFactoryBean();
@@ -102,8 +96,8 @@ public class BatchDbConfig {
         return em;
     }
 
-    @Primary
-    @Bean
+//    @Primary
+//    @Bean
     public PlatformTransactionManager batchTransactionManager() {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(batchEntityManager().getObject());
