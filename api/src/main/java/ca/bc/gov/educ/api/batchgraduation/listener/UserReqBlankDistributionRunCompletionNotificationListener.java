@@ -1,14 +1,13 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.BlankDistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionPrintRequest;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -29,9 +28,13 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
     private static final String LOG_SEPARATION = "=======================================================================================";
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
-	@Autowired BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-	@Autowired UserScheduledJobsRepository userScheduledJobsRepository;
-    @Autowired RestUtils restUtils;
+	@Autowired
+	private GradBatchHistoryService gradBatchHistoryService;
+
+	@Autowired
+	private TaskSchedulingService taskSchedulingService;
+
+	@Autowired RestUtils restUtils;
     
     @Override
     public void afterJob(JobExecution jobExecution) {
@@ -52,7 +55,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			String properName = jobParameters.getString("properName");
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
-				updateUserScheduledJobs(userScheduledId);
+				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
 			}
 			BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
 			if(summaryDTO == null) {
@@ -74,7 +77,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			ent.setJobType(jobType);
 			ent.setLocalDownload(localDownLoad);
 
-			batchGradAlgorithmJobHistoryRepository.save(ent);
+			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
 			
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
@@ -116,15 +119,6 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			SupportListener.blankCertificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
 		});
 		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, mapDist,localDownload);
-	}
-
-	private void updateUserScheduledJobs(String userScheduledId) {
-		Optional<UserScheduledJobsEntity> entOpt = userScheduledJobsRepository.findById(UUID.fromString(userScheduledId));
-		if(entOpt.isPresent()) {
-			UserScheduledJobsEntity ent = entOpt.get();
-			ent.setStatus("COMPLETED");
-			userScheduledJobsRepository.save(ent);
-		}
 	}
 
 }

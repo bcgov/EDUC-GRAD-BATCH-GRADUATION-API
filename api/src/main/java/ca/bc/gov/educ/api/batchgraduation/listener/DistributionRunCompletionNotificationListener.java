@@ -3,9 +3,8 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -23,12 +22,9 @@ import java.util.stream.Collectors;
 public class DistributionRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunCompletionNotificationListener.class);
-    
-    @Autowired
-    private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
 
 	@Autowired
-	private BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
+	private GradBatchHistoryService gradBatchHistoryService;
     
     @Autowired
     private RestUtils restUtils;
@@ -67,7 +63,7 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			ent.setTriggerBy(jobTrigger);
 			ent.setJobType(jobType);
 
-			batchGradAlgorithmJobHistoryRepository.save(ent);
+			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
 			
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
@@ -83,7 +79,7 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 				eList.add(errorHistory);
 			});
 			if(!eList.isEmpty())
-				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
+				gradBatchHistoryService.saveGradAlgorithmErrorHistories(eList);
 
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;

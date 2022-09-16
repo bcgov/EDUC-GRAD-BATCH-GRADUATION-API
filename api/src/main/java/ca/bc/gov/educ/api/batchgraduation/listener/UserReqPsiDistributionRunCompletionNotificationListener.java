@@ -1,11 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -26,8 +25,10 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Job
     private static final String LOG_SEPARATION = "=======================================================================================";
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
-	@Autowired BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-	@Autowired UserScheduledJobsRepository userScheduledJobsRepository;
+	@Autowired
+	private GradBatchHistoryService gradBatchHistoryService;
+	@Autowired
+	private TaskSchedulingService taskSchedulingService;
     @Autowired RestUtils restUtils;
     
     @Override
@@ -48,7 +49,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Job
 
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
-				updateUserScheduledJobs(userScheduledId);
+				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
 			}
 
 			PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
@@ -71,7 +72,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Job
 			ent.setTriggerBy(jobTrigger);
 			ent.setJobType(jobType);
 
-			batchGradAlgorithmJobHistoryRepository.save(ent);
+			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
 			
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
@@ -105,15 +106,4 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Job
 	private void updateBackStudentRecords(List<PsiCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
 		cList.forEach(scd->	restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken));
 	}
-
-
-	private void updateUserScheduledJobs(String userScheduledId) {
-		Optional<UserScheduledJobsEntity> entOpt = userScheduledJobsRepository.findById(UUID.fromString(userScheduledId));
-		if(entOpt.isPresent()) {
-			UserScheduledJobsEntity ent = entOpt.get();
-			ent.setStatus("COMPLETED");
-			userScheduledJobsRepository.save(ent);
-		}
-	}
-
 }

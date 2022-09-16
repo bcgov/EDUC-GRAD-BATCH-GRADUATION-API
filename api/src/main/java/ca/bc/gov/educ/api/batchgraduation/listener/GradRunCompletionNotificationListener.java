@@ -6,9 +6,8 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -31,15 +30,11 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
     private static final Logger LOGGER = LoggerFactory.getLogger(GradRunCompletionNotificationListener.class);
     
     @Autowired
-    private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-
-	@Autowired
-	private BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
+    private GradBatchHistoryService gradBatchHistoryService;
 
 	@Autowired
 	JobLauncherController jobLauncherController;
 
-    
     @Autowired
     private RestUtils restUtils;
     
@@ -81,7 +76,7 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 			ent.setTriggerBy(jobTrigger);
 			ent.setJobType(jobType);
 
-			batchGradAlgorithmJobHistoryRepository.save(ent);
+			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
 			
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
@@ -97,7 +92,7 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 				eList.add(errorHistory);
 			});
 			if(!eList.isEmpty()) {
-				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
+				gradBatchHistoryService.saveGradAlgorithmErrorHistories(eList);
 			}
 
 			LOGGER.info(" --------------------------------------------------------------------------------------");
