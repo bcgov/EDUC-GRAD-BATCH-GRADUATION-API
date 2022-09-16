@@ -70,7 +70,7 @@ public class BatchDbConfig {
 
         config.setMinimumIdle(15);
         config.setMaximumPoolSize(maxPoolSize);
-        config.setMaxLifetime(maxLifetime);
+        config.setMaxLifetime(18000000);
         config.setConnectionTimeout(connectionTimeout);
         config.setKeepaliveTime(60000); // 1 minute
         config.setIdleTimeout(120000);  // 2 minutes
