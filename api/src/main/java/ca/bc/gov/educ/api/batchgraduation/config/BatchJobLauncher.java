@@ -103,7 +103,8 @@ public class BatchJobLauncher {
         LOGGER.info(BATCH_ENDED);
     }
 
-    @Scheduled(fixedDelayString = "PT30M")
+// TODO (jsung) : temporarily turn off
+//    @Scheduled(fixedDelayString = "PT30M")
     public void refreshUserScheduledQueue() {
         LOGGER.info(BATCH_STARTED);
         JobParametersBuilder builder = new JobParametersBuilder();

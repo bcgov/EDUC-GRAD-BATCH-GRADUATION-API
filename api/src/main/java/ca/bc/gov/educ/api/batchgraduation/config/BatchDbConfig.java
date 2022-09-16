@@ -68,12 +68,12 @@ public class BatchDbConfig {
         config.setPassword(batchPassword);
         config.setPoolName(batchPoolName);
 
-        config.setMinimumIdle(15);
+        config.setMinimumIdle(2);
         config.setMaximumPoolSize(maxPoolSize);
-        config.setMaxLifetime(maxLifetime);
+        config.setMaxLifetime(36000000);
         config.setConnectionTimeout(connectionTimeout);
-        config.setKeepaliveTime(60000); // 1 minute
-        config.setIdleTimeout(120000);  // 2 minutes
+        config.setKeepaliveTime(240000); // 4 minutes
+        config.setIdleTimeout(300000);  // 5 minutes
         config.addDataSourceProperty("socketTimeout", maxLifetime);
         config.addDataSourceProperty("oracle.jdbc.javaNetNio", "false");
 
