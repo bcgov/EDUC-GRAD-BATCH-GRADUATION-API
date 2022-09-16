@@ -2,7 +2,7 @@
 spring:
   jmx:
     enabled: false
-  datasource:
+  db-connection:
     hikari:
       pool-name: educ-grad-batch-graduation-api-cp
       maximum-pool-size: ${MAXIMUM_POOL_SIZE}
