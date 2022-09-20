@@ -65,6 +65,7 @@ public class GradDashboardService extends GradService {
 		return gradDash;
     }
 
+	@Transactional(readOnly = true)
     public ErrorDashBoard getErrorInfo(Long batchId, Integer pageNumber, Integer pageSize,String accessToken) {
 		ErrorDashBoard edb = new ErrorDashBoard();
 		Pageable paging = PageRequest.of(pageNumber, pageSize);
@@ -97,6 +98,7 @@ public class GradDashboardService extends GradService {
 		return edb;
     }
 
+	@Transactional(readOnly = true)
     public SummaryDashBoard getBatchSummary(Integer pageNumber, Integer pageSize) {
 		Pageable paging = PageRequest.of(pageNumber, pageSize);
 		Page<BatchJobExecutionEntity> pagedData = batchJobExecutionRepository.findAllByOrderByCreateTimeDesc(paging);
@@ -112,11 +114,12 @@ public class GradDashboardService extends GradService {
 		return edb;
     }
 
+	@Transactional(readOnly = true)
     public List<BatchProcessing> getProcessingList() {
 		return batchProcessingTransformer.transformToDTO(batchProcessingRepository.findAll());
     }
 
-
+	@Transactional
 	public BatchProcessing toggleProcess(String jobType) {
 		Optional<BatchProcessingEntity> opt = batchProcessingRepository.findByJobType(jobType);
 		if(opt.isPresent()) {
@@ -127,5 +130,10 @@ public class GradDashboardService extends GradService {
 			return batchProcessingTransformer.transformToDTO(batchProcessingRepository.save(ent));
 		}
 		return null;
+	}
+
+	@Transactional(readOnly = true)
+	public Optional<BatchProcessingEntity> findBatchProcessing(String jobType) {
+		return batchProcessingRepository.findByJobType(jobType);
 	}
 }

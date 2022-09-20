@@ -19,11 +19,7 @@ public class BlankDistributionRunReader extends BlankDistributionRunBaseReader {
 
     @Override
     public BlankCredentialDistribution read() throws Exception {
-        LOGGER.info("*** Reading the information of the next Credential");
-
-        if (nxtCredentialForProcessing % 300 == 0) {
-            fetchAccessToken();
-        }
+        fetchAccessToken();
         summaryDTO.setReadCount(credentialList.size());
 
         BlankCredentialDistribution nextCredential = null;

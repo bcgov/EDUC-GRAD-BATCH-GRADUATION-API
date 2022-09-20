@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
@@ -62,6 +63,8 @@ public class TaskSchedulingService {
             }
         }
     }
+
+    @Transactional
     public void saveUserScheduledJobs(Task task, String batchJobTypeCode) {
         JobProperName jName = JobProperName.valueOf(StringUtils.toRootUpperCase(task.getJobName()));
         String jobName = jName.getValue();
@@ -82,5 +85,15 @@ public class TaskSchedulingService {
         entity = userScheduledJobsRepository.save(entity);
         task.setJobIdReference(entity.getId());
         task.setJobParams(entity.getJobParameters());
+    }
+
+    @Transactional
+    public void updateUserScheduledJobs(String userScheduledId) {
+        Optional<UserScheduledJobsEntity> entOpt = userScheduledJobsRepository.findById(UUID.fromString(userScheduledId));
+        if(entOpt.isPresent()) {
+            UserScheduledJobsEntity ent = entOpt.get();
+            ent.setStatus("COMPLETED");
+            userScheduledJobsRepository.save(ent);
+        }
     }
 }

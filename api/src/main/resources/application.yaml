@@ -8,7 +8,9 @@ spring:
       maximum-pool-size: ${MAXIMUM_POOL_SIZE}
       connection-timeout: ${CONNECTION_TIMEOUT}
       max-lifetime: ${MAX_LIFETIME}
+      minimum-idle: 2
       keepalive-time: ${KEEP_ALIVE_TIME}
+      idle-timeout: ${IDLE_TIMEOUT}
     url: ${CONNECTION_STRING}
     username: ${USERNAME}
     password: ${PASSWORD}
@@ -71,6 +73,10 @@ logging:
         boot:
           autoconfigure:
             logging: ${SPRING_BOOT_AUTOCONFIG_LOG_LEVEL}
+    com:
+      zaxxer:
+        hikari: TRACE
+
 
 #Local properties
 server:
