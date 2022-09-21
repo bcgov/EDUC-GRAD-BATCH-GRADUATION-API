@@ -4,12 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import java.util.Date;
-import java.util.UUID;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
