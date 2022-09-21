@@ -4,7 +4,6 @@ import ca.bc.gov.educ.api.batchgraduation.controller.JobLauncherController;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
@@ -18,11 +17,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Component
 public class GradRunCompletionNotificationListener extends JobExecutionListenerSupport {
@@ -100,13 +95,13 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 			summaryDTO.getProgramCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getProgramCountMap().get(key)));
 
 			LOGGER.info(" Creating Reports ---------------------------------------------------------------------");
-			processGlobalList(summaryDTO.getGlobalList(),obj.getAccess_token());
+			processSchoolList(summaryDTO.getSchoolList(),obj.getAccess_token());
 			LOGGER.info("=======================================================================================");
 		}
     }
 
-	private void processGlobalList(List<GraduationStudentRecord> cList, String accessToken) {
-		List<String> uniqueSchoolList = cList.stream().map(GraduationStudentRecord::getSchoolOfRecord).distinct().collect(Collectors.toList());
+	private void processSchoolList(Set<String> cList, String accessToken) {
+		List<String> uniqueSchoolList = new ArrayList<>(cList);
 		restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList,"REGALG");
 	}
 }

@@ -16,7 +16,7 @@ public class DateConversionUtils {
         } else if (dateStr.trim().length() == 8) {
           formatter = new SimpleDateFormat("yyyyMMdd");
         }
-        return formatter.parse(dateStr);
+        return formatter != null? formatter.parse(dateStr) : null;
       } catch (ParseException pe) {
         return null;
       }
