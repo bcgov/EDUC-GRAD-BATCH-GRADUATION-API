@@ -176,9 +176,7 @@ public class RestUtils {
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
             summary.getSuccessfulStudentIDs().add(item.getStudentID());
-            if (item.getProgramCompletionDate() != null) {
-                summary.getSchoolList().add(item.getSchoolOfRecord());
-            }
+            summary.getSchoolList().add(item.getSchoolOfRecord());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
