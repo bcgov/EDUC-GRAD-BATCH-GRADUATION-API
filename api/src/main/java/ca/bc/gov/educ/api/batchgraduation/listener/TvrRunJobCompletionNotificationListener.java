@@ -102,6 +102,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 
 	private void processSchoolList(Set<String> cList, String accessToken) {
 		List<String> uniqueSchoolList = new ArrayList<>(cList);
+		LOGGER.info(" Number of Schools [{}] ---------------------------------------------------------", uniqueSchoolList.size());
 		restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList,"TVRRUN");
 	}
 }
