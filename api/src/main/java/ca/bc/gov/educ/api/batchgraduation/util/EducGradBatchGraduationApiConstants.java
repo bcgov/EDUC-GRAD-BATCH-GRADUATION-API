@@ -98,6 +98,10 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${batch.partitions.number}")
     private int numberOfPartitions;
 
+    // Token expiry offset (seconds)
+    @Value("${batch.token-expiry.offset}")
+    private int tokenExpiryOffset;
+
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;
 

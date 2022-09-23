@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class TvrRunJobCompletionNotificationListener extends JobExecutionListenerSupport {
@@ -96,13 +95,14 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 
 
 			LOGGER.info(" Creating Reports ---------------------------------------------------------------------");
-			processGlobalList(summaryDTO.getGlobalList(),obj.getAccess_token());
+			processSchoolList(summaryDTO.getSchoolList(),obj.getAccess_token());
 			LOGGER.info("=======================================================================================");
 		}
     }
 
-	private void processGlobalList(List<GraduationStudentRecord> cList, String accessToken) {
-		List<String> uniqueSchoolList = cList.stream().map(GraduationStudentRecord::getSchoolOfRecord).distinct().collect(Collectors.toList());
+	private void processSchoolList(Set<String> cList, String accessToken) {
+		List<String> uniqueSchoolList = new ArrayList<>(cList);
+		LOGGER.info(" Number of Schools [{}] ---------------------------------------------------------", uniqueSchoolList.size());
 		restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList,"TVRRUN");
 	}
 }

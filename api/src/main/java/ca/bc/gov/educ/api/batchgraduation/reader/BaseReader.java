@@ -43,12 +43,11 @@ public abstract class BaseReader implements ItemReader<GraduationStudentRecord> 
         totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());
         totalSummaryDTO.getErrors().putAll(summaryDTO.getErrors());
         totalSummaryDTO.getSuccessfulStudentIDs().addAll(summaryDTO.getSuccessfulStudentIDs());
-        totalSummaryDTO.getGlobalList().addAll(summaryDTO.getGlobalList());
+        totalSummaryDTO.getSchoolList().addAll(summaryDTO.getSchoolList());
         mergeMapCounts(totalSummaryDTO.getProgramCountMap(),summaryDTO.getProgramCountMap());
     }
 
     protected void fetchAccessToken() {
-        LOGGER.info("Fetching the access token from KeyCloak API");
         ResponseObj res = restUtils.getTokenResponseObject();
         if (res != null) {
             summaryDTO.setAccessToken(res.getAccess_token());

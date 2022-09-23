@@ -49,6 +49,7 @@ public class RestUtils {
 
     @Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
     private ResponseObj getResponseObj() {
+        LOGGER.info("Fetching the access token from KeyCloak API");
         HttpHeaders httpHeadersKC = EducGradBatchGraduationApiUtils.getHeaders(
                 constants.getUserName(), constants.getPassword());
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
@@ -176,7 +177,7 @@ public class RestUtils {
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
             summary.getSuccessfulStudentIDs().add(item.getStudentID());
-            summary.getGlobalList().add(item);
+            summary.getSchoolList().add(item.getSchoolOfRecord());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
@@ -199,7 +200,7 @@ public class RestUtils {
             }
             LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
             summary.getSuccessfulStudentIDs().add(item.getStudentID());
-            summary.getGlobalList().add(item);
+            summary.getSchoolList().add(item.getSchoolOfRecord());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
