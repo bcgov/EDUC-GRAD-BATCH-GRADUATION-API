@@ -49,6 +49,7 @@ public class RestUtils {
 
     @Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
     private ResponseObj getResponseObj() {
+        LOGGER.info("Fetching the access token from KeyCloak API");
         HttpHeaders httpHeadersKC = EducGradBatchGraduationApiUtils.getHeaders(
                 constants.getUserName(), constants.getPassword());
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();

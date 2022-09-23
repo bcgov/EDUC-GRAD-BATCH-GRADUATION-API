@@ -130,6 +130,8 @@ batch:
     cron: ${REG_ALG_CRON}
   tvrrun:
     cron: ${TVR_RUN_CRON}
+  token-expiry:
+    offset: ${TOKEN_EXPIRY_OFFSET}
 
 #Endpoints
 endpoint:

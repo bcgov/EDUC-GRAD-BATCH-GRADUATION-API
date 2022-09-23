@@ -48,7 +48,6 @@ public abstract class BaseReader implements ItemReader<GraduationStudentRecord> 
     }
 
     protected void fetchAccessToken() {
-        LOGGER.info("Fetching the access token from KeyCloak API");
         ResponseObj res = restUtils.getTokenResponseObject();
         if (res != null) {
             summaryDTO.setAccessToken(res.getAccess_token());
