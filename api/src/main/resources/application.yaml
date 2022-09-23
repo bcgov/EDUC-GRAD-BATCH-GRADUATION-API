@@ -75,8 +75,7 @@ logging:
             logging: ${SPRING_BOOT_AUTOCONFIG_LOG_LEVEL}
     com:
       zaxxer:
-        hikari: TRACE
-
+        hikari: ERROR
 
 #Local properties
 server:
