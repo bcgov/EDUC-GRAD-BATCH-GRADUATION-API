@@ -11,10 +11,8 @@ public class RecalculateProjectedGradRunErrorReader extends BaseReader {
     @Override
     public GraduationStudentRecord read() throws Exception {
         fetchAccessToken();
-        summaryDTO.setReadCount(0);
-
+        summaryDTO.setReadCount(studentList.size());
         GraduationStudentRecord nextStudent = null;
-        
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
             LOGGER.info("*** Error Found student[{}] - Student ID: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getStudentID(), summaryDTO.getReadCount());

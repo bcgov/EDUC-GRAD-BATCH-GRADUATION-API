@@ -12,7 +12,7 @@ public class RecalculateStudentErrorReader extends BaseReader {
     public GraduationStudentRecord read() throws Exception {
         fetchAccessToken();
         GraduationStudentRecord nextStudent = null;
-        summaryDTO.setReadCount(0);
+        summaryDTO.setReadCount(studentList.size());
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
             LOGGER.info("***  Error Found student[{}] - Student ID: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getStudentID(), summaryDTO.getReadCount());
