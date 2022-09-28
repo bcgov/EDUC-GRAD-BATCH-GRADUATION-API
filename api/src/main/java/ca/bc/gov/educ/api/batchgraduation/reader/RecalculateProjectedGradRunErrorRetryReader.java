@@ -18,6 +18,7 @@ public class RecalculateProjectedGradRunErrorRetryReader extends BaseReader {
             LOGGER.info("*** Error Found student[{}] - Student ID: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getStudentID(), summaryDTO.getReadCount());
             nxtStudentForProcessing++;
         }else {
+            summaryDTO.setReadCount(0);
         	aggregate("tvrRunSummaryDTO");
         }
         return nextStudent;
