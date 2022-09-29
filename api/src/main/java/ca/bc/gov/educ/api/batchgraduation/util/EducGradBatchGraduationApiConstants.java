@@ -26,7 +26,10 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
     public static final String EXECUTE_SPECIALIZED_USER_REQ_RUNS = "/userrequestdisrun/{credentialType}";
     public static final String EXECUTE_SPECIALIZED_BLANK_USER_REQ_RUNS = "/userrequestblankdisrun/{credentialType}";
-    
+
+    public static final String BATCH_JOB_TYPES_MAPPING = "/batchjobtype";
+    public static final String BATCH_JOB_TYPE_MAPPING = "/batchjobtype/{batchJobTypeCode}";
+
     public static final String BATCH_DASHBOARD = "/dashboard";
     public static final String BATCH_ERRORS = "/dashboard/errors/{batchId}";
     public static final String BATCH_SUMMARY = "/dashboard/summary";
@@ -94,6 +97,10 @@ public class EducGradBatchGraduationApiConstants {
     // Number of Partitions
     @Value("${batch.partitions.number}")
     private int numberOfPartitions;
+
+    // Token expiry offset (seconds)
+    @Value("${batch.token-expiry.offset}")
+    private int tokenExpiryOffset;
 
     @Value("${endpoint.grad-graduation-report-api.get-transcript-list.url}")
     private String transcriptDistributionList;

@@ -1,8 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -19,9 +19,12 @@ public class UserScheduledCompletionNotificationListener extends JobExecutionLis
     private static final Logger LOGGER = LoggerFactory.getLogger(UserScheduledCompletionNotificationListener.class);
     private static final String LOG_SEPARATION = "=======================================================================================";
 
-	@Autowired BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-	@Autowired UserScheduledJobsRepository userScheduledJobsRepository;
-    @Autowired RestUtils restUtils;
+	@Autowired
+	private GradBatchHistoryService gradBatchHistoryService;
+	@Autowired
+	private TaskSchedulingService taskSchedulingService;
+
+	@Autowired RestUtils restUtils;
     
     @Override
     public void afterJob(JobExecution jobExecution) {

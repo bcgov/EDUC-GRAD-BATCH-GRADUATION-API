@@ -72,6 +72,8 @@ batch:
     cron: 0 0 16 * * *
   tvrrun:
     cron: 0 0 22 * * *
+  token-expiry:
+    offset: 30
 
 #Endpoints
 endpoint:

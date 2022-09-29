@@ -4,11 +4,9 @@ import ca.bc.gov.educ.api.batchgraduation.controller.JobLauncherController;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -19,11 +17,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Component
 public class GradRunCompletionNotificationListener extends JobExecutionListenerSupport {
@@ -31,15 +25,11 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
     private static final Logger LOGGER = LoggerFactory.getLogger(GradRunCompletionNotificationListener.class);
     
     @Autowired
-    private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-
-	@Autowired
-	private BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
+    private GradBatchHistoryService gradBatchHistoryService;
 
 	@Autowired
 	JobLauncherController jobLauncherController;
 
-    
     @Autowired
     private RestUtils restUtils;
     
@@ -81,7 +71,7 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 			ent.setTriggerBy(jobTrigger);
 			ent.setJobType(jobType);
 
-			batchGradAlgorithmJobHistoryRepository.save(ent);
+			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
 			
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
@@ -97,7 +87,7 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 				eList.add(errorHistory);
 			});
 			if(!eList.isEmpty()) {
-				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
+				gradBatchHistoryService.saveGradAlgorithmErrorHistories(eList);
 			}
 
 			LOGGER.info(" --------------------------------------------------------------------------------------");
@@ -105,13 +95,14 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 			summaryDTO.getProgramCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getProgramCountMap().get(key)));
 
 			LOGGER.info(" Creating Reports ---------------------------------------------------------------------");
-			processGlobalList(summaryDTO.getGlobalList(),obj.getAccess_token());
+			processSchoolList(summaryDTO.getSchoolList(),obj.getAccess_token());
 			LOGGER.info("=======================================================================================");
 		}
     }
 
-	private void processGlobalList(List<GraduationStudentRecord> cList, String accessToken) {
-		List<String> uniqueSchoolList = cList.stream().map(GraduationStudentRecord::getSchoolOfRecord).distinct().collect(Collectors.toList());
+	private void processSchoolList(Set<String> cList, String accessToken) {
+		List<String> uniqueSchoolList = new ArrayList<>(cList);
+		LOGGER.info(" Number of Schools [{}] ---------------------------------------------------------", uniqueSchoolList.size());
 		restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList,"REGALG");
 	}
 }

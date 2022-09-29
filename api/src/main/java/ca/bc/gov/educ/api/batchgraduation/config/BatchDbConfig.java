@@ -41,6 +41,9 @@ public class BatchDbConfig {
     @Value("${spring.db-connection.hikari.keepalive-time}")
     private int keepAliveTime;
 
+    @Value("${spring.db-connection.hikari.idle-timeout}")
+    private int idleTimeout;
+
     @Value("${spring.db-connection.driver-class}")
     private String driverClassName;
 
@@ -73,8 +76,8 @@ public class BatchDbConfig {
         config.setMaxLifetime(maxLifetime);
         config.setConnectionTimeout(connectionTimeout);
         config.setKeepaliveTime(keepAliveTime);
-        config.setIdleTimeout(keepAliveTime);
-        config.addDataSourceProperty("socketTimeout", maxLifetime);
+        config.setIdleTimeout(idleTimeout);
+        config.addDataSourceProperty("socketTimeout", 36000000);
         config.addDataSourceProperty("oracle.jdbc.javaNetNio", "false");
 
         return new HikariDataSource(config);

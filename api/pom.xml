@@ -19,6 +19,8 @@
             src/main/java/ca/bc/gov/educ/api/batchgraduation/controller/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/model/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/entity/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/repository/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/exception/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/transformer/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/util/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/listener/**,
@@ -32,6 +34,8 @@
             src/main/java/ca/bc/gov/educ/api/batchgraduation/config/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/model/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/entity/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/repository/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/exception/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/transformer/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/util/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/processor/**,
@@ -203,6 +207,11 @@
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-provider-jdbc-template</artifactId>
             <version>${shedlock.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20220320</version>
         </dependency>
     </dependencies>
 

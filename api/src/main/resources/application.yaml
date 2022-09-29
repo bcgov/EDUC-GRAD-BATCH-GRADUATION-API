@@ -8,7 +8,9 @@ spring:
       maximum-pool-size: ${MAXIMUM_POOL_SIZE}
       connection-timeout: ${CONNECTION_TIMEOUT}
       max-lifetime: ${MAX_LIFETIME}
+      minimum-idle: 2
       keepalive-time: ${KEEP_ALIVE_TIME}
+      idle-timeout: ${IDLE_TIMEOUT}
     url: ${CONNECTION_STRING}
     username: ${USERNAME}
     password: ${PASSWORD}
@@ -71,6 +73,9 @@ logging:
         boot:
           autoconfigure:
             logging: ${SPRING_BOOT_AUTOCONFIG_LOG_LEVEL}
+    com:
+      zaxxer:
+        hikari: ERROR
 
 #Local properties
 server:
@@ -91,15 +96,22 @@ springdoc:
 #Resilience
 resilience4j.retry:
   instances:
+    rt-getToken:
+      maxAttempts: 35
+      waitDuration: 5s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
     reggradrun:
-      maxRetryAttempts: ${MAX_RETRY_ATTEMPTS}
+      maxAttempts: ${MAX_RETRY_ATTEMPTS}
       waitDuration: 2s
       retryExceptions:
         - org.springframework.web.client.HttpServerErrorException
       ignoreExceptions:
         - java.lang.NullPointerException
     tvrrun:
-      maxRetryAttempts: ${MAX_RETRY_ATTEMPTS}
+      maxAttempts: ${MAX_RETRY_ATTEMPTS}
       waitDuration: 2s
       retryExceptions:
         - org.springframework.web.client.HttpServerErrorException
@@ -117,6 +129,8 @@ batch:
     cron: ${REG_ALG_CRON}
   tvrrun:
     cron: ${TVR_RUN_CRON}
+  token-expiry:
+    offset: ${TOKEN_EXPIRY_OFFSET}
 
 #Endpoints
 endpoint:
