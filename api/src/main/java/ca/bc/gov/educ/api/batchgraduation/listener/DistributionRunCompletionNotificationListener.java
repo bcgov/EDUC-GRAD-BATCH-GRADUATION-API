@@ -43,7 +43,7 @@ public class DistributionRunCompletionNotificationListener extends JobExecutionL
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
-			String activityCode = jobType != null && jobType.equalsIgnoreCase("DISTRUNMONTH")?"MONTHLYDIST":"YEARENDDIST";
+			String activityCode = jobType != null && jobType.equalsIgnoreCase("DISTRUN")?"MONTHLYDIST":"YEARENDDIST";
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new DistributionSummaryDTO();
