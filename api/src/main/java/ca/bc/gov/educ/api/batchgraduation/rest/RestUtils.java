@@ -3,7 +3,9 @@ package ca.bc.gov.educ.api.batchgraduation.rest;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import io.github.resilience4j.retry.annotation.Retry;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,10 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
@@ -32,6 +37,9 @@ public class RestUtils {
     private ResponseObjCache responseObjCache;
 
     private final WebClient webClient;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     @Autowired
     public RestUtils(final EducGradBatchGraduationApiConstants constants, final WebClient webClient, ResponseObjCache objCache) {
@@ -404,9 +412,11 @@ public class RestUtils {
         return  result;
     }
 
-
-    public void createBlankCredentialsAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String localDownload) {
+    @SneakyThrows
+    public void createBlankCredentialsAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist, String localDownload) {
         UUID correlationID = UUID.randomUUID();
+        String mapDistJson = jsonTransformer.marshall(mapDist);
+        LOGGER.debug(mapDistJson);
         DistributionResponse result = webClient.post()
                 .uri(String.format(constants.getCreateBlanksAndUpload(),batchId,localDownload))
                 .headers(h -> {
