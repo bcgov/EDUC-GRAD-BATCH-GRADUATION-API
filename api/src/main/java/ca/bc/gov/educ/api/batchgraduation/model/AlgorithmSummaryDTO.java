@@ -19,7 +19,7 @@ public class AlgorithmSummaryDTO {
 
   List<UUID> successfulStudentIDs = new ArrayList<>();
   private Map<UUID,ProcessError> errors = new HashMap<>();
-  private List<GraduationStudentRecord> globalList = new ArrayList<>();
+  private Set<String> schoolList = new HashSet<>();
   private String exception;
 
   // stats

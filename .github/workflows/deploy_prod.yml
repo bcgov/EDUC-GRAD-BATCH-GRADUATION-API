@@ -15,12 +15,12 @@ env:
   NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}
   TAG: "latest"
 
-  MIN_CPU: "50m"
+  MIN_CPU: "20m"
   MAX_CPU: "250m"
   MIN_MEM: "1024Mi"
   MAX_MEM: "5Gi"
-  MIN_REPLICAS: "1"
-  MAX_REPLICAS: "3"
+  MIN_REPLICAS: "3"
+  MAX_REPLICAS: "5"
 
 
 on:

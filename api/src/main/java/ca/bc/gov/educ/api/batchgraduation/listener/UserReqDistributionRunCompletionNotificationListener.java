@@ -2,13 +2,11 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
+import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -29,14 +27,13 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
     private static final String LOG_SEPARATION = "=======================================================================================";
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
-	@Autowired BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-	@Autowired BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
-	@Autowired UserScheduledJobsRepository userScheduledJobsRepository;
+	@Autowired
+	private GradBatchHistoryService gradBatchHistoryService;
+	@Autowired
+	private TaskSchedulingService taskSchedulingService;
     @Autowired RestUtils restUtils;
 	ParallelDataFetch parallelDataFetch;
 
-
-    
     @Override
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
@@ -56,7 +53,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			String properName = jobParameters.getString("properName");
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
-				updateUserScheduledJobs(userScheduledId);
+				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
 			}
 
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
@@ -80,7 +77,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 			ent.setJobType(jobType);
 			ent.setLocalDownload(localDownLoad);
 
-			batchGradAlgorithmJobHistoryRepository.save(ent);
+			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
 			
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
@@ -96,7 +93,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 				eList.add(errorHistory);
 			});
 			if(!eList.isEmpty())
-				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
+				gradBatchHistoryService.saveGradAlgorithmErrorHistories(eList);
 
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
@@ -152,18 +149,10 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 	}
 
 	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
-		cList.forEach(scd->	restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken));
+		cList.forEach(scd-> {
+			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),accessToken);
+			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
+		});
 	}
-
-
-	private void updateUserScheduledJobs(String userScheduledId) {
-		Optional<UserScheduledJobsEntity> entOpt = userScheduledJobsRepository.findById(UUID.fromString(userScheduledId));
-		if(entOpt.isPresent()) {
-			UserScheduledJobsEntity ent = entOpt.get();
-			ent.setStatus("COMPLETED");
-			userScheduledJobsRepository.save(ent);
-		}
-	}
-
 
 }

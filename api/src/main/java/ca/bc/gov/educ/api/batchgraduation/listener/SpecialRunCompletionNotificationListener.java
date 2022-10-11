@@ -2,12 +2,10 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -24,10 +22,12 @@ import java.util.*;
 public class SpecialRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpecialRunCompletionNotificationListener.class);
-    
-    @Autowired BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-	@Autowired BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
-	@Autowired UserScheduledJobsRepository userScheduledJobsRepository;
+
+	@Autowired
+	private GradBatchHistoryService gradBatchHistoryService;
+
+	@Autowired
+	private TaskSchedulingService taskSchedulingService;
     
     @Autowired
     private RestUtils restUtils;
@@ -49,7 +49,7 @@ public class SpecialRunCompletionNotificationListener extends JobExecutionListen
 
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
-				updateUserScheduledJobs(userScheduledId);
+				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
 			}
 			
 			AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get("spcRunAlgSummaryDTO");
@@ -71,10 +71,8 @@ public class SpecialRunCompletionNotificationListener extends JobExecutionListen
 			ent.setTriggerBy(jobTrigger);
 			ent.setJobType(jobType);
 
-			batchGradAlgorithmJobHistoryRepository.save(ent);
+			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
 
-
-			
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
@@ -89,7 +87,7 @@ public class SpecialRunCompletionNotificationListener extends JobExecutionListen
 				eList.add(errorHistory);
 			});
 			if(!eList.isEmpty())
-				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
+				gradBatchHistoryService.saveGradAlgorithmErrorHistories(eList);
 
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			AlgorithmSummaryDTO finalSummaryDTO = summaryDTO;
@@ -98,12 +96,4 @@ public class SpecialRunCompletionNotificationListener extends JobExecutionListen
 		}
     }
 
-	private void updateUserScheduledJobs(String userScheduledId) {
-		Optional<UserScheduledJobsEntity> entOpt = userScheduledJobsRepository.findById(UUID.fromString(userScheduledId));
-		if(entOpt.isPresent()) {
-			UserScheduledJobsEntity ent = entOpt.get();
-			ent.setStatus("COMPLETED");
-			userScheduledJobsRepository.save(ent);
-		}
-	}
 }

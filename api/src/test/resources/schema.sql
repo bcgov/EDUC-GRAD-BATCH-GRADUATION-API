@@ -13,3 +13,18 @@ CREATE TABLE GRAD_COURSE_REQUIREMENT (
     rule_code VARCHAR(4),
     PRIMARY KEY(id)
 );
+
+create sequence BATCH_JOB_SEQ
+    minvalue 0
+    maxvalue 9223372036854775807
+;
+
+create sequence BATCH_JOB_EXECUTION_SEQ
+    minvalue 0
+    maxvalue 9223372036854775807
+;
+
+create sequence BATCH_STEP_EXECUTION_SEQ
+    minvalue 0
+    maxvalue 9223372036854775807
+;

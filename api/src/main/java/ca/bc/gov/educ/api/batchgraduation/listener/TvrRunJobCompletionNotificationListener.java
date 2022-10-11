@@ -4,9 +4,8 @@ import ca.bc.gov.educ.api.batchgraduation.controller.JobLauncherController;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -18,18 +17,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class TvrRunJobCompletionNotificationListener extends JobExecutionListenerSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TvrRunJobCompletionNotificationListener.class);
-    
-    @Autowired
-    private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
 
 	@Autowired
-	private BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
+	private GradBatchHistoryService gradBatchHistoryService;
 
 	@Autowired
 	JobLauncherController jobLauncherController;
@@ -74,9 +69,9 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			ent.setStatus(status);
 			ent.setTriggerBy(jobTrigger);
 			ent.setJobType(jobType);
-			
-			batchGradAlgorithmJobHistoryRepository.save(ent);
-			
+
+			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
+
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
@@ -92,7 +87,7 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 			});
 
 			if(!eList.isEmpty()) {
-				batchGradAlgorithmErrorHistoryRepository.saveAll(eList);
+				gradBatchHistoryService.saveGradAlgorithmErrorHistories(eList);
 			}
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			AlgorithmSummaryDTO finalSummaryDTO = summaryDTO;
@@ -100,13 +95,14 @@ public class TvrRunJobCompletionNotificationListener extends JobExecutionListene
 
 
 			LOGGER.info(" Creating Reports ---------------------------------------------------------------------");
-			processGlobalList(summaryDTO.getGlobalList(),obj.getAccess_token());
+			processSchoolList(summaryDTO.getSchoolList(),obj.getAccess_token());
 			LOGGER.info("=======================================================================================");
 		}
     }
 
-	private void processGlobalList(List<GraduationStudentRecord> cList, String accessToken) {
-		List<String> uniqueSchoolList = cList.stream().map(GraduationStudentRecord::getSchoolOfRecord).distinct().collect(Collectors.toList());
+	private void processSchoolList(Set<String> cList, String accessToken) {
+		List<String> uniqueSchoolList = new ArrayList<>(cList);
+		LOGGER.info(" Number of Schools [{}] ---------------------------------------------------------", uniqueSchoolList.size());
 		restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList,"TVRRUN");
 	}
 }

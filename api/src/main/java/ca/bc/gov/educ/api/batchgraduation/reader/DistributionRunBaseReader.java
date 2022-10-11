@@ -9,7 +9,6 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.List;
 import java.util.Map;
 
 public abstract class DistributionRunBaseReader implements ItemReader<StudentCredentialDistribution> {

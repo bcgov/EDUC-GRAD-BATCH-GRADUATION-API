@@ -7,4 +7,5 @@ public class ResponseObj {
 
 	private String access_token;
 	private String refresh_token;
+
 }

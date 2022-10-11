@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
+import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +38,10 @@ public class BatchJobLauncher {
     private Job tvrBatchJob;
 
     @Autowired
+    @Qualifier("DistributionBatchJob")
+    private Job distributionBatchJob;
+
+    @Autowired
     @Qualifier("userScheduledBatchJobRefresher")
     private Job userScheduledBatchJobRefresher;
 
@@ -51,7 +55,7 @@ public class BatchJobLauncher {
     private JobExplorer jobExplorer;
 
     @Autowired
-    private BatchProcessingRepository batchProcessingRepository;
+    private GradDashboardService gradDashboardService;
 
     private static final String TIME="time";
     private static final String JOB_TRIGGER="jobTrigger";
@@ -61,8 +65,6 @@ public class BatchJobLauncher {
     private static final String BATCH_ENDED = "Batch Job was stopped";
     private static final String ERROR_MSG = "Error {}";
 
-
-
     @Scheduled(cron = "${batch.regalg.cron}")
     @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runRegularGradAlgorithm() {
@@ -71,7 +73,7 @@ public class BatchJobLauncher {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
         builder.addString(JOB_TYPE, "REGALG");
-        Optional<BatchProcessingEntity> bPresent = batchProcessingRepository.findByJobType("REGALG");
+        Optional<BatchProcessingEntity> bPresent = gradDashboardService.findBatchProcessing("REGALG");
         if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
             try {
                 jobLauncher.run(graduationBatchJob, builder.toJobParameters());
@@ -91,10 +93,30 @@ public class BatchJobLauncher {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
         builder.addString(JOB_TYPE, "TVRRUN");
-        Optional<BatchProcessingEntity> bPresent = batchProcessingRepository.findByJobType("TVRRUN");
+        Optional<BatchProcessingEntity> bPresent = gradDashboardService.findBatchProcessing("TVRRUN");
         if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
             try {
                 jobLauncher.run(tvrBatchJob, builder.toJobParameters());
+            } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                    | JobParametersInvalidException | IllegalArgumentException e) {
+                LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
+            }
+        }
+        LOGGER.info(BATCH_ENDED);
+    }
+
+    @Scheduled(cron = "${batch.distrun.cron}")
+    @SchedulerLock(name = "DistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
+    public void runMonthlyDistributionProcess() {
+        LOGGER.info(BATCH_STARTED);
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
+        builder.addString(JOB_TYPE, "DISTRUN");
+        Optional<BatchProcessingEntity> bPresent = gradDashboardService.findBatchProcessing("DISTRUN");
+        if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
+            try {
+                jobLauncher.run(distributionBatchJob, builder.toJobParameters());
             } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                     | JobParametersInvalidException | IllegalArgumentException e) {
                 LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
