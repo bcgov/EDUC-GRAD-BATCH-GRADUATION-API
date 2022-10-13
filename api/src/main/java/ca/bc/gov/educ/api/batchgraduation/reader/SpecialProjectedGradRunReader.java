@@ -4,7 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SpecialProjectedGradRunReader extends BaseReader {
+public class SpecialProjectedGradRunReader extends BaseSpecialRunReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpecialProjectedGradRunReader.class);
 
