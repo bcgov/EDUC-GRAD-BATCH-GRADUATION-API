@@ -969,6 +969,24 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testGetStudentDataForBatch() {
+        final UUID studentID = UUID.randomUUID();
+        GraduationStudentRecord grd = new GraduationStudentRecord();
+        grd.setStudentID(studentID);
+        grd.setProgram("2018-EN");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentInfo(),studentID))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(grd));
+
+        GraduationStudentRecord res = this.restUtils.getStudentDataForBatch(studentID.toString(),null);
+        assertThat(res).isNotNull();
+        assertThat(res.getStudentID()).isEqualTo(studentID);
+    }
+
+    @Test
     public void testUpdateStudentCredentialRecord() {
         final String studentID = UUID.randomUUID().toString();
         String credentialTypeCode = "E";
