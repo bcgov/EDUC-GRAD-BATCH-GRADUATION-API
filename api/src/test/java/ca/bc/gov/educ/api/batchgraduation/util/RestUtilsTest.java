@@ -897,9 +897,9 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
-        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
         };
-        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(grd)));
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(grd.getStudentID())));
 
         val result = this.restUtils.getStudentsForAlgorithm("abc");
         assertThat(result).isNotNull();
@@ -918,13 +918,33 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
-        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
         };
-        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(grd)));
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(grd.getStudentID())));
 
         val result = this.restUtils.getStudentsForProjectedAlgorithm("abc");
         assertThat(result).isNotNull();
         assertThat(result.size() > 0).isTrue();
+    }
+
+    @Test
+    public void testGetStudentForBatchInput() {
+        final String mincode = "123213123";
+        final UUID studentID = UUID.randomUUID();
+        BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, "1234567");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getGradStudentApiGradStatusForBatchUrl(), studentID))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        when(this.responseMock.bodyToMono(BatchGraduationStudentRecord.class)).thenReturn(Mono.just(grd));
+
+        AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
+
+        val result = this.restUtils.getStudentForBatchInput(studentID, summary);
+        assertThat(result).isNotNull();
+        assertThat(result.getStudentID()).isEqualTo(studentID);
     }
 
     @Test
