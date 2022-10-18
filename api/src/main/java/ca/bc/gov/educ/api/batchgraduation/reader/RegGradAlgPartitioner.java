@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
@@ -26,11 +25,11 @@ public class RegGradAlgPartitioner extends SimplePartitioner {
         if (res != null) {
             accessToken = res.getAccess_token();
         }
-        List<GraduationStudentRecord> studentList = restUtils.getStudentsForAlgorithm(accessToken);
+        List<UUID> studentList = restUtils.getStudentsForAlgorithm(accessToken);
 
         if(!studentList.isEmpty()) {
             int partitionSize = studentList.size()/gridSize + 1;
-            List<List<GraduationStudentRecord>> partitions = new LinkedList<>();
+            List<List<UUID>> partitions = new LinkedList<>();
             for (int i = 0; i < studentList.size(); i += partitionSize) {
                 partitions.add(studentList.subList(i, Math.min(i + partitionSize, studentList.size())));
             }
@@ -39,7 +38,7 @@ public class RegGradAlgPartitioner extends SimplePartitioner {
                 ExecutionContext executionContext = new ExecutionContext();
                 AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
                 summaryDTO.initializeProgramCountMap();
-                List<GraduationStudentRecord> data = partitions.get(i);
+                List<UUID> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());
                 executionContext.put("summary", summaryDTO);

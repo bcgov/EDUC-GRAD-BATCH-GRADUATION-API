@@ -76,6 +76,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-api.tvrrun.url}")
     private String graduationApiProjectedGradUrl;
 
+    @Value("${endpoint.grad-student-api.get-student-for-batch-input}")
+    private String gradStudentApiGradStatusForBatchUrl;
+
     @Value("${endpoint.grad-student-api.pen-student-by-pen}")
     private String penStudentApiByPenUrl;
 
