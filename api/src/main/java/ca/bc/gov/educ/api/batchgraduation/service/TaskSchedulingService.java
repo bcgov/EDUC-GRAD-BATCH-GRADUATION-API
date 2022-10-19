@@ -45,6 +45,10 @@ public class TaskSchedulingService {
             scheduledTask.cancel(true);
             jobsMap.remove(jobId);
         }
+        Optional<UserScheduledJobsEntity> optional = userScheduledJobsRepository.findById(jobId);
+        if (optional.isPresent()) {
+            userScheduledJobsRepository.delete(optional.get());
+        }
         logger.info("Task removed {}",jobId);
     }
 
