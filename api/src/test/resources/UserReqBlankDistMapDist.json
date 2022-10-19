@@ -1,0 +1,28 @@
+{
+  "HashMap": {
+    "00502001": {
+      "transcriptPrintRequest": null,
+      "schoolDistributionRequest": null,
+      "yed2CertificatePrintRequest": null,
+      "yedbCertificatePrintRequest": null,
+      "yedrCertificatePrintRequest": {
+        "batchId": 20759,
+        "psId": "00502001 20759",
+        "count": 1,
+        "certificateList": null,
+        "blankCertificateList": [
+          {
+            "credentialTypeCode": "E",
+            "schoolOfRecord": "00502001",
+            "quantity": 0,
+            "paperType": "YEDR"
+          }
+        ]
+      },
+      "psiCredentialPrintRequest": null,
+      "properName": null,
+      "total": 1
+    }
+  }
+}
+

@@ -110,7 +110,7 @@ endpoint:
     get-certificate-list:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/getcertificatesfordistribution
     update-student-credential:
-      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcredential/%s/%s/%s
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s&activityCode=%s
     user-req-dis-run:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/userrequest/%s
     get-certificate-types:

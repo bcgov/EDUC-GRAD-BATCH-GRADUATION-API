@@ -150,7 +150,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends JobExe
 
 	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
 		cList.forEach(scd-> {
-			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),accessToken);
+			restUtils.updateStudentCredentialRecord(scd.getStudentID(), scd.getCredentialTypeCode(), scd.getPaperType(), scd.getDocumentStatusCode(), activityCode, accessToken);
 			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
 		});
 	}
