@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +18,9 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class TaskDefinition implements Runnable{
@@ -34,6 +39,9 @@ public class TaskDefinition implements Runnable{
 
     @Autowired JobLauncher jobLauncher;
     @Autowired JobRegistry jobRegistry;
+
+    @Autowired
+    UserScheduledJobsRepository userScheduledJobsRepository;
 
     private Task task;
 
@@ -59,6 +67,13 @@ public class TaskDefinition implements Runnable{
         }
         if(task.getJobIdReference() != null) {
             builder.addString("userScheduled",task.getJobIdReference().toString());
+            if (!isTaskRunnable(task.getJobIdReference())) {
+                LOGGER.error("{}} must be not null as it is a primary key to UserScheduledJobs!!!", task.getJobName());
+                return;
+            }
+        } else {
+            LOGGER.error("jobIdReference must be not null for {}", task.getJobName());
+            return;
         }
         if(task.getJobParams() != null) {
             builder.addString("userScheduledParam",task.getJobParams());
@@ -66,6 +81,19 @@ public class TaskDefinition implements Runnable{
         validatePsiPayLoad(task,builder,taskType);
         validatePayLoad(task,builder,taskType);
         validateBlankPayLoad(task,builder,taskType);
+    }
+
+    private boolean isTaskRunnable(UUID jobId) {
+        Optional<UserScheduledJobsEntity> optional = userScheduledJobsRepository.findById(jobId);
+        if (optional.isPresent()) {
+            UserScheduledJobsEntity entity = optional.get();
+            if (StringUtils.equalsIgnoreCase(entity.getStatus(), "QUEUED")) {
+                entity.setStatus("PROCESSING");
+                userScheduledJobsRepository.save(entity);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void validateBlankPayLoad(Task task,JobParametersBuilder builder, TaskSelection taskType) {
