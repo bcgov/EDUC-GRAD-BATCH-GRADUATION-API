@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import net.javacrumbs.shedlock.spring.LockableTaskScheduler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -11,6 +12,7 @@ import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.scheduling.TaskScheduler;
@@ -33,7 +35,8 @@ public class TaskDefinitionTest {
     TaskDefinition taskDefinition;
 
     @MockBean
-    TaskScheduler taskScheduler;
+    @Qualifier("lockableTaskScheduler")
+    LockableTaskScheduler taskScheduler;
 
     @Autowired
     Job SpecialGraduationBatchJob;
