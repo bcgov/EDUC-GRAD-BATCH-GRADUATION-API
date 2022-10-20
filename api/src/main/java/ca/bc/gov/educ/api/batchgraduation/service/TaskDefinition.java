@@ -68,7 +68,7 @@ public class TaskDefinition implements Runnable{
         if(task.getJobIdReference() != null) {
             builder.addString("userScheduled",task.getJobIdReference().toString());
             if (!isTaskRunnable(task.getJobIdReference())) {
-                LOGGER.error("{}} must be not null as it is a primary key to UserScheduledJobs!!!", task.getJobName());
+                LOGGER.error("{} status should be QUEUED for the given jobId, {}", task.getJobName(), task.getJobIdReference());
                 return;
             }
         }
