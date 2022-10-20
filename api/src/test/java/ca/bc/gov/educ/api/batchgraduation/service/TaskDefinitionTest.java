@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import net.javacrumbs.shedlock.spring.LockableTaskScheduler;
 import org.junit.Test;
@@ -52,6 +54,9 @@ public class TaskDefinitionTest {
 
     @MockBean
     JobRegistry jobRegistry;
+
+    @MockBean
+    UserScheduledJobsRepository userScheduledJobsRepository;
 
     @Test
     public void testRun() {
@@ -149,7 +154,16 @@ public class TaskDefinitionTest {
         bReq.setCredentialTypeCode(List.of("E"));
         task.setBlankPayLoad(bReq);
         taskDefinition.setTask(task);
+
+        UserScheduledJobsEntity userScheduledJobsEntity = new UserScheduledJobsEntity();
+        userScheduledJobsEntity.setId(task.getJobIdReference());
+        userScheduledJobsEntity.setStatus("QUEUED");
+        userScheduledJobsEntity.setJobName(task.getJobName());
+        userScheduledJobsEntity.setJobCode(task.getJobName());
+        userScheduledJobsEntity.setCronExpression(task.getCronExpression());
+
         Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        Mockito.when(userScheduledJobsRepository.findById(task.getJobIdReference())).thenReturn(Optional.of(userScheduledJobsEntity));
         taskDefinition.run();
 
         bReq = new BlankCredentialRequest();
@@ -179,7 +193,16 @@ public class TaskDefinitionTest {
         bReq.setCredentialTypeCode(new ArrayList<>());
         task.setBlankPayLoad(bReq);
         taskDefinition.setTask(task);
+
+        UserScheduledJobsEntity userScheduledJobsEntity = new UserScheduledJobsEntity();
+        userScheduledJobsEntity.setId(task.getJobIdReference());
+        userScheduledJobsEntity.setStatus("QUEUED");
+        userScheduledJobsEntity.setJobName(task.getJobName());
+        userScheduledJobsEntity.setJobCode(task.getJobName());
+        userScheduledJobsEntity.setCronExpression(task.getCronExpression());
+
         Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
+        Mockito.when(userScheduledJobsRepository.findById(task.getJobIdReference())).thenReturn(Optional.of(userScheduledJobsEntity));
         taskDefinition.run();
 
         bReq = new BlankCredentialRequest();

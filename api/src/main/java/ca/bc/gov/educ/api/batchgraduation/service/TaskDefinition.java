@@ -71,9 +71,6 @@ public class TaskDefinition implements Runnable{
                 LOGGER.error("{}} must be not null as it is a primary key to UserScheduledJobs!!!", task.getJobName());
                 return;
             }
-        } else {
-            LOGGER.error("jobIdReference must be not null for {}", task.getJobName());
-            return;
         }
         if(task.getJobParams() != null) {
             builder.addString("userScheduledParam",task.getJobParams());
