@@ -68,7 +68,7 @@ public class TaskDefinition implements Runnable{
         if(task.getJobIdReference() != null) {
             builder.addString("userScheduled",task.getJobIdReference().toString());
             if (!isTaskRunnable(task.getJobIdReference())) {
-                LOGGER.error("{} status should be QUEUED for the given jobId, {}", task.getJobName(), task.getJobIdReference());
+                LOGGER.error("{} is already in PROCESSING status for the given jobId, {}", task.getJobName(), task.getJobIdReference());
                 return;
             }
         }
