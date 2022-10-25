@@ -24,6 +24,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.util.UUID;
+
 @Configuration
 @EnableBatchProcessing
 public class BatchJobConfig {
@@ -41,25 +43,25 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorRegGrad() {
+    public ItemProcessor<UUID,GraduationStudentRecord> itemProcessorRegGrad() {
         return new RunRegularGradAlgorithmProcessor();
     }
 
     @Bean
     @StepScope
-    public ItemReader<GraduationStudentRecord> itemReaderRegGrad() {
+    public ItemReader<UUID> itemReaderRegGrad() {
         return new RecalculateStudentReader();
     }
 
     @Bean
     @StepScope
-    public ItemReader<GraduationStudentRecord> itemReaderRegErrorGrad() {
+    public ItemReader<UUID> itemReaderRegErrorGrad() {
         return new RecalculateStudentErrorReader();
     }
 
     @Bean
     @StepScope
-    public ItemReader<GraduationStudentRecord> itemReaderRegErrorRetryGrad() {
+    public ItemReader<UUID> itemReaderRegErrorRetryGrad() {
         return new RecalculateStudentErrorRetryReader();
     }
 
@@ -109,7 +111,7 @@ public class BatchJobConfig {
     @Bean
     public Step graduationJobErrorStep(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("graduationJobErrorStep")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .<UUID, GraduationStudentRecord>chunk(1)
                 .reader(itemReaderRegErrorGrad())
                 .processor(itemProcessorRegGrad())
                 .writer(itemWriterRegGrad())
@@ -119,7 +121,7 @@ public class BatchJobConfig {
     @Bean
     public Step graduationJobErrorRetryStep(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("graduationJobErrorRetryStep")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .<UUID, GraduationStudentRecord>chunk(1)
                 .reader(itemReaderRegErrorRetryGrad())
                 .processor(itemProcessorRegGrad())
                 .writer(itemWriterRegGrad())
@@ -129,7 +131,7 @@ public class BatchJobConfig {
     @Bean
     public Step graduationJobStep(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("graduationJobStep")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .<UUID, GraduationStudentRecord>chunk(1)
                 .reader(itemReaderRegGrad())
                 .processor(itemProcessorRegGrad())
                 .writer(itemWriterRegGrad())
@@ -156,25 +158,25 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorTvrRun() {
+    public ItemProcessor<UUID,GraduationStudentRecord> itemProcessorTvrRun() {
         return new RunProjectedGradAlgorithmProcessor();
     }
 
     @Bean
     @StepScope
-    public ItemReader<GraduationStudentRecord> itemReaderTvrRun() {
+    public ItemReader<UUID> itemReaderTvrRun() {
         return new RecalculateProjectedGradRunReader();
     }
 
     @Bean
     @StepScope
-    public ItemReader<GraduationStudentRecord> itemReaderTvrErrorRun() {
+    public ItemReader<UUID> itemReaderTvrErrorRun() {
         return new RecalculateProjectedGradRunErrorReader();
     }
 
     @Bean
     @StepScope
-    public ItemReader<GraduationStudentRecord> itemReaderTvrErrorRetryRun() {
+    public ItemReader<UUID> itemReaderTvrErrorRetryRun() {
         return new RecalculateProjectedGradRunErrorRetryReader();
     }
 
@@ -223,7 +225,7 @@ public class BatchJobConfig {
     @Bean
     public Step tvrJobStep(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("tvrJobStep")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .<UUID, GraduationStudentRecord>chunk(1)
                 .reader(itemReaderTvrRun())
                 .processor(itemProcessorTvrRun())
                 .writer(itemWriterTvrRun())
@@ -233,7 +235,7 @@ public class BatchJobConfig {
     @Bean
     public Step tvrJobErrorStep(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("tvrJobErrorStep")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .<UUID, GraduationStudentRecord>chunk(1)
                 .reader(itemReaderTvrErrorRun())
                 .processor(itemProcessorTvrRun())
                 .writer(itemWriterTvrRun())
@@ -243,7 +245,7 @@ public class BatchJobConfig {
     @Bean
     public Step tvrJobErrorRetryStep(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("tvrJobErrorRetryStep")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .<UUID, GraduationStudentRecord>chunk(1)
                 .reader(itemReaderTvrErrorRetryRun())
                 .processor(itemProcessorTvrRun())
                 .writer(itemWriterTvrRun())

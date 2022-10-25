@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
@@ -12,11 +13,10 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
-public abstract class BaseReader implements ItemReader<UUID> {
+public abstract class BaseSpecialRunReader implements ItemReader<GraduationStudentRecord> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseSpecialRunReader.class);
 
     @Autowired
     RestUtils restUtils;
@@ -25,7 +25,7 @@ public abstract class BaseReader implements ItemReader<UUID> {
     protected Integer nxtStudentForProcessing;
 
     @Value("#{stepExecutionContext['data']}")
-    protected List<UUID> studentList;
+    protected List<GraduationStudentRecord> studentList;
 
     @Value("#{stepExecutionContext['summary']}")
     AlgorithmSummaryDTO summaryDTO;

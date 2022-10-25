@@ -106,7 +106,7 @@ public class BatchJobLauncher {
     }
 
     @Scheduled(cron = "${batch.distrun.cron}")
-    @SchedulerLock(name = "DistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
+    @SchedulerLock(name = "DistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "60m")
     public void runMonthlyDistributionProcess() {
         LOGGER.info(BATCH_STARTED);
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -126,6 +126,7 @@ public class BatchJobLauncher {
     }
 
     @Scheduled(fixedDelayString = "PT30M")
+    @SchedulerLock(name = "userScheduledBatchJobRefresher", lockAtLeastFor = "10s", lockAtMostFor = "5m")
     public void refreshUserScheduledQueue() {
         LOGGER.info(BATCH_STARTED);
         JobParametersBuilder builder = new JobParametersBuilder();
