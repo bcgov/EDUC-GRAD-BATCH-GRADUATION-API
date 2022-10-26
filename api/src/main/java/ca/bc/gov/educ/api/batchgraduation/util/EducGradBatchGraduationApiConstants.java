@@ -166,4 +166,7 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-trax-api.get-psi-student-list.url}")
     private String psiStudentList;
 
+    @Value("${endpoint.grad-student-api.update-flag-ready-for-batch}")
+    private String updateStudentFlagReadyForBatchByStudentIDs;
+
 }
