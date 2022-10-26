@@ -18,6 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -1249,6 +1250,35 @@ public class RestUtilsTest {
         Integer res = this.restUtils.getStudentByPenFromStudentAPI(loadStudentData,"abc");
         assertThat(res).isEqualTo(1);
 
+    }
+
+    @Test
+    public void testUpdateStudentFlagReadyForBatch() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "123456789";
+        final String batchJobType = "REGALG";
+
+        GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
+        graduationStatus.setStudentID(studentID);
+        graduationStatus.setPen(pen);
+
+        List<UUID> studentIDs = Arrays.asList(studentID);
+
+        StudentList stuList = new StudentList();
+        stuList.setStudentids(studentIDs);
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentFlagReadyForBatchByStudentIDs(), batchJobType))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        };
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(graduationStatus)));
+
+        val result = this.restUtils.updateStudentFlagReadyForBatch(studentIDs, batchJobType, "abc");
+        assertThat(result).hasSize(1);
     }
 
 }

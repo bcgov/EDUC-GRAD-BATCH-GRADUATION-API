@@ -78,6 +78,7 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 			List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
+			List<UUID> erroredStudentIDs = new ArrayList<>();
 			summaryDTO.getErrors().forEach((e,v) -> {
 				LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e, v.getReason(), v.getDetail());
 				BatchGradAlgorithmErrorHistoryEntity errorHistory = new BatchGradAlgorithmErrorHistoryEntity();
@@ -85,9 +86,11 @@ public class GradRunCompletionNotificationListener extends JobExecutionListenerS
 				errorHistory.setJobExecutionId(jobExecutionId);
 				errorHistory.setError(v.getReason() + "-" + v.getDetail());
 				eList.add(errorHistory);
+				erroredStudentIDs.add(e);
 			});
 			if(!eList.isEmpty()) {
 				gradBatchHistoryService.saveGradAlgorithmErrorHistories(eList);
+				restUtils.updateStudentFlagReadyForBatch(erroredStudentIDs, "REGALG", summaryDTO.getAccessToken());
 			}
 
 			LOGGER.info(" --------------------------------------------------------------------------------------");
