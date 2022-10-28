@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,23 +9,14 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @JsonSerialize
-public class AlgorithmSummaryDTO {
-
-  private String tableName;
-  private Long batchId;
-  private long readCount = 0L;
-  private long processedCount = 0L;
+public class AlgorithmSummaryDTO extends BaseSummaryDTO {
 
   List<UUID> successfulStudentIDs = new ArrayList<>();
   private Map<UUID,ProcessError> errors = new HashMap<>();
   private Set<String> schoolList = new HashSet<>();
-  private String exception;
 
   // stats
   private Map<String, Long> programCountMap = new HashMap<>();
-
-  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-  private String accessToken;
 
   public void increment(String programCode) {
     programCountMap.computeIfPresent(programCode,(key, val) -> val + 1);

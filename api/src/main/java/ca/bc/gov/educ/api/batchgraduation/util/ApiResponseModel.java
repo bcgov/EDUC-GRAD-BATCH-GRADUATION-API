@@ -109,7 +109,7 @@ public class ApiResponseModel<T> {
 
 	@JsonProperty("messages")
 	@Valid
-	private List<ApiResponseMessage> messages = new ArrayList<>();;
+	private List<ApiResponseMessage> messages = new ArrayList<>();
 
 	public CodeEnum getCode() {
 		return code;
