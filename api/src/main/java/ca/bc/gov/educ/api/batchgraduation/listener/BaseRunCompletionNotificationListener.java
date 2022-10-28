@@ -117,7 +117,7 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
     }
 
     private void processSchoolList(Set<String> cList, String accessToken, String jobType) {
-        LOGGER.info(" Creating Reports for {} ---------------------------------------------------------------------", jobType);
+        LOGGER.info(" Creating Reports for {} --------------------------------------------------------", jobType);
         List<String> uniqueSchoolList = new ArrayList<>(cList);
         LOGGER.info(" Number of Schools [{}] ---------------------------------------------------------", uniqueSchoolList.size());
         restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList,jobType);
