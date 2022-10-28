@@ -38,14 +38,14 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 				summaryDTO = new DistributionSummaryDTO();
 			}
 
-			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
-
 			// display Summary Details
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
+
+			// save batch job & error history
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));

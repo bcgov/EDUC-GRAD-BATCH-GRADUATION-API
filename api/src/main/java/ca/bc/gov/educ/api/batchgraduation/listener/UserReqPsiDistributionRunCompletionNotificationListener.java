@@ -51,14 +51,14 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 				summaryDTO = new PsiDistributionSummaryDTO();
 			}
 
-			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
-
 			// display Summary Details
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
+
+			// save batch job & error history
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			PsiDistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));

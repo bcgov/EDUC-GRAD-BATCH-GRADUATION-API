@@ -57,14 +57,14 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
             }
         }
 
-        // save batch job & error history
-        processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
-
         // display Summary Details
         LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
         LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
         LOGGER.info(" --------------------------------------------------------------------------------------");
         LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
+
+        // save batch job & error history
+        processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
         LOGGER.info(" --------------------------------------------------------------------------------------");
         AlgorithmSummaryDTO finalSummaryDTO = summaryDTO;
         summaryDTO.getProgramCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getProgramCountMap().get(key)));

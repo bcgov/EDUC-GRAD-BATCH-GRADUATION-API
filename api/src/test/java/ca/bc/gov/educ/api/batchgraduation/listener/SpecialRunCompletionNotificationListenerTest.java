@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.After;
@@ -100,6 +101,9 @@ public class SpecialRunCompletionNotificationListenerTest {
         ent.setJobType(jobType);
 
         ex.setExecutionContext(jobContext);
+        ResponseObj obj = new ResponseObj();
+        obj.setAccess_token("asdasd");
+        Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
         specialRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
@@ -157,6 +161,9 @@ public class SpecialRunCompletionNotificationListenerTest {
         ent.setJobType(jobType);
 
         ex.setExecutionContext(jobContext);
+        ResponseObj obj = new ResponseObj();
+        obj.setAccess_token("asdasd");
+        Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
         specialRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
