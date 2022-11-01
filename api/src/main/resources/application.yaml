@@ -117,6 +117,13 @@ resilience4j.retry:
         - org.springframework.web.client.HttpServerErrorException
       ignoreExceptions:
         - java.lang.NullPointerException
+    rt-getStudent:
+      maxAttempts: ${MAX_RETRY_ATTEMPTS}
+      waitDuration: 2s
+      retryExceptions:
+        - org.springframework.web.client.HttpServerErrorException
+      ignoreExceptions:
+        - java.lang.NullPointerException
 
 authorization:
   user: ${GRAD_CLIENT_NAME}
@@ -151,6 +158,7 @@ endpoint:
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate
     student-for-projectedgrad-list: ${GRAD_STUDENT_API}api/v1/student/projected
+    get-student-for-batch-input: ${GRAD_STUDENT_API}api/v1/student/batch/gradstudent/studentid/%s
     pen-student-by-pen: ${PEN_API}api/v1/student?pen=%s
     student-for-special-grad-run-list: ${GRAD_STUDENT_API}api/v1/student/studentlistsearch
     get-student-data-list: ${GRAD_STUDENT_API}api/v1/student/multistudentids
@@ -158,6 +166,7 @@ endpoint:
     update-student-record: ${GRAD_STUDENT_API}api/v1/student/distribution/studentid/%s?batchId=%s&activityCode=%s
     read-grad-student-record: ${GRAD_STUDENT_API}api/v1/student/studentid/%s/algorithm
     read-grad-student-record-batch: ${GRAD_STUDENT_API}api/v1/student/batch/%s
+    update-flag-ready-for-batch: ${GRAD_STUDENT_API}api/v1/student/multistudentids/batchflag/jobtype/%s
   grad-graduation-report-api:
     get-transcript-list:
       yearly:
@@ -166,7 +175,7 @@ endpoint:
     get-certificate-list:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/getcertificatesfordistribution
     update-student-credential:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s&activityCode=%s
     user-req-dis-run:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/userrequest/%s
     get-certificate-types:

@@ -1,19 +1,16 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.BlankDistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionPrintRequest;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,19 +19,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class UserReqBlankDistributionRunCompletionNotificationListener extends JobExecutionListenerSupport {
+public class UserReqBlankDistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserReqBlankDistributionRunCompletionNotificationListener.class);
     private static final String LOG_SEPARATION = "=======================================================================================";
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
 	@Autowired
-	private GradBatchHistoryService gradBatchHistoryService;
-
-	@Autowired
 	private TaskSchedulingService taskSchedulingService;
-
-	@Autowired RestUtils restUtils;
     
     @Override
     public void afterJob(JobExecution jobExecution) {
@@ -61,32 +53,20 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			if(summaryDTO == null) {
 				summaryDTO = new BlankDistributionSummaryDTO();
 			}
-			int failedRecords = summaryDTO.getErrors().size();			
-			Long processedStudents = summaryDTO.getProcessedCount();
-			Long expectedStudents = summaryDTO.getReadCount();
-			ResponseObj obj = restUtils.getTokenResponseObject();
-			BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
-			ent.setActualStudentsProcessed(processedStudents);
-			ent.setExpectedStudentsProcessed(expectedStudents);
-			ent.setFailedStudentsProcessed(failedRecords);
-			ent.setJobExecutionId(jobExecutionId);
-			ent.setStartTime(startTime);
-			ent.setEndTime(endTime);
-			ent.setStatus(status);
-			ent.setTriggerBy(jobTrigger);
-			ent.setJobType(jobType);
-			ent.setLocalDownload(localDownLoad);
 
-			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
-			
+			// display Summary Details
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
+
+			// save batch job & error history
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			BlankDistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
+			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
 			processGlobalList(credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,properName);
 			LOGGER.info(LOG_SEPARATION);
@@ -102,11 +82,11 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends J
 			List<BlankCredentialDistribution> yedbList = new ArrayList<>();
 
 			if(credentialType != null) {
-				if (credentialType.equalsIgnoreCase("OT")) {
+				if (StringUtils.equalsIgnoreCase(credentialType, "OT")) {
 					yed4List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
 				}
 
-				if (credentialType.equalsIgnoreCase("OC")) {
+				if (StringUtils.equalsIgnoreCase(credentialType, "OC")) {
 					yed2List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
 					yedrList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
 					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());

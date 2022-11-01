@@ -9,11 +9,12 @@ import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository
 import ca.bc.gov.educ.api.batchgraduation.transformer.UserScheduledJobsTransformer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.javacrumbs.shedlock.spring.LockableTaskScheduler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,10 @@ public class TaskSchedulingService {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskSchedulingService.class);
 
-    @Autowired TaskScheduler taskScheduler;
+    @Autowired
+    @Qualifier("lockableTaskScheduler")
+    LockableTaskScheduler taskScheduler;
+
     @Autowired UserScheduledJobsRepository userScheduledJobsRepository;
     @Autowired CodeService codeService;
     @Autowired UserScheduledJobsTransformer userScheduledJobsTransformer;
@@ -44,6 +48,10 @@ public class TaskSchedulingService {
         if(scheduledTask != null) {
             scheduledTask.cancel(true);
             jobsMap.remove(jobId);
+        }
+        Optional<UserScheduledJobsEntity> optional = userScheduledJobsRepository.findById(jobId);
+        if (optional.isPresent()) {
+            userScheduledJobsRepository.delete(optional.get());
         }
         logger.info("Task removed {}",jobId);
     }

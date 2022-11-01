@@ -8,19 +8,17 @@ import java.time.Instant;
 
 public class GradService {
 
-    private Instant start;
-    private Instant end;
-    private Duration timeElapsed;
-
     private static final Logger logger = LoggerFactory.getLogger(GradService.class);
+
+    private Instant start;
 
     void start() {
         start = Instant.now();
     }
 
     void end() {
-        end = Instant.now();
-        timeElapsed = Duration.between(start, end);
+        Instant end = Instant.now();
+        Duration timeElapsed = Duration.between(start, end);
         logger.info("Time taken: {} milliseconds", timeElapsed.toMillis());
     }
 }

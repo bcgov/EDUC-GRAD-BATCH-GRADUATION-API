@@ -76,6 +76,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-api.tvrrun.url}")
     private String graduationApiProjectedGradUrl;
 
+    @Value("${endpoint.grad-student-api.get-student-for-batch-input}")
+    private String gradStudentApiGradStatusForBatchUrl;
+
     @Value("${endpoint.grad-student-api.pen-student-by-pen}")
     private String penStudentApiByPenUrl;
 
@@ -162,5 +165,8 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-trax-api.get-psi-student-list.url}")
     private String psiStudentList;
+
+    @Value("${endpoint.grad-student-api.update-flag-ready-for-batch}")
+    private String updateStudentFlagReadyForBatchByStudentIDs;
 
 }

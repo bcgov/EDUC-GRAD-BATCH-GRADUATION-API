@@ -5,6 +5,9 @@ import org.springframework.http.MediaType;
 
 public class EducGradBatchGraduationApiUtils {
 
+    private EducGradBatchGraduationApiUtils() {
+        throw new IllegalStateException("Utility class");
+    }
     
     public static HttpHeaders getHeaders (String accessToken)
     {
