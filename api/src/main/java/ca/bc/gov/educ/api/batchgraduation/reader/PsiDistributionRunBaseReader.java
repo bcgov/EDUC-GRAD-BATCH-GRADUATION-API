@@ -30,6 +30,7 @@ public abstract class PsiDistributionRunBaseReader implements ItemReader<PsiCred
         PsiDistributionSummaryDTO totalSummaryDTO = (PsiDistributionSummaryDTO)jobExecution.getExecutionContext().get(summaryContextName);
         if (totalSummaryDTO == null) {
             totalSummaryDTO = new PsiDistributionSummaryDTO();
+            totalSummaryDTO.initializeCredentialCountMap();
             jobExecution.getExecutionContext().put(summaryContextName, totalSummaryDTO);
         }
         totalSummaryDTO.setBatchId(summaryDTO.getBatchId());

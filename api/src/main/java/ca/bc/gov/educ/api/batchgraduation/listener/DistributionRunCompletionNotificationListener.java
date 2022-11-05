@@ -36,6 +36,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new DistributionSummaryDTO();
+				summaryDTO.initializeCredentialCountMap();
 			}
 
 			// display Summary Details

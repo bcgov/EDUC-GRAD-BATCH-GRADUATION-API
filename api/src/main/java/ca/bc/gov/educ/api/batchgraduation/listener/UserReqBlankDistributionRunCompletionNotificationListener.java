@@ -52,6 +52,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new BlankDistributionSummaryDTO();
+				summaryDTO.initializeCredentialCountMap();
 			}
 
 			// display Summary Details

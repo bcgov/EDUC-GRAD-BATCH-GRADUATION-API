@@ -28,6 +28,7 @@ public abstract class BlankDistributionRunBaseReader implements ItemReader<Blank
         BlankDistributionSummaryDTO totalSummaryDTO = (BlankDistributionSummaryDTO)jobExecution.getExecutionContext().get(summaryContextName);
         if (totalSummaryDTO == null) {
             totalSummaryDTO = new BlankDistributionSummaryDTO();
+            totalSummaryDTO.initializeCredentialCountMap();
             jobExecution.getExecutionContext().put(summaryContextName, totalSummaryDTO);
         }
         totalSummaryDTO.setBatchId(summaryDTO.getBatchId());
