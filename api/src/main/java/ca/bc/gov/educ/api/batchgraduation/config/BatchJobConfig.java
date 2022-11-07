@@ -158,9 +158,12 @@ public class BatchJobConfig {
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .start(masterStepRegGrad(stepBuilderFactory,constants, skipListener))
-                .next(masterStepErrorRegGrad(stepBuilderFactory,constants, skipListener))
-                .next(masterStepErrorRegGradRetry(stepBuilderFactory,constants, skipListener))
-                .build();
+                .on("*")
+                .to(masterStepErrorRegGrad(stepBuilderFactory,constants, skipListener))
+                .on("*")
+                .to(masterStepErrorRegGradRetry(stepBuilderFactory,constants, skipListener))
+                .on("*").end()
+                .build().build();
     }
 
 
@@ -284,9 +287,12 @@ public class BatchJobConfig {
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .start(masterStepTvrRun(stepBuilderFactory,constants,skipListener))
-                .next(masterStepErrorTvrRun(stepBuilderFactory,constants,skipListener))
-                .next(masterStepErrorTvrRunRetry(stepBuilderFactory,constants,skipListener))
-                .build();
+                .on("*")
+                .to(masterStepErrorTvrRun(stepBuilderFactory,constants,skipListener))
+                .on("*")
+                .to(masterStepErrorTvrRunRetry(stepBuilderFactory,constants,skipListener))
+                .on("*").end()
+                .build().build();
     }
 
     /**
@@ -351,8 +357,9 @@ public class BatchJobConfig {
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .flow(masterStepSpcRegGrad(stepBuilderFactory,constants,skipListener))
+                .on("*")
                 .end()
-                .build();
+                .build().build();
     }
 
     /**
@@ -409,8 +416,9 @@ public class BatchJobConfig {
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .flow(masterStepSpcTvrRun(stepBuilderFactory,constants,skipListener))
+                .on("*")
                 .end()
-                .build();
+                .build().build();
     }
 
     /**
