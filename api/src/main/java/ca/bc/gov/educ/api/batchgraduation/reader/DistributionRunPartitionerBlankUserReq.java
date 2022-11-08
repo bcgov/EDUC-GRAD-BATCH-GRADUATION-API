@@ -47,6 +47,7 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
+                summaryDTO.initializeCredentialCountMap();
                 List<BlankCredentialDistribution> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

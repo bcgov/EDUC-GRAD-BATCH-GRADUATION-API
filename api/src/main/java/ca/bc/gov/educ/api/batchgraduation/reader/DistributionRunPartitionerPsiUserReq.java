@@ -61,6 +61,7 @@ public class DistributionRunPartitionerPsiUserReq extends SimplePartitioner {
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 PsiDistributionSummaryDTO summaryDTO = new PsiDistributionSummaryDTO();
+                summaryDTO.initializeCredentialCountMap();
                 List<PsiCredentialDistribution> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

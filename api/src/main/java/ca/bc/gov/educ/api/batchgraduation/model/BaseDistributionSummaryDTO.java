@@ -17,7 +17,7 @@ public abstract class BaseDistributionSummaryDTO extends BaseSummaryDTO {
 
     private Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
 
-    abstract void initializeCredentialCountMap();
+    public abstract void initializeCredentialCountMap();
 
     public void increment(String programCode) {
         credentialCountMap.computeIfPresent(programCode,(key, val) -> val + 1);
