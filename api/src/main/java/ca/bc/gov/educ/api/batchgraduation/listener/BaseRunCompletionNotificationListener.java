@@ -44,6 +44,7 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
         AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get(summaryDtoName);
         if(summaryDTO == null) {
             summaryDTO = new AlgorithmSummaryDTO();
+            summaryDTO.initializeProgramCountMap();
         }
 
         if (isSpecialRun) {

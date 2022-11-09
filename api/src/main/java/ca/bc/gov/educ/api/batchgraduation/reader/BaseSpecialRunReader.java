@@ -37,6 +37,7 @@ public abstract class BaseSpecialRunReader implements ItemReader<GraduationStude
         AlgorithmSummaryDTO totalSummaryDTO = (AlgorithmSummaryDTO)jobExecution.getExecutionContext().get(summaryContextName);
         if (totalSummaryDTO == null) {
             totalSummaryDTO = new AlgorithmSummaryDTO();
+            totalSummaryDTO.initializeProgramCountMap();
             jobExecution.getExecutionContext().put(summaryContextName, totalSummaryDTO);
         }
         totalSummaryDTO.setReadCount(totalSummaryDTO.getReadCount() + summaryDTO.getReadCount());

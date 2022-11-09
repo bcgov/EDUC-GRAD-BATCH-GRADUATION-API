@@ -49,6 +49,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 			PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new PsiDistributionSummaryDTO();
+				summaryDTO.initializeCredentialCountMap();
 			}
 
 			// display Summary Details

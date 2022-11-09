@@ -23,7 +23,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.transaction.TransactionException;
 
+import java.sql.SQLException;
 import java.util.UUID;
 
 @Configuration
@@ -73,32 +75,32 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step masterStepRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Step masterStepRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepRegGrad")
-                .partitioner(graduationJobStep(stepBuilderFactory).getName(), partitionerRegGrad())
-                .step(graduationJobStep(stepBuilderFactory))
+                .partitioner(graduationJobStep(stepBuilderFactory, skipListener).getName(), partitionerRegGrad())
+                .step(graduationJobStep(stepBuilderFactory, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
     @Bean
-    public Step masterStepErrorRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Step masterStepErrorRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepErrorRegGrad")
-                .partitioner(graduationJobErrorStep(stepBuilderFactory).getName(), partitionerRegGrad())
-                .step(graduationJobErrorStep(stepBuilderFactory))
+                .partitioner(graduationJobErrorStep(stepBuilderFactory, skipListener).getName(), partitionerRegGrad())
+                .step(graduationJobErrorStep(stepBuilderFactory, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
     @Bean
-    public Step masterStepErrorRegGradRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Step masterStepErrorRegGradRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepErrorRegGradRetry")
-                .partitioner(graduationJobErrorRetryStep(stepBuilderFactory).getName(), partitionerRegGrad())
-                .step(graduationJobErrorRetryStep(stepBuilderFactory))
+                .partitioner(graduationJobErrorRetryStep(stepBuilderFactory, skipListener).getName(), partitionerRegGrad())
+                .step(graduationJobErrorRetryStep(stepBuilderFactory, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
@@ -109,44 +111,59 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step graduationJobErrorStep(StepBuilderFactory stepBuilderFactory) {
+    public Step graduationJobErrorStep(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("graduationJobErrorStep")
                 .<UUID, GraduationStudentRecord>chunk(1)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
                 .reader(itemReaderRegErrorGrad())
                 .processor(itemProcessorRegGrad())
                 .writer(itemWriterRegGrad())
+                .listener(skipListener)
                 .build();
     }
 
     @Bean
-    public Step graduationJobErrorRetryStep(StepBuilderFactory stepBuilderFactory) {
+    public Step graduationJobErrorRetryStep(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("graduationJobErrorRetryStep")
                 .<UUID, GraduationStudentRecord>chunk(1)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
                 .reader(itemReaderRegErrorRetryGrad())
                 .processor(itemProcessorRegGrad())
                 .writer(itemWriterRegGrad())
+                .listener(skipListener)
                 .build();
     }
 
     @Bean
-    public Step graduationJobStep(StepBuilderFactory stepBuilderFactory) {
+    public Step graduationJobStep(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("graduationJobStep")
                 .<UUID, GraduationStudentRecord>chunk(1)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
                 .reader(itemReaderRegGrad())
                 .processor(itemProcessorRegGrad())
                 .writer(itemWriterRegGrad())
+                .listener(skipListener)
                 .build();
     }
 
     @Bean(name="GraduationBatchJob")
-    public Job graduationBatchJob(GradRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory,JobBuilderFactory jobBuilderFactory,EducGradBatchGraduationApiConstants constants) {
+    public Job graduationBatchJob(GradRunCompletionNotificationListener listener, SkipSQLTransactionExceptionsListener skipListener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("GraduationBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .start(masterStepRegGrad(stepBuilderFactory,constants))
-                .next(masterStepErrorRegGrad(stepBuilderFactory,constants))
-                .next(masterStepErrorRegGradRetry(stepBuilderFactory,constants))
-                .build();
+                .start(masterStepRegGrad(stepBuilderFactory,constants, skipListener))
+                .on("*")
+                .to(masterStepErrorRegGrad(stepBuilderFactory,constants, skipListener))
+                .on("*")
+                .to(masterStepErrorRegGradRetry(stepBuilderFactory,constants, skipListener))
+                .on("*").end()
+                .build().build();
     }
 
 
@@ -187,32 +204,32 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step masterStepTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Step masterStepTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepTvrRun")
-                .partitioner(tvrJobStep(stepBuilderFactory).getName(), partitionerTvrRun())
-                .step(tvrJobStep(stepBuilderFactory))
+                .partitioner(tvrJobStep(stepBuilderFactory,skipListener).getName(), partitionerTvrRun())
+                .step(tvrJobStep(stepBuilderFactory,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
     @Bean
-    public Step masterStepErrorTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Step masterStepErrorTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepErrorTvrRun")
-                .partitioner(tvrJobErrorStep(stepBuilderFactory).getName(), partitionerTvrRun())
-                .step(tvrJobErrorStep(stepBuilderFactory))
+                .partitioner(tvrJobErrorStep(stepBuilderFactory,skipListener).getName(), partitionerTvrRun())
+                .step(tvrJobErrorStep(stepBuilderFactory,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
     @Bean
-    public Step masterStepErrorTvrRunRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Step masterStepErrorTvrRunRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepErrorTvrRunRetry")
-                .partitioner(tvrJobErrorRetryStep(stepBuilderFactory).getName(), partitionerTvrRun())
-                .step(tvrJobErrorRetryStep(stepBuilderFactory))
+                .partitioner(tvrJobErrorRetryStep(stepBuilderFactory,skipListener).getName(), partitionerTvrRun())
+                .step(tvrJobErrorRetryStep(stepBuilderFactory,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
@@ -223,44 +240,59 @@ public class BatchJobConfig {
 
 
     @Bean
-    public Step tvrJobStep(StepBuilderFactory stepBuilderFactory) {
+    public Step tvrJobStep(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("tvrJobStep")
                 .<UUID, GraduationStudentRecord>chunk(1)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
                 .reader(itemReaderTvrRun())
                 .processor(itemProcessorTvrRun())
                 .writer(itemWriterTvrRun())
+                .listener(skipListener)
                 .build();
     }
 
     @Bean
-    public Step tvrJobErrorStep(StepBuilderFactory stepBuilderFactory) {
+    public Step tvrJobErrorStep(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("tvrJobErrorStep")
                 .<UUID, GraduationStudentRecord>chunk(1)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
                 .reader(itemReaderTvrErrorRun())
                 .processor(itemProcessorTvrRun())
                 .writer(itemWriterTvrRun())
+                .listener(skipListener)
                 .build();
     }
 
     @Bean
-    public Step tvrJobErrorRetryStep(StepBuilderFactory stepBuilderFactory) {
+    public Step tvrJobErrorRetryStep(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("tvrJobErrorRetryStep")
                 .<UUID, GraduationStudentRecord>chunk(1)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
                 .reader(itemReaderTvrErrorRetryRun())
                 .processor(itemProcessorTvrRun())
                 .writer(itemWriterTvrRun())
+                .listener(skipListener)
                 .build();
     }
 
     @Bean(name="tvrBatchJob")
-    public Job tvrBatchJob(TvrRunJobCompletionNotificationListener listener,StepBuilderFactory stepBuilderFactory,JobBuilderFactory jobBuilderFactory,EducGradBatchGraduationApiConstants constants) {
+    public Job tvrBatchJob(TvrRunJobCompletionNotificationListener listener, SkipSQLTransactionExceptionsListener skipListener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("tvrBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .start(masterStepTvrRun(stepBuilderFactory,constants))
-                .next(masterStepErrorTvrRun(stepBuilderFactory,constants))
-                .next(masterStepErrorTvrRunRetry(stepBuilderFactory,constants))
-                .build();
+                .start(masterStepTvrRun(stepBuilderFactory,constants,skipListener))
+                .on("*")
+                .to(masterStepErrorTvrRun(stepBuilderFactory,constants,skipListener))
+                .on("*")
+                .to(masterStepErrorTvrRunRetry(stepBuilderFactory,constants,skipListener))
+                .on("*").end()
+                .build().build();
     }
 
     /**
@@ -290,12 +322,12 @@ public class BatchJobConfig {
 
 
     @Bean
-    public Step masterStepSpcRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Step masterStepSpcRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepSpcRegGrad")
-                .partitioner(slaveStepSpcRegGrad(stepBuilderFactory).getName(), partitionerSpcRegGrad())
-                .step(slaveStepSpcRegGrad(stepBuilderFactory))
+                .partitioner(slaveStepSpcRegGrad(stepBuilderFactory,skipListener).getName(), partitionerSpcRegGrad())
+                .step(slaveStepSpcRegGrad(stepBuilderFactory,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
@@ -306,23 +338,28 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step slaveStepSpcRegGrad(StepBuilderFactory stepBuilderFactory) {
+    public Step slaveStepSpcRegGrad(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("slaveStepSpcRegGrad")
                 .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
                 .reader(itemReaderSpcRegGrad())
                 .processor(itemProcessorSpcRegGrad())
                 .writer(itemWriterSpcRegGrad())
+                .listener(skipListener)
                 .build();
     }
 
     @Bean(name="SpecialGraduationBatchJob")
-    public Job specialGraduationBatchJob(SpecialRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Job specialGraduationBatchJob(SpecialRunCompletionNotificationListener listener, SkipSQLTransactionExceptionsListener skipListener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("SpecialGraduationBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepSpcRegGrad(stepBuilderFactory,constants))
+                .flow(masterStepSpcRegGrad(stepBuilderFactory,constants,skipListener))
+                .on("*")
                 .end()
-                .build();
+                .build().build();
     }
 
     /**
@@ -350,33 +387,38 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step slaveStepSpcTvrRun(StepBuilderFactory stepBuilderFactory) {
+    public Step slaveStepSpcTvrRun(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("slaveStepSpcTvrRun")
                 .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
                 .reader(itemReaderSpcTvrRun())
                 .processor(itemProcessorSpcTvrRun())
                 .writer(itemWriterSpcTvrRun())
+                .listener(skipListener)
                 .build();
     }
 
     @Bean
-    public Step masterStepSpcTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Step masterStepSpcTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepSpcTvrRun")
-                .partitioner(slaveStepSpcTvrRun(stepBuilderFactory).getName(), partitionerSpcRegGrad())
-                .step(slaveStepSpcTvrRun(stepBuilderFactory))
+                .partitioner(slaveStepSpcTvrRun(stepBuilderFactory,skipListener).getName(), partitionerSpcRegGrad())
+                .step(slaveStepSpcTvrRun(stepBuilderFactory,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
     @Bean(name="SpecialTvrRunBatchJob")
-    public Job specialTvrRunBatchJob(SpecialRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Job specialTvrRunBatchJob(SpecialRunCompletionNotificationListener listener, SkipSQLTransactionExceptionsListener skipListener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("SpecialTvrRunBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepSpcTvrRun(stepBuilderFactory,constants))
+                .flow(masterStepSpcTvrRun(stepBuilderFactory,constants,skipListener))
+                .on("*")
                 .end()
-                .build();
+                .build().build();
     }
 
     /**
@@ -426,7 +468,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRun())
                 .step(slaveStepDisRun(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
@@ -458,7 +500,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRunYearly())
                 .step(slaveStepDisRun(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
@@ -490,7 +532,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRunUserReq())
                 .step(slaveStepDisRun(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
@@ -551,7 +593,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepBlankDisRun(stepBuilderFactory).getName(), partitionerDisRunBlankUserReq())
                 .step(slaveStepBlankDisRun(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
@@ -613,7 +655,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepPsiDisRun(stepBuilderFactory).getName(), partitionerDisRunPsiUserReq())
                 .step(slaveStepPsiDisRun(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants.getNumberOfPartitions()))
+                .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
@@ -660,7 +702,7 @@ public class BatchJobConfig {
     }
 
     @Bean(name="userScheduledBatchJobRefresher")
-    public Job userScheduledBatchJobQueueRefresher(UserScheduledCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Job userScheduledBatchJobQueueRefresher(UserScheduledCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory) {
         return jobBuilderFactory.get("userScheduledBatchJobRefresher")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
@@ -677,10 +719,10 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public TaskExecutor taskExecutor(int numberOfPartitions) {
+    public TaskExecutor taskExecutor(EducGradBatchGraduationApiConstants constants) {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(numberOfPartitions);
-        executor.setMaxPoolSize(numberOfPartitions);
+        executor.setCorePoolSize(constants.getNumberOfPartitions());
+        executor.setMaxPoolSize(constants.getNumberOfPartitions());
         executor.setThreadNamePrefix("partition_task_executor_thread-");
         executor.initialize();
         return executor;
