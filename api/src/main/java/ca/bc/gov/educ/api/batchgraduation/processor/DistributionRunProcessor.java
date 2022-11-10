@@ -24,7 +24,7 @@ public class DistributionRunProcessor implements ItemProcessor<StudentCredential
     
 	@Override
 	public StudentCredentialDistribution process(StudentCredentialDistribution item) throws Exception {
-		LOGGER.info("*** {} processing partitionData = {}",Thread.currentThread().getName(), item.getCredentialTypeCode());
+		LOGGER.info("Processing partitionData = {}", item.getCredentialTypeCode());
 		summaryDTO.setBatchId(batchId);
 		return restUtils.processDistribution(item, summaryDTO);
 		

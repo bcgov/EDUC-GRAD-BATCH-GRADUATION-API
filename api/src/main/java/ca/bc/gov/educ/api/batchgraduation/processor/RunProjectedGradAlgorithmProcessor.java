@@ -14,7 +14,7 @@ public class RunProjectedGradAlgorithmProcessor extends BaseProcessor {
 	public GraduationStudentRecord process(UUID key) throws Exception {
 		GraduationStudentRecord item = getItem(key);
 		if (item != null) {
-			LOGGER.info("*** {} processing partitionData = {}",Thread.currentThread().getName(), item.getProgram());
+			LOGGER.info("Processing partitionData = {}", item.getProgram());
 			summaryDTO.setBatchId(batchId);
 			return restUtils.processProjectedGradStudent(item, summaryDTO);
 		}

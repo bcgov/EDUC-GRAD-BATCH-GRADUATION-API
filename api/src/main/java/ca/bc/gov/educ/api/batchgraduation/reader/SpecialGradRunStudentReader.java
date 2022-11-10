@@ -15,7 +15,7 @@ public class SpecialGradRunStudentReader extends BaseSpecialRunReader {
         GraduationStudentRecord nextStudent = null;
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
-            LOGGER.info("*** Found student[{}] - Student ID: {} in total {}", nxtStudentForProcessing + 1, nextStudent.getStudentID(), summaryDTO.getReadCount());
+            LOGGER.info("StudID:{} - {} of {}", nextStudent.getStudentID(), nxtStudentForProcessing + 1, summaryDTO.getReadCount());
             nxtStudentForProcessing++;
         }else {
         	aggregate("spcRunAlgSummaryDTO");

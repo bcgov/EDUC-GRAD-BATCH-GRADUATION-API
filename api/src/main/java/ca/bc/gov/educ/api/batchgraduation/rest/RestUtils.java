@@ -328,7 +328,7 @@ public class RestUtils {
                 .bodyToMono(GradCertificateTypes.class)
                 .block();
         if(result != null)
-            LOGGER.info("*** Fetched # of Cert type Record : {}",result.getCode());
+            LOGGER.info("Fetched {} Cert type Records : ",result.getCode());
 
         return result;
     }
@@ -343,7 +343,7 @@ public class RestUtils {
                 .block();
 
         if(result != null)
-            LOGGER.info("*** Fetched # of Graduation Record : {}",result.getStudentID());
+            LOGGER.info("Fetched {} Graduation Records",result.getStudentID());
 
         return result;
     }
@@ -358,7 +358,7 @@ public class RestUtils {
                 .block();
 
         if(result != null)
-            LOGGER.info("*** Fetched # of Graduation Record : {}",result.getStudentID());
+            LOGGER.info("Fetched {} Graduation Records",result.getStudentID());
 
         return result;
     }

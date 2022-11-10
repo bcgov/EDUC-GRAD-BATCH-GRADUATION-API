@@ -26,7 +26,7 @@ public class DistributionRunReader extends DistributionRunBaseReader {
         
         if (nxtCredentialForProcessing < credentialList.size()) {
             nextCredential = credentialList.get(nxtCredentialForProcessing);
-            LOGGER.info("*** Found Credential[{}] - Student ID: {} in total {}", nxtCredentialForProcessing + 1, nextCredential.getStudentID(), summaryDTO.getReadCount());
+            LOGGER.info("StudID:{} - {} of {}", nextCredential.getStudentID(), nxtCredentialForProcessing + 1, summaryDTO.getReadCount());
             nxtCredentialForProcessing++;
         }else {
         	aggregate("distributionSummaryDTO");

@@ -16,7 +16,7 @@ public class RecalculateStudentErrorReader extends BaseReader {
         summaryDTO.setReadCount(studentList.size());
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
-            LOGGER.info("***  Error Found student[{}] - Student ID: {} in total {}", nxtStudentForProcessing + 1, nextStudent, summaryDTO.getReadCount());
+            LOGGER.info("Error - StudID:{} - {} of {}", nextStudent, nxtStudentForProcessing + 1, summaryDTO.getReadCount());
             nxtStudentForProcessing++;
         }else {
             summaryDTO.setReadCount(0);

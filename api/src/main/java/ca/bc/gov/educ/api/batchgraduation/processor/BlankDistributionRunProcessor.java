@@ -24,7 +24,7 @@ public class BlankDistributionRunProcessor implements ItemProcessor<BlankCredent
     
 	@Override
 	public BlankCredentialDistribution process(BlankCredentialDistribution item) throws Exception {
-		LOGGER.info("*** {} processing partitionData = {}",Thread.currentThread().getName(), item.getCredentialTypeCode());
+		LOGGER.info("Processing partitionData = {}",item.getCredentialTypeCode());
 		summaryDTO.setBatchId(batchId);
 		return restUtils.processBlankDistribution(item, summaryDTO);
 		

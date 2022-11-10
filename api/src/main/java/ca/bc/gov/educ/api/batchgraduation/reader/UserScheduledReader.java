@@ -24,11 +24,11 @@ public class UserScheduledReader implements ItemReader<UserScheduledJobs> {
 
     @Override
     public UserScheduledJobs read() throws Exception {
-        LOGGER.info("*** Reading the information of the next Credential");
+        LOGGER.info("Reading next Credential");
 
         if (jobDataIsNotInitialized()) {
             jobList = findJobList();
-            LOGGER.info("*** Found {} records",jobList.size());
+            LOGGER.info("Found {} records",jobList.size());
         }
 
         UserScheduledJobs nextJob = null;
@@ -36,7 +36,7 @@ public class UserScheduledReader implements ItemReader<UserScheduledJobs> {
         
         if (nextJobForProcessing < jobList.size()) {
             nextJob = jobList.get(nextJobForProcessing);
-            LOGGER.info("*** Found Job[{}] - Job ID: {} in total {}", nextJobForProcessing + 1, nextJob.getId(), jobList.size());
+            LOGGER.info("Job ID:{} - {} of {}", nextJob.getId(), nextJobForProcessing + 1, jobList.size());
             nextJobForProcessing++;
         }else {
             nextJobForProcessing = 0;

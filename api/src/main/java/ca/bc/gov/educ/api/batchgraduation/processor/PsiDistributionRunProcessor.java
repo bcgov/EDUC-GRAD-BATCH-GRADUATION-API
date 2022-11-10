@@ -24,7 +24,7 @@ public class PsiDistributionRunProcessor implements ItemProcessor<PsiCredentialD
     
 	@Override
 	public PsiCredentialDistribution process(PsiCredentialDistribution item) throws Exception {
-		LOGGER.info("*** {} processing partitionData = {}",Thread.currentThread().getName(), item.getPsiYear());
+		LOGGER.info("Processing partitionData = {}", item.getPsiYear());
 		summaryDTO.setBatchId(batchId);
 		return restUtils.processPsiDistribution(item, summaryDTO);
 		

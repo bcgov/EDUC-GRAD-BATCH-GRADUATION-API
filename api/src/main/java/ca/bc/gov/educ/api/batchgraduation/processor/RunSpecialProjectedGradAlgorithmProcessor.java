@@ -10,7 +10,7 @@ public class RunSpecialProjectedGradAlgorithmProcessor extends BaseSpecialRunPro
 
 	@Override
 	public GraduationStudentRecord process(GraduationStudentRecord item) throws Exception {
-		LOGGER.info("*** {} processing partitionData = {}",Thread.currentThread().getName(), item.getProgram());
+		LOGGER.info("Processing partitionData = {}", item.getProgram());
 		summaryDTO.setBatchId(batchId);
 		return restUtils.processProjectedGradStudent(item, summaryDTO);
 	}
