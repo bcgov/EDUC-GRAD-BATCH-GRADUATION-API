@@ -18,12 +18,10 @@ public class TvrRunBatchPerformanceWriter implements ItemWriter<GraduationStuden
     
     @Override
     public void write(List<? extends GraduationStudentRecord> list) throws Exception {
-        LOGGER.info("*** Recording Algorithm Processed Data");
         if(!list.isEmpty()) {
         	GraduationStudentRecord gradStatus = list.get(0);
 	        summaryDTO.increment(gradStatus.getProgram());
-            LOGGER.info("*** {} Partition * Number of Students Left : {}",Thread.currentThread().getName(),summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
-            LOGGER.info("--------------------------------------------------------------------------------------------------------------------");
+            LOGGER.info("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }
     }
 

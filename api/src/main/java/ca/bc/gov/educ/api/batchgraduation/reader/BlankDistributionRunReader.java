@@ -26,7 +26,7 @@ public class BlankDistributionRunReader extends BlankDistributionRunBaseReader {
         
         if (nxtCredentialForProcessing < credentialList.size()) {
             nextCredential = credentialList.get(nxtCredentialForProcessing);
-            LOGGER.info("*** Found Credential[{}]- in total {}", nxtCredentialForProcessing + 1, summaryDTO.getReadCount());
+            LOGGER.info("Cred[{}]-Tot-{}", nxtCredentialForProcessing + 1, summaryDTO.getReadCount());
             nxtCredentialForProcessing++;
         }else {
         	aggregate("blankDistributionSummaryDTO");

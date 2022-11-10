@@ -29,9 +29,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RestUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestUtils.class);
-    private static final String STUDENT_READ = "*** {} Partition  - Retrieving  * STUDENT ID: * {}";
-    private static final String STUDENT_PROCESS = "*** {} Partition  - Processing  * STUDENT ID: * {}";
-    private static final String STUDENT_PROCESSED = "*** {} Partition  * Processed student[{}] * Student ID: {} in total {}";
+    private static final String STUDENT_READ = "R:{}";
+    private static final String STUDENT_PROCESS = "P:{}";
+    private static final String STUDENT_PROCESSED = "D:{} {} of {}";
     private static final String MERGE_MSG="Merge and Upload Success {}";
     private final EducGradBatchGraduationApiConstants constants;
 
@@ -58,7 +58,7 @@ public class RestUtils {
 
     @Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
     private ResponseObj getResponseObj() {
-        LOGGER.info("Fetching the access token from KeyCloak API");
+        LOGGER.info("Fetch token");
         HttpHeaders httpHeadersKC = EducGradBatchGraduationApiUtils.getHeaders(
                 constants.getUserName(), constants.getPassword());
         MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
@@ -72,7 +72,7 @@ public class RestUtils {
     }
 
     public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
-        LOGGER.error("Could not contact {} after many attempts.", constants.getTokenUrl(), exception);
+        LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
         return null;
     }
 
@@ -123,12 +123,12 @@ public class RestUtils {
     }
 
     public BatchGraduationStudentRecord getStudentForBatchInput(UUID studentID, AlgorithmSummaryDTO summary) {
-        LOGGER.info(STUDENT_READ,Thread.currentThread().getName(),studentID);
+        LOGGER.debug(STUDENT_READ,studentID);
         try {
             return this.runGetStudentForBatchInput(studentID, summary.getAccessToken());
         } catch(Exception e) {
             summary.updateError(studentID,"GRAD-STUDENT-API IS DOWN","GRAD Student API is unavailable at this moment");
-            LOGGER.info("*** {} Partition  - Retrieving Failed  * STUDENT ID: * {} Error Count: {}",Thread.currentThread().getName(),studentID,summary.getErrors().size());
+            LOGGER.info("GET Failed STU-ID:{} Errors:{}",studentID,summary.getErrors().size());
             return null;
         }
     }
@@ -177,7 +177,7 @@ public class RestUtils {
     }
 
     public GraduationStudentRecord processStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
-        LOGGER.info(STUDENT_PROCESS,Thread.currentThread().getName(),item.getStudentID());
+        LOGGER.debug(STUDENT_PROCESS,item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         try {
             String accessToken = summary.getAccessToken();
@@ -187,20 +187,20 @@ public class RestUtils {
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
                 return null;
             }
-            LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+            LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
             summary.getSuccessfulStudentIDs().add(item.getStudentID());
             summary.getSchoolList().add(item.getSchoolOfRecord());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count : {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
+            LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
             return null;
         }
     }
 
     public GraduationStudentRecord processProjectedGradStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
-        LOGGER.info(STUDENT_PROCESS,Thread.currentThread().getName(),item.getStudentID());
+        LOGGER.info(STUDENT_PROCESS,item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         try {
             String accessToken = summary.getAccessToken();
@@ -210,14 +210,14 @@ public class RestUtils {
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
                 return null;
             }
-            LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+            LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
             summary.getSuccessfulStudentIDs().add(item.getStudentID());
             summary.getSchoolList().add(item.getSchoolOfRecord());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("*** {} Partition  - Processing Failed  * STUDENT ID: * {} Error Count: {}",Thread.currentThread().getName(),item.getStudentID(),summary.getErrors().size());
+            LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
             return null;
         }
     }
@@ -255,7 +255,7 @@ public class RestUtils {
     }
 
     public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary) {
-        LOGGER.info(STUDENT_PROCESS,Thread.currentThread().getName(),item.getStudentID());
+        LOGGER.info(STUDENT_PROCESS,item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         String accessToken = summary.getAccessToken();
 
@@ -281,7 +281,7 @@ public class RestUtils {
             }
         }
         summary.getGlobalList().add(item);
-        LOGGER.info(STUDENT_PROCESSED,Thread.currentThread().getName(), summary.getProcessedCount(), item.getStudentID(), summary.getReadCount());
+        LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
         return item;
     }
 

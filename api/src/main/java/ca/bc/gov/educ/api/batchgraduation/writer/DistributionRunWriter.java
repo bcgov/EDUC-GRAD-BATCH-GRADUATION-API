@@ -18,12 +18,10 @@ public class DistributionRunWriter implements ItemWriter<StudentCredentialDistri
     
     @Override
     public void write(List<? extends StudentCredentialDistribution> list) throws Exception {
-        LOGGER.info("*** Recording Distribution Processed Data");
         if(!list.isEmpty()) {
         	StudentCredentialDistribution cred = list.get(0);
 	        summaryDTO.increment(cred.getPaperType());
-            LOGGER.info("*** {} Partition * Number of Items Left : {}",Thread.currentThread().getName(),summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
-            LOGGER.info("--------------------------------------------------------------------------------------------------------------------");
+            LOGGER.info("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }
     }
 

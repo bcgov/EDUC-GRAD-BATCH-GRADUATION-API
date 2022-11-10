@@ -18,11 +18,9 @@ public class PsiDistributionRunWriter implements ItemWriter<PsiCredentialDistrib
     
     @Override
     public void write(List<? extends PsiCredentialDistribution> list) throws Exception {
-        LOGGER.info("*** Recording Distribution Processed Data");
         if(!list.isEmpty()) {
 	        summaryDTO.increment("YED4");
-            LOGGER.info("*** {} Partition * Number of Items Left : {}",Thread.currentThread().getName(),summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
-            LOGGER.info("--------------------------------------------------------------------------------------------------------------------");
+            LOGGER.info("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }
     }
 
