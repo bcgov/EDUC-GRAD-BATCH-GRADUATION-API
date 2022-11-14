@@ -7,11 +7,11 @@ import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.partition.support.SimplePartitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,15 +21,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class SpcRegGradAlgPartitioner extends SimplePartitioner {
+public class SpcRegGradAlgPartitioner extends BasePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpcRegGradAlgPartitioner.class);
 
     @Value("#{stepExecution.jobExecution}")
-    JobExecution context;
+    JobExecution jobExecution;
 
     @Autowired
     RestUtils restUtils;
+
+    public SpcRegGradAlgPartitioner() {
+        super();
+        this.stepType = "Normal";
+    }
+
+    @Override
+    public JobExecution getJobExecution() {
+        return jobExecution;
+    }
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
@@ -38,7 +48,7 @@ public class SpcRegGradAlgPartitioner extends SimplePartitioner {
         if (res != null) {
             accessToken = res.getAccess_token();
         }
-        JobParameters jobParameters = context.getJobParameters();
+        JobParameters jobParameters = jobExecution.getJobParameters();
         String searchRequest = jobParameters.getString("searchRequest");
         StudentSearchRequest req = null;
         try {
@@ -47,6 +57,7 @@ public class SpcRegGradAlgPartitioner extends SimplePartitioner {
             e.printStackTrace();
         }
         List<GraduationStudentRecord> studentList = restUtils.getStudentsForSpecialGradRun(req,accessToken);
+        initializeTotalSummaryDTO("spcRunAlgSummaryDTO", studentList.size(), StringUtils.equals(stepType, "Retry"));
 
         if(!studentList.isEmpty()) {
             int partitionSize = studentList.size()/gridSize + 1;
