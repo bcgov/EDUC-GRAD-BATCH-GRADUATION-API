@@ -168,7 +168,7 @@ public class RestUtilsTest {
         graduationStatus.setPen(pen);
 
         GraduationStudentRecordSearchResult res = new GraduationStudentRecordSearchResult();
-        res.setGraduationStudentRecords(Arrays.asList(graduationStatus));
+        res.setStudentIDs(Arrays.asList(graduationStatus.getStudentID()));
 
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
@@ -182,7 +182,7 @@ public class RestUtilsTest {
 
         var result = this.restUtils.getStudentsForSpecialGradRun(req, "123");
         assertThat(result).isNotNull();
-        assertThat(result.get(0).getPen()).isEqualTo(pen);
+        assertThat(result.get(0)).isEqualTo(studentID);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class RestUtilsTest {
         graduationStatus.setPen(pen);
 
         GraduationStudentRecordSearchResult res = new GraduationStudentRecordSearchResult();
-        res.setGraduationStudentRecords(Arrays.asList(graduationStatus));
+        res.setStudentIDs(Arrays.asList(graduationStatus.getStudentID()));
 
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);

@@ -164,7 +164,7 @@ public class RestUtils {
                 .retrieve().bodyToMono(GraduationStudentRecord.class).block();
     }
 
-    public List<GraduationStudentRecord> getStudentsForSpecialGradRun(StudentSearchRequest req,String accessToken) {
+    public List<UUID> getStudentsForSpecialGradRun(StudentSearchRequest req,String accessToken) {
         UUID correlationID = UUID.randomUUID();
         GraduationStudentRecordSearchResult res = this.webClient.post()
                 .uri(constants.getGradStudentApiStudentForSpcGradListUrl())
@@ -173,7 +173,7 @@ public class RestUtils {
                 .retrieve()
                 .bodyToMono(GraduationStudentRecordSearchResult.class)
                 .block();
-        return res != null ?res.getGraduationStudentRecords():new ArrayList<>();
+        return res != null ?res.getStudentIDs() : new ArrayList<>();
     }
 
     public GraduationStudentRecord processStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {

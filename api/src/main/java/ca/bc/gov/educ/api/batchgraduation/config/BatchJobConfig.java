@@ -317,13 +317,13 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorSpcRegGrad() {
+    public ItemProcessor<UUID,GraduationStudentRecord> itemProcessorSpcRegGrad() {
         return new RunSpecialGradAlgorithmProcessor();
     }
 
     @Bean
     @StepScope
-    public ItemReader<GraduationStudentRecord> itemReaderSpcRegGrad() {
+    public ItemReader<UUID> itemReaderSpcRegGrad() {
         return new SpecialProjectedGradRunReader();
     }
 
@@ -354,7 +354,7 @@ public class BatchJobConfig {
     @Bean
     public Step slaveStepSpcRegGrad(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("slaveStepSpcRegGrad")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .<UUID, GraduationStudentRecord>chunk(1)
                 .faultTolerant()
                 .skip(SQLException.class)
                 .skip(TransactionException.class)
@@ -384,13 +384,13 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ItemProcessor<GraduationStudentRecord,GraduationStudentRecord> itemProcessorSpcTvrRun() {
+    public ItemProcessor<UUID,GraduationStudentRecord> itemProcessorSpcTvrRun() {
         return new RunSpecialProjectedGradAlgorithmProcessor();
     }
 
     @Bean
     @StepScope
-    public ItemReader<GraduationStudentRecord> itemReaderSpcTvrRun() {
+    public ItemReader<UUID> itemReaderSpcTvrRun() {
         return new SpecialGradRunStudentReader();
     }
 
@@ -403,7 +403,7 @@ public class BatchJobConfig {
     @Bean
     public Step slaveStepSpcTvrRun(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("slaveStepSpcTvrRun")
-                .<GraduationStudentRecord, GraduationStudentRecord>chunk(1)
+                .<UUID, GraduationStudentRecord>chunk(1)
                 .faultTolerant()
                 .skip(SQLException.class)
                 .skip(TransactionException.class)

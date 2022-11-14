@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -16,10 +15,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SpcRegGradAlgPartitioner extends BasePartitioner {
 
@@ -56,12 +52,12 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        List<GraduationStudentRecord> studentList = restUtils.getStudentsForSpecialGradRun(req,accessToken);
+        List<UUID> studentList = restUtils.getStudentsForSpecialGradRun(req,accessToken);
         initializeTotalSummaryDTO("spcRunAlgSummaryDTO", studentList.size(), StringUtils.equals(stepType, "Retry"));
 
         if(!studentList.isEmpty()) {
             int partitionSize = studentList.size()/gridSize + 1;
-            List<List<GraduationStudentRecord>> partitions = new LinkedList<>();
+            List<List<UUID>> partitions = new LinkedList<>();
             for (int i = 0; i < studentList.size(); i += partitionSize) {
                 partitions.add(studentList.subList(i, Math.min(i + partitionSize, studentList.size())));
             }
@@ -70,7 +66,7 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
                 ExecutionContext executionContext = new ExecutionContext();
                 AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
                 summaryDTO.initializeProgramCountMap();
-                List<GraduationStudentRecord> data = partitions.get(i);
+                List<UUID> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());
                 executionContext.put("summary", summaryDTO);
