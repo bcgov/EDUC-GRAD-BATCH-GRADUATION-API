@@ -59,7 +59,7 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
         }
 
         // display Summary Details
-        LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
+        LOGGER.info("Records read   : {}", summaryDTO.getTotalReadCount());
         LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
         LOGGER.info(" --------------------------------------------------------------------------------------");
         LOGGER.info("Errors:{}", summaryDTO.getErrors().size());

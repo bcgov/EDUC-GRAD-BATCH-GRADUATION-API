@@ -3,20 +3,35 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.partition.support.SimplePartitioner;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
-public class RegGradAlgPartitioner extends SimplePartitioner {
+public class RegGradAlgPartitioner extends BasePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegGradAlgPartitioner.class);
 
     @Autowired
     RestUtils restUtils;
+
+    @Value("#{stepExecution.jobExecution}")
+    JobExecution jobExecution;
+
+    public RegGradAlgPartitioner(String stepType) {
+        super();
+        this.stepType = stepType;
+    }
+
+    @Override
+    public JobExecution getJobExecution() {
+        return jobExecution;
+    }
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
@@ -26,6 +41,7 @@ public class RegGradAlgPartitioner extends SimplePartitioner {
             accessToken = res.getAccess_token();
         }
         List<UUID> studentList = restUtils.getStudentsForAlgorithm(accessToken);
+        initializeTotalSummaryDTO("regGradAlgSummaryDTO", studentList.size(), StringUtils.equals(stepType, "Retry"));
 
         if(!studentList.isEmpty()) {
             int partitionSize = studentList.size()/gridSize + 1;
@@ -52,4 +68,6 @@ public class RegGradAlgPartitioner extends SimplePartitioner {
         LOGGER.info("No Students Found for Processing");
         return new HashMap<>();
     }
+
+
 }

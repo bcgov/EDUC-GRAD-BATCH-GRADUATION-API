@@ -87,7 +87,7 @@ public class BatchJobConfig {
     @Bean
     public Step masterStepErrorRegGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepErrorRegGrad")
-                .partitioner(graduationJobErrorStep(stepBuilderFactory, skipListener).getName(), partitionerRegGrad())
+                .partitioner(graduationJobErrorStep(stepBuilderFactory, skipListener).getName(), partitionerRegGradRetry())
                 .step(graduationJobErrorStep(stepBuilderFactory, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants))
@@ -97,7 +97,7 @@ public class BatchJobConfig {
     @Bean
     public Step masterStepErrorRegGradRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepErrorRegGradRetry")
-                .partitioner(graduationJobErrorRetryStep(stepBuilderFactory, skipListener).getName(), partitionerRegGrad())
+                .partitioner(graduationJobErrorRetryStep(stepBuilderFactory, skipListener).getName(), partitionerRegGradRetry())
                 .step(graduationJobErrorRetryStep(stepBuilderFactory, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants))
@@ -106,8 +106,15 @@ public class BatchJobConfig {
 
 
     @Bean
+    @StepScope
     public RegGradAlgPartitioner partitionerRegGrad() {
-        return new RegGradAlgPartitioner();
+        return new RegGradAlgPartitioner("Normal");
+    }
+
+    @Bean
+    @StepScope
+    public RegGradAlgPartitioner partitionerRegGradRetry() {
+        return new RegGradAlgPartitioner("Retry");
     }
 
     @Bean
@@ -216,7 +223,7 @@ public class BatchJobConfig {
     @Bean
     public Step masterStepErrorTvrRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepErrorTvrRun")
-                .partitioner(tvrJobErrorStep(stepBuilderFactory,skipListener).getName(), partitionerTvrRun())
+                .partitioner(tvrJobErrorStep(stepBuilderFactory,skipListener).getName(), partitionerTvrRunRetry())
                 .step(tvrJobErrorStep(stepBuilderFactory,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants))
@@ -226,7 +233,7 @@ public class BatchJobConfig {
     @Bean
     public Step masterStepErrorTvrRunRetry(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
         return stepBuilderFactory.get("masterStepErrorTvrRunRetry")
-                .partitioner(tvrJobErrorRetryStep(stepBuilderFactory,skipListener).getName(), partitionerTvrRun())
+                .partitioner(tvrJobErrorRetryStep(stepBuilderFactory,skipListener).getName(), partitionerTvrRunRetry())
                 .step(tvrJobErrorRetryStep(stepBuilderFactory,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants))
@@ -234,8 +241,15 @@ public class BatchJobConfig {
     }
 
     @Bean
+    @StepScope
     public TvrRunPartitioner partitionerTvrRun() {
-        return new TvrRunPartitioner();
+        return new TvrRunPartitioner("Normal");
+    }
+
+    @Bean
+    @StepScope
+    public TvrRunPartitioner partitionerTvrRunRetry() {
+        return new TvrRunPartitioner("Retry");
     }
 
 
