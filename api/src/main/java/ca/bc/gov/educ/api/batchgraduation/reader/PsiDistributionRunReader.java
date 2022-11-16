@@ -26,7 +26,7 @@ public class PsiDistributionRunReader extends PsiDistributionRunBaseReader {
         
         if (nxtCredentialForProcessing < credentialList.size()) {
             nextCredential = credentialList.get(nxtCredentialForProcessing);
-            LOGGER.info("*** Found Credential[{}] - Student ID: {} in total {}", nxtCredentialForProcessing + 1, nextCredential.getPen(), summaryDTO.getReadCount());
+            LOGGER.debug("Cred[{}]-StuID:{} total-{}", nxtCredentialForProcessing + 1, nextCredential.getPen(), summaryDTO.getReadCount());
             nxtCredentialForProcessing++;
         }else {
         	aggregate("psiDistributionSummaryDTO");

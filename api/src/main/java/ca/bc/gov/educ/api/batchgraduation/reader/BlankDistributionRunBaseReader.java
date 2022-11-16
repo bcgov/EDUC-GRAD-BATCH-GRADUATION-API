@@ -40,7 +40,7 @@ public abstract class BlankDistributionRunBaseReader implements ItemReader<Blank
     }
 
     protected void fetchAccessToken() {
-        LOGGER.info("Fetching the access token from KeyCloak API");
+        LOGGER.info("Fetch token");
         ResponseObj res = restUtils.getTokenResponseObject();
         if (res != null) {
             summaryDTO.setAccessToken(res.getAccess_token());

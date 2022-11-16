@@ -18,12 +18,10 @@ public class BlankDistributionRunWriter implements ItemWriter<BlankCredentialDis
     
     @Override
     public void write(List<? extends BlankCredentialDistribution> list) throws Exception {
-        LOGGER.info("*** Recording Distribution Processed Data");
         if(!list.isEmpty()) {
             BlankCredentialDistribution cred = list.get(0);
 	        summaryDTO.increment(cred.getCredentialTypeCode());
-            LOGGER.info("*** {} Partition * Number of Items Left : {}",Thread.currentThread().getName(),summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
-            LOGGER.info("--------------------------------------------------------------------------------------------------------------------");
+            LOGGER.info("Left : {}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }
     }
 

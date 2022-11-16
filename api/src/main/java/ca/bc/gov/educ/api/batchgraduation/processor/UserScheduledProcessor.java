@@ -19,7 +19,7 @@ public class UserScheduledProcessor implements ItemProcessor<UserScheduledJobs, 
     
 	@Override
 	public UserScheduledJobs process(UserScheduledJobs item) throws Exception {
-		LOGGER.info("*** processing = {}", item.getId());
+		LOGGER.info("Processing = {}", item.getId());
 		Task task = new ObjectMapper().readValue(item.getJobParameters(), Task.class);
 		task.setJobIdReference(item.getId());
 		taskDefinition.setTask(task);
