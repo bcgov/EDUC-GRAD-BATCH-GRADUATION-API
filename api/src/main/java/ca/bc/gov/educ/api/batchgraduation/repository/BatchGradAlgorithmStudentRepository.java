@@ -59,14 +59,4 @@ public interface BatchGradAlgorithmStudentRepository extends JpaRepository<Batch
             "group by graduation_program_code\n" +
             "order by graduation_program_code desc", nativeQuery = true)
     List<Object[]> getGraduationProgramCounts( @Param("batchId") Long batchId);
-
-//    @Modifying
-//    @Query(value="insert into BATCH_GRAD_ALG_STUDENT(job_execution_id, graduation_student_record_id, status, create_user, create_date, update_user, update_date) \n" +
-//            "values(:batchId, :studentId, 'STARTED', :username, :currentTime, :username, :currentTime)\n" , nativeQuery = true)
-//    int insert(@Param("batchId") Long batchId, @Param("studentId") UUID studentID, @Param("username") String username, @Param("currentTime") Date currentTime);
-//
-//    @Modifying
-//    @Query(value="insert into BATCH_GRAD_ALG_STUDENT(job_execution_id, graduation_student_record_id, status, create_user, create_date, update_user, update_date) \n" +
-//            "values(:batchId, :studentId, 'STARTED', :username, :currentTime, :username, :currentTime)\n" , nativeQuery = true)
-//    int bulkInsert(List<BatchGradStudentDTO> list);
 }

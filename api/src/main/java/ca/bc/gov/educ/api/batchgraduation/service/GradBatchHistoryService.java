@@ -56,19 +56,9 @@ public class GradBatchHistoryService {
     }
 
     @Transactional
-    public void saveGradAlgorithmStudent(BatchGradAlgorithmStudentEntity entity) {
-        batchGradAlgorithmStudentRepository.save(entity);
+    public BatchGradAlgorithmStudentEntity saveGradAlgorithmStudent(BatchGradAlgorithmStudentEntity entity) {
+        return batchGradAlgorithmStudentRepository.save(entity);
     }
-
-//    @Transactional
-//    public void createGradAlgorithmStudent(List<BatchGradStudentDTO> list) {
-//        batchGradAlgorithmStudentRepository.bulkInsert(list);
-//    }
-//
-//    @Transactional
-//    public void createGradAlgorithmStudent(Long batchId, UUID studentID) {
-//        batchGradAlgorithmStudentRepository.insert(batchId, studentID, EducGradBatchGraduationApiConstants.DEFAULT_CREATED_BY, new Date(System.currentTimeMillis()));
-//    }
 
     @Transactional(readOnly = true)
     public List<BatchGradAlgorithmStudentEntity> getErroredStudents(Long batchId) {  // STARTED or FAILED
@@ -97,6 +87,14 @@ public class GradBatchHistoryService {
             currentEntity.setProgram(program);
             currentEntity.setSchoolOfRecord(schoolOfRecord);
             batchGradAlgorithmStudentRepository.save(currentEntity);
+        } else {
+            BatchGradAlgorithmStudentEntity entity = new BatchGradAlgorithmStudentEntity();
+            entity.setJobExecutionId(batchId);
+            entity.setStudentID(studentID);
+            entity.setProgram(program);
+            entity.setSchoolOfRecord(schoolOfRecord);
+            entity.setStatus(BatchStatusEnum.STARTED.name());
+            batchGradAlgorithmStudentRepository.save(entity);
         }
     }
 
