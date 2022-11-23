@@ -356,8 +356,7 @@ public class GradBatchHistoryServiceTest {
 
         when(batchGradAlgorithmStudentRepository.getGraduationProgramCounts(batchId)).thenReturn(gradCounts);
         Map<String, Integer> response = gradBatchHistoryService.getGraduationProgramCountsForBatchRunSummary(batchId);
-        assertThat(response).hasSize(4);
-        assertThat(response).containsEntry("2018-EN", Integer.valueOf(10));
+        assertThat(response).hasSize(4).containsEntry("2018-EN", Integer.valueOf(10));
     }
 
 }
