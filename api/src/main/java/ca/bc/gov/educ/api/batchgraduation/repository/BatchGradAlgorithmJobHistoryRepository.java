@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,5 +13,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 public interface BatchGradAlgorithmJobHistoryRepository extends JpaRepository<BatchGradAlgorithmJobHistoryEntity, UUID> {
 
     List<BatchGradAlgorithmJobHistoryEntity> findAll();
+
+    Optional<BatchGradAlgorithmJobHistoryEntity> findByJobExecutionId(Long batchId);
 
 }

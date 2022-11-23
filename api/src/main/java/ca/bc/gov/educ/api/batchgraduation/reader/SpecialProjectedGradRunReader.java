@@ -12,16 +12,12 @@ public class SpecialProjectedGradRunReader extends BaseReader {
     @Override
     public UUID read() throws Exception {
         fetchAccessToken();
-        summaryDTO.setReadCount(studentList.size());
-
         UUID nextStudent = null;
         
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
             LOGGER.debug("Stu[{}]-{}, total-{}", nxtStudentForProcessing + 1, nextStudent, summaryDTO.getReadCount());
             nxtStudentForProcessing++;
-        }else {
-        	aggregate("spcRunAlgSummaryDTO");
         }
         return nextStudent;
     }

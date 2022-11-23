@@ -20,8 +20,6 @@ public class RecalculateStudentReader extends BaseReader {
             nextStudent = studentList.get(nxtStudentForProcessing);
             LOGGER.info("StudID:{} - {} of {}", nextStudent, nxtStudentForProcessing + 1, summaryDTO.getReadCount());
             nxtStudentForProcessing++;
-        }else {
-        	aggregate("regGradAlgSummaryDTO");
         }
         return nextStudent;
     }

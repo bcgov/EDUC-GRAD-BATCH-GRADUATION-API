@@ -13,14 +13,11 @@ public class RecalculateStudentErrorReader extends BaseReader {
     public UUID read() throws Exception {
         fetchAccessToken();
         UUID nextStudent = null;
-        summaryDTO.setReadCount(studentList.size());
+
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
             LOGGER.info("Error - StudID:{} - {} of {}", nextStudent, nxtStudentForProcessing + 1, summaryDTO.getReadCount());
             nxtStudentForProcessing++;
-        }else {
-            summaryDTO.setReadCount(0);
-        	aggregate("regGradAlgSummaryDTO");
         }
         return nextStudent;
     }

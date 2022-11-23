@@ -19,8 +19,9 @@ public class TaskSchedulerConfig {
 
     @Bean(name="lockableTaskScheduler")
     public LockableTaskScheduler getScheduler() {
+        // ShedLock config: lockAtMostFor = 4 hours, lockAtLeastFor = 10 seconds
         LockConfigurationExtractor lockConfigurationExtractor = (task) ->  Optional.
-                of(new LockConfiguration(Instant.now(), "userScheduledJob", Duration.ofSeconds(60), Duration.ofSeconds(10)));
+                of(new LockConfiguration(Instant.now(), "userScheduledJob", Duration.ofHours(2), Duration.ofSeconds(10)));
 
         LockManager lockManager = new DefaultLockManager(lockProvider, lockConfigurationExtractor);
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();

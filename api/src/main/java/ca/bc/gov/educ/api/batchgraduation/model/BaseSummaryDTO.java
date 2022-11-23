@@ -5,13 +5,12 @@ import lombok.Data;
 
 @Data
 public class BaseSummaryDTO {
-    // Total
     private Long batchId;
-    private long totalReadCount = 0L;
 
-    // Partition
+    // partition
     private long readCount = 0L;
     private long processedCount = 0L;
+    private long erroredCount = 0L;
 
     private String exception;
 

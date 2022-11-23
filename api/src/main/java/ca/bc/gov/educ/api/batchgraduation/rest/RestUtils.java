@@ -188,8 +188,6 @@ public class RestUtils {
                 return null;
             }
             LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
-            summary.getSuccessfulStudentIDs().add(item.getStudentID());
-            summary.getSchoolList().add(item.getSchoolOfRecord());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
@@ -211,8 +209,6 @@ public class RestUtils {
                 return null;
             }
             LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
-            summary.getSuccessfulStudentIDs().add(item.getStudentID());
-            summary.getSchoolList().add(item.getSchoolOfRecord());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
