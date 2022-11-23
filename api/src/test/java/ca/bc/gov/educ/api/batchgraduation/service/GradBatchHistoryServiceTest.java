@@ -20,7 +20,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.math.BigDecimal;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -119,7 +118,13 @@ public class GradBatchHistoryServiceTest {
         batchGradAlgorithmStudentEntity.setStatus("STARTED");
 
         when(batchGradAlgorithmStudentRepository.saveAll(Arrays.asList(batchGradAlgorithmStudentEntity))).thenReturn(Arrays.asList(batchGradAlgorithmStudentEntity));
-        gradBatchHistoryService.saveGradAlgorithmStudents(Arrays.asList(batchGradAlgorithmStudentEntity));
+        boolean isExceptionThrown = false;
+        try {
+            gradBatchHistoryService.saveGradAlgorithmStudents(Arrays.asList(batchGradAlgorithmStudentEntity));
+        } catch (Exception e) {
+            isExceptionThrown = true;
+        }
+        assertThat(isExceptionThrown).isFalse();
     }
 
     @Test
@@ -215,7 +220,13 @@ public class GradBatchHistoryServiceTest {
 
         when(batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(studentId, batchId)).thenReturn(Optional.empty());
         when(batchGradAlgorithmStudentRepository.save(batchGradAlgorithmStudentEntity)).thenReturn(batchGradAlgorithmStudentEntity);
-        gradBatchHistoryService.saveBatchAlgorithmStudent(batchId, studentId, batchGradAlgorithmStudentEntity.getProgram(), batchGradAlgorithmStudentEntity.getSchoolOfRecord());
+        boolean isExceptionThrown = false;
+        try {
+            gradBatchHistoryService.saveBatchAlgorithmStudent(batchId, studentId, batchGradAlgorithmStudentEntity.getProgram(), batchGradAlgorithmStudentEntity.getSchoolOfRecord());
+        } catch (Exception e) {
+            isExceptionThrown = true;
+        }
+        assertThat(isExceptionThrown).isFalse();
     }
 
     @Test
@@ -231,7 +242,13 @@ public class GradBatchHistoryServiceTest {
 
         when(batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(studentId, batchId)).thenReturn(Optional.of(batchGradAlgorithmStudentEntity));
         when(batchGradAlgorithmStudentRepository.save(batchGradAlgorithmStudentEntity)).thenReturn(batchGradAlgorithmStudentEntity);
-        gradBatchHistoryService.saveBatchAlgorithmStudent(batchId, studentId, batchGradAlgorithmStudentEntity.getProgram(), batchGradAlgorithmStudentEntity.getSchoolOfRecord());
+        boolean isExceptionThrown = false;
+        try {
+            gradBatchHistoryService.saveBatchAlgorithmStudent(batchId, studentId, batchGradAlgorithmStudentEntity.getProgram(), batchGradAlgorithmStudentEntity.getSchoolOfRecord());
+        } catch (Exception e) {
+            isExceptionThrown = true;
+        }
+        assertThat(isExceptionThrown).isFalse();
     }
 
     @Test
@@ -255,7 +272,13 @@ public class GradBatchHistoryServiceTest {
 
         when(batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(studentId, batchId)).thenReturn(Optional.of(batchGradAlgorithmStudentEntity));
         when(batchGradAlgorithmStudentRepository.save(batchGradAlgorithmStudentEntity)).thenReturn(savedEntity);
-        gradBatchHistoryService.updateBatchStatusForStudent(batchId, studentId, BatchStatusEnum.FAILED, "Unexpected Error");
+        boolean isExceptionThrown = false;
+        try {
+            gradBatchHistoryService.updateBatchStatusForStudent(batchId, studentId, BatchStatusEnum.FAILED, "Unexpected Error");
+        } catch (Exception e) {
+            isExceptionThrown = true;
+        }
+        assertThat(isExceptionThrown).isFalse();
     }
 
     @Test
@@ -295,7 +318,14 @@ public class GradBatchHistoryServiceTest {
         Long batchId = 3001L;
         Long oldBatchId = 3000L;
         Mockito.doNothing().when(batchGradAlgorithmStudentRepository).copyAllGradAlgorithmStudents(eq(batchId), eq(oldBatchId), eq(ThreadLocalStateUtil.getCurrentUser()), any(Date.class));
-        gradBatchHistoryService.copyAllStudentsIntoNewBatch(batchId, oldBatchId);
+
+        boolean isExceptionThrown = false;
+        try {
+            gradBatchHistoryService.copyAllStudentsIntoNewBatch(batchId, oldBatchId);
+        } catch (Exception e) {
+            isExceptionThrown = true;
+        }
+        assertThat(isExceptionThrown).isFalse();
     }
 
     @Test
@@ -303,7 +333,14 @@ public class GradBatchHistoryServiceTest {
         Long batchId = 3001L;
         Long oldBatchId = 3000L;
         Mockito.doNothing().when(batchGradAlgorithmStudentRepository).copyGradAlgorithmErroredStudents(eq(batchId), eq(oldBatchId), eq(ThreadLocalStateUtil.getCurrentUser()), any(Date.class));
-        gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, oldBatchId);
+
+        boolean isExceptionThrown = false;
+        try {
+            gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, oldBatchId);
+        } catch (Exception e) {
+            isExceptionThrown = true;
+        }
+        assertThat(isExceptionThrown).isFalse();
     }
 
     @Test
@@ -320,7 +357,7 @@ public class GradBatchHistoryServiceTest {
         when(batchGradAlgorithmStudentRepository.getGraduationProgramCounts(batchId)).thenReturn(gradCounts);
         Map<String, Integer> response = gradBatchHistoryService.getGraduationProgramCountsForBatchRunSummary(batchId);
         assertThat(response).hasSize(4);
-        assertThat(response.get("2018-EN")).isEqualTo(Integer.valueOf(10));
+        assertThat(response).containsEntry("2018-EN", Integer.valueOf(10));
     }
 
 }
