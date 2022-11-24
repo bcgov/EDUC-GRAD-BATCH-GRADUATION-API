@@ -24,6 +24,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePartitioner.class);
     private static final String RERUN_TYPE = "reRunType";
+    private static final String RUN_BY = "runBy";
     private static final String PREV_BATCH_ID = "previousBatchId";
     private static final String RERUN_ALL = "RERUN_ALL";
     private static final String RERUN_FAILED = "RERUN_FAILED";
@@ -61,11 +62,12 @@ public abstract class BasePartitioner extends SimplePartitioner {
         Long batchId = getJobExecution().getId();
         JobParameters jobParameters = getJobExecution().getJobParameters();
         Long fromBatchId = jobParameters.getLong(PREV_BATCH_ID);
+        String username = jobParameters.getString(RUN_BY);
         if (runType == RunTypeEnum.RERUN_ALL_STUDENTS_FROM_PREVIOUS_JOB) {
-            copyAllStudentsFromPreviousJob(batchId, fromBatchId);
+            copyAllStudentsFromPreviousJob(batchId, fromBatchId, username);
             return getInputDataForAllStudents(batchId);
         } else {
-            copyErroredStudentsFromPreviousJob(batchId, fromBatchId);
+            copyErroredStudentsFromPreviousJob(batchId, fromBatchId, username);
             return getInputDataForErroredStudents(batchId);
         }
     }
@@ -110,6 +112,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
         JobParameters jobParameters = getJobExecution().getJobParameters();
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
+        String username = jobParameters.getString(RUN_BY);
         String studentSearchRequest = jobParameters.getString("searchRequest");
         String status = getJobExecution().getStatus().toString();
         Date startTime = getJobExecution().getStartTime();
@@ -124,6 +127,8 @@ public abstract class BasePartitioner extends SimplePartitioner {
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
         ent.setJobParameters(studentSearchRequest);
+        ent.setCreateUser(username);
+        ent.setUpdateUser(username);
 
         return gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
     }
@@ -133,11 +138,11 @@ public abstract class BasePartitioner extends SimplePartitioner {
         gradBatchHistoryService.saveGradAlgorithmJobHistory(entity);
     }
 
-    private void copyAllStudentsFromPreviousJob(Long batchId, Long fromBatchId) {
-        gradBatchHistoryService.copyAllStudentsIntoNewBatch(batchId, fromBatchId);
+    private void copyAllStudentsFromPreviousJob(Long batchId, Long fromBatchId, String username) {
+        gradBatchHistoryService.copyAllStudentsIntoNewBatch(batchId, fromBatchId, username);
     }
 
-    private void copyErroredStudentsFromPreviousJob(Long batchId, Long fromBatchId) {
-        gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, fromBatchId);
+    private void copyErroredStudentsFromPreviousJob(Long batchId, Long fromBatchId, String username) {
+        gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, fromBatchId, username);
     }
 }

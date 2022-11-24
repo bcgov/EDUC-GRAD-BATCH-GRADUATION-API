@@ -6,7 +6,6 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -317,11 +316,12 @@ public class GradBatchHistoryServiceTest {
     public void testGetCopyAllStudentsIntoNewBatch() {
         Long batchId = 3001L;
         Long oldBatchId = 3000L;
-        Mockito.doNothing().when(batchGradAlgorithmStudentRepository).copyAllGradAlgorithmStudents(eq(batchId), eq(oldBatchId), eq(ThreadLocalStateUtil.getCurrentUser()), any(Date.class));
+        String username = "TestUser";
+        Mockito.doNothing().when(batchGradAlgorithmStudentRepository).copyAllGradAlgorithmStudents(eq(batchId), eq(oldBatchId), eq(username), any(Date.class));
 
         boolean isExceptionThrown = false;
         try {
-            gradBatchHistoryService.copyAllStudentsIntoNewBatch(batchId, oldBatchId);
+            gradBatchHistoryService.copyAllStudentsIntoNewBatch(batchId, oldBatchId, username);
         } catch (Exception e) {
             isExceptionThrown = true;
         }
@@ -332,11 +332,12 @@ public class GradBatchHistoryServiceTest {
     public void testGetCopyErroredStudentsIntoNewBatch() {
         Long batchId = 3001L;
         Long oldBatchId = 3000L;
-        Mockito.doNothing().when(batchGradAlgorithmStudentRepository).copyGradAlgorithmErroredStudents(eq(batchId), eq(oldBatchId), eq(ThreadLocalStateUtil.getCurrentUser()), any(Date.class));
+        String username = "TestUser";
+        Mockito.doNothing().when(batchGradAlgorithmStudentRepository).copyGradAlgorithmErroredStudents(eq(batchId), eq(oldBatchId), eq(username), any(Date.class));
 
         boolean isExceptionThrown = false;
         try {
-            gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, oldBatchId);
+            gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, oldBatchId, username);
         } catch (Exception e) {
             isExceptionThrown = true;
         }

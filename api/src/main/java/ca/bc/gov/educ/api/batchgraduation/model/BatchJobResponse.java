@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Data
-public class SpecialJobResponse {
+public class BatchJobResponse {
     private Long batchId;
     private Date startTime;
     private String status;
@@ -17,6 +17,5 @@ public class SpecialJobResponse {
     private String transmissionType;
     private String localDownload;
 
-    //
     private String exception;
 }

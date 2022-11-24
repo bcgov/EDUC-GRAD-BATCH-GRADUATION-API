@@ -14,6 +14,7 @@ import java.util.Date;
 public abstract class BaseDistributionPartitioner extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseDistributionPartitioner.class);
+    private static final String RUN_BY = "runBy";
 
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
@@ -25,6 +26,7 @@ public abstract class BaseDistributionPartitioner extends SimplePartitioner {
         JobParameters jobParameters = getJobExecution().getJobParameters();
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
+        String username = jobParameters.getString(RUN_BY);
         String studentSearchRequest = jobParameters.getString("searchRequest");
         String status = getJobExecution().getStatus().toString();
         Date startTime = getJobExecution().getStartTime();
@@ -39,6 +41,8 @@ public abstract class BaseDistributionPartitioner extends SimplePartitioner {
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
         ent.setJobParameters(studentSearchRequest);
+        ent.setCreateUser(username);
+        ent.setUpdateUser(username);
 
         return gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
     }
