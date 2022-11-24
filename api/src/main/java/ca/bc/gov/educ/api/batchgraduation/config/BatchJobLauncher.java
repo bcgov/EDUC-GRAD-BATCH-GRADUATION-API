@@ -66,7 +66,7 @@ public class BatchJobLauncher {
     private static final String ERROR_MSG = "Error {}";
 
     @Scheduled(cron = "${batch.regalg.cron}")
-    @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
+    @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "20s", lockAtMostFor = "1200m")
     public void runRegularGradAlgorithm() {
         LOGGER.info(BATCH_STARTED);
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -86,7 +86,7 @@ public class BatchJobLauncher {
     }
 
     @Scheduled(cron = "${batch.tvrrun.cron}")
-    @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
+    @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "20s", lockAtMostFor = "1200m")
     public void runTranscriptVerificationReportProcess() {
         LOGGER.info(BATCH_STARTED);
         JobParametersBuilder builder = new JobParametersBuilder();
@@ -106,7 +106,7 @@ public class BatchJobLauncher {
     }
 
     @Scheduled(cron = "${batch.distrun.cron}")
-    @SchedulerLock(name = "DistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "60m")
+    @SchedulerLock(name = "DistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
     public void runMonthlyDistributionProcess() {
         LOGGER.info(BATCH_STARTED);
         JobParametersBuilder builder = new JobParametersBuilder();

@@ -74,7 +74,6 @@ public class TvrRunJobCompletionNotificationListenerTest {
         AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
         summaryDTO.setAccessToken("123");
         summaryDTO.setBatchId(121L);
-        summaryDTO.setSchoolList(new HashSet<>());
         summaryDTO.setProcessedCount(10);
         summaryDTO.setErrors(new HashMap<>());
         jobContext.put("summaryDTO", summaryDTO);
@@ -127,7 +126,6 @@ public class TvrRunJobCompletionNotificationListenerTest {
         AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
         summaryDTO.setAccessToken("123");
         summaryDTO.setBatchId(121L);
-        summaryDTO.setSchoolList(new HashSet<>());
         summaryDTO.setProcessedCount(10);
         ProcessError er = new ProcessError();
         er.setReason("ERE");

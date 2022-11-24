@@ -16,16 +16,24 @@ public class EducGradBatchGraduationApiConstants {
     public static final String API_VERSION = "v1";
     public static final String CORRELATION_ID = "correlationID";
     public static final String GRAD_BATCH_API_ROOT_MAPPING = "/api/" + API_VERSION + "/batch";
+
+    // Manual Run
     public static final String EXECUTE_REG_GRAD_BATCH_JOB = "/executereggradbatchjob";
     public static final String EXECUTE_TVR_RUN_BATCH_JOB = "/executetvrrunbatchjob";
     public static final String EXECUTE_DIS_RUN_BATCH_JOB = "/executedisrunbatchjob";
     public static final String EXECUTE_YEARLY_DIS_RUN_BATCH_JOB = "/executeyearlydisrunbatchjob";
-    public static final String EXECUTE_SPECIALIZED_PSI_USER_REQ_RUNS = "/executepsireportbatchjob/{transmissionType}";
-    public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
+
+    // Special Run
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
     public static final String EXECUTE_SPECIALIZED_TVR_RUNS = "/tvrspecialrun";
     public static final String EXECUTE_SPECIALIZED_USER_REQ_RUNS = "/userrequestdisrun/{credentialType}";
     public static final String EXECUTE_SPECIALIZED_BLANK_USER_REQ_RUNS = "/userrequestblankdisrun/{credentialType}";
+    public static final String EXECUTE_SPECIALIZED_PSI_USER_REQ_RUNS = "/executepsireportbatchjob/{transmissionType}";
+
+    // Re-Run
+    public static final String EXECUTE_RE_RUNS_ALL = "/rerun/all/{batchId}";
+    public static final String EXECUTE_RE_RUNS_FAILED = "/rerun/failed/{batchId}";
+    public static final String EXECUTE_REGEN_SCHOOL_REPORTS = "/regenerate/school-report/{batchId}";
 
     public static final String BATCH_JOB_TYPES_MAPPING = "/batchjobtype";
     public static final String BATCH_JOB_TYPE_MAPPING = "/batchjobtype/{batchJobTypeCode}";
@@ -40,6 +48,8 @@ public class EducGradBatchGraduationApiConstants {
 
     public static final String PROCESSING_LIST = "/processing/all";
     public static final String UPDATE_ENABLED = "/processing/toggle/{jobType}";
+
+    public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
 
     public static final String UPDATE_PARAM = "/parameters";
 

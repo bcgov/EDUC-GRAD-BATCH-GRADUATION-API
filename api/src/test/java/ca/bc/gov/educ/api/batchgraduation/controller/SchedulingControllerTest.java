@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskDefinition;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
@@ -38,6 +39,9 @@ public class SchedulingControllerTest {
 
     @Mock
     GradDashboardService gradDashboardService;
+
+    @MockBean
+    GradBatchHistoryService gradBatchHistoryService;
 
     @Mock
     private TaskDefinition taskDefinition;

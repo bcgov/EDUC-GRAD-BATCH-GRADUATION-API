@@ -9,9 +9,9 @@ import java.util.UUID;
 
 @Data
 @Entity
-@Table(name = "BATCH_GRAD_ALG_ERR_HISTORY")
+@Table(name = "BATCH_GRAD_ALG_STUDENT")
 @EqualsAndHashCode(callSuper=false)
-public class BatchGradAlgorithmErrorHistoryEntity extends BaseEntity {
+public class BatchGradAlgorithmStudentEntity extends BaseEntity {
    
 	@Id
 	@GeneratedValue(generator = "UUID")
@@ -19,7 +19,7 @@ public class BatchGradAlgorithmErrorHistoryEntity extends BaseEntity {
 		name = "UUID",
 		strategy = "org.hibernate.id.UUIDGenerator"
 	)
-	@Column(name = "BATCH_GRAD_ALG_ERR_HISTORY_ID", nullable = false)
+	@Column(name = "BATCH_GRAD_ALG_STUDENT_ID", nullable = false)
     private UUID id; 
 	
 	@Column(name = "JOB_EXECUTION_ID", nullable = false)
@@ -27,6 +27,15 @@ public class BatchGradAlgorithmErrorHistoryEntity extends BaseEntity {
 	
 	@Column(name = "GRADUATION_STUDENT_RECORD_ID", nullable = false)
 	private UUID studentID;
+
+	@Column(name = "GRADUATION_PROGRAM_CODE", nullable = true)
+	private String program;
+
+	@Column(name = "SCHOOL_OF_RECORD", nullable = true)
+	private String schoolOfRecord;
+
+	@Column(name = "STATUS", nullable = true)
+	private String status;
 	
 	@Column(name = "ERROR", nullable = true)
     private String error;

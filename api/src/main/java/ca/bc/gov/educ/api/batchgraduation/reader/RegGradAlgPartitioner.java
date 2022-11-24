@@ -1,9 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
+import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -23,9 +24,8 @@ public class RegGradAlgPartitioner extends BasePartitioner {
     @Value("#{stepExecution.jobExecution}")
     JobExecution jobExecution;
 
-    public RegGradAlgPartitioner(String stepType) {
+    public RegGradAlgPartitioner() {
         super();
-        this.stepType = stepType;
     }
 
     @Override
@@ -35,15 +35,23 @@ public class RegGradAlgPartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        ResponseObj res = restUtils.getTokenResponseObject();
-        String accessToken = null;
-        if (res != null) {
-            accessToken = res.getAccess_token();
+        initializeRunType();
+        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
+        List<UUID> studentList;
+        if (runType == RunTypeEnum.NORMAL_JOB_PROCESS) {
+            ResponseObj res = restUtils.getTokenResponseObject();
+            String accessToken = null;
+            if (res != null) {
+                accessToken = res.getAccess_token();
+            }
+            studentList = restUtils.getStudentsForAlgorithm(accessToken);
+        } else {
+            studentList = getInputDataFromPreviousJob();
         }
-        List<UUID> studentList = restUtils.getStudentsForAlgorithm(accessToken);
-        initializeTotalSummaryDTO("regGradAlgSummaryDTO", studentList.size(), StringUtils.equals(stepType, "Retry"));
-
+        createTotalSummaryDTO("regGradAlgSummaryDTO");
+        updateBatchJobHistory(jobHistory, Long.valueOf(studentList.size()));
         if(!studentList.isEmpty()) {
+            saveInputData(studentList);
             int partitionSize = studentList.size()/gridSize + 1;
             List<List<UUID>> partitions = new LinkedList<>();
             for (int i = 0; i < studentList.size(); i += partitionSize) {
@@ -53,7 +61,6 @@ public class RegGradAlgPartitioner extends BasePartitioner {
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-                summaryDTO.initializeProgramCountMap();
                 List<UUID> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

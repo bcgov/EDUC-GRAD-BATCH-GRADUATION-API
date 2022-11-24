@@ -18,7 +18,7 @@ public class RestWebClient {
 
     public RestWebClient() {
         this.httpClient = HttpClient.create(ConnectionProvider.create("batch-api")).compress(true)
-                .resolver(spec -> spec.queryTimeout(Duration.ofMillis(200)).trace("DNS", LogLevel.TRACE));
+                .resolver(spec -> spec.queryTimeout(Duration.ofSeconds(5)).trace("DNS", LogLevel.TRACE));
         this.httpClient.warmup().block();
     }
 
