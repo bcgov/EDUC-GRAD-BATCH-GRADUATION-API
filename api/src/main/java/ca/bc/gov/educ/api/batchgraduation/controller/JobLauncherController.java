@@ -8,6 +8,7 @@ import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
+import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -50,6 +51,7 @@ public class JobLauncherController {
     private static final String JOB_TYPE="jobType";
     private static final String SEARCH_REQUEST = "searchRequest";
     private static final String RERUN_TYPE = "reRunType";
+    private static final String RUN_BY = "runBy";
     private static final String PREV_BATCH_ID = "previousBatchId";
     private static final String MANUAL = "MANUAL";
     private static final String TVRRUN = "TVRRUN";
@@ -89,11 +91,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Manual Reg Grad Job", description = "Run Manual Reg Grad Job", tags = { "Reg Grad" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchRegGradJob() {
+    public ResponseEntity<BatchJobResponse> launchRegGradJob() {
         logger.debug("launchRegGradJob");
-        SpecialJobResponse response = new SpecialJobResponse();
+        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, REGALG);
         response.setJobType(REGALG);
@@ -117,11 +120,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Manual TVR Job", description = "Run Manual TVR Job", tags = { "TVR" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchTvrRunJob() {
+    public ResponseEntity<BatchJobResponse> launchTvrRunJob() {
         logger.debug("launchTvrRunJob");
-        SpecialJobResponse response = new SpecialJobResponse();
+        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
         response.setJobType(TVRRUN);
@@ -185,11 +189,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized Regular Grad Runs", description = "Run specialized Regular Grad runs", tags = { "Reg Grad" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchRegGradSpecialJob(@RequestBody StudentSearchRequest studentSearchRequest) {
+    public ResponseEntity<BatchJobResponse> launchRegGradSpecialJob(@RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchRegGradSpecialJob");
-        SpecialJobResponse response = new SpecialJobResponse();
+        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, REGALG);
         response.setJobType(REGALG);
@@ -213,21 +218,21 @@ public class JobLauncherController {
         }
     }
 
-    private void validateInput(SpecialJobResponse response, StudentSearchRequest studentSearchRequest) {
+    private void validateInput(BatchJobResponse response, StudentSearchRequest studentSearchRequest) {
         if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
             response.setException("Please provide at least 1 parameter");
         }
         response.setException(null);
     }
 
-    private void validateInputDisRun(SpecialJobResponse response, StudentSearchRequest studentSearchRequest) {
+    private void validateInputDisRun(BatchJobResponse response, StudentSearchRequest studentSearchRequest) {
         if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
             response.setException("Please provide at least 1 parameter");
         }
         response.setException(null);
     }
 
-    private void validateInputBlankDisRun(SpecialJobResponse response, BlankCredentialRequest blankCredentialRequest) {
+    private void validateInputBlankDisRun(BatchJobResponse response, BlankCredentialRequest blankCredentialRequest) {
         if(blankCredentialRequest.getSchoolOfRecords().isEmpty() || blankCredentialRequest.getCredentialTypeCode().isEmpty()) {
             response.setException("Please provide both parameters");
         }
@@ -238,11 +243,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized TVR runs", tags = { "TVR" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchTvrRunSpecialJob(@RequestBody StudentSearchRequest studentSearchRequest) {
+    public ResponseEntity<BatchJobResponse> launchTvrRunSpecialJob(@RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchTvrRunSpecialJob");
-        SpecialJobResponse response = new SpecialJobResponse();
+        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
         response.setJobType(TVRRUN);
@@ -270,11 +276,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Re-Run REGALG or TVRRUN Job for all students from the given batchJobId", description = "Re-Run REGALG or TVRRUN Job for all students from the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchRerunAll(@PathVariable Long batchId) {
-        SpecialJobResponse response = new SpecialJobResponse();
+    public ResponseEntity<BatchJobResponse> launchRerunAll(@PathVariable Long batchId) {
+        BatchJobResponse response = new BatchJobResponse();
         BatchGradAlgorithmJobHistoryEntity entity = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, entity.getTriggerBy());
         builder.addString(JOB_TYPE,  entity.getJobType());
         response.setJobType(entity.getJobType());
@@ -323,11 +330,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Re-Run REGALG or TVRRUN Job for failed students from the given batchJobId", description = "Re-Run REGALG or TVRRUN Job for failed students from the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchRerunFailed(@PathVariable Long batchId) {
-        SpecialJobResponse response = new SpecialJobResponse();
+    public ResponseEntity<BatchJobResponse> launchRerunFailed(@PathVariable Long batchId) {
+        BatchJobResponse response = new BatchJobResponse();
         BatchGradAlgorithmJobHistoryEntity entity = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, entity.getTriggerBy());
         builder.addString(JOB_TYPE,  entity.getJobType());
         response.setJobType(entity.getJobType());
@@ -396,11 +404,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchDistributionRunJob() {
+    public ResponseEntity<BatchJobResponse> launchDistributionRunJob() {
         logger.debug("launchDistributionRunJob");
-        SpecialJobResponse response = new SpecialJobResponse();
+        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUN);
         response.setJobType(DISTRUN);
@@ -422,11 +431,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchYearlyDistributionRunJob() {
+    public ResponseEntity<BatchJobResponse> launchYearlyDistributionRunJob() {
         logger.debug("launchYearlyDistributionRunJob");
-        SpecialJobResponse response = new SpecialJobResponse();
+        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNYEAREND);
         response.setJobType(DISTRUNYEAREND);
@@ -461,11 +471,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchUserReqDisRunSpecialJob(@PathVariable String credentialType,@RequestBody StudentSearchRequest studentSearchRequest) {
+    public ResponseEntity<BatchJobResponse> launchUserReqDisRunSpecialJob(@PathVariable String credentialType, @RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchUserReqDisRunSpecialJob");
-        SpecialJobResponse response = new SpecialJobResponse();
+        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
         builder.addString(LOCALDOWNLOAD,studentSearchRequest.getLocalDownload());
@@ -498,11 +509,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized User Req Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest,@PathVariable String credentialType) {
+    public ResponseEntity<BatchJobResponse> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest, @PathVariable String credentialType) {
         logger.debug("launchUserReqDisRunSpecialJob");
-        SpecialJobResponse response = new SpecialJobResponse();
+        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
         builder.addString(CREDENTIALTYPE, credentialType);
@@ -534,11 +546,12 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized User Req PSI Runs", description = "Run specialized PSI Distribution runs", tags = { "PSIs" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<SpecialJobResponse> launchUserReqPsiDisRunSpecialJob(@RequestBody PsiCredentialRequest psiCredentialRequest,@PathVariable String transmissionType) {
+    public ResponseEntity<BatchJobResponse> launchUserReqPsiDisRunSpecialJob(@RequestBody PsiCredentialRequest psiCredentialRequest, @PathVariable String transmissionType) {
         logger.debug("launchUserReqPsiDisRunSpecialJob");
-        SpecialJobResponse response = new SpecialJobResponse();
+        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, PSIDISTRUN);
         builder.addString(TRANMISSION_TYPE,transmissionType);
@@ -569,7 +582,7 @@ public class JobLauncherController {
         }
     }
 
-    private void validateInputPsiDisRun(SpecialJobResponse response, PsiCredentialRequest psiCredentialRequest) {
+    private void validateInputPsiDisRun(BatchJobResponse response, PsiCredentialRequest psiCredentialRequest) {
         if(psiCredentialRequest.getPsiCodes().isEmpty() || StringUtils.isBlank(psiCredentialRequest.getPsiYear())) {
             response.setException("Please provide both parameters");
         }

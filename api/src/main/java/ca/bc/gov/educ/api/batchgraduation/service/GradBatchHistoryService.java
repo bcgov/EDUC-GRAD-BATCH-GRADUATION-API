@@ -5,7 +5,6 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
-import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -132,19 +131,19 @@ public class GradBatchHistoryService {
     }
 
     @Transactional
-    public void copyAllStudentsIntoNewBatch(Long newBatchId, Long fromBatchId) {
+    public void copyAllStudentsIntoNewBatch(Long newBatchId, Long fromBatchId, String username) {
         batchGradAlgorithmStudentRepository.copyAllGradAlgorithmStudents(
                 newBatchId, fromBatchId,
-                ThreadLocalStateUtil.getCurrentUser(),
+                username,
                 new Date(System.currentTimeMillis())
         );
     }
 
     @Transactional
-    public void copyErroredStudentsIntoNewBatch(Long newBatchId, Long fromBatchId) {
+    public void copyErroredStudentsIntoNewBatch(Long newBatchId, Long fromBatchId, String username) {
         batchGradAlgorithmStudentRepository.copyGradAlgorithmErroredStudents(
                 newBatchId, fromBatchId,
-                ThreadLocalStateUtil.getCurrentUser(),
+                username,
                 new Date(System.currentTimeMillis())
         );
     }
