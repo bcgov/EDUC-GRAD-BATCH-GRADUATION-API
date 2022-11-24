@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
@@ -17,7 +18,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 
-public class DistributionRunPartitionerYearly extends SimplePartitioner {
+public class DistributionRunPartitionerYearly extends BaseDistributionPartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitionerYearly.class);
 
@@ -31,7 +32,13 @@ public class DistributionRunPartitionerYearly extends SimplePartitioner {
     ParallelDataFetch parallelDataFetch;
 
     @Override
+    public JobExecution getJobExecution() {
+        return context;
+    }
+
+    @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
+        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         ResponseObj res = restUtils.getTokenResponseObject();
         String accessToken = null;
         if (res != null) {
@@ -44,6 +51,7 @@ public class DistributionRunPartitionerYearly extends SimplePartitioner {
             credentialList.addAll(parallelDTO.transcriptList());
             credentialList.addAll(parallelDTO.certificateList());
         }
+        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();

@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -39,19 +38,6 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         ent.setJobType(jobType);
 
         gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
-
-        List<BatchGradAlgorithmErrorHistoryEntity> eList = new ArrayList<>();
-        summaryDTO.getErrors().forEach(e -> {
-            LOGGER.info(" Student ID : {}, Reason: {}, Detail: {}", e.getStudentID(), e.getReason(), e.getDetail());
-            BatchGradAlgorithmErrorHistoryEntity errorHistory = new BatchGradAlgorithmErrorHistoryEntity();
-            errorHistory.setStudentID(UUID.fromString(e.getStudentID()));
-            errorHistory.setJobExecutionId(jobExecutionId);
-            errorHistory.setError(e.getReason() + "-" + e.getDetail());
-            eList.add(errorHistory);
-        });
-        if(!eList.isEmpty()) {
-            gradBatchHistoryService.saveGradAlgorithmErrorHistories(eList);
-        }
     }
 
     public void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {

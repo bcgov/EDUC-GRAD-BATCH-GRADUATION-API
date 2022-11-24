@@ -1,14 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchJobExecutionEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.*;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchJobExecutionRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,8 +21,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -43,7 +35,7 @@ public class GradDashboardServiceTest {
     BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
 
     @MockBean
-    BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
+    BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository;
 
     @MockBean
     BatchJobExecutionRepository batchJobExecutionRepository;
@@ -118,20 +110,20 @@ public class GradDashboardServiceTest {
         Pageable paging = PageRequest.of(0, 10);
         Long batchId= 123123L;
         UUID studentId = UUID.randomUUID();
-        BatchGradAlgorithmErrorHistoryEntity ent = new BatchGradAlgorithmErrorHistoryEntity();
+        BatchGradAlgorithmStudentEntity ent = new BatchGradAlgorithmStudentEntity();
         ent.setError("weqw");
         ent.setJobExecutionId(batchId);
         ent.setId(UUID.randomUUID());
         ent.setStudentID(studentId);
-        Page<BatchGradAlgorithmErrorHistoryEntity> pagedDate = new PageImpl(List.of(ent));
+        Page<BatchGradAlgorithmStudentEntity> pagedData = new PageImpl(List.of(ent));
 
         GraduationStudentRecord rec = new GraduationStudentRecord();
         rec.setStudentID(studentId);
         rec.setPen("673213121");
 
-        Mockito.when(batchGradAlgorithmErrorHistoryRepository.findByJobExecutionId(batchId,paging)).thenReturn(pagedDate);
+        Mockito.when(batchGradAlgorithmStudentRepository.findByJobExecutionIdAndStatusIn(batchId,Arrays.asList("STARTED", "FAILED"), paging)).thenReturn(pagedData);
         Mockito.when(restUtils.getStudentData(List.of(studentId), "accessToken")).thenReturn(List.of(rec));
-        Mockito.when(batchGradAlgorithmErrorHistoryRepository.findByStudentIDAndJobExecutionId(rec.getStudentID(),batchId)).thenReturn(ent);
+        Mockito.when(batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(rec.getStudentID(),batchId)).thenReturn(Optional.of(ent));
 
         ErrorDashBoard res = gradDashboardService.getErrorInfo(batchId,0,10,"accessToken");
         assertThat(res).isNotNull();

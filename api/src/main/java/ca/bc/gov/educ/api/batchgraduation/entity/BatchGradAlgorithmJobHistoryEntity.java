@@ -63,5 +63,6 @@ public class BatchGradAlgorithmJobHistoryEntity  extends BaseEntity {
 	@Column(name = "LOCAL_DOWNLOAD",nullable = true)
 	private String localDownload;
 
-
+	@Column(name = "JOB_PARAMS")
+	private String jobParameters;
 }

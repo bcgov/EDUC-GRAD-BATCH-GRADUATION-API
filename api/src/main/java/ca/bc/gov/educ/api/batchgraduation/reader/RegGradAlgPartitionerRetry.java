@@ -1,31 +1,25 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
-public class TvrRunPartitioner extends BasePartitioner {
+public class RegGradAlgPartitionerRetry extends BasePartitioner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TvrRunPartitioner.class);
-
-    @Autowired
-    RestUtils restUtils;
+    private static final Logger LOGGER = LoggerFactory.getLogger(RegGradAlgPartitionerRetry.class);
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution jobExecution;
 
-    public TvrRunPartitioner() {
+    public RegGradAlgPartitionerRetry() {
         super();
+        this.runType = RunTypeEnum.RETRY_STEP_FOR_ERRORED_STUDENTS;
     }
 
     @Override
@@ -35,23 +29,11 @@ public class TvrRunPartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        initializeRunType();
-        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
-        List<UUID> studentList;
-        if (runType == RunTypeEnum.NORMAL_JOB_PROCESS) {
-            ResponseObj res = restUtils.getTokenResponseObject();
-            String accessToken = null;
-            if (res != null) {
-                accessToken = res.getAccess_token();
-            }
-            studentList = restUtils.getStudentsForProjectedAlgorithm(accessToken);
-        } else {
-            studentList = getInputDataFromPreviousJob();
-        }
-        createTotalSummaryDTO("tvrRunSummaryDTO");
-        updateBatchJobHistory(jobHistory, Long.valueOf(studentList.size()));
+        Long batchId = jobExecution.getId();
+        List<UUID> studentList = getInputDataForErroredStudents(batchId);
+        createTotalSummaryDTO("regGradAlgSummaryDTO");
+
         if(!studentList.isEmpty()) {
-            saveInputData(studentList);
             int partitionSize = studentList.size()/gridSize + 1;
             List<List<UUID>> partitions = new LinkedList<>();
             for (int i = 0; i < studentList.size(); i += partitionSize) {
@@ -75,4 +57,6 @@ public class TvrRunPartitioner extends BasePartitioner {
         LOGGER.info("No Students Found for Processing");
         return new HashMap<>();
     }
+
+
 }

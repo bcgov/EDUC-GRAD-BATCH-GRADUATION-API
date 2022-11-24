@@ -12,16 +12,12 @@ public class RecalculateProjectedGradRunReader extends BaseReader {
     @Override
     public UUID read() throws Exception {
         fetchAccessToken();
-        summaryDTO.setReadCount(studentList.size());
-
         UUID nextStudent = null;
 
         if (nxtStudentForProcessing < studentList.size()) {
             nextStudent = studentList.get(nxtStudentForProcessing);
             LOGGER.info("StudID:{} - {} of {}", nextStudent, nxtStudentForProcessing + 1, summaryDTO.getReadCount());
             nxtStudentForProcessing++;
-        }else {
-        	aggregate("tvrRunSummaryDTO");
         }
         return nextStudent;
     }

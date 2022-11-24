@@ -23,4 +23,5 @@ public class BatchGradAlgorithmJobHistory extends BaseModel{
 	private String triggerBy;
 	private String jobType;
 	private String localDownload;
+	private String jobParameters;
 }

@@ -1,12 +1,13 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
+import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -29,7 +30,6 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
 
     public SpcRegGradAlgPartitioner() {
         super();
-        this.stepType = "Normal";
     }
 
     @Override
@@ -39,23 +39,31 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        ResponseObj res = restUtils.getTokenResponseObject();
-        String accessToken = null;
-        if (res != null) {
-            accessToken = res.getAccess_token();
+        initializeRunType();
+        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
+        List<UUID> studentList;
+        if (runType == RunTypeEnum.NORMAL_JOB_PROCESS) {
+            ResponseObj res = restUtils.getTokenResponseObject();
+            String accessToken = null;
+            if (res != null) {
+                accessToken = res.getAccess_token();
+            }
+            JobParameters jobParameters = jobExecution.getJobParameters();
+            String searchRequest = jobParameters.getString("searchRequest");
+            StudentSearchRequest req = null;
+            try {
+                req = new ObjectMapper().readValue(searchRequest, StudentSearchRequest.class);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            studentList = restUtils.getStudentsForSpecialGradRun(req, accessToken);
+        } else {
+            studentList = getInputDataFromPreviousJob();
         }
-        JobParameters jobParameters = jobExecution.getJobParameters();
-        String searchRequest = jobParameters.getString("searchRequest");
-        StudentSearchRequest req = null;
-        try {
-            req = new ObjectMapper().readValue(searchRequest, StudentSearchRequest.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        List<UUID> studentList = restUtils.getStudentsForSpecialGradRun(req,accessToken);
-        initializeTotalSummaryDTO("spcRunAlgSummaryDTO", studentList.size(), StringUtils.equals(stepType, "Retry"));
-
+        createTotalSummaryDTO("spcRunAlgSummaryDTO");
+        updateBatchJobHistory(jobHistory, Long.valueOf(studentList.size()));
         if(!studentList.isEmpty()) {
+            saveInputData(studentList);
             int partitionSize = studentList.size()/gridSize + 1;
             List<List<UUID>> partitions = new LinkedList<>();
             for (int i = 0; i < studentList.size(); i += partitionSize) {
@@ -65,7 +73,6 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-                summaryDTO.initializeProgramCountMap();
                 List<UUID> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

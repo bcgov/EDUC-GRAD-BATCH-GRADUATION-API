@@ -3,13 +3,11 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmErrorHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchJobExecutionEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmErrorHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchJobExecutionRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchProcessingTransformer;
 import org.springframework.data.domain.Page;
@@ -17,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchGradAlgorithmJobHistoryTransformer;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,18 +22,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class GradDashboardService extends GradService {
 
 	private final BatchGradAlgorithmJobHistoryRepository  batchGradAlgorithmJobHistoryRepository;
-	private final BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository;
+	private final BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository;
 	private final BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer;
 	private final BatchJobExecutionRepository batchJobExecutionRepository;
 	private final BatchProcessingTransformer batchProcessingTransformer;
 	private final BatchProcessingRepository batchProcessingRepository;
 	private final RestUtils restUtils;
 
-    public GradDashboardService(BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository,BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer,BatchGradAlgorithmErrorHistoryRepository batchGradAlgorithmErrorHistoryRepository,RestUtils restUtils,BatchJobExecutionRepository batchJobExecutionRepository,BatchProcessingRepository batchProcessingRepository,BatchProcessingTransformer batchProcessingTransformer) {
+    public GradDashboardService(BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository,
+								BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer,
+								RestUtils restUtils,
+								BatchJobExecutionRepository batchJobExecutionRepository,BatchProcessingRepository batchProcessingRepository,BatchProcessingTransformer batchProcessingTransformer,
+								BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository) {
     	this.batchGradAlgorithmJobHistoryRepository = batchGradAlgorithmJobHistoryRepository;
     	this.batchGradAlgorithmJobHistoryTransformer = batchGradAlgorithmJobHistoryTransformer;
 		this.batchProcessingTransformer = batchProcessingTransformer;
-		this.batchGradAlgorithmErrorHistoryRepository = batchGradAlgorithmErrorHistoryRepository;
+		this.batchGradAlgorithmStudentRepository = batchGradAlgorithmStudentRepository;
 		this.batchJobExecutionRepository = batchJobExecutionRepository;
 		this.batchProcessingRepository = batchProcessingRepository;
 		this.restUtils = restUtils;
@@ -69,22 +70,25 @@ public class GradDashboardService extends GradService {
     public ErrorDashBoard getErrorInfo(Long batchId, Integer pageNumber, Integer pageSize,String accessToken) {
 		ErrorDashBoard edb = new ErrorDashBoard();
 		Pageable paging = PageRequest.of(pageNumber, pageSize);
-		Page<BatchGradAlgorithmErrorHistoryEntity> pagedDate = batchGradAlgorithmErrorHistoryRepository.findByJobExecutionId(batchId,paging);
-		List<BatchGradAlgorithmErrorHistoryEntity> list = pagedDate.getContent();
-		List<UUID> studentIds = list.stream().map(BatchGradAlgorithmErrorHistoryEntity::getStudentID).collect(Collectors.toList());
+		Page<BatchGradAlgorithmStudentEntity> pagedDate = batchGradAlgorithmStudentRepository.findByJobExecutionIdAndStatusIn(batchId, Arrays.asList("STARTED", "FAILED"), paging);
+		List<BatchGradAlgorithmStudentEntity> list = pagedDate.getContent();
+		List<UUID> studentIds = list.stream().map(BatchGradAlgorithmStudentEntity::getStudentID).collect(Collectors.toList());
 		List<ErrorBoard> eList = new ArrayList<>();
 		if(!studentIds.isEmpty()) {
 			List<GraduationStudentRecord> studentList = restUtils.getStudentData(studentIds, accessToken);
 
 			for (GraduationStudentRecord gRec : studentList) {
 				ErrorBoard eD = new ErrorBoard();
-				BatchGradAlgorithmErrorHistoryEntity ent = batchGradAlgorithmErrorHistoryRepository.findByStudentIDAndJobExecutionId(gRec.getStudentID(),batchId);
-				eD.setError(ent.getError());
-				eD.setLegalFirstName(gRec.getLegalFirstName());
-				eD.setLegalLastName(gRec.getLegalLastName());
-				eD.setLegalMiddleNames(gRec.getLegalMiddleNames());
-				eD.setPen(gRec.getPen());
-				eList.add(eD);
+				Optional<BatchGradAlgorithmStudentEntity> optional = batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(gRec.getStudentID(),batchId);
+				if (optional.isPresent()) {
+					BatchGradAlgorithmStudentEntity ent = optional.get();
+					eD.setError(ent.getError());
+					eD.setLegalFirstName(gRec.getLegalFirstName());
+					eD.setLegalLastName(gRec.getLegalLastName());
+					eD.setLegalMiddleNames(gRec.getLegalMiddleNames());
+					eD.setPen(gRec.getPen());
+					eList.add(eD);
+				}
 			}
 		}
 		edb.setErrorList(eList);

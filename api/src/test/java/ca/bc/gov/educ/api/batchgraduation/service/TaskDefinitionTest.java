@@ -7,7 +7,6 @@ import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import net.javacrumbs.shedlock.spring.LockableTaskScheduler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -17,15 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
-import java.util.concurrent.ScheduledFuture;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringRunner.class)
@@ -44,6 +40,7 @@ public class TaskDefinitionTest {
     Job SpecialGraduationBatchJob;
 
     @MockBean
+    @Qualifier("asyncJobLauncher")
     JobLauncher jobLauncher;
 
     @MockBean
@@ -54,6 +51,9 @@ public class TaskDefinitionTest {
 
     @MockBean
     JobRegistry jobRegistry;
+
+    @MockBean
+    GradBatchHistoryService gradBatchHistoryService;
 
     @MockBean
     UserScheduledJobsRepository userScheduledJobsRepository;
