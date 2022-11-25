@@ -90,6 +90,8 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     protected void saveInputData(List<UUID> studentIDs) {
         Long jobExecutionId = getJobExecution().getId();
+        JobParameters jobParameters = getJobExecution().getJobParameters();
+        String username = jobParameters.getString(RUN_BY);
         long startTime = System.currentTimeMillis();
         LOGGER.info(" => Saving Input Data for {} students", studentIDs.size());
 
@@ -99,6 +101,8 @@ public abstract class BasePartitioner extends SimplePartitioner {
             ent.setJobExecutionId(jobExecutionId);
             ent.setStudentID(id);
             ent.setStatus(BatchStatusEnum.STARTED.name());
+            ent.setCreateUser(username);
+            ent.setUpdateUser(username);
             entityList.add(ent);
         });
         gradBatchHistoryService.saveGradAlgorithmStudents(entityList);
