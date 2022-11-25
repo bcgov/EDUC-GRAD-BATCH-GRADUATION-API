@@ -59,7 +59,7 @@ public class JobLauncherController {
     private static final String RERUN_ALL = "RERUN_ALL";
     private static final String RERUN_FAILED = "RERUN_FAILED";
     private static final String DISTRUN = "DISTRUN";
-    private static final String DISTRUNYEAREND = "DISTRUNYEAREND";
+    private static final String DISTRUN_YE = "DISTRUN_YE";
     private static final String DISTRUNUSER = "DISTRUNUSER";
     private static final String PSIDISTRUN = "PSIRUN";
     private static final String CREDENTIALTYPE = "credentialType";
@@ -441,8 +441,8 @@ public class JobLauncherController {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
-        builder.addString(JOB_TYPE, DISTRUNYEAREND);
-        response.setJobType(DISTRUNYEAREND);
+        builder.addString(JOB_TYPE, DISTRUN_YE);
+        response.setJobType(DISTRUN_YE);
         response.setTriggerBy(MANUAL);
         response.setStartTime(new Date(System.currentTimeMillis()));
         response.setStatus(BatchStatusEnum.STARTED.name());
