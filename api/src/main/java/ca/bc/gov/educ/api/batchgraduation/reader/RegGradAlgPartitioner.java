@@ -51,7 +51,9 @@ public class RegGradAlgPartitioner extends BasePartitioner {
         createTotalSummaryDTO("regGradAlgSummaryDTO");
         updateBatchJobHistory(jobHistory, Long.valueOf(studentList.size()));
         if(!studentList.isEmpty()) {
-            saveInputData(studentList);
+            if (runType == RunTypeEnum.NORMAL_JOB_PROCESS) {
+                saveInputData(studentList);
+            }
             int partitionSize = studentList.size()/gridSize + 1;
             List<List<UUID>> partitions = new LinkedList<>();
             for (int i = 0; i < studentList.size(); i += partitionSize) {

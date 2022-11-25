@@ -302,10 +302,12 @@ public class JobLauncherController {
             switch(entity.getJobType()) {
                 case "REGALG":
                     if (isSpecialRun) {
-                        jobName = "GraduationBatchJob";
-                    } else {
                         jobName = "SpecialGraduationBatchJob";
+
+                    } else {
+                        jobName = "GraduationBatchJob";
                     }
+                    break;
                 case "TVRRUN":
                     if (isSpecialRun) {
                         jobName = "SpecialTvrRunBatchJob";
@@ -356,10 +358,11 @@ public class JobLauncherController {
             switch(entity.getJobType()) {
                 case "REGALG":
                     if (isSpecialRun) {
-                        jobName = "GraduationBatchJob";
-                    } else {
                         jobName = "SpecialGraduationBatchJob";
+                    } else {
+                        jobName = "GraduationBatchJob";
                     }
+                    break;
                 case "TVRRUN":
                     if (isSpecialRun) {
                         jobName = "SpecialTvrRunBatchJob";
