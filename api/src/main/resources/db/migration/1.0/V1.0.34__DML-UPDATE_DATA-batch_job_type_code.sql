@@ -1,5 +1,5 @@
 -- updated codes
-UPDATE BATCH_JOB_TYPE_CODE SET DESCRITION = 'The Batch Transcript Verification Report (TVR) Run updates student individual TVRs as PDF reports which are a summary of a students'' GRAD status including the students'' courses and assessments, program requirements met, non-grad reasons and graduation status. This run also updates the school Projected Non-Grad Summary Report.'
+UPDATE BATCH_JOB_TYPE_CODE SET DESCRIPTION = 'The Batch Transcript Verification Report (TVR) Run updates student individual TVRs as PDF reports which are a summary of a students'' GRAD status including the students'' courses and assessments, program requirements met, non-grad reasons and graduation status. This run also updates the school Projected Non-Grad Summary Report.'
 WHERE BATCH_JOB_TYPE_CODE = 'TVRRUN';
 
 UPDATE BATCH_JOB_TYPE_CODE SET LABEL = 'Credentials and Transcript Distribution Run', DESCRIPTION = 'A Credentials Distribution Run that sends printed certificate and transcript packages (including distribution reports) to schools only. Includes students with new program completions where a certificate has not yet been distributed.'
