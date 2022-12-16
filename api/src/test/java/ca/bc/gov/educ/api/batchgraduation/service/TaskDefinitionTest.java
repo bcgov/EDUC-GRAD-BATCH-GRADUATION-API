@@ -20,7 +20,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -40,7 +44,6 @@ public class TaskDefinitionTest {
     Job SpecialGraduationBatchJob;
 
     @MockBean
-    @Qualifier("asyncJobLauncher")
     JobLauncher jobLauncher;
 
     @MockBean

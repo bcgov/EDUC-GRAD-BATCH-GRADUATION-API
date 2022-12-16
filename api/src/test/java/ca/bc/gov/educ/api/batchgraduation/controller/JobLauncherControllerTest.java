@@ -12,7 +12,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -54,7 +53,6 @@ public class JobLauncherControllerTest {
     GradBatchHistoryService gradBatchHistoryService;
 
     @Mock
-    @Qualifier("asyncJobLauncher")
     private JobLauncher jobLauncher;
 
     @Mock
