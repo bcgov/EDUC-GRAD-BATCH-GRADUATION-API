@@ -44,6 +44,7 @@ public class TaskDefinitionTest {
     Job SpecialGraduationBatchJob;
 
     @MockBean
+    @Qualifier("jobLauncher")
     JobLauncher jobLauncher;
 
     @MockBean

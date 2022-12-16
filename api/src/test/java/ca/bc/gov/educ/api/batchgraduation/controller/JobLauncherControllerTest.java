@@ -12,6 +12,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -53,7 +54,12 @@ public class JobLauncherControllerTest {
     GradBatchHistoryService gradBatchHistoryService;
 
     @Mock
+    @Qualifier("jobLauncher")
     private JobLauncher jobLauncher;
+
+    @Mock
+    @Qualifier("asyncJobLauncher")
+    private JobLauncher asyncJobLauncher;
 
     @Mock
     private JobRegistry jobRegistry;
@@ -79,7 +85,7 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TYPE, REGALG);
 
         try {
-            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchRegGradJob();
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -96,7 +102,7 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
         try {
-            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchTvrRunJob();
         } catch (Exception e) {
             exceptionIsThrown = true;
@@ -147,7 +153,7 @@ public class JobLauncherControllerTest {
         StudentSearchRequest req = new StudentSearchRequest();
         req.setPens(Arrays.asList("123213123"));
         try {
-            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("SpecialTvrRunBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob("SpecialTvrRunBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchTvrRunSpecialJob(req);
         } catch (Exception e) {
             exceptionIsThrown = true;
