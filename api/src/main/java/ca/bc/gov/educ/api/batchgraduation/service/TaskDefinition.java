@@ -39,8 +39,9 @@ public class TaskDefinition implements Runnable{
     private static final String TRANMISSION_TYPE = "transmissionType";
 
     @Autowired
-    @Qualifier("asyncJobLauncher")
+    @Qualifier("jobLauncher")
     JobLauncher jobLauncher;
+
     @Autowired JobRegistry jobRegistry;
 
     @Autowired
