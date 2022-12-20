@@ -39,7 +39,7 @@ public class DistributionRunPartitionerPsiUserReq extends BaseDistributionPartit
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
+//        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         JobParameters jobParameters = context.getJobParameters();
         String searchRequest = jobParameters.getString("searchRequest");
         String transmissionType = jobParameters.getString("transmissionType");
@@ -57,7 +57,7 @@ public class DistributionRunPartitionerPsiUserReq extends BaseDistributionPartit
         }
 
         List<PsiCredentialDistribution> credentialList = getRecordsForPSIUserReqDisRun(req,transmissionType,accessToken);
-        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
+//        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<PsiCredentialDistribution>> partitions = new LinkedList<>();

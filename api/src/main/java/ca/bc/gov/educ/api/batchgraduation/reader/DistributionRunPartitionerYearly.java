@@ -38,7 +38,7 @@ public class DistributionRunPartitionerYearly extends BaseDistributionPartitione
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
+//        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         ResponseObj res = restUtils.getTokenResponseObject();
         String accessToken = null;
         if (res != null) {
@@ -51,7 +51,7 @@ public class DistributionRunPartitionerYearly extends BaseDistributionPartitione
             credentialList.addAll(parallelDTO.transcriptList());
             credentialList.addAll(parallelDTO.certificateList());
         }
-        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
+//        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();

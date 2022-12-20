@@ -32,7 +32,7 @@ public class DistributionRunPartitionerBlankUserReq extends BaseDistributionPart
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
+//        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         JobParameters jobParameters = context.getJobParameters();
         String searchRequest = jobParameters.getString("searchRequest");
         String credentialType = jobParameters.getString("credentialType");
@@ -43,7 +43,7 @@ public class DistributionRunPartitionerBlankUserReq extends BaseDistributionPart
             e.printStackTrace();
         }
         List<BlankCredentialDistribution> credentialList = getRecordsForBlankUserReqDisRun(req);
-        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
+//        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<BlankCredentialDistribution>> partitions = new LinkedList<>();

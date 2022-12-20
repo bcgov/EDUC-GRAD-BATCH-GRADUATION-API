@@ -32,6 +32,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
 			String activityCode = jobType != null && jobType.equalsIgnoreCase("DISTRUN")?"MONTHLYDIST":"YEARENDDIST";
+			String studentSearchRequest = jobParameters.getString("searchRequest");
 
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
@@ -46,7 +47,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
 			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, studentSearchRequest);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));

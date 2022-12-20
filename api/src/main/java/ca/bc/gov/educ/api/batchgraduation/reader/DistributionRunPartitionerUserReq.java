@@ -39,7 +39,7 @@ public class DistributionRunPartitionerUserReq extends BaseDistributionPartition
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
+//        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         ResponseObj res = restUtils.getTokenResponseObject();
         String accessToken = null;
         if (res != null) {
@@ -55,7 +55,8 @@ public class DistributionRunPartitionerUserReq extends BaseDistributionPartition
             e.printStackTrace();
         }
         List<StudentCredentialDistribution> credentialList = restUtils.getStudentsForUserReqDisRun(credentialType,req,accessToken);
-        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
+        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
+//        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
