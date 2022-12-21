@@ -40,6 +40,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
 			String transmissionType = jobParameters.getString("transmissionType");
+			String studentSearchRequest = jobParameters.getString("searchRequest");
 
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
@@ -59,7 +60,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
 			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, studentSearchRequest);
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			PsiDistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));

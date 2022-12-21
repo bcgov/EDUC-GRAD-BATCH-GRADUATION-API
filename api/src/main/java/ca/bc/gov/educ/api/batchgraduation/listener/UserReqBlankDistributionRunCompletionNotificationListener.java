@@ -45,6 +45,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			String credentialType = jobParameters.getString("credentialType");
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String properName = jobParameters.getString("properName");
+			String studentSearchRequest = jobParameters.getString("searchRequest");
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
 				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
@@ -62,7 +63,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
 			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, studentSearchRequest);
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			BlankDistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
