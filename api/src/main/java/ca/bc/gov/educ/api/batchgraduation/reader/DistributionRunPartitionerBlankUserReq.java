@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -9,13 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.partition.support.SimplePartitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
-public class DistributionRunPartitionerBlankUserReq extends BaseDistributionPartitioner {
+public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitionerBlankUserReq.class);
 
@@ -26,13 +26,7 @@ public class DistributionRunPartitionerBlankUserReq extends BaseDistributionPart
     RestUtils restUtils;
 
     @Override
-    public JobExecution getJobExecution() {
-        return context;
-    }
-
-    @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-//        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         JobParameters jobParameters = context.getJobParameters();
         String searchRequest = jobParameters.getString("searchRequest");
         String credentialType = jobParameters.getString("credentialType");
@@ -43,7 +37,6 @@ public class DistributionRunPartitionerBlankUserReq extends BaseDistributionPart
             e.printStackTrace();
         }
         List<BlankCredentialDistribution> credentialList = getRecordsForBlankUserReqDisRun(req);
-//        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<BlankCredentialDistribution>> partitions = new LinkedList<>();

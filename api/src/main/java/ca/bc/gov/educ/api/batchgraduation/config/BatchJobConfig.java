@@ -865,7 +865,7 @@ public class BatchJobConfig {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(constants.getNumberOfPartitions());
         executor.setMaxPoolSize(constants.getNumberOfPartitions());
-        executor.setThreadNamePrefix("partition_task_executor_thread-");
+        executor.setThreadNamePrefix("partition-");
         executor.initialize();
         return executor;
     }

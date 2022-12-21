@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
@@ -10,6 +9,7 @@ import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.partition.support.SimplePartitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.*;
 
-public class DistributionRunPartitioner extends BaseDistributionPartitioner {
+public class DistributionRunPartitioner extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitioner.class);
 
@@ -31,13 +31,7 @@ public class DistributionRunPartitioner extends BaseDistributionPartitioner {
     ParallelDataFetch parallelDataFetch;
 
     @Override
-    public JobExecution getJobExecution() {
-        return context;
-    }
-
-    @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-//        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         ResponseObj res = restUtils.getTokenResponseObject();
         String accessToken = null;
         if (res != null) {
@@ -50,8 +44,6 @@ public class DistributionRunPartitioner extends BaseDistributionPartitioner {
             credentialList.addAll(parallelDTO.transcriptList());
             credentialList.addAll(parallelDTO.certificateList());
         }
-        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
-//        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
