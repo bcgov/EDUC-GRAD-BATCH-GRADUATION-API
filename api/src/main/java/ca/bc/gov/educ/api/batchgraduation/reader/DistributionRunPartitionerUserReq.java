@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
@@ -22,7 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class DistributionRunPartitionerUserReq extends BaseDistributionPartitioner {
+public class DistributionRunPartitionerUserReq extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitionerUserReq.class);
 
@@ -33,13 +32,7 @@ public class DistributionRunPartitionerUserReq extends BaseDistributionPartition
     RestUtils restUtils;
 
     @Override
-    public JobExecution getJobExecution() {
-        return context;
-    }
-
-    @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         ResponseObj res = restUtils.getTokenResponseObject();
         String accessToken = null;
         if (res != null) {
@@ -55,7 +48,6 @@ public class DistributionRunPartitionerUserReq extends BaseDistributionPartition
             e.printStackTrace();
         }
         List<StudentCredentialDistribution> credentialList = restUtils.getStudentsForUserReqDisRun(credentialType,req,accessToken);
-        updateBatchJobHistory(jobHistory, Long.valueOf(credentialList.size()));
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();

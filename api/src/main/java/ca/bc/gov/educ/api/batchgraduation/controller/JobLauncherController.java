@@ -29,6 +29,7 @@ import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -64,9 +65,11 @@ public class JobLauncherController {
     private static final String PSIDISTRUN = "PSIRUN";
     private static final String CREDENTIALTYPE = "credentialType";
     private static final String TRANMISSION_TYPE = "transmissionType";
+    private static final String DISDTO = "distributionSummaryDTO";
     private static final String LOCALDOWNLOAD = "LocalDownload";
 
     private final JobLauncher jobLauncher;
+    private final JobLauncher asyncJobLauncher;
     private final JobRegistry jobRegistry;
     private final RestUtils restUtils;
     private final GradDashboardService gradDashboardService;
@@ -74,13 +77,16 @@ public class JobLauncherController {
 
     @Autowired
     public JobLauncherController(
-            @Qualifier("asyncJobLauncher")
+            @Qualifier("jobLauncher")
             JobLauncher jobLauncher,
+            @Qualifier("asyncJobLauncher")
+            JobLauncher asyncJobLauncher,
             JobRegistry jobRegistry,
             RestUtils restUtils,
             GradDashboardService gradDashboardService,
             GradBatchHistoryService gradBatchHistoryService) {
         this.jobLauncher = jobLauncher;
+        this.asyncJobLauncher = asyncJobLauncher;
         this.jobRegistry = jobRegistry;
         this.restUtils = restUtils;
         this.gradDashboardService = gradDashboardService;
@@ -105,7 +111,7 @@ public class JobLauncherController {
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
-            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
@@ -134,7 +140,7 @@ public class JobLauncherController {
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
-            JobExecution jobExecution =jobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
@@ -209,7 +215,7 @@ public class JobLauncherController {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
             response.setJobParameters(studentSearchData);
-            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("SpecialGraduationBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("SpecialGraduationBatchJob"), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
@@ -225,18 +231,22 @@ public class JobLauncherController {
         response.setException(null);
     }
 
-    private void validateInputDisRun(BatchJobResponse response, StudentSearchRequest studentSearchRequest) {
+    private DistributionSummaryDTO validateInputDisRun(StudentSearchRequest studentSearchRequest) {
         if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
-            response.setException("Please provide at least 1 parameter");
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setException("Please provide at least 1 parameter");
+            return summaryDTO;
         }
-        response.setException(null);
+        return null;
     }
 
-    private void validateInputBlankDisRun(BatchJobResponse response, BlankCredentialRequest blankCredentialRequest) {
+    private BlankDistributionSummaryDTO validateInputBlankDisRun(BlankCredentialRequest blankCredentialRequest) {
         if(blankCredentialRequest.getSchoolOfRecords().isEmpty() || blankCredentialRequest.getCredentialTypeCode().isEmpty()) {
-            response.setException("Please provide both parameters");
+            BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
+            summaryDTO.setException("Please provide both parameters");
+            return summaryDTO;
         }
-        response.setException(null);
+        return null;
     }
 
     @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_TVR_RUNS)
@@ -263,7 +273,7 @@ public class JobLauncherController {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
             response.setJobParameters(studentSearchData);
-            JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("SpecialTvrRunBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob("SpecialTvrRunBatchJob"), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
@@ -319,7 +329,7 @@ public class JobLauncherController {
                     jobName = "Not Known";
                     throw new NoSuchJobException(jobName);
             }
-            JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob(jobName), builder.toJobParameters());
+            JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob(jobName), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
@@ -374,7 +384,7 @@ public class JobLauncherController {
                     jobName = "Not Known";
                     throw new NoSuchJobException(jobName);
             }
-            JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob(jobName), builder.toJobParameters());
+            JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob(jobName), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
@@ -407,26 +417,23 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<BatchJobResponse> launchDistributionRunJob() {
+    public ResponseEntity<DistributionSummaryDTO> launchDistributionRunJob() {
         logger.debug("launchDistributionRunJob");
-        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUN);
-        response.setJobType(DISTRUN);
-        response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
-        response.setStatus(BatchStatusEnum.STARTED.name());
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
-            response.setBatchId(jobExecution.getId());
-            return ResponseEntity.ok(response);
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
-            response.setException(e.getLocalizedMessage());
-            return ResponseEntity.status(500).body(response);
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
         }
     }
 
@@ -434,26 +441,23 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<BatchJobResponse> launchYearlyDistributionRunJob() {
+    public ResponseEntity<DistributionSummaryDTO> launchYearlyDistributionRunJob() {
         logger.debug("launchYearlyDistributionRunJob");
-        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUN_YE);
-        response.setJobType(DISTRUN_YE);
-        response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
-        response.setStatus(BatchStatusEnum.STARTED.name());
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters());
-            response.setBatchId(jobExecution.getId());
-            return ResponseEntity.ok(response);
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
-            response.setException(e.getLocalizedMessage());
-            return ResponseEntity.status(500).body(response);
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
         }
     }
 
@@ -474,36 +478,30 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<BatchJobResponse> launchUserReqDisRunSpecialJob(@PathVariable String credentialType, @RequestBody StudentSearchRequest studentSearchRequest) {
+    public ResponseEntity<DistributionSummaryDTO> launchUserReqDisRunSpecialJob(@PathVariable String credentialType, @RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchUserReqDisRunSpecialJob");
-        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
         builder.addString(LOCALDOWNLOAD,studentSearchRequest.getLocalDownload());
-        response.setJobType(DISTRUNUSER);
-        response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
-        response.setStatus(BatchStatusEnum.STARTED.name());
-        response.setLocalDownload(studentSearchRequest.getLocalDownload());
-        validateInputDisRun(response, studentSearchRequest);
-        if(response.getException() != null) {
-            return ResponseEntity.status(400).body(response);
+        DistributionSummaryDTO validate = validateInputDisRun(studentSearchRequest);
+        if(validate != null) {
+            return ResponseEntity.status(400).body(validate);
         }
         try {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
             builder.addString(CREDENTIALTYPE,credentialType);
-            response.setJobParameters(studentSearchData);
-            response.setCredentialType(credentialType);
             JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("UserReqDistributionBatchJob"), builder.toJobParameters());
-            response.setBatchId(jobExecution.getId());
-            return ResponseEntity.ok(response);
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
-            response.setException(e.getLocalizedMessage());
-            return ResponseEntity.status(500).body(response);
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
         }
 
     }
@@ -512,9 +510,8 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized User Req Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<BatchJobResponse> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest, @PathVariable String credentialType) {
+    public ResponseEntity<BlankDistributionSummaryDTO> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest, @PathVariable String credentialType) {
         logger.debug("launchUserReqDisRunSpecialJob");
-        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
@@ -522,26 +519,21 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE, DISTRUNUSER);
         builder.addString(CREDENTIALTYPE, credentialType);
         builder.addString(LOCALDOWNLOAD, blankCredentialRequest.getLocalDownload());
-        response.setJobType(DISTRUNUSER);
-        response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
-        response.setStatus(BatchStatusEnum.STARTED.name());
-        response.setCredentialType(credentialType);
-        response.setLocalDownload(blankCredentialRequest.getLocalDownload());
-        validateInputBlankDisRun(response, blankCredentialRequest);
-        if (response.getException() != null) {
-            return ResponseEntity.status(400).body(response);
+        BlankDistributionSummaryDTO validate = validateInputBlankDisRun(blankCredentialRequest);
+        if (validate != null) {
+            return ResponseEntity.status(400).body(validate);
         }
         try {
             String searchData = new ObjectMapper().writeValueAsString(blankCredentialRequest);
             builder.addString(SEARCH_REQUEST, searchData);
-            response.setJobParameters(searchData);
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters());
-            response.setBatchId(jobExecution.getId());
-            return ResponseEntity.ok(response);
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
+            return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
-            response.setException(e.getLocalizedMessage());
-            return ResponseEntity.status(500).body(response);
+            BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
         }
     }
 
@@ -549,46 +541,42 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Specialized User Req PSI Runs", description = "Run specialized PSI Distribution runs", tags = { "PSIs" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<BatchJobResponse> launchUserReqPsiDisRunSpecialJob(@RequestBody PsiCredentialRequest psiCredentialRequest, @PathVariable String transmissionType) {
+    public ResponseEntity<PsiDistributionSummaryDTO> launchUserReqPsiDisRunSpecialJob(@RequestBody PsiCredentialRequest psiCredentialRequest, @PathVariable String transmissionType) {
         logger.debug("launchUserReqPsiDisRunSpecialJob");
-        BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, PSIDISTRUN);
         builder.addString(TRANMISSION_TYPE,transmissionType);
-        response.setJobType(PSIDISTRUN);
-        response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
-        response.setStatus(BatchStatusEnum.STARTED.name());
-        response.setTransmissionType(transmissionType);
         if(transmissionType.equalsIgnoreCase("FTP")) {
             builder.addString(LOCALDOWNLOAD, "Y");
-            response.setLocalDownload("Y");
         }
 
-        validateInputPsiDisRun(response, psiCredentialRequest);
-        if(response.getException() != null) {
-            return ResponseEntity.status(400).body(response);
+        PsiDistributionSummaryDTO validate = validateInputPsiDisRun(psiCredentialRequest);
+        if(validate != null) {
+            return ResponseEntity.status(400).body(validate);
         }
         try {
             String searchData = new ObjectMapper().writeValueAsString(psiCredentialRequest);
             builder.addString(SEARCH_REQUEST, searchData);
-            response.setJobParameters(searchData);
             JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("psiDistributionBatchJob"), builder.toJobParameters());
-            response.setBatchId(jobExecution.getId());
-            return ResponseEntity.ok(response);
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
+            return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
-            response.setException(e.getLocalizedMessage());
-            return ResponseEntity.status(500).body(response);
+            PsiDistributionSummaryDTO summaryDTO = new PsiDistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
         }
     }
 
-    private void validateInputPsiDisRun(BatchJobResponse response, PsiCredentialRequest psiCredentialRequest) {
+    private PsiDistributionSummaryDTO validateInputPsiDisRun(PsiCredentialRequest psiCredentialRequest) {
         if(psiCredentialRequest.getPsiCodes().isEmpty() || StringUtils.isBlank(psiCredentialRequest.getPsiYear())) {
-            response.setException("Please provide both parameters");
+            PsiDistributionSummaryDTO summaryDTO = new PsiDistributionSummaryDTO();
+            summaryDTO.setException("Please provide both parameters");
+            return summaryDTO;
         }
-        response.setException(null);
+        return null;
     }
 }

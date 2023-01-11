@@ -44,6 +44,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String credentialType = jobParameters.getString("credentialType");
 			String properName = jobParameters.getString("properName");
+			String studentSearchRequest = jobParameters.getString("searchRequest");
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
 				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
@@ -62,7 +63,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
 			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime);
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, studentSearchRequest);
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));

@@ -21,7 +21,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
     @Autowired
     RestUtils restUtils;
 
-    protected void processBatchJobHistory(BaseDistributionSummaryDTO summaryDTO, Long jobExecutionId, String status, String jobTrigger, String jobType, Date startTime, Date endTime) {
+    protected void processBatchJobHistory(BaseDistributionSummaryDTO summaryDTO, Long jobExecutionId, String status, String jobTrigger, String jobType, Date startTime, Date endTime, String jobParameters) {
         int failedRecords = summaryDTO.getErrors().size();
         Long processedStudents = summaryDTO.getProcessedCount();
         Long expectedStudents = summaryDTO.getReadCount();
@@ -36,6 +36,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
+        ent.setJobParameters(jobParameters);
 
         gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
     }
