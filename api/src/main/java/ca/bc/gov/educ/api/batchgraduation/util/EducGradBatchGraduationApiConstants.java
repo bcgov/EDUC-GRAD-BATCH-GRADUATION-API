@@ -60,7 +60,7 @@ public class EducGradBatchGraduationApiConstants {
        
     //Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
-    
+    public static final String DATE_FORMAT = "yyyy/MM/dd";
     public static final String TRAX_DATE_FORMAT = "yyyyMM";
     
     public static final String DEFAULT_CREATED_BY = "API_GRAD_BATCH";
@@ -106,6 +106,9 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-student-api.get-student-data-list}")
     private String gradStudentApiStudentDataListUrl;
+
+    @Value("${endpoint.grad-graduation-report-api.check-sccp-certificate-exists}")
+    private String checkSccpCertificateExists;
 
     // Number of Partitions
     @Value("${batch.partitions.number}")

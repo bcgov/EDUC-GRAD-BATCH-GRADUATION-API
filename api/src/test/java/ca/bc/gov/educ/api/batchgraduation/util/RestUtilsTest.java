@@ -4,6 +4,7 @@ package ca.bc.gov.educ.api.batchgraduation.util;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import lombok.val;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,17 +19,18 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserter;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -835,7 +837,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(res));
 
-        val result = this.restUtils.runGradAlgorithm(UUID.fromString(studentID), "123",programCompletionDate,null);
+        val result = this.restUtils.runGradAlgorithm(UUID.fromString(studentID), grd.getProgram(), "123",programCompletionDate,null);
         assertThat(result).isNotNull();
     }
 
@@ -859,7 +861,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(res));
 
-        val result = this.restUtils.runGradAlgorithm(UUID.fromString(studentID), "123",null,null);
+        val result = this.restUtils.runGradAlgorithm(UUID.fromString(studentID), grd.getProgram(), "123",null,null);
         assertThat(result).isNotNull();
     }
 
@@ -1280,5 +1282,42 @@ public class RestUtilsTest {
         val result = this.restUtils.updateStudentFlagReadyForBatch(studentIDs, batchJobType, "abc");
         assertThat(result).hasSize(1);
     }
+
+    @Test
+    public void testIsReportOnly_when_programCompletionDate_isInFuture_thenReturns_GS() {
+        final UUID studentID = UUID.randomUUID();
+        final String gradProgram = "SCCP";
+
+        Date futureDate = DateUtils.addMonths(new Date(), 1);
+        final String programCompletionDate = EducGradBatchGraduationApiUtils.formatDate(futureDate, "yyyy/MM");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(eq(constants.getCheckSccpCertificateExists()), any(Function.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        when(this.responseMock.bodyToMono(Boolean.class)).thenReturn(Mono.just(true));
+
+        val result = this.restUtils.isReportOnly(studentID, gradProgram, programCompletionDate, "abc");
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsReportOnly_when_programCompletionDate_isNotInFuture_and_SCCPcertificateExists_thenReturns_FMR() {
+        final UUID studentID = UUID.randomUUID();
+        final String gradProgram = "SCCP";
+        final String programCompletionDate = "2023/01";
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(eq(constants.getCheckSccpCertificateExists()), any(Function.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        when(this.responseMock.bodyToMono(Boolean.class)).thenReturn(Mono.just(true));
+
+        val result = this.restUtils.isReportOnly(studentID, gradProgram, programCompletionDate, "abc");
+        assertThat(result).isTrue();
+    }
+
 
 }
