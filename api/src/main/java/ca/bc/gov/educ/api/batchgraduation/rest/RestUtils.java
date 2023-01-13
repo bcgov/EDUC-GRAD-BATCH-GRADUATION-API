@@ -1,11 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.rest;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
+import ca.bc.gov.educ.api.batchgraduation.util.*;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +18,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
@@ -88,9 +84,9 @@ public class RestUtils {
     }
 
     @Retry(name = "reggradrun")
-    public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken, String programCompleteDate,Long batchId) {
+    public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken, String gradProgram, String programCompleteDate,Long batchId) {
         UUID correlationID = UUID.randomUUID();
-        if(programCompleteDate != null) {
+        if(isReportOnly(studentID, gradProgram, programCompleteDate, accessToken)) {
             return this.webClient.get()
             		.uri(String.format(constants.getGraduationApiReportOnlyUrl(), studentID,batchId))
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
@@ -181,7 +177,8 @@ public class RestUtils {
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         try {
             String accessToken = summary.getAccessToken();
-            AlgorithmResponse algorithmResponse = this.runGradAlgorithm(item.getStudentID(), accessToken,item.getProgramCompletionDate(),summary.getBatchId());
+            AlgorithmResponse algorithmResponse = this.runGradAlgorithm(item.getStudentID(), accessToken,
+                    item.getProgram(), item.getProgramCompletionDate(), summary.getBatchId());
             if(algorithmResponse.getException() != null) {
                 summary.updateError(item.getStudentID(),algorithmResponse.getException().getExceptionName(),algorithmResponse.getException().getExceptionDetails());
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
@@ -195,6 +192,24 @@ public class RestUtils {
             LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
             return null;
         }
+    }
+
+    public boolean isReportOnly(UUID studentID, String gradProgram, String programCompletionDate, String accessToken) {
+        boolean isFMR = false;
+        if ("SCCP".equalsIgnoreCase(gradProgram)) {
+            if (programCompletionDate != null) {
+                Date pCD = EducGradBatchGraduationApiUtils.parsingTraxDate(programCompletionDate);
+                int diff = EducGradBatchGraduationApiUtils.getDifferenceInDays(EducGradBatchGraduationApiUtils.getProgramCompletionDate(pCD), EducGradBatchGraduationApiUtils.getCurrentDate());
+                if (diff >= 0) {
+                    isFMR = checkSccpCertificateExists(studentID, accessToken);
+                } else {
+                    isFMR = false;
+                }
+            }
+        } else {
+            isFMR = programCompletionDate != null;
+        }
+        return isFMR;
     }
 
     public GraduationStudentRecord processProjectedGradStudent(GraduationStudentRecord item, AlgorithmSummaryDTO summary) {
@@ -490,6 +505,14 @@ public class RestUtils {
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .body(BodyInserters.fromValue(stuList))
                 .retrieve().bodyToMono(responseType).block();
+    }
+
+    public Boolean checkSccpCertificateExists (UUID studentID, String accessToken) {
+        return this.webClient.get()
+                .uri(constants.getCheckSccpCertificateExists(),
+                        uri -> uri.queryParam("studentID", studentID).build())
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
+                .retrieve().bodyToMono(Boolean.class).block();
     }
 
 }
