@@ -137,3 +137,8 @@ endpoint:
   grad-trax-api:
     get-psi-student-list:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
+
+#Splunk LogHelper
+splunk:
+  log-helper:
+    enabled: false
