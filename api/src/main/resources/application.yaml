@@ -12,8 +12,8 @@ spring:
       keepalive-time: ${KEEP_ALIVE_TIME}
       idle-timeout: ${IDLE_TIMEOUT}
     url: ${CONNECTION_STRING}
-    username: API_GRAD_BATCH
-    password: b4mbleb33$
+    username: ${USERNAME}
+    password: ${PASSWORD}
     driver-class: oracle.jdbc.driver.OracleDriver
   jpa:
     show-sql: true
