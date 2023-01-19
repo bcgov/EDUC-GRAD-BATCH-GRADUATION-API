@@ -184,6 +184,7 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
     get-school-report-list:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistribution
+    check-sccp-certificate-exists: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/check-sccp-certificate-exists
   grad-distribution-api:
     merge-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/MER?batchId=%s&activityCode=%s&localDownload=%s
