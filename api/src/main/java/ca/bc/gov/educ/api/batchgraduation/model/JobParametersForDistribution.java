@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class JobParametersForDistribution {
     private String jobName;
+    private String credentialType;
     private StudentSearchRequest payload;
 }

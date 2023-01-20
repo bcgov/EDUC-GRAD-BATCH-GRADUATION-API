@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -63,7 +62,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
-			String jobParametersDTO = populateJobParametersDTO(jobType, studentSearchRequest);
+			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.URDBJ, credentialType);
 
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
@@ -77,27 +76,6 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			LOGGER.info(LOG_SEPARATION);
 		}
     }
-
-	private String populateJobParametersDTO(String jobType, String studentSearchRequest) {
-		JobParametersForDistribution jobParamsDto = new JobParametersForDistribution();
-		jobParamsDto.setJobName(jobType);
-
-		try {
-			StudentSearchRequest payload = new ObjectMapper().readValue(studentSearchRequest, StudentSearchRequest.class);
-			jobParamsDto.setPayload(payload);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		String jobParamsDtoStr = null;
-		try {
-			jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
-		} catch (Exception e) {
-			LOGGER.error("Job Parameters DTO parse error - {}", e.getMessage());
-		}
-
-		return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
-	}
 
 	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String credentialType, String accessToken,String localDownload,String properName) {
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());

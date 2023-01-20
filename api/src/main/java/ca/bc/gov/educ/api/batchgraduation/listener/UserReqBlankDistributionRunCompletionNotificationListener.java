@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +59,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
-			String jobParametersDTO = populateJobParametersDTO(jobType, credentialType, studentSearchRequest);
+			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.BDBJ, credentialType);
 
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
@@ -74,28 +73,6 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			LOGGER.info(LOG_SEPARATION);
 		}
     }
-
-    private String populateJobParametersDTO(String jobType, String credentialType, String studentSearchRequest) {
-		JobParametersForBlankDistribution jobParamsDto = new JobParametersForBlankDistribution();
-		jobParamsDto.setJobName(jobType);
-		jobParamsDto.setCredentialType(credentialType);
-
-		try {
-			BlankCredentialRequest payload = new ObjectMapper().readValue(studentSearchRequest, BlankCredentialRequest.class);
-			jobParamsDto.setPayload(payload);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		String jobParamsDtoStr = null;
-		try {
-			jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
-		} catch (Exception e) {
-			LOGGER.error("Job Parameters DTO parse error - {}", e.getMessage());
-		}
-
-		return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
-	}
 
 	private void processGlobalList(String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String localDownload,String properName) {
 		List<String> uniqueSchoolList = cList.stream().map(BlankCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
