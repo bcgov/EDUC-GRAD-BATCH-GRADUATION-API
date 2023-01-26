@@ -10,8 +10,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @PropertySource("classpath:messages.properties")
 public class GradCommonConfig implements WebMvcConfigurer {
 
-	@Autowired
 	RequestInterceptor requestInterceptor;
+	@Autowired
+	public GradCommonConfig(RequestInterceptor requestInterceptor) {
+		this.requestInterceptor = requestInterceptor;
+	}
 
 	/**
 	 * Add interceptors.

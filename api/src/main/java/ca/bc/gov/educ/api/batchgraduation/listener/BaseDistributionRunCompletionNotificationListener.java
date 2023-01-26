@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
@@ -39,6 +40,95 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         ent.setJobParameters(jobParameters);
 
         gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
+    }
+
+    protected String buildJobParametersDTO(String jobType, String studentSearchRequest, TaskSelection taskSelection, String taskSelectionOptionType) {
+        String jobParamsDtoStr = null;
+
+        if (taskSelection == null) {
+            // Scheduled Distribution (Monthly or Yearly)
+            jobParamsDtoStr = populateJobParametersDTO(jobType, null, studentSearchRequest);
+        } else {
+            switch (taskSelection) {
+                case URDBJ: // User Request Distribution
+                    jobParamsDtoStr = populateJobParametersDTO(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
+                    break;
+                case BDBJ: // Blank Distribution
+                    jobParamsDtoStr = populateJobParametersDTOForBlankDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
+                    break;
+                case URPDBJ: // PSI Distribution
+                    jobParamsDtoStr = populateJobParametersDTOForPsiDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
+                    break;
+            }
+        }
+
+        return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
+    }
+
+    private String populateJobParametersDTO(String jobType, String credentialType, String studentSearchRequest) {
+        JobParametersForDistribution jobParamsDto = new JobParametersForDistribution();
+        jobParamsDto.setJobName(jobType);
+        jobParamsDto.setCredentialType(credentialType);
+
+        try {
+            StudentSearchRequest payload = new ObjectMapper().readValue(studentSearchRequest, StudentSearchRequest.class);
+            jobParamsDto.setPayload(payload);
+        } catch (Exception e) {
+            LOGGER.error("StudentSearchRequest payload parse error - {}", e.getMessage());
+        }
+
+        String jobParamsDtoStr = null;
+        try {
+            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
+        } catch (Exception e) {
+            LOGGER.error("Job Parameters DTO parse error for User Request Distribution - {}", e.getMessage());
+        }
+
+        return jobParamsDtoStr;
+    }
+
+    private String populateJobParametersDTOForBlankDistribution(String jobType, String credentialType, String studentSearchRequest) {
+        JobParametersForBlankDistribution jobParamsDto = new JobParametersForBlankDistribution();
+        jobParamsDto.setJobName(jobType);
+        jobParamsDto.setCredentialType(credentialType);
+
+        try {
+            BlankCredentialRequest payload = new ObjectMapper().readValue(studentSearchRequest, BlankCredentialRequest.class);
+            jobParamsDto.setPayload(payload);
+        } catch (Exception e) {
+            LOGGER.error("BlankCredentialRequest payload parse error - {}", e.getMessage());
+        }
+
+        String jobParamsDtoStr = null;
+        try {
+            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
+        } catch (Exception e) {
+            LOGGER.error("Job Parameters DTO parse error for Blank Distribution - {}", e.getMessage());
+        }
+
+        return jobParamsDtoStr;
+    }
+
+    private String populateJobParametersDTOForPsiDistribution(String jobType, String transmissionType, String studentSearchRequest) {
+        JobParametersForPsiDistribution jobParamsDto = new JobParametersForPsiDistribution();
+        jobParamsDto.setJobName(jobType);
+        jobParamsDto.setTransmissionType(transmissionType);
+
+        try {
+            PsiCredentialRequest payload = new ObjectMapper().readValue(studentSearchRequest, PsiCredentialRequest.class);
+            jobParamsDto.setPayload(payload);
+        } catch (Exception e) {
+            LOGGER.error("PsiCredentialRequest payload parse error - {}", e.getMessage());
+        }
+
+        String jobParamsDtoStr = null;
+        try {
+            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
+        } catch (Exception e) {
+            LOGGER.error("Job Parameters DTO parse error for PSI Distribution - {}", e.getMessage());
+        }
+
+        return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
     }
 
     public void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {

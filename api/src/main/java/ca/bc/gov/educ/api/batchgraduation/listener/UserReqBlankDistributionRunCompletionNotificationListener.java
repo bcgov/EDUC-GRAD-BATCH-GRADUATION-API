@@ -1,9 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.model.BlankDistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionPrintRequest;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -62,8 +59,10 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
+			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.BDBJ, credentialType);
+
 			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, studentSearchRequest);
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			BlankDistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));

@@ -46,8 +46,10 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
+			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
+
 			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, studentSearchRequest);
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
