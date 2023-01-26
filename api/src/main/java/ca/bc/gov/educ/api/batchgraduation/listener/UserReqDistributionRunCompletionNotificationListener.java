@@ -12,7 +12,10 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -103,7 +106,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		if(credentialType != null) {
 			if(credentialType.equalsIgnoreCase("OC")) {
 				activityCode = "USERDISTOC";
-			}else {
+			} else {
 				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
 			}
 			if (credentialType.equalsIgnoreCase("RC")) {
