@@ -12,7 +12,9 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -24,6 +26,9 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 
 	@Autowired
 	private TaskSchedulingService taskSchedulingService;
+
+	@Autowired
+	SupportListener supportListener;
     
     @Override
     public void afterJob(JobExecution jobExecution) {
@@ -78,7 +83,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		List<String> uniquePSIList = cList.stream().map(PsiCredentialDistribution::getPsiCode).distinct().collect(Collectors.toList());
 		uniquePSIList.forEach(upl->{
 			List<PsiCredentialDistribution> yed4List = cList.stream().filter(scd -> scd.getPsiCode().compareTo(upl) == 0).collect(Collectors.toList());
-			SupportListener.psiPrintFile(yed4List,batchId,upl,mapDist);
+			supportListener.psiPrintFile(yed4List,batchId,upl,mapDist);
 		});
 		String localDownload =  StringUtils.equalsIgnoreCase(transmissionType, "FTP")?"Y":"N";
 		DistributionResponse disres = restUtils.mergePsiAndUpload(batchId, accessToken, mapDist,localDownload);
