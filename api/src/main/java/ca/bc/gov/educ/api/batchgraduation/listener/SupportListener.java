@@ -1,15 +1,15 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class SupportListener {
-    private SupportListener() {
-    }
 
-    public static void psiPrintFile(List<PsiCredentialDistribution> yed4List, Long batchId, String usl, Map<String, DistributionPrintRequest> mapDist) {
+    public void psiPrintFile(List<PsiCredentialDistribution> yed4List, Long batchId, String usl, Map<String, DistributionPrintRequest> mapDist) {
         if(!yed4List.isEmpty()) {
             PsiCredentialPrintRequest tpReq = new PsiCredentialPrintRequest();
             tpReq.setBatchId(batchId);
@@ -23,7 +23,7 @@ public class SupportListener {
         }
     }
 
-    public static void transcriptPrintFile(List<StudentCredentialDistribution> yed4List, Long batchId, String usl, Map<String, DistributionPrintRequest> mapDist, String properName) {
+    public void transcriptPrintFile(List<StudentCredentialDistribution> yed4List, Long batchId, String usl, Map<String, DistributionPrintRequest> mapDist, String properName) {
         if(!yed4List.isEmpty()) {
             TranscriptPrintRequest tpReq = new TranscriptPrintRequest();
             tpReq.setBatchId(batchId);
@@ -36,7 +36,7 @@ public class SupportListener {
                 dist.setTotal(dist.getTotal()+1);
                 dist.setProperName(properName);
                 mapDist.put(usl,dist);
-            }else{
+            } else {
                 DistributionPrintRequest dist = new DistributionPrintRequest();
                 dist.setTranscriptPrintRequest(tpReq);
                 dist.setTotal(dist.getTotal()+1);
@@ -46,7 +46,7 @@ public class SupportListener {
         }
     }
 
-    public static void certificatePrintFile(List<StudentCredentialDistribution> cList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist, String certificatePaperType,String properName) {
+    public void certificatePrintFile(List<StudentCredentialDistribution> cList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist, String certificatePaperType,String properName) {
         if(!cList.isEmpty()) {
             CertificatePrintRequest tpReq = new CertificatePrintRequest();
             tpReq.setBatchId(batchId);
@@ -64,7 +64,7 @@ public class SupportListener {
                 dist.setTotal(dist.getTotal()+1);
                 dist.setProperName(properName);
                 mapDist.put(usl,dist);
-            }else{
+            } else {
                 DistributionPrintRequest dist = new DistributionPrintRequest();
                 if(certificatePaperType.compareTo("YED2") == 0)
                     dist.setYed2CertificatePrintRequest(tpReq);
@@ -79,7 +79,7 @@ public class SupportListener {
         }
     }
 
-    public static void blankTranscriptPrintFile(List<BlankCredentialDistribution> yed4List, Long batchId, String usl, Map<String, DistributionPrintRequest> mapDist, String properName) {
+    public void blankTranscriptPrintFile(List<BlankCredentialDistribution> yed4List, Long batchId, String usl, Map<String, DistributionPrintRequest> mapDist, String properName) {
         if(!yed4List.isEmpty()) {
             TranscriptPrintRequest tpReq = new TranscriptPrintRequest();
             tpReq.setBatchId(batchId);
@@ -102,7 +102,7 @@ public class SupportListener {
         }
     }
 
-    public static void blankCertificatePrintFile(List<BlankCredentialDistribution> cList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist, String certificatePaperType,String properName) {
+    public void blankCertificatePrintFile(List<BlankCredentialDistribution> cList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist, String certificatePaperType,String properName) {
         if(!cList.isEmpty()) {
             CertificatePrintRequest tpReq = new CertificatePrintRequest();
             tpReq.setBatchId(batchId);

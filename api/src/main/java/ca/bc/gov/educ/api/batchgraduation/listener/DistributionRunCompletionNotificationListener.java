@@ -7,15 +7,21 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
 public class DistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunCompletionNotificationListener.class);
+
+	@Autowired
+	SupportListener supportListener;
 
     @Override
     public void afterJob(JobExecution jobExecution) {
@@ -69,11 +75,11 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			List<StudentCredentialDistribution> yedrList = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
 			List<StudentCredentialDistribution> yedbList = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
 			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0).collect(Collectors.toList());
-			SupportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
+			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
-			SupportListener.certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",null);
-			SupportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",null);
-			SupportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",null);
+			supportListener.certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",null);
+			supportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",null);
+			supportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",null);
 		});
 		DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,null);
 		if(disres != null) {

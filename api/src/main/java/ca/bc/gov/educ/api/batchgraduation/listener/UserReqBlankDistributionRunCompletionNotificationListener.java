@@ -12,7 +12,10 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -24,6 +27,9 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 
 	@Autowired
 	private TaskSchedulingService taskSchedulingService;
+
+	@Autowired
+	SupportListener supportListener;
     
     @Override
     public void afterJob(JobExecution jobExecution) {
@@ -94,10 +100,10 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 				}
 			}
 
-			SupportListener.blankTranscriptPrintFile(yed4List,batchId,usl,mapDist,properName);
-			SupportListener.blankCertificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",properName);
-			SupportListener.blankCertificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
-			SupportListener.blankCertificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
+			supportListener.blankTranscriptPrintFile(yed4List,batchId,usl,mapDist,properName);
+			supportListener.blankCertificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",properName);
+			supportListener.blankCertificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
+			supportListener.blankCertificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
 		});
 		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, mapDist,localDownload);
 	}
