@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 public enum JobSelection {
 	SGBJ ("REGALG"),
 	STBJ ("TVRRUN"),
+    YDBJ ("DISTRUN_YE"),
 	URDBJ ("DISTRUNUSER"),
     URPDBJ ("PSIRUN"),
     BDBJ ("DISTRUNUSER");
