@@ -14,10 +14,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -124,7 +121,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				 *  User Request Distribution Run - Original Certificate OC
 				 ****  Also select the students’ transcript for print
 				 */
-				addTranscriptsToDistributionRequest(summaryDTO,batchId,properName);
+				addTranscriptsToDistributionRequest(cList,summaryDTO,batchId,properName);
 			} else {
 				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
 			}
@@ -140,7 +137,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		}
 	}
 
-	private void addTranscriptsToDistributionRequest(DistributionSummaryDTO summaryDTO, Long batchId, String properName) {
+	private void addTranscriptsToDistributionRequest(List<StudentCredentialDistribution> cList, DistributionSummaryDTO summaryDTO, Long batchId, String properName) {
 		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		mapDist.forEach((schoolCode, distributionPrintRequest) -> {
 			List<StudentCredentialDistribution> mergedCertificateList = distributionPrintRequest.getMergedListOfCertificates();
@@ -165,6 +162,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 					}
 				}
 			}
+			cList.addAll(transcriptDistributionList);
 			supportListener.transcriptPrintFile(transcriptDistributionList, batchId, schoolCode, mapDist, properName);
 		});
 	}
@@ -172,7 +170,10 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
 		cList.forEach(scd-> {
 			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
-			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
+		});
+		List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().collect(Collectors.toList());
+		studentIDs.forEach(sid-> {
+			restUtils.updateStudentGradRecord(sid,batchId,activityCode,accessToken);
 		});
 	}
 
