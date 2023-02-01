@@ -1,6 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import org.slf4j.Logger;
@@ -23,7 +25,13 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
 	@Autowired
-	private TaskSchedulingService taskSchedulingService;
+	TaskSchedulingService taskSchedulingService;
+	@Autowired
+	GraduationReportService graduationReportService;
+	@Autowired
+	RestUtils restUtils;
+	@Autowired
+	SupportListener supportListener;
 
 	ParallelDataFetch parallelDataFetch;
 
@@ -56,29 +64,33 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				summaryDTO.initializeCredentialCountMap();
 			}
 
+			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.URDBJ, credentialType);
+
+			// save batch job & error history
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
+
+			ResponseObj obj = restUtils.getTokenResponseObject();
+			LOGGER.info("Starting Report Process " + LOG_SEPARATION_SINGLE);
+			processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,properName);
+
+			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
+			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
+
 			// display Summary Details
 			LOGGER.info(" Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info(" Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
-
-			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.URDBJ, credentialType);
-
-			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(LOG_SEPARATION_SINGLE);
-			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
-			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
-			ResponseObj obj = restUtils.getTokenResponseObject();
-			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),credentialType,obj.getAccess_token(),localDownLoad,properName);
 			LOGGER.info(LOG_SEPARATION);
 		}
     }
 
-	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String credentialType, String accessToken,String localDownload,String properName) {
-		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
+	private void processGlobalList(DistributionSummaryDTO summaryDTO, Long batchId, String credentialType, String accessToken,String localDownload,String properName) {
+		List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
+		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
+    	List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = new ArrayList<>();
 			List<StudentCredentialDistribution> yed2List = new ArrayList<>();
@@ -95,23 +107,28 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
 				}
 			}
-			SupportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,properName);
-			SupportListener.certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",properName);
-			SupportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
-			SupportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
+			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,properName);
+			supportListener.certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",properName);
+			supportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
+			supportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
 		});
 		DistributionResponse disres = null;
 		String activityCode = null;
 		if(credentialType != null) {
 			if(credentialType.equalsIgnoreCase("OC")) {
 				activityCode = "USERDISTOC";
-			}else {
+				/** GRADT-553
+				 *  User Request Distribution Run - Original Certificate OC
+				 ****  Also select the students’ transcript for print
+				 */
+				addTranscriptsToDistributionRequest(cList,summaryDTO,batchId,properName);
+			} else {
 				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
 			}
 			if (credentialType.equalsIgnoreCase("RC")) {
-				disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist,activityCode,localDownload);
+				disres = restUtils.createReprintAndUpload(batchId, accessToken, mapDist, activityCode,localDownload);
 			} else {
-				disres = restUtils.mergeAndUpload(batchId, accessToken, mapDist,activityCode,localDownload);
+				disres = restUtils.mergeAndUpload(batchId, accessToken, mapDist, activityCode,localDownload);
 			}
 		}
 		if(disres != null) {
@@ -120,10 +137,43 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		}
 	}
 
+	private void addTranscriptsToDistributionRequest(List<StudentCredentialDistribution> cList, DistributionSummaryDTO summaryDTO, Long batchId, String properName) {
+		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
+		mapDist.forEach((schoolCode, distributionPrintRequest) -> {
+			List<StudentCredentialDistribution> mergedCertificateList = distributionPrintRequest.getMergedListOfCertificates();
+			List<StudentCredentialDistribution> uniqueCertificateList = mergedCertificateList.stream().distinct().collect(Collectors.toList());
+			List<String> studentPens = uniqueCertificateList.stream().map(StudentCredentialDistribution::getPen).collect(Collectors.toList());
+			StudentSearchRequest searchRequest = StudentSearchRequest.builder().pens(studentPens).build();
+			List<StudentCredentialDistribution> transcriptDistributionList = restUtils.getStudentsForUserReqDisRun("OT",searchRequest,restUtils.getTokenResponseObject().getAccess_token());
+			for(StudentCredentialDistribution certScd: uniqueCertificateList) {
+				for(StudentCredentialDistribution trScd: transcriptDistributionList) {
+					if(certScd.getStudentID().equals(trScd.getStudentID())) {
+						trScd.setSchoolOfRecord(certScd.getSchoolOfRecord());
+						trScd.setPen(certScd.getPen());
+						trScd.setLegalFirstName(certScd.getLegalFirstName());
+						trScd.setLegalMiddleNames(certScd.getLegalMiddleNames());
+						trScd.setLegalLastName(certScd.getLegalLastName());
+						trScd.setProgramCompletionDate(certScd.getProgramCompletionDate());
+						trScd.setHonoursStanding(certScd.getHonoursStanding());
+						trScd.setProgram(certScd.getProgram());
+						trScd.setStudentGrade(certScd.getStudentGrade());
+						trScd.setNonGradReasons(certScd.getNonGradReasons());
+						summaryDTO.increment(trScd.getPaperType());
+					}
+				}
+			}
+			cList.addAll(transcriptDistributionList);
+			supportListener.transcriptPrintFile(transcriptDistributionList, batchId, schoolCode, mapDist, properName);
+		});
+	}
+
 	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
 		cList.forEach(scd-> {
 			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
-			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
+		});
+		List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().collect(Collectors.toList());
+		studentIDs.forEach(sid-> {
+			restUtils.updateStudentGradRecord(sid,batchId,activityCode,accessToken);
 		});
 	}
 
