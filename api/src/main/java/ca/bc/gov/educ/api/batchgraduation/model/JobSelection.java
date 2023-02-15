@@ -4,6 +4,7 @@ public enum JobSelection {
 	SGBJ ("REGALG"),
 	STBJ ("TVRRUN"),
     YDBJ ("DISTRUN_YE"),
+    MDBJ ("DISTRUN"),
 	URDBJ ("DISTRUNUSER"),
     URPDBJ ("PSIRUN"),
     BDBJ ("DISTRUNUSER");
