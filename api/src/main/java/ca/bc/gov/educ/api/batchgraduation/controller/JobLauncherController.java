@@ -67,6 +67,7 @@ public class JobLauncherController {
     private static final String TRANMISSION_TYPE = "transmissionType";
     private static final String DISDTO = "distributionSummaryDTO";
     private static final String LOCALDOWNLOAD = "LocalDownload";
+    private static final String BEARER = "Bearer ";
 
     private final JobLauncher jobLauncher;
     private final JobLauncher asyncJobLauncher;
@@ -157,7 +158,7 @@ public class JobLauncherController {
     public ResponseEntity<String> loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData,
                                                  @RequestHeader(name="Authorization") String accessToken) {
         logger.debug("Inside loadStudentIDs");
-        Integer recordsAdded = restUtils.getStudentByPenFromStudentAPI(loadStudentData, accessToken.replace("Bearer ", ""));
+        Integer recordsAdded = restUtils.getStudentByPenFromStudentAPI(loadStudentData, accessToken.replace(BEARER, ""));
         if(recordsAdded != null)
             return ResponseEntity.ok("Record Added Successfully");
         return ResponseEntity.status(500).body("Student Record Could not be added");
@@ -184,7 +185,7 @@ public class JobLauncherController {
                                                     @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
                                                     @RequestHeader(name="Authorization") String accessToken) {
         logger.debug("Inside loadError");
-        ErrorDashBoard dash = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken.replace("Bearer ", ""));
+        ErrorDashBoard dash = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken.replace(BEARER, ""));
         if(dash == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -404,7 +405,7 @@ public class JobLauncherController {
                 logger.info(" Re-Generating School Reports for {} --------------------------------------------------------", entity.getJobType());
                 List<String> uniqueSchoolList = gradBatchHistoryService.getSchoolListForReport(batchId);
                 logger.info(" Number of Schools [{}] ---------------------------------------------------------", uniqueSchoolList.size());
-                restUtils.createAndStoreSchoolReports(accessToken, uniqueSchoolList, entity.getJobType());
+                restUtils.createAndStoreSchoolReports(accessToken.replace(BEARER, ""), uniqueSchoolList, entity.getJobType());
                 return ResponseEntity.ok(Boolean.TRUE);
             } catch (Exception e) {
                 return ResponseEntity.status(500).body(Boolean.FALSE);
