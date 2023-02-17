@@ -48,17 +48,17 @@ PARSER_CONFIG="
 ###########################################################
 echo Creating config map "$APP_NAME"-config-map
 oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map \
- --from-literal=CONNECTION_TIMEOUT="60000" \
+ --from-literal=CONNECTION_TIMEOUT="30000" \
  --from-literal=GRAD_TRAX_API="http://educ-grad-trax-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
- --from-literal=MAX_LIFETIME="580000" \
+ --from-literal=MAX_LIFETIME="600000" \
  --from-literal=GRAD_STUDENT_API="http://educ-grad-student-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
- --from-literal=MAXIMUM_POOL_SIZE="60" \
+ --from-literal=MAXIMUM_POOL_SIZE="20" \
  --from-literal=APP_LOG_LEVEL="INFO" \
  --from-literal=GRAD_GRADUATION_REPORT_API="http://educ-grad-graduation-report-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=GRAD_DISTRIBUTION_API="http://educ-grad-distribution-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=TVR_RUN_CRON="0 0 22 * * *" \
  --from-literal=PEN_API="http://student-api-master.$COMMON_NAMESPACE-$envValue.svc.cluster.local:8080/" \
- --from-literal=IDLE_TIMEOUT="400000" \
+ --from-literal=IDLE_TIMEOUT="300000" \
  --from-literal=MAX_RETRY_ATTEMPTS="5" \
  --from-literal=ENABLE_FLYWAY="true" \
  --from-literal=KEEP_ALIVE_TIME="150000" \
