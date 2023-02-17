@@ -8,7 +8,7 @@ spring:
       maximum-pool-size: ${MAXIMUM_POOL_SIZE}
       connection-timeout: ${CONNECTION_TIMEOUT}
       max-lifetime: ${MAX_LIFETIME}
-      minimum-idle: 2
+      minimum-idle: ${MIN_IDLE}
       keepalive-time: ${KEEP_ALIVE_TIME}
       idle-timeout: ${IDLE_TIMEOUT}
     url: ${CONNECTION_STRING}
