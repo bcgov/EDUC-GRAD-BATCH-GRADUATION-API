@@ -1,7 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.rest;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.util.*;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
+import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
@@ -468,6 +471,15 @@ public class RestUtils {
                 .retrieve().bodyToMono(boolean.class).block();
     }
 
+    public void createDistrictSchoolYearEndReport(String accessToken) {
+        final UUID correlationID = UUID.randomUUID();
+        webClient.get().uri(constants.getSchoolYearEndReport())
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .retrieve().bodyToMono(Integer.class).block();
+        webClient.get().uri(constants.getDistrictYearEndReport())
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .retrieve().bodyToMono(Integer.class).block();
+    }
 
     public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req, String accessToken) {
         UUID correlationID = UUID.randomUUID();

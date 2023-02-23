@@ -68,7 +68,10 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
     }
 
 	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String,DistributionPrintRequest> mapDist,String activityCode,String accessToken) {
-		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
+		if("YEARENDDIST".equalsIgnoreCase(activityCode)) {
+			createDistrictSchoolYearEndReport(accessToken);
+		}
+    	List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
 			List<StudentCredentialDistribution> yed2List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
@@ -86,6 +89,10 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());
 		}
+	}
+
+	private void createDistrictSchoolYearEndReport(String accessToken) {
+		restUtils.createDistrictSchoolYearEndReport(accessToken);
 	}
 
 	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode,String accessToken) {
