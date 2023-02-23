@@ -471,14 +471,16 @@ public class RestUtils {
                 .retrieve().bodyToMono(boolean.class).block();
     }
 
-    public void createDistrictSchoolYearEndReport(String accessToken) {
+    public Integer createDistrictSchoolYearEndReport(String accessToken) {
+        Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
-        webClient.get().uri(constants.getSchoolYearEndReport())
+        reportCount += webClient.get().uri(constants.getSchoolYearEndReport())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(Integer.class).block();
-        webClient.get().uri(constants.getDistrictYearEndReport())
+        reportCount += webClient.get().uri(constants.getDistrictYearEndReport())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(Integer.class).block();
+        return reportCount;
     }
 
     public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req, String accessToken) {
