@@ -31,6 +31,7 @@ public class RestUtils {
     private static final String STUDENT_PROCESS = "P:{}";
     private static final String STUDENT_PROCESSED = "D:{} {} of {}";
     private static final String MERGE_MSG="Merge and Upload Success {}";
+    private static final String YEARENDDIST = "YEARENDDIST";
     private final EducGradBatchGraduationApiConstants constants;
 
     private ResponseObjCache responseObjCache;
@@ -408,14 +409,15 @@ public class RestUtils {
 
     public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String activityCode,String localDownload) {
         UUID correlationID = UUID.randomUUID();
-        String url;
-        if(activityCode.equalsIgnoreCase("YEARENDDIST")) {
-            url= String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
-        }else {
-            url = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
+        String distributionUrl;
+        if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
+            createDistrictSchoolYearEndReport(accessToken);
+            distributionUrl= String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
+        } else {
+            distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
         DistributionResponse result = webClient.post()
-                .uri(url)
+                .uri(distributionUrl)
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .body(BodyInserters.fromValue(mapDist))
                 .retrieve()
@@ -424,6 +426,7 @@ public class RestUtils {
 
         if(result != null)
             LOGGER.info(MERGE_MSG,result.getMergeProcessResponse());
+
         return  result;
     }
 
