@@ -477,10 +477,7 @@ public class RestUtils {
     public Integer createDistrictSchoolYearEndReport(String accessToken) {
         Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
-        reportCount += webClient.get().uri(constants.getSchoolYearEndReport())
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .retrieve().bodyToMono(Integer.class).block();
-        reportCount += webClient.get().uri(constants.getDistrictYearEndReport())
+        reportCount += webClient.get().uri(constants.getSchoolDistrictYearEndReport())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(Integer.class).block();
         return reportCount;

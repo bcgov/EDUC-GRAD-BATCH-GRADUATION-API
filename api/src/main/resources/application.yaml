@@ -160,6 +160,8 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schoolyearend
     district_year_end_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/districtyearend
+    school_district_year_end_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictyearend
   grad-student-api:
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate
