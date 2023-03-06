@@ -5,7 +5,8 @@ envValue=$1
 APP_NAME=$2
 OPENSHIFT_NAMESPACE=$3
 COMMON_NAMESPACE=$4
-SPLUNK_TOKEN=$5
+BUSINESS_NAMESPACE=$5
+SPLUNK_TOKEN=$6
 
 SPLUNK_URL="gww.splunk.educ.gov.bc.ca"
 FLB_CONFIG="[SERVICE]
@@ -55,7 +56,7 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
  --from-literal=MAXIMUM_POOL_SIZE="20" \
  --from-literal=APP_LOG_LEVEL="INFO" \
  --from-literal=GRAD_GRADUATION_REPORT_API="http://educ-grad-graduation-report-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
- --from-literal=GRAD_DISTRIBUTION_API="http://educ-grad-distribution-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
+ --from-literal=GRAD_DISTRIBUTION_API="http://educ-grad-distribution-api.$BUSINESS_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=TVR_RUN_CRON="0 0 22 * * *" \
  --from-literal=PEN_API="http://student-api-master.$COMMON_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=IDLE_TIMEOUT="300000" \
