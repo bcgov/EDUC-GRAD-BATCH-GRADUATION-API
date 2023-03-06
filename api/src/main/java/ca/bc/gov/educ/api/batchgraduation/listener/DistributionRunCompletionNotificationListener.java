@@ -37,7 +37,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
-			String activityCode = jobType != null && jobType.equalsIgnoreCase("DISTRUN")?"MONTHLYDIST":"YEARENDDIST";
+			String activityCode = jobType != null && jobType.equalsIgnoreCase("DISTRUN") ? "MONTHLYDIST" : "YEARENDDIST";
 			String studentSearchRequest = jobParameters.getString("searchRequest");
 
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
@@ -60,9 +60,9 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
-			ResponseObj obj = restUtils.getTokenResponseObject();
+			ResponseObj tokenResponse = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),activityCode,obj.getAccess_token());
+			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),activityCode,tokenResponse.getAccess_token());
 			LOGGER.info("=======================================================================================");
 		}
     }
