@@ -92,10 +92,16 @@ endpoint:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/school
     school_year_end_report:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schoolyearend
+    school_month_report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schoolmonth
     district_year_end_report:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/districtyearend
+    district_month_report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/districtmonth
     school_district_year_end_report:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictyearend
+    school_district_month_report:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictmonth
   grad-student-api:
     grad-status: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s
     student-for-grad-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
