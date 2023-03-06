@@ -23,11 +23,12 @@ env:
   APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
   BRANCH: "main"
   TAG: "latest"
+  #GRAD2-1947 Resource optimization
   MIN_CPU: "20m"
   MAX_CPU: "250m"
   MIN_MEM: "1024Mi"
-  MAX_MEM: "5Gi"
-  MIN_REPLICAS: "1"
+  MAX_MEM: "4Gi"
+  MIN_REPLICAS: "3"
   MAX_REPLICAS: "3"
 
 on:
