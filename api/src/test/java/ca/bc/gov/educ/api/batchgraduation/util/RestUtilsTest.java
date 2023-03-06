@@ -1112,6 +1112,15 @@ public class RestUtilsTest {
         int result = this.restUtils.createDistrictSchoolYearEndReport("accessToken");
         assertEquals(4, result);
 
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictMonthReport())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
+
+        result = this.restUtils.createDistrictSchoolMonthReport("accessToken");
+        assertEquals(4, result);
+
     }
 
     @Test

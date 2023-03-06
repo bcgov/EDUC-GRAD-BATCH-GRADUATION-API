@@ -414,6 +414,7 @@ public class RestUtils {
             createDistrictSchoolYearEndReport(accessToken);
             distributionUrl= String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
         } else {
+            createDistrictSchoolMonthReport(accessToken);
             distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
         DistributionResponse result = webClient.post()
@@ -478,6 +479,15 @@ public class RestUtils {
         Integer reportCount = 0;
         final UUID correlationID = UUID.randomUUID();
         reportCount += webClient.get().uri(constants.getSchoolDistrictYearEndReport())
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .retrieve().bodyToMono(Integer.class).block();
+        return reportCount;
+    }
+
+    public Integer createDistrictSchoolMonthReport(String accessToken) {
+        Integer reportCount = 0;
+        final UUID correlationID = UUID.randomUUID();
+        reportCount += webClient.get().uri(constants.getSchoolDistrictMonthReport())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(Integer.class).block();
         return reportCount;

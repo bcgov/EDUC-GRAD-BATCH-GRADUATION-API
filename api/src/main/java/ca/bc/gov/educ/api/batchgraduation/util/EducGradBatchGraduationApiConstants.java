@@ -164,11 +164,20 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-api.school_year_end_report.url}")
     private String schoolYearEndReport;
 
+    @Value("${endpoint.grad-graduation-api.school_month_report.url}")
+    private String schoolMonthReport;
+
     @Value("${endpoint.grad-graduation-api.district_year_end_report.url}")
     private String districtYearEndReport;
 
+    @Value("${endpoint.grad-graduation-api.district_month_report.url}")
+    private String districtMonthReport;
+
     @Value("${endpoint.grad-graduation-api.school_district_year_end_report.url}")
     private String schoolDistrictYearEndReport;
+
+    @Value("${endpoint.grad-graduation-api.school_district_month_report.url}")
+    private String schoolDistrictMonthReport;
 
     @Value("${endpoint.grad-distribution-api.read-n-post.url}")
     private String readAndPost;
