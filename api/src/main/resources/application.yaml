@@ -158,8 +158,16 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/school?type=%s
     school_year_end_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schoolyearend
+    school_month_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schoolmonth
     district_year_end_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/districtyearend
+    district_month_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/districtmonth
+    school_district_year_end_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictyearend
+    school_district_month_report:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictmonth
   grad-student-api:
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate

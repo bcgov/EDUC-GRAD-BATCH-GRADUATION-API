@@ -27,7 +27,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -1094,30 +1095,20 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
 
-
-        val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,null);
-        assertThat(result).isNotNull();
-    }
-
-    @Test
-    public void testCreateDistrictSchoolYearEndReport() {
-        String activityCode = "YEARENDDIST";
-
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getSchoolYearEndReport())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictMonthReport())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getDistrictYearEndReport())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictYearEndReport())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
 
-        int result = this.restUtils.createDistrictSchoolYearEndReport("accessToken");
-        assertEquals(4, result);
-
+        val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,null);
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -1135,6 +1126,17 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
         when(this.inputResponsePSI.block()).thenReturn(null);
 
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictMonthReport())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictYearEndReport())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
 
         val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,null);
         assertThat(result).isNull();

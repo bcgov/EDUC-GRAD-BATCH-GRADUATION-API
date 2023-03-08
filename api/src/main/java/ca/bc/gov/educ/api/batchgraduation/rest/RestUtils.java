@@ -411,8 +411,7 @@ public class RestUtils {
         UUID correlationID = UUID.randomUUID();
         String distributionUrl;
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
-            createDistrictSchoolYearEndReport(accessToken);
-            distributionUrl= String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
+            distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
         } else {
             distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
@@ -472,18 +471,6 @@ public class RestUtils {
         webClient.get().uri(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(boolean.class).block();
-    }
-
-    public Integer createDistrictSchoolYearEndReport(String accessToken) {
-        Integer reportCount = 0;
-        final UUID correlationID = UUID.randomUUID();
-        reportCount += webClient.get().uri(constants.getSchoolYearEndReport())
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .retrieve().bodyToMono(Integer.class).block();
-        reportCount += webClient.get().uri(constants.getDistrictYearEndReport())
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .retrieve().bodyToMono(Integer.class).block();
-        return reportCount;
     }
 
     public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req, String accessToken) {
