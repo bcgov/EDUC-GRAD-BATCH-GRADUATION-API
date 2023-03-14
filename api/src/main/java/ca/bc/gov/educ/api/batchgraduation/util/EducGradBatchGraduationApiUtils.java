@@ -50,7 +50,7 @@ public class EducGradBatchGraduationApiUtils {
         try {
             date = simpleDateFormat.parse(dateString);
         } catch (ParseException e) {
-            logger.info(ERROR_MSG,e.getMessage());
+            logger.error(ERROR_MSG,e.getMessage());
         }
 
         return date;

@@ -13,9 +13,9 @@ public class UserScheduledWriter implements ItemWriter<UserScheduledJobs> {
 
     @Override
     public void write(List<? extends UserScheduledJobs> list) throws Exception {
-        LOGGER.info("Recording Distribution Processed Data");
+        LOGGER.debug("Recording Distribution Processed Data");
         if(!list.isEmpty()) {
-            LOGGER.info("Rescheduling Done\n");
+            LOGGER.debug("Rescheduling Done\n");
         }
     }
 

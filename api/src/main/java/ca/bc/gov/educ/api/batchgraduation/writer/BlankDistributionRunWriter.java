@@ -21,7 +21,7 @@ public class BlankDistributionRunWriter implements ItemWriter<BlankCredentialDis
         if(!list.isEmpty()) {
             BlankCredentialDistribution cred = list.get(0);
 	        summaryDTO.increment(cred.getCredentialTypeCode());
-            LOGGER.info("Left : {}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
+            LOGGER.debug("Left : {}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }
     }
 

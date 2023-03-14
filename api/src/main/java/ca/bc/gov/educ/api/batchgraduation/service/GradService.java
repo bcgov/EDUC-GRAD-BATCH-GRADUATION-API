@@ -19,6 +19,6 @@ public class GradService {
     void end() {
         Instant end = Instant.now();
         Duration timeElapsed = Duration.between(start, end);
-        logger.info("Time taken: {} milliseconds", timeElapsed.toMillis());
+        logger.debug("Time taken: {} milliseconds", timeElapsed.toMillis());
     }
 }
