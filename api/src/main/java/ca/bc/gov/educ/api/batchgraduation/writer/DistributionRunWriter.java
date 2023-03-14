@@ -21,7 +21,7 @@ public class DistributionRunWriter implements ItemWriter<StudentCredentialDistri
         if(!list.isEmpty()) {
         	StudentCredentialDistribution cred = list.get(0);
 	        summaryDTO.increment(cred.getPaperType());
-            LOGGER.info("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
+            LOGGER.debug("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }
     }
 
