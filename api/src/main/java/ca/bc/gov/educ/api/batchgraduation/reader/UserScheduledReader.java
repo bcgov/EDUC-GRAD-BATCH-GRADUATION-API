@@ -24,7 +24,7 @@ public class UserScheduledReader implements ItemReader<UserScheduledJobs> {
 
     @Override
     public UserScheduledJobs read() throws Exception {
-        LOGGER.info("Reading next Credential");
+        LOGGER.debug("Reading next Credential");
 
         if (jobDataIsNotInitialized()) {
             jobList = findJobList();

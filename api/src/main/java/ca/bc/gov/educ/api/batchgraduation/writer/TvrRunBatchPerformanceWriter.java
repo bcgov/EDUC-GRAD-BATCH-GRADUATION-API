@@ -20,7 +20,7 @@ public class TvrRunBatchPerformanceWriter extends BaseWriter {
         if(!list.isEmpty()) {
         	GraduationStudentRecord gradStatus = list.get(0);
             saveBatchStatus(gradStatus);
-            LOGGER.info("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
+            LOGGER.debug("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }
     }
 

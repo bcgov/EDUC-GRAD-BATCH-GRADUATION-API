@@ -20,7 +20,7 @@ public class PsiDistributionRunWriter implements ItemWriter<PsiCredentialDistrib
     public void write(List<? extends PsiCredentialDistribution> list) throws Exception {
         if(!list.isEmpty()) {
 	        summaryDTO.increment("YED4");
-            LOGGER.info("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
+            LOGGER.debug("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }
     }
 
