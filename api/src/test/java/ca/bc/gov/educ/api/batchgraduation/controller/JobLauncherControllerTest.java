@@ -132,6 +132,18 @@ public class JobLauncherControllerTest {
     }
 
     @Test
+    public void testDistributionMonthlyGradJob() {
+        boolean exceptionIsThrown = false;
+        try {
+            jobLauncherController.launchMonthlyDistributionRunJob();
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(exceptionIsThrown).isTrue();
+    }
+
+    @Test
     public void testDistributionGradJob() {
         boolean exceptionIsThrown = false;
         try {

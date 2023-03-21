@@ -656,6 +656,32 @@ public class BatchJobConfig {
                 .build();
     }
 
+    @Bean
+    @StepScope
+    public DistributionRunPartitionerSupplemental partitionerDisRunSupplemental() {
+        return new DistributionRunPartitionerSupplemental();
+    }
+
+    @Bean
+    public Step masterStepDisRunSupplemental(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepDisRunSupplemental")
+                .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRunSupplemental())
+                .step(slaveStepDisRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants))
+                .build();
+    }
+
+    @Bean(name="SupplementalDistributionBatchJob")
+    public Job distributionBatchJobSupplemental(DistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("SupplementalDistributionBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepDisRunSupplemental(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
     /**
      * User Distribution Run
      * ItemProcessor,ItemReader and ItemWriter common with monthly distribution run

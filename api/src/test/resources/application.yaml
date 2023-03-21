@@ -138,6 +138,8 @@ endpoint:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/MER?batchId=%s&activityCode=%s&localDownload=%s
     merge-n-upload-yearly:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/MERYER?batchId=%s&activityCode=%s
+    merge-n-upload-supplemental:
+      url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/MERSUPP?batchId=%s&activityCode=%s
     reprint-n-upload:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/RPR?batchId=%s&activityCode=%s&localDownload=%s
     blanks-n-upload:
