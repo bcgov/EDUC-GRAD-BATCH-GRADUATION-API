@@ -21,7 +21,9 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_REG_GRAD_BATCH_JOB = "/executereggradbatchjob";
     public static final String EXECUTE_TVR_RUN_BATCH_JOB = "/executetvrrunbatchjob";
     public static final String EXECUTE_DIS_RUN_BATCH_JOB = "/executedisrunbatchjob";
+    public static final String EXECUTE_MONTHLY_DIS_RUN_BATCH_JOB = "/executemonthlydisrunbatchjob";
     public static final String EXECUTE_YEARLY_DIS_RUN_BATCH_JOB = "/executeyearlydisrunbatchjob";
+    public static final String EXECUTE_SUPP_DIS_RUN_BATCH_JOB = "/executesuppdisrunbatchjob";
 
     // Special Run
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
@@ -136,9 +138,11 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-distribution-api.merge-psi-n-upload.url}")
     private String mergePsiAndUpload;
 
-
     @Value("${endpoint.grad-distribution-api.merge-n-upload-yearly.url}")
     private String mergeAndUploadYearly;
+
+    @Value("${endpoint.grad-distribution-api.merge-n-upload-supplemental.url}")
+    private String mergeAndUploadSupplemental;
 
     @Value("${endpoint.grad-distribution-api.reprint-n-upload.url}")
     private String reprintAndUpload;
