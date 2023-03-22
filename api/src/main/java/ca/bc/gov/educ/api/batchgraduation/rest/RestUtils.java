@@ -32,6 +32,7 @@ public class RestUtils {
     private static final String STUDENT_PROCESSED = "D:{} {} of {}";
     private static final String MERGE_MSG="Merge and Upload Success {}";
     private static final String YEARENDDIST = "YEARENDDIST";
+    private static final String SUPPDIST = "SUPPDIST";
     private final EducGradBatchGraduationApiConstants constants;
 
     private ResponseObjCache responseObjCache;
@@ -412,6 +413,8 @@ public class RestUtils {
         String distributionUrl;
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
+        } else if(SUPPDIST.equalsIgnoreCase(activityCode)) {
+            distributionUrl = String.format(constants.getMergeAndUploadSupplemental(),batchId,activityCode);
         } else {
             distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }

@@ -38,7 +38,23 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
-			String activityCode = jobType != null && jobType.equalsIgnoreCase("DISTRUN") ? "MONTHLYDIST" : "YEARENDDIST";
+			String activityCode = "MONTHLYDIST";
+			if(StringUtils.isNotBlank(jobType)) {
+				switch(jobType) {
+					case "DISTRUN":
+						activityCode = "MONTHLYDIST";
+						break;
+					case "DISTRUN_YE":
+						activityCode = "YEARENDDIST";
+						break;
+					case "DISTRUN_SUPP":
+						activityCode = "SUPPDIST";
+						break;
+					case "NONGRADRUN":
+						activityCode = "NONGRADDIST";
+						break;
+				}
+			}
 			String studentSearchRequest = jobParameters.getString("searchRequest");
 
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");

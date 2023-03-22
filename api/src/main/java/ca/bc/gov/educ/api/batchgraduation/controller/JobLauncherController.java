@@ -61,6 +61,8 @@ public class JobLauncherController {
     private static final String RERUN_FAILED = "RERUN_FAILED";
     private static final String DISTRUN = "DISTRUN";
     private static final String DISTRUN_YE = "DISTRUN_YE";
+    private static final String DISTRUN_SUPP = "DISTRUN_SUPP";
+    private static final String NONGRADRUN = "NONGRADRUN";
     private static final String DISTRUNUSER = "DISTRUNUSER";
     private static final String PSIDISTRUN = "PSIRUN";
     private static final String CREDENTIALTYPE = "credentialType";
@@ -414,9 +416,17 @@ public class JobLauncherController {
         return ResponseEntity.status(500).body(Boolean.FALSE);
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_DIS_RUN_BATCH_JOB)
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_MONTHLY_DIS_RUN_BATCH_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<DistributionSummaryDTO> launchMonthlyDistributionRunJob() {
+        return launchDistributionRunJob();
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_DIS_RUN_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Distribution Runs", description = "Run Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<DistributionSummaryDTO> launchDistributionRunJob() {
         logger.debug("launchDistributionRunJob");
@@ -440,7 +450,7 @@ public class JobLauncherController {
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_YEARLY_DIS_RUN_BATCH_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
-    @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
+    @Operation(summary = "Run Yearly Distribution Runs", description = "Run Yearly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<DistributionSummaryDTO> launchYearlyDistributionRunJob() {
         logger.debug("launchYearlyDistributionRunJob");
@@ -451,6 +461,30 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE, DISTRUN_YE);
         try {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            return ResponseEntity.ok(summaryDTO);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                | JobParametersInvalidException | NoSuchJobException e) {
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(summaryDTO);
+        }
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_SUPP_DIS_RUN_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Supplemental Distribution Runs", description = "Run Supplemental Distribution Runs", tags = { "Distribution" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<DistributionSummaryDTO> launchSupplementalDistributionRunJob() {
+        logger.debug("launchSupplementallyDistributionRunJob");
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, DISTRUN_SUPP);
+        try {
+            JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("SupplementalDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
             return ResponseEntity.ok(summaryDTO);
