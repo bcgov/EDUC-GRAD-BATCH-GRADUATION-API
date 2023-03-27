@@ -29,7 +29,7 @@ public class RestUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestUtils.class);
     private static final String STUDENT_READ = "R:{}";
     private static final String STUDENT_PROCESS = "P:{}";
-    private static final String STUDENT_PROCESSED = "D:{} {} of {}";
+    private static final String STUDENT_PROCESSED = "D:{} {} of {} batch {}";
     private static final String MERGE_MSG="Merge and Upload Success {}";
     private static final String YEARENDDIST = "YEARENDDIST";
     private static final String SUPPDIST = "SUPPDIST";
@@ -188,7 +188,7 @@ public class RestUtils {
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
                 return null;
             }
-            LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
+            LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount(), summary.getBatchId());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
@@ -227,7 +227,7 @@ public class RestUtils {
                 summary.setProcessedCount(summary.getProcessedCount() - 1L);
                 return null;
             }
-            LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
+            LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount(), summary.getBatchId());
             return algorithmResponse.getGraduationStudentRecord();
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
@@ -296,7 +296,7 @@ public class RestUtils {
             }
         }
         summary.getGlobalList().add(item);
-        LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
+        LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount(), summary.getBatchId());
         return item;
     }
 
