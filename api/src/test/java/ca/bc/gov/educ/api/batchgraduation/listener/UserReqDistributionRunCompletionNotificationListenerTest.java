@@ -1,10 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
@@ -310,6 +307,20 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(cListRes)).thenReturn(Mono.just(cList));
+
+        ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+        reportGradStudentData.setGraduationStudentRecordId(scd.getStudentID());
+        reportGradStudentData.setFirstName(scd.getLegalFirstName());
+        reportGradStudentData.setLastName(scd.getLegalLastName());
+
+        ParameterizedTypeReference<List<ReportGradStudentData>> repListRes = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getStudentDataNonGradEarly())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(repListRes)).thenReturn(Mono.just(List.of(reportGradStudentData)));
 
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");

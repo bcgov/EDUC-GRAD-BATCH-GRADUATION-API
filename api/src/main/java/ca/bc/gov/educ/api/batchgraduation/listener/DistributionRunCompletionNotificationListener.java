@@ -105,6 +105,25 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		}
 	}
 
+	private void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
+		if(!studentList.isEmpty()) {
+			SchoolDistributionRequest tpReq = new SchoolDistributionRequest();
+			tpReq.setBatchId(batchId);
+			tpReq.setPsId(usl +" " +batchId);
+			tpReq.setCount(studentList.size());
+			tpReq.setStudentList(studentList);
+			if(mapDist.get(usl) != null) {
+				DistributionPrintRequest dist = mapDist.get(usl);
+				dist.setSchoolDistributionRequest(tpReq);
+				mapDist.put(usl,dist);
+			}else{
+				DistributionPrintRequest dist = new DistributionPrintRequest();
+				dist.setSchoolDistributionRequest(tpReq);
+				mapDist.put(usl,dist);
+			}
+		}
+	}
+
 	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode,String accessToken) {
         cList.forEach(scd-> {
             restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);

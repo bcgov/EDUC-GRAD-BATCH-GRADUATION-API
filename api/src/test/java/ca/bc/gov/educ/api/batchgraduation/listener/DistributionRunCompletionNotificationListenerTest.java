@@ -176,6 +176,20 @@ public class DistributionRunCompletionNotificationListenerTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
 
+        ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+        reportGradStudentData.setGraduationStudentRecordId(scd.getStudentID());
+        reportGradStudentData.setFirstName(scd.getLegalFirstName());
+        reportGradStudentData.setLastName(scd.getLegalLastName());
+
+        ParameterizedTypeReference<List<ReportGradStudentData>> repListRes = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getStudentDataNonGradEarly())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(repListRes)).thenReturn(Mono.just(List.of(reportGradStudentData)));
+
         ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
         };
 
