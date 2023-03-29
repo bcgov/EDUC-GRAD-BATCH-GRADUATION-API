@@ -115,6 +115,7 @@ endpoint:
     read-grad-student-record: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s/algorithm
     read-grad-student-record-batch: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/batch/%s
     update-flag-ready-for-batch: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/multistudentids/batchflag/jobtype/%s
+    get-student-data-nongrad-yearly: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentnongradreportdata
   grad-graduation-report-api:
     get-transcript-list:
       yearly:

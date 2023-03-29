@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.Date;
 
 public abstract class BaseDistributionRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
@@ -129,25 +129,6 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         }
 
         return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
-    }
-
-    public void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
-        if(!studentList.isEmpty()) {
-            SchoolDistributionRequest tpReq = new SchoolDistributionRequest();
-            tpReq.setBatchId(batchId);
-            tpReq.setPsId(usl +" " +batchId);
-            tpReq.setCount(studentList.size());
-            tpReq.setStudentList(studentList);
-            if(mapDist.get(usl) != null) {
-                DistributionPrintRequest dist = mapDist.get(usl);
-                dist.setSchoolDistributionRequest(tpReq);
-                mapDist.put(usl,dist);
-            }else{
-                DistributionPrintRequest dist = new DistributionPrintRequest();
-                dist.setSchoolDistributionRequest(tpReq);
-                mapDist.put(usl,dist);
-            }
-        }
     }
 
 }

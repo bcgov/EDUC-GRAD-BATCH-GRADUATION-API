@@ -29,7 +29,7 @@ public class RestUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(RestUtils.class);
     private static final String STUDENT_READ = "R:{}";
     private static final String STUDENT_PROCESS = "P:{}";
-    private static final String STUDENT_PROCESSED = "D:{} {} of {}";
+    private static final String STUDENT_PROCESSED = "D:{} {} of {} batch {}";
     private static final String MERGE_MSG="Merge and Upload Success {}";
     private static final String YEARENDDIST = "YEARENDDIST";
     private static final String SUPPDIST = "SUPPDIST";
@@ -183,19 +183,23 @@ public class RestUtils {
             String accessToken = summary.getAccessToken();
             AlgorithmResponse algorithmResponse = this.runGradAlgorithm(item.getStudentID(), accessToken,
                     item.getProgram(), item.getProgramCompletionDate(), summary.getBatchId());
-            if(algorithmResponse.getException() != null) {
-                summary.updateError(item.getStudentID(),algorithmResponse.getException().getExceptionName(),algorithmResponse.getException().getExceptionDetails());
-                summary.setProcessedCount(summary.getProcessedCount() - 1L);
-                return null;
-            }
-            LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
-            return algorithmResponse.getGraduationStudentRecord();
+            return processGraduationStudentRecord(item, summary, algorithmResponse);
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
             return null;
         }
+    }
+
+    private GraduationStudentRecord processGraduationStudentRecord(GraduationStudentRecord item, AlgorithmSummaryDTO summary, AlgorithmResponse algorithmResponse) {
+        if(algorithmResponse.getException() != null) {
+            summary.updateError(item.getStudentID(),algorithmResponse.getException().getExceptionName(),algorithmResponse.getException().getExceptionDetails());
+            summary.setProcessedCount(summary.getProcessedCount() - 1L);
+            return null;
+        }
+        LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount(), summary.getBatchId());
+        return algorithmResponse.getGraduationStudentRecord();
     }
 
     public boolean isReportOnly(UUID studentID, String gradProgram, String programCompletionDate, String accessToken) {
@@ -222,13 +226,7 @@ public class RestUtils {
         try {
             String accessToken = summary.getAccessToken();
             AlgorithmResponse algorithmResponse = this.runProjectedGradAlgorithm(item.getStudentID(), accessToken,summary.getBatchId());
-            if(algorithmResponse.getException() != null) {
-                summary.updateError(item.getStudentID(),algorithmResponse.getException().getExceptionName(),algorithmResponse.getException().getExceptionDetails());
-                summary.setProcessedCount(summary.getProcessedCount() - 1L);
-                return null;
-            }
-            LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
-            return algorithmResponse.getGraduationStudentRecord();
+            return processGraduationStudentRecord(item, summary, algorithmResponse);
         }catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
@@ -296,7 +294,7 @@ public class RestUtils {
             }
         }
         summary.getGlobalList().add(item);
-        LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount());
+        LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount(), summary.getBatchId());
         return item;
     }
 

@@ -1,14 +1,17 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.ReportGradStudentData;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,5 +46,29 @@ public class GraduationReportService {
 					h.setBearerAuth(accessToken);
 					h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
 				}).retrieve().bodyToMono(responseType).block();
+	}
+
+	public Mono<List<StudentCredentialDistribution>> getStudentsNonGradYearly(String accessToken) {
+		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(constants.getStudentDataNonGradEarly()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
+		List<StudentCredentialDistribution> result = new ArrayList<>();
+		for(ReportGradStudentData data: reportGradStudentDataList) {
+			StudentCredentialDistribution dist = new StudentCredentialDistribution();
+			dist.setId(data.getGraduationStudentRecordId());
+			dist.setCredentialTypeCode(data.getTranscriptTypeCode());
+			dist.setStudentID(data.getGraduationStudentRecordId());
+			dist.setPaperType("YED4");
+			dist.setSchoolOfRecord(data.getMincode());
+			dist.setDocumentStatusCode("CUR");
+			dist.setPen(data.getPen());
+			dist.setLegalFirstName(data.getFirstName());
+			dist.setLegalMiddleNames(data.getMiddleName());
+			dist.setLegalLastName(data.getLastName());
+			dist.setProgramCompletionDate(data.getProgramCompletionDate());
+			dist.setHonoursStanding(data.getHonorsStanding());
+			dist.setProgram(data.getProgramCode());
+			dist.setStudentGrade(data.getStudentGrade());
+			dist.setNonGradReasons(data.getNonGradReasons());
+		}
+		return Flux.fromIterable(result).collectList();
 	}
 }

@@ -658,6 +658,32 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
+    public DistributionRunPartitionerYearlyNonGrad partitionerDisRunYearlyNonGrad() {
+        return new DistributionRunPartitionerYearlyNonGrad();
+    }
+
+    @Bean
+    public Step masterStepDisRunYearlyNonGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return stepBuilderFactory.get("masterStepDisRunYearlyNonGrad")
+                .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRunYearlyNonGrad())
+                .step(slaveStepDisRun(stepBuilderFactory))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants))
+                .build();
+    }
+
+    @Bean(name="YearlyNonGradDistributionBatchJob")
+    public Job distributionBatchJobYearlyNonGrad(DistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("YearlyNonGradDistributionBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .flow(masterStepDisRunYearlyNonGrad(stepBuilderFactory,constants))
+                .end()
+                .build();
+    }
+
+    @Bean
+    @StepScope
     public DistributionRunPartitionerSupplemental partitionerDisRunSupplemental() {
         return new DistributionRunPartitionerSupplemental();
     }

@@ -1,10 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
@@ -291,6 +288,12 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         };
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getTranscriptYearlyDistributionList())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(constants.getTranscriptDistributionList())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
@@ -305,12 +308,28 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(cListRes)).thenReturn(Mono.just(cList));
 
+        ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+        reportGradStudentData.setGraduationStudentRecordId(scd.getStudentID());
+        reportGradStudentData.setFirstName(scd.getLegalFirstName());
+        reportGradStudentData.setLastName(scd.getLegalLastName());
+
+        ParameterizedTypeReference<List<ReportGradStudentData>> repListRes = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getStudentDataNonGradEarly())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(repListRes)).thenReturn(Mono.just(List.of(reportGradStudentData)));
+
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
         Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
         Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
         Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
+        Mockito.when(parallelDataFetch.fetchDistributionRequiredDataYearly(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
+        Mockito.when(parallelDataFetch.fetchDistributionRequiredDataNonGradYearly(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
         userReqDistributionRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
