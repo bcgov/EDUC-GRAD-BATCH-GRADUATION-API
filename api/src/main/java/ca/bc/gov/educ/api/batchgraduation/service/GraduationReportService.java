@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -48,8 +47,8 @@ public class GraduationReportService {
 				}).retrieve().bodyToMono(responseType).block();
 	}
 
-	public Mono<List<StudentCredentialDistribution>> getStudentsNonGradYearly(String accessToken) {
-		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(constants.getStudentDataNonGradEarly()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
+	public List<StudentCredentialDistribution> getStudentsNonGradYearly(String mincode, String accessToken) {
+		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(String.format(constants.getStudentDataNonGradEarly(), mincode)).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
 		List<StudentCredentialDistribution> result = new ArrayList<>();
 		for(ReportGradStudentData data: reportGradStudentDataList) {
 			StudentCredentialDistribution dist = new StudentCredentialDistribution();
@@ -68,7 +67,12 @@ public class GraduationReportService {
 			dist.setProgram(data.getProgramCode());
 			dist.setStudentGrade(data.getStudentGrade());
 			dist.setNonGradReasons(data.getNonGradReasons());
+			result.add(dist);
 		}
-		return Flux.fromIterable(result).collectList();
+		return result;
+	}
+
+	public List<String> getSchoolsNonGradYearly(String accessToken) {
+		return webClient.get().uri(String.format(constants.getSchoolDataNonGradEarly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<String>>(){}).block();
 	}
 }

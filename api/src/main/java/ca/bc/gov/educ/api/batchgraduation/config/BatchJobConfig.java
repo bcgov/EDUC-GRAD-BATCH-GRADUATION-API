@@ -27,6 +27,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.UUID;
 
 @Configuration
@@ -577,14 +578,32 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
+    public ItemProcessor<String, List<StudentCredentialDistribution>> itemProcessorDisRunYearlyNonGrad() {
+        return new DistributionRunYearlyNonGradProcessor();
+    }
+
+    @Bean
+    @StepScope
     public ItemReader<StudentCredentialDistribution> itemReaderDisRun() {
-        return new DistributionRunReader();
+        return new DistributionRunStudentCredentialsReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<String> itemReaderDisRunYearlyNonGrad() {
+        return new DistributionRunYearlyNonGradReader();
     }
 
     @Bean
     @StepScope
     public ItemWriter<StudentCredentialDistribution> itemWriterDisRun() {
         return new DistributionRunWriter();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<List<StudentCredentialDistribution>> itemWriterDisRunYearlyNonGrad() {
+        return new DistributionRunWriterYearlyNonGrad();
     }
 
     @Bean
@@ -601,6 +620,16 @@ public class BatchJobConfig {
                 .reader(itemReaderDisRun())
                 .processor(itemProcessorDisRun())
                 .writer(itemWriterDisRun())
+                .build();
+    }
+
+    @Bean
+    public Step slaveStepDisRunYearlyNonGrad(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepDisRunYearlyNonGrad")
+                .<String, List<StudentCredentialDistribution>>chunk(1)
+                .reader(itemReaderDisRunYearlyNonGrad())
+                .processor(itemProcessorDisRunYearlyNonGrad())
+                .writer(itemWriterDisRunYearlyNonGrad())
                 .build();
     }
 
@@ -658,15 +687,15 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public DistributionRunPartitionerYearlyNonGrad partitionerDisRunYearlyNonGrad() {
-        return new DistributionRunPartitionerYearlyNonGrad();
+    public DistributionRunYearlyNonGradPartitioner partitionerDisRunYearlyNonGrad() {
+        return new DistributionRunYearlyNonGradPartitioner();
     }
 
     @Bean
     public Step masterStepDisRunYearlyNonGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepDisRunYearlyNonGrad")
-                .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRunYearlyNonGrad())
-                .step(slaveStepDisRun(stepBuilderFactory))
+                .partitioner(slaveStepDisRunYearlyNonGrad(stepBuilderFactory).getName(), partitionerDisRunYearlyNonGrad())
+                .step(slaveStepDisRunYearlyNonGrad(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants))
                 .build();

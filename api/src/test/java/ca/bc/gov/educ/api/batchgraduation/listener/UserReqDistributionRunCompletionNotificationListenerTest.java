@@ -329,7 +329,6 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredDataYearly(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
-        Mockito.when(parallelDataFetch.fetchDistributionRequiredDataNonGradYearly(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
         userReqDistributionRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);

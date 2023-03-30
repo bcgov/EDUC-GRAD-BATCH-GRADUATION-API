@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.rest;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
@@ -41,6 +42,9 @@ public class RestUtils {
 
     @Autowired
     JsonTransformer jsonTransformer;
+
+    @Autowired
+    GraduationReportService graduationReportService;
 
     @Autowired
     public RestUtils(final EducGradBatchGraduationApiConstants constants, final WebClient webClient, ResponseObjCache objCache) {
@@ -132,7 +136,14 @@ public class RestUtils {
             return null;
         }
     }
-    
+
+    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(String mincode, DistributionSummaryDTO summaryDTO) {
+        summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
+        List<StudentCredentialDistribution> result = graduationReportService.getStudentsNonGradYearly(mincode, summaryDTO.getAccessToken());
+        summaryDTO.getGlobalList().addAll(result);
+        return result;
+    }
+
     public List<UUID> getStudentsForAlgorithm(String accessToken) {
         UUID correlationID = UUID.randomUUID();
         final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {

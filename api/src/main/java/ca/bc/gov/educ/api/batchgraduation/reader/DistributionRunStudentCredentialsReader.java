@@ -3,13 +3,14 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
-public class DistributionRunReader extends DistributionRunBaseReader {
+public class DistributionRunStudentCredentialsReader extends DistributionRunBaseReader implements ItemReader<StudentCredentialDistribution> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunStudentCredentialsReader.class);
 
     @Value("#{stepExecutionContext['index']}")
     private Integer nxtCredentialForProcessing;
