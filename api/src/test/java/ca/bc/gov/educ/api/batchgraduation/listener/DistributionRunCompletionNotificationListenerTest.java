@@ -170,6 +170,26 @@ public class DistributionRunCompletionNotificationListenerTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
 
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getTranscriptYearlyDistributionList())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
+
+        ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+        reportGradStudentData.setGraduationStudentRecordId(scd.getStudentID());
+        reportGradStudentData.setFirstName(scd.getLegalFirstName());
+        reportGradStudentData.setLastName(scd.getLegalLastName());
+
+        ParameterizedTypeReference<List<ReportGradStudentData>> repListRes = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(constants.getStudentDataNonGradEarly())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(repListRes)).thenReturn(Mono.just(List.of(reportGradStudentData)));
+
         ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
         };
 
@@ -185,6 +205,8 @@ public class DistributionRunCompletionNotificationListenerTest {
         Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
         Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
+        Mockito.when(parallelDataFetch.fetchDistributionRequiredDataYearly(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
+        Mockito.when(parallelDataFetch.fetchDistributionRequiredDataNonGradYearly(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
         Mockito.when(restUtils.mergeAndUpload(121L,"asdasd",mapDist,"YEARENDDIST",null)).thenReturn(new DistributionResponse());
         distributionRunCompletionNotificationListener.afterJob(ex);
 
