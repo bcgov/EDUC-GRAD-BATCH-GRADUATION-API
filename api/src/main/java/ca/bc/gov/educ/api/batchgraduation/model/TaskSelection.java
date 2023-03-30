@@ -5,6 +5,8 @@ public enum TaskSelection {
 	STBJ ("SpecialTvrRunBatchJob"),
     YDBJ ("YearlyDistributionBatchJob"),
     MDBJ ("DistributionBatchJob"),
+    SDBJ ("SupplementalDistributionBatchJob"),
+    NDBJ ("YearlyNonGradDistributionBatchJob"),
 	URDBJ ("UserReqDistributionBatchJob"),
     URPDBJ("psiDistributionBatchJob"),
     BDBJ ("blankDistributionBatchJob");
