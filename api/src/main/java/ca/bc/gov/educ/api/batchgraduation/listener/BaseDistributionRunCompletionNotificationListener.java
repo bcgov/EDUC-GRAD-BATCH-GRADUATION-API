@@ -74,7 +74,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
             StudentSearchRequest payload = new ObjectMapper().readValue(studentSearchRequest, StudentSearchRequest.class);
             jobParamsDto.setPayload(payload);
         } catch (Exception e) {
-            LOGGER.error("StudentSearchRequest payload parse error - {}", e.getMessage());
+            LOGGER.warn("StudentSearchRequest payload parse error - {}", e.getMessage());
         }
 
         String jobParamsDtoStr = null;

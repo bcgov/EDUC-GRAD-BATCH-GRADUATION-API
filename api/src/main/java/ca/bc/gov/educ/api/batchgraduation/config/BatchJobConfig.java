@@ -702,7 +702,7 @@ public class BatchJobConfig {
     }
 
     @Bean(name="YearlyNonGradDistributionBatchJob")
-    public Job distributionBatchJobYearlyNonGrad(DistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Job distributionBatchJobYearlyNonGrad(DistributionRunYearlyNonGradCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("YearlyNonGradDistributionBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)

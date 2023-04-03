@@ -36,11 +36,11 @@ public class GraduationReportService {
 		return webClient.get().uri(constants.getCertificateDistributionList()).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<StudentCredentialDistribution>>(){});
 	}
 
-	public List<PsiCredentialDistribution> getPsiStudentsForRun(String transmissionType,String psiCode,String psiYear,String accessToken) {
+	public List<PsiCredentialDistribution> getPsiStudentsForRun(String transmissionType,String psiCodes,String psiYear,String accessToken) {
 		UUID correlationID = UUID.randomUUID();
 		final ParameterizedTypeReference<List<PsiCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
 		};
-		return webClient.get().uri(String.format(constants.getPsiStudentList(),transmissionType,psiCode,psiYear))
+		return webClient.get().uri(String.format(constants.getPsiStudentList(),transmissionType,psiCodes,psiYear))
 				.headers(h -> {
 					h.setBearerAuth(accessToken);
 					h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
