@@ -5,6 +5,8 @@ public enum JobSelection {
 	STBJ ("TVRRUN"),
     YDBJ ("DISTRUN_YE"),
     MDBJ ("DISTRUN"),
+    SDBJ("DISTRUN_SUPP"),
+    NDBJ("NONGRADRUN"),
 	URDBJ ("DISTRUNUSER"),
     URPDBJ ("PSIRUN"),
     BDBJ ("DISTRUNUSER");
