@@ -603,7 +603,7 @@ public class BatchJobConfig {
     @Bean
     @StepScope
     public ItemWriter<List<StudentCredentialDistribution>> itemWriterDisRunYearlyNonGrad() {
-        return new DistributionRunWriterYearlyNonGrad();
+        return new DistributionRunYearlyNonGradWriter();
     }
 
     @Bean

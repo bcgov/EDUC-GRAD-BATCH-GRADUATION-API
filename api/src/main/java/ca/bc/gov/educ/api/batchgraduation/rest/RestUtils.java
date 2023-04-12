@@ -34,6 +34,7 @@ public class RestUtils {
     private static final String MERGE_MSG="Merge and Upload Success {}";
     private static final String YEARENDDIST = "YEARENDDIST";
     private static final String SUPPDIST = "SUPPDIST";
+    private static final String NONGRADDIST = "NONGRADDIST";
     private final EducGradBatchGraduationApiConstants constants;
 
     private ResponseObjCache responseObjCache;
@@ -58,6 +59,10 @@ public class RestUtils {
             responseObjCache.setResponseObj(getResponseObj());
         }
         return responseObjCache.getResponseObj();
+    }
+
+    public String fetchAccessToken() {
+        return this.getTokenResponseObject().getAccess_token();
     }
 
     @Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
@@ -139,8 +144,11 @@ public class RestUtils {
 
     public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(String mincode, DistributionSummaryDTO summaryDTO) {
         summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
-        List<StudentCredentialDistribution> result = graduationReportService.getStudentsNonGradYearly(mincode, summaryDTO.getAccessToken());
-        summaryDTO.getGlobalList().addAll(result);
+        String accessToken = getTokenResponseObject().getAccess_token();
+        List<StudentCredentialDistribution> result = graduationReportService.getStudentsNonGradYearly(mincode, accessToken);
+        List<StudentCredentialDistribution> globalList = summaryDTO.getGlobalList();
+        globalList.clear();
+        globalList.addAll(result);
         return result;
     }
 
@@ -422,6 +430,8 @@ public class RestUtils {
         String distributionUrl;
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
+        } else if(NONGRADDIST.equalsIgnoreCase(activityCode)) {
+            distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
         } else if(SUPPDIST.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadSupplemental(),batchId,activityCode);
         } else {
@@ -505,7 +515,7 @@ public class RestUtils {
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(GraduationStudentRecord.class).block();
         }catch (Exception e) {
-            LOGGER.debug("Student {} not found",studentID);
+            LOGGER.error("Update Student Record {} failed {}",studentID,e.getMessage());
         }
     }
 

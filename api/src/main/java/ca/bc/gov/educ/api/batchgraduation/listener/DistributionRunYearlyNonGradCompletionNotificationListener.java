@@ -9,6 +9,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.processing.Generated;
 import java.util.Date;
 
 @Component
@@ -17,6 +18,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradCompletionNotificationListener.class);
 
     @Override
+	@Generated("default")
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();

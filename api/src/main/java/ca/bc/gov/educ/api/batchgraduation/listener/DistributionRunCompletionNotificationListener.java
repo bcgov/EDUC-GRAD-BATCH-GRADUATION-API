@@ -101,7 +101,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,null);
 		if(disres != null) {
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());
+			updateBackStudentRecords(cList,batchId,activityCode);
 		}
 	}
 
@@ -124,8 +124,10 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		}
 	}
 
-	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode,String accessToken) {
+	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode) {
         cList.forEach(scd-> {
+			LOGGER.debug("Update back Student Record {}", scd.getStudentID());
+        	String accessToken = restUtils.fetchAccessToken();
             restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
             restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
         });

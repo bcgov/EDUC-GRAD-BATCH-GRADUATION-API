@@ -133,7 +133,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		}
 		if(disres != null) {
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());
+			updateBackStudentRecords(cList,batchId,activityCode);
 		}
 	}
 
@@ -158,6 +158,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 						trScd.setProgram(certScd.getProgram());
 						trScd.setStudentGrade(certScd.getStudentGrade());
 						trScd.setNonGradReasons(certScd.getNonGradReasons());
+						trScd.setLastUpdateDate(certScd.getLastUpdateDate());
 						summaryDTO.increment(trScd.getPaperType());
 					}
 				}
@@ -167,12 +168,15 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		});
 	}
 
-	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
+	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode) {
 		cList.forEach(scd-> {
+			LOGGER.debug("Update back Student Record {}", scd.getStudentID());
+			String accessToken = restUtils.fetchAccessToken();
 			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
 		});
 		List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().collect(Collectors.toList());
 		studentIDs.forEach(sid-> {
+			String accessToken = restUtils.fetchAccessToken();
 			restUtils.updateStudentGradRecord(sid,batchId,activityCode,accessToken);
 		});
 	}

@@ -28,6 +28,7 @@ public class DistributionRunYearlyNonGradReader extends DistributionRunBaseReade
             nextSchool = schoolsList.get(nxtCredentialForProcessing);
             LOGGER.info("School Code:{} - {} of {}", nextSchool, nxtCredentialForProcessing + 1, summaryDTO.getReadCount());
             nxtCredentialForProcessing++;
+            summaryDTO.getMapDist().clear();
         } else {
         	aggregate("distributionSummaryDTO");
         }

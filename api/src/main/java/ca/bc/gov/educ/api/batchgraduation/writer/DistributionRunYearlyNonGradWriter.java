@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class DistributionRunWriterYearlyNonGrad implements ItemWriter<List<StudentCredentialDistribution>> {
+public class DistributionRunYearlyNonGradWriter implements ItemWriter<List<StudentCredentialDistribution>> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunWriterYearlyNonGrad.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradWriter.class);
 
     @Autowired
     RestUtils restUtils;
@@ -52,17 +52,13 @@ public class DistributionRunWriterYearlyNonGrad implements ItemWriter<List<Stude
 
     @Override
     public void write(List<? extends List<StudentCredentialDistribution>> list) throws Exception {
-        if(!list.isEmpty()) {
-            List<StudentCredentialDistribution> credentialsList = list.get(0);
-            if(credentialsList != null && !credentialsList.isEmpty()) {
-                String paperType = credentialsList.get(0).getPaperType();
-                summaryDTO.increment(paperType);
-                LOGGER.debug("Left:{}\n", summaryDTO.getReadCount() - summaryDTO.getProcessedCount());
-                ResponseObj tokenResponse = restUtils.getTokenResponseObject();
-                LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-                processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),"NONGRADDIST",tokenResponse.getAccess_token());
-                LOGGER.info("=======================================================================================");
-            }
+        if (!list.isEmpty()) {
+            summaryDTO.increment("YED4");
+            LOGGER.debug("Left:{}\n", summaryDTO.getReadCount() - summaryDTO.getProcessedCount());
+            ResponseObj tokenResponse = restUtils.getTokenResponseObject();
+            LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
+            processGlobalList(summaryDTO.getGlobalList(), jobExecutionId, summaryDTO.getMapDist(), "NONGRADDIST", restUtils.fetchAccessToken());
+            LOGGER.info("=======================================================================================");
         }
     }
 
@@ -78,8 +74,7 @@ public class DistributionRunWriterYearlyNonGrad implements ItemWriter<List<Stude
         System.out.println(jsonTransformer.marshall(mapDist));
         DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,"N");
         if(disres != null) {
-            ResponseObj obj = restUtils.getTokenResponseObject();
-            updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());
+            updateBackStudentRecords(cList,batchId);
         }
     }
 
@@ -102,10 +97,12 @@ public class DistributionRunWriterYearlyNonGrad implements ItemWriter<List<Stude
         }
     }
 
-    private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode,String accessToken) {
+    private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId) {
         cList.forEach(scd-> {
-            restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
-            restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
+            LOGGER.debug("Update back Student Record {}", scd.getStudentID());
+            String accessToken = restUtils.fetchAccessToken();
+            restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),"NONGRADYERUN",accessToken);
+            restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,"NONGRADYERUN",accessToken);
         });
     }
 }

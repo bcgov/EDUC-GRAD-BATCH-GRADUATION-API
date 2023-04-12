@@ -90,11 +90,15 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		if(disres != null) {
 			String activityCode = StringUtils.equalsIgnoreCase(transmissionType, "PAPER")?"USERDISTPSIP":"USERDISTPISF";
 			ResponseObj obj = restUtils.getTokenResponseObject();
-			updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());
+			updateBackStudentRecords(cList,batchId,activityCode);
 		}
 	}
 
-	private void updateBackStudentRecords(List<PsiCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
-		cList.forEach(scd->	restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken));
+	private void updateBackStudentRecords(List<PsiCredentialDistribution> cList, Long batchId,String activityCode) {
+		cList.forEach(scd->	{
+			LOGGER.debug("Update back Student Record {}", scd.getStudentID());
+			String accessToken = restUtils.fetchAccessToken();
+			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
+		});
 	}
 }
