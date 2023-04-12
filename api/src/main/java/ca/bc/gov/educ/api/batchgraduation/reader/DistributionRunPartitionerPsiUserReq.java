@@ -41,7 +41,7 @@ public class DistributionRunPartitionerPsiUserReq extends SimplePartitioner {
         try {
             req = new ObjectMapper().readValue(searchRequest, PsiCredentialRequest.class);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getLocalizedMessage());
         }
 
         ResponseObj responseObj = restUtils.getTokenResponseObject();
