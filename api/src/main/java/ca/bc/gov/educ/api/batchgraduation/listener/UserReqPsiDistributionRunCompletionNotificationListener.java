@@ -24,11 +24,42 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
     private static final String LOG_SEPARATION = "=======================================================================================";
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
-	@Autowired
 	private TaskSchedulingService taskSchedulingService;
+	private SupportListener supportListener;
 
 	@Autowired
-	SupportListener supportListener;
+	public UserReqPsiDistributionRunCompletionNotificationListener(TaskSchedulingService taskSchedulingService, SupportListener supportListener) {
+		this.taskSchedulingService = taskSchedulingService;
+		this.supportListener = supportListener;
+	}
+
+	@Override
+	public void beforeJob(JobExecution jobExecution) {
+		// Create entry in job history table
+		JobParameters jobParameters = jobExecution.getJobParameters();
+		ExecutionContext jobContext = jobExecution.getExecutionContext();
+		Long jobExecutionId = jobExecution.getId();
+		String status = jobExecution.getStatus().toString();
+		Date startTime = jobExecution.getStartTime();
+		Date endTime = jobExecution.getEndTime();
+		String jobTrigger = jobParameters.getString("jobTrigger");
+		String jobType = jobParameters.getString("jobType");
+		String transmissionType = jobParameters.getString("transmissionType");
+		String studentSearchRequest = jobParameters.getString("searchRequest");
+
+		String userScheduledId = jobParameters.getString("userScheduled");
+		if(userScheduledId != null) {
+			taskSchedulingService.updateUserScheduledJobs(userScheduledId);
+		}
+
+		PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
+		if(summaryDTO == null) {
+			summaryDTO = new PsiDistributionSummaryDTO();
+			summaryDTO.initializeCredentialCountMap();
+		}
+		String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.URPDBJ, transmissionType);
+		processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
+	}
     
     @Override
     public void afterJob(JobExecution jobExecution) {
