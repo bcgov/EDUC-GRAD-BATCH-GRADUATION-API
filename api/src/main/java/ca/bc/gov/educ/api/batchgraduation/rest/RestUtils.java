@@ -390,11 +390,11 @@ public class RestUtils {
             LOGGER.info("Create and Store School Report Success {}",result);
     }
 
-
-    public DistributionResponse mergePsiAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String localDownload) {
+    //Grad2-1931 sending transmissionType with the webclient.
+    public DistributionResponse mergePsiAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String localDownload, String transmissionType) {
         UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
-                .uri(String.format(constants.getMergePsiAndUpload(),batchId,localDownload))
+                .uri(String.format(constants.getMergePsiAndUpload(),batchId,localDownload,transmissionType))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .body(BodyInserters.fromValue(mapDist))
                 .retrieve()
