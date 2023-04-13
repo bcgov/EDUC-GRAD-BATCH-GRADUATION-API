@@ -1,10 +1,13 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialRequest;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiDistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +31,8 @@ public class DistributionRunPartitionerPsiUserReq extends SimplePartitioner {
 
     @Autowired
     RestUtils restUtils;
+    @Autowired
+    GradBatchHistoryService gradBatchHistoryService;
 
     @Autowired
     GraduationReportService graduationReportService;
@@ -52,6 +57,8 @@ public class DistributionRunPartitionerPsiUserReq extends SimplePartitioner {
 
         List<PsiCredentialDistribution> credentialList = getRecordsForPSIUserReqDisRun(req,transmissionType,accessToken);
         if(!credentialList.isEmpty()) {
+            // update count size
+            updateBatchHistoryForRunSize(credentialList.size());
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<PsiCredentialDistribution>> partitions = new LinkedList<>();
             for (int i = 0; i < credentialList.size(); i += partitionSize) {
@@ -75,6 +82,14 @@ public class DistributionRunPartitionerPsiUserReq extends SimplePartitioner {
         }
         LOGGER.info("No Credentials Found for Processing");
         return new HashMap<>();
+    }
+
+    private void updateBatchHistoryForRunSize(int runSize) {
+        BatchGradAlgorithmJobHistoryEntity historyEntity = gradBatchHistoryService.getGradAlgorithmJobHistory(context.getId());
+        if(historyEntity != null){
+            historyEntity.setExpectedStudentsProcessed((long) runSize);
+            gradBatchHistoryService.saveGradAlgorithmJobHistory(historyEntity);
+        }
     }
 
     private List<PsiCredentialDistribution> getRecordsForPSIUserReqDisRun(PsiCredentialRequest req, String transmissionType, String accessToken) {
