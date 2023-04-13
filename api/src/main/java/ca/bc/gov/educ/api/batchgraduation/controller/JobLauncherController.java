@@ -84,7 +84,6 @@ public class JobLauncherController {
 
     @Autowired
     public JobLauncherController(
-            @Qualifier("jobLauncher")
             JobLauncher jobLauncher,
             @Qualifier("asyncJobLauncher")
             JobLauncher asyncJobLauncher,
