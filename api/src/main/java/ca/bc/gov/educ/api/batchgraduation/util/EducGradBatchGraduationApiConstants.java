@@ -12,6 +12,7 @@ import java.util.Date;
 @Setter
 public class EducGradBatchGraduationApiConstants {
 
+    // **** API Mappings
 	public static final String API_ROOT_MAPPING = "";
     public static final String API_VERSION = "v1";
     public static final String CORRELATION_ID = "correlationID";
@@ -56,20 +57,28 @@ public class EducGradBatchGraduationApiConstants {
 
     public static final String UPDATE_PARAM = "/parameters";
 
-    // Data Conversion
+    // **** Data Conversion
     public static final String EXECUTE_DATA_CONVERSION_BATCH_JOB = "/executeGradStudentDataConversionJob";
     public static final String GRAD_CONVERSION_API_MAPPING = "/dataconversion";
     public static final String EXECUTE_COURSE_RESTRICTIONS_CONVERSION_JOB = "/courseRestrictions";
        
-    //Default Date format constants
+    // **** Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String DATE_FORMAT = "yyyy/MM/dd";
     public static final String TRAX_DATE_FORMAT = "yyyyMM";
-    
+
+    // **** Model defaults
     public static final String DEFAULT_CREATED_BY = "API_GRAD_BATCH";
     protected static final Date DEFAULT_CREATED_TIMESTAMP = new Date();
     public static final String DEFAULT_UPDATED_BY = "API_GRAD_BATCH";
     protected static final Date DEFAULT_UPDATED_TIMESTAMP = new Date();
+
+    // **** Batch Parameters
+    public static final String JOB_TRIGGER = "jobTrigger";
+    public static final String JOB_TYPE = "jobType";
+    public static final String SEARCH_REQUEST = "searchRequest";
+    public static final String TRANSMISSION_TYPE = "transmissionType";
+    public static final String USER_SCHEDULED = "userScheduled";
 
     @Value("${authorization.user}")
     private String userName;

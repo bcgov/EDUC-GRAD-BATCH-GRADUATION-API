@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 
 @Component
 public class UserReqPsiDistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
@@ -36,29 +37,25 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 	@Override
 	public void beforeJob(JobExecution jobExecution) {
 		// Create entry in job history table
-		JobParameters jobParameters = jobExecution.getJobParameters();
-		ExecutionContext jobContext = jobExecution.getExecutionContext();
-		Long jobExecutionId = jobExecution.getId();
-		String status = jobExecution.getStatus().toString();
-		Date startTime = jobExecution.getStartTime();
-		Date endTime = jobExecution.getEndTime();
-		String jobTrigger = jobParameters.getString("jobTrigger");
-		String jobType = jobParameters.getString("jobType");
-		String transmissionType = jobParameters.getString("transmissionType");
-		String studentSearchRequest = jobParameters.getString("searchRequest");
-
-		String userScheduledId = jobParameters.getString("userScheduled");
-		if(userScheduledId != null) {
-			taskSchedulingService.updateUserScheduledJobs(userScheduledId);
-		}
-
-		PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
+		PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobExecution.getExecutionContext().get("psiDistributionSummaryDTO");
 		if(summaryDTO == null) {
 			summaryDTO = new PsiDistributionSummaryDTO();
 			summaryDTO.initializeCredentialCountMap();
 		}
-		String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.URPDBJ, transmissionType);
-		processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
+		processBatchJobHistory(
+				summaryDTO,
+				jobExecution.getId(),
+				jobExecution.getStatus().toString(),
+				jobExecution.getJobParameters().getString(EducGradBatchGraduationApiConstants.JOB_TRIGGER),
+				jobExecution.getJobParameters().getString(EducGradBatchGraduationApiConstants.JOB_TYPE),
+				jobExecution.getStartTime(),
+				jobExecution.getEndTime(),
+				buildJobParametersDTO(
+						jobExecution.getJobParameters().getString(EducGradBatchGraduationApiConstants.JOB_TYPE),
+						jobExecution.getJobParameters().getString(EducGradBatchGraduationApiConstants.SEARCH_REQUEST),
+						TaskSelection.URPDBJ,
+						jobExecution.getJobParameters().getString(EducGradBatchGraduationApiConstants.TRANSMISSION_TYPE))
+		);
 	}
     
     @Override
@@ -73,12 +70,12 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 			String status = jobExecution.getStatus().toString();
 			Date startTime = jobExecution.getStartTime();
 			Date endTime = jobExecution.getEndTime();
-			String jobTrigger = jobParameters.getString("jobTrigger");
-			String jobType = jobParameters.getString("jobType");
-			String transmissionType = jobParameters.getString("transmissionType");
-			String studentSearchRequest = jobParameters.getString("searchRequest");
+			String jobTrigger = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TRIGGER);
+			String jobType = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TYPE);
+			String transmissionType = jobParameters.getString(EducGradBatchGraduationApiConstants.TRANSMISSION_TYPE);
+			String studentSearchRequest = jobParameters.getString(EducGradBatchGraduationApiConstants.SEARCH_REQUEST);
 
-			String userScheduledId = jobParameters.getString("userScheduled");
+			String userScheduledId = jobParameters.getString(EducGradBatchGraduationApiConstants.USER_SCHEDULED);
 			if(userScheduledId != null) {
 				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
 			}
