@@ -451,6 +451,17 @@ public class RestUtils {
         return  result;
     }
 
+    public Boolean executePostDistribution(Long batchId, String download, List<School> schools) {
+        UUID correlationID = UUID.randomUUID();
+        return webClient.post()
+                .uri(String.format(constants.getPostingDistribution(),batchId,download))
+                .headers(h -> { h.setBearerAuth(getAccessToken()); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .body(BodyInserters.fromValue(schools))
+                .retrieve()
+                .bodyToMono(Boolean.class)
+                .block();
+    }
+
     @SneakyThrows
     public void createBlankCredentialsAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist, String localDownload) {
         UUID correlationID = UUID.randomUUID();
@@ -538,6 +549,10 @@ public class RestUtils {
                         uri -> uri.queryParam("studentID", studentID).build())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
                 .retrieve().bodyToMono(Boolean.class).block();
+    }
+
+    public String getAccessToken() {
+        return this.fetchAccessToken();
     }
 
 }

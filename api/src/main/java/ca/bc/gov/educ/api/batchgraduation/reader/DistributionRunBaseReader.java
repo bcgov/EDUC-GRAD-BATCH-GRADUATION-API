@@ -37,6 +37,7 @@ public abstract class DistributionRunBaseReader {
         totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());
         totalSummaryDTO.getErrors().addAll(summaryDTO.getErrors());
         totalSummaryDTO.getGlobalList().addAll(summaryDTO.getGlobalList());
+        totalSummaryDTO.setSchools(summaryDTO.getSchools());
         mergeMapCounts(totalSummaryDTO.getCredentialCountMap(),summaryDTO.getCredentialCountMap());
     }
 

@@ -74,6 +74,7 @@ public class DistributionRunYearlyNonGradWriter implements ItemWriter<List<Stude
         System.out.println(jsonTransformer.marshall(mapDist));
         DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,"N");
         if(disres != null) {
+            summaryDTO.getSchools().addAll(disres.getSchools());
             updateBackStudentRecords(cList,batchId);
         }
     }

@@ -212,6 +212,8 @@ endpoint:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/RPR?batchId=%s&activityCode=%s&localDownload=%s
     blanks-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/BCPR?batchId=%s&localDownload=%s
+    posting-distribution:
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/zipandupload/%s?localDownload=%s
     read-n-post:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSR?batchId=%s
     merge-psi-n-upload:

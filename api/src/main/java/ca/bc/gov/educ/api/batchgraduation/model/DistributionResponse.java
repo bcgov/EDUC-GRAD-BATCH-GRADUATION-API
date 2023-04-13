@@ -2,6 +2,8 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class DistributionResponse {
     private String transcriptResponse;
@@ -9,4 +11,5 @@ public class DistributionResponse {
     private String yedrResponse;
     private String yedbResponse;
     private String mergeProcessResponse;
+    private List<School> schools;
 }

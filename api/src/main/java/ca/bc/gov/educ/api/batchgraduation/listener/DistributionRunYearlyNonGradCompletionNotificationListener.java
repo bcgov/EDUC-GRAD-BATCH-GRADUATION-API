@@ -41,6 +41,8 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 				summaryDTO.initializeCredentialCountMap();
 			}
 
+			restUtils.executePostDistribution(summaryDTO.getBatchId(), "N", summaryDTO.getSchools());
+
 			// display Summary Details
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
@@ -48,7 +50,6 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
-
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");

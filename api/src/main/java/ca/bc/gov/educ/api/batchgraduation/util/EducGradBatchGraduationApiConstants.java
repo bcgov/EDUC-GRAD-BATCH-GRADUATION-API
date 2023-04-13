@@ -151,6 +151,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-distribution-api.blanks-n-upload.url}")
     private String createBlanksAndUpload;
 
+    @Value("${endpoint.grad-distribution-api.posting-distribution.url}")
+    private String postingDistribution;
+
     @Value("${endpoint.grad-graduation-report-api.update-student-credential.url}")
     private String updateStudentCredential;
 
