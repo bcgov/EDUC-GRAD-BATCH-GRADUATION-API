@@ -29,4 +29,8 @@ public class ParallelDataFetch {
     public List<String> fetchDistributionRequiredDataSchoolsNonGradYearly(String accessToken) {
         return graduationReportService.getSchoolsNonGradYearly(accessToken);
     }
+
+    public List<String> fetchDistributionRequiredDataDistrictsNonGradYearly(String accessToken) {
+        return graduationReportService.getDistrictsNonGradYearly(accessToken);
+    }
 }

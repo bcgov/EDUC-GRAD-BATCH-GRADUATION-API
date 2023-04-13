@@ -75,4 +75,8 @@ public class GraduationReportService {
 	public List<String> getSchoolsNonGradYearly(String accessToken) {
 		return webClient.get().uri(String.format(constants.getSchoolDataNonGradEarly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<String>>(){}).block();
 	}
+
+	public List<String> getDistrictsNonGradYearly(String accessToken) {
+		return webClient.get().uri(String.format(constants.getDistrictDataNonGradEarly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<String>>(){}).block();
+	}
 }
