@@ -76,6 +76,11 @@ batch:
     cron: 0 0 02 1 * *
   token-expiry:
     offset: 30
+  user:
+    scheduled:
+      jobs:
+        lockAtLeastFor: 10
+        lockAtMostFor: 180
 
 #Endpoints
 endpoint:
