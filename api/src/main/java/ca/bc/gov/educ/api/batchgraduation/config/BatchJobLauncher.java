@@ -126,7 +126,7 @@ public class BatchJobLauncher {
     }
 
     @Scheduled(fixedDelayString = "PT30M")
-    @SchedulerLock(name = "userScheduledBatchJobRefresher", lockAtLeastFor = "1s", lockAtMostFor = "60s")
+    @SchedulerLock(name = "userScheduledBatchJobRefresher", lockAtLeastFor = "10s", lockAtMostFor = "5m")
     public void refreshUserScheduledQueue() {
         LOGGER.info(BATCH_STARTED);
         JobParametersBuilder builder = new JobParametersBuilder();
