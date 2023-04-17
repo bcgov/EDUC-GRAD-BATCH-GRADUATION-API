@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialRequest;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiDistributionSummaryDTO;
@@ -12,14 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.partition.support.SimplePartitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
-public class DistributionRunPartitionerPsiUserReq extends SimplePartitioner {
+public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitionerPsiUserReq.class);
 
@@ -34,6 +34,7 @@ public class DistributionRunPartitionerPsiUserReq extends SimplePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
+        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         JobParameters jobParameters = context.getJobParameters();
         String searchRequest = jobParameters.getString("searchRequest");
         String transmissionType = jobParameters.getString("transmissionType");
@@ -41,7 +42,7 @@ public class DistributionRunPartitionerPsiUserReq extends SimplePartitioner {
         try {
             req = new ObjectMapper().readValue(searchRequest, PsiCredentialRequest.class);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getLocalizedMessage());
         }
 
         ResponseObj responseObj = restUtils.getTokenResponseObject();
@@ -52,6 +53,8 @@ public class DistributionRunPartitionerPsiUserReq extends SimplePartitioner {
 
         List<PsiCredentialDistribution> credentialList = getRecordsForPSIUserReqDisRun(req,transmissionType,accessToken);
         if(!credentialList.isEmpty()) {
+            // update count size
+            updateBatchJobHistory(jobHistory, (long) credentialList.size());
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<PsiCredentialDistribution>> partitions = new LinkedList<>();
             for (int i = 0; i < credentialList.size(); i += partitionSize) {
@@ -86,5 +89,10 @@ public class DistributionRunPartitionerPsiUserReq extends SimplePartitioner {
             return graduationReportService.getPsiStudentsForRun(transmissionType,psiCodes,psiYear,accessToken);
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    protected JobExecution getJobExecution() {
+        return context;
     }
 }

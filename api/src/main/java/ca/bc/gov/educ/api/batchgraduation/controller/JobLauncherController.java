@@ -70,6 +70,10 @@ public class JobLauncherController {
     private static final String DISDTO = "distributionSummaryDTO";
     private static final String LOCALDOWNLOAD = "LocalDownload";
     private static final String BEARER = "Bearer ";
+    private static final String GRADUATION_BATCH_JOB = "GraduationBatchJob";
+    private static final String TVR_BATCH_JOB = "tvrBatchJob";
+    private static final String SPECIAL_GRADUATION_BATCH_JOB = "SpecialGraduationBatchJob";
+    private static final String SPECIAL_TVR_RUN_BATCH_JOB = "SpecialTvrRunBatchJob";
 
     private final JobLauncher jobLauncher;
     private final JobLauncher asyncJobLauncher;
@@ -113,7 +117,7 @@ public class JobLauncherController {
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
-            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(GRADUATION_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
@@ -142,7 +146,7 @@ public class JobLauncherController {
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
-            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(TVR_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
@@ -217,7 +221,7 @@ public class JobLauncherController {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
             response.setJobParameters(studentSearchData);
-            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("SpecialGraduationBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(SPECIAL_GRADUATION_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
@@ -275,7 +279,7 @@ public class JobLauncherController {
             String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
             response.setJobParameters(studentSearchData);
-            JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob("SpecialTvrRunBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob(SPECIAL_TVR_RUN_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
@@ -312,19 +316,19 @@ public class JobLauncherController {
             builder.addLong(PREV_BATCH_ID, batchId);
             String jobName;
             switch(entity.getJobType()) {
-                case "REGALG":
+                case REGALG:
                     if (isSpecialRun) {
-                        jobName = "SpecialGraduationBatchJob";
+                        jobName = SPECIAL_GRADUATION_BATCH_JOB;
 
                     } else {
-                        jobName = "GraduationBatchJob";
+                        jobName = GRADUATION_BATCH_JOB;
                     }
                     break;
-                case "TVRRUN":
+                case TVRRUN:
                     if (isSpecialRun) {
-                        jobName = "SpecialTvrRunBatchJob";
+                        jobName = SPECIAL_TVR_RUN_BATCH_JOB;
                     } else {
-                        jobName = "tvrBatchJob";
+                        jobName = TVR_BATCH_JOB;
                     }
                     break;
                 default:
@@ -368,18 +372,18 @@ public class JobLauncherController {
             builder.addLong(PREV_BATCH_ID, batchId);
             String jobName;
             switch(entity.getJobType()) {
-                case "REGALG":
+                case REGALG:
                     if (isSpecialRun) {
-                        jobName = "SpecialGraduationBatchJob";
+                        jobName = SPECIAL_GRADUATION_BATCH_JOB;
                     } else {
-                        jobName = "GraduationBatchJob";
+                        jobName = GRADUATION_BATCH_JOB;
                     }
                     break;
-                case "TVRRUN":
+                case TVRRUN:
                     if (isSpecialRun) {
-                        jobName = "SpecialTvrRunBatchJob";
+                        jobName = SPECIAL_TVR_RUN_BATCH_JOB;
                     } else {
-                        jobName = "tvrBatchJob";
+                        jobName = TVR_BATCH_JOB;
                     }
                     break;
                 default:
@@ -618,7 +622,7 @@ public class JobLauncherController {
         try {
             String searchData = new ObjectMapper().writeValueAsString(psiCredentialRequest);
             builder.addString(SEARCH_REQUEST, searchData);
-            JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("psiDistributionBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob("psiDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
             return ResponseEntity.ok(summaryDTO);
