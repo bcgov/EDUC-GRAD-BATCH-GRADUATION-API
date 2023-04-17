@@ -183,6 +183,7 @@ endpoint:
     update-flag-ready-for-batch: ${GRAD_STUDENT_API}api/v1/student/multistudentids/batchflag/jobtype/%s
     get-student-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/studentnongradreportdata/%s
     get-school-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/schoolnongradreportdata
+    get-district-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/districtnongradreportdata
   grad-graduation-report-api:
     get-transcript-list:
       yearly:

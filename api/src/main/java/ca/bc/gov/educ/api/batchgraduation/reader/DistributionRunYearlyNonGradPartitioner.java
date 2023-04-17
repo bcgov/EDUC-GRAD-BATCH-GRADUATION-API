@@ -37,8 +37,14 @@ public class DistributionRunYearlyNonGradPartitioner extends SimplePartitioner {
         if (res != null) {
             accessToken = res.getAccess_token();
         }
-        List<String> schoolsList = parallelDataFetch.fetchDistributionRequiredDataSchoolsNonGradYearly(accessToken);
+        List<String> schoolsList = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(accessToken);
         if(!schoolsList.isEmpty()) {
+
+            //TODO: TEST CODE - REMOVE
+            /*********** TEST CODE - REMOVE **********/
+            schoolsList = schoolsList.subList(0, 8);
+            /*********** TEST CODE - REMOVE **********/
+
             int partitionSize = schoolsList.size();
             List<List<String>> partitions = new LinkedList<>();
             for (int i = 0; i < schoolsList.size(); i += partitionSize) {

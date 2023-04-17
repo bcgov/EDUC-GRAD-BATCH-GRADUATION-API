@@ -117,6 +117,7 @@ endpoint:
     update-flag-ready-for-batch: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/multistudentids/batchflag/jobtype/%s
     get-student-data-nongrad-yearly: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentnongradreportdata/%s
     get-school-data-nongrad-yearly: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/schoolnongradreportdata
+    get-district-data-nongrad-yearly: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/districtnongradreportdata
   grad-graduation-report-api:
     get-transcript-list:
       yearly:

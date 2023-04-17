@@ -75,7 +75,10 @@ public class DistributionRunYearlyNonGradWriter implements ItemWriter<List<Stude
         DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,"N");
         if(disres != null) {
             summaryDTO.getSchools().addAll(disres.getSchools());
-            updateBackStudentRecords(cList,batchId);
+            //TODO: TEST CODE - UNCOMMENT
+            /*********** TEST CODE - UNCOMMENT **********/
+            //updateBackStudentRecords(cList,batchId);
+            /*********** TEST CODE - UNCOMMENT **********/
         }
     }
 
@@ -90,7 +93,7 @@ public class DistributionRunYearlyNonGradWriter implements ItemWriter<List<Stude
                 DistributionPrintRequest dist = mapDist.get(usl);
                 dist.setSchoolDistributionRequest(tpReq);
                 mapDist.put(usl,dist);
-            }else{
+            } else {
                 DistributionPrintRequest dist = new DistributionPrintRequest();
                 dist.setSchoolDistributionRequest(tpReq);
                 mapDist.put(usl,dist);
