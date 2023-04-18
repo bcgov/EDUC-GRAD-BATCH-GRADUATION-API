@@ -143,6 +143,11 @@ batch:
     cron: ${DIST_RUN_CRON}
   token-expiry:
     offset: ${TOKEN_EXPIRY_OFFSET}
+  user:
+    scheduled:
+      jobs:
+        lockAtLeastFor: ${CRON_USER_SCHEDULED_JOBS_LOCK_AT_LEAST_FOR}
+        lockAtMostFor: ${CRON_USER_SCHEDULED_JOBS_LOCK_AT_MOST_FOR}
 
 #Endpoints
 endpoint:

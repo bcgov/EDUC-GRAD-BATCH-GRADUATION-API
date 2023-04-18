@@ -76,8 +76,8 @@ public class RestUtils {
         return null;
     }
 
+    @Retry(name = "rt-getStudent")
     public List<Student> getStudentsByPen(String pen, String accessToken) {
-        // No need to add a correlationID here.
         final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
         };
         LOGGER.debug("url = {}",constants.getPenStudentApiByPenUrl());
@@ -307,11 +307,20 @@ public class RestUtils {
         if(pObj != null) {
             item.setStudentID(pObj.getStudentID());
         }else {
-            List<Student> stuDataList = this.getStudentsByPen(item.getPen(), accessToken);
-            if(!stuDataList.isEmpty())
-                item.setStudentID(UUID.fromString(stuDataList.get(0).getStudentID()));
+            List<Student> stuDataList;
+            try {
+                stuDataList = this.getStudentsByPen(item.getPen(), accessToken);
+                if(!stuDataList.isEmpty()) {
+                    item.setStudentID(UUID.fromString(stuDataList.get(0).getStudentID()));
+                }
+                summary.getGlobalList().add(item);
+            } catch (Exception e) {
+                LOGGER.error("Error processing student with id {} due to {}", item.getStudentID(), e.getLocalizedMessage());
+                summary.getErrors().add(
+                        new ProcessError(item.getStudentID().toString(), e.getLocalizedMessage(), e.getMessage())
+                );
+            }
         }
-        summary.getGlobalList().add(item);
         return item;
     }
 
