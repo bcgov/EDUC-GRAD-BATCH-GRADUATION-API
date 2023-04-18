@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.*;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -66,6 +67,38 @@ public class GradDashboardServiceTest {
         GradDashboard dash = gradDashboardService.getDashboardInfo();
         assertThat(dash).isNotNull();
         assertThat(dash.getTotalBatchRuns()).isEqualTo(1);
+
+    }
+
+    @Test
+    public void testGetDashboardInfo_whenStartedDate_isOlderThan3Days_thenUpdateStatusAsFailed() {
+
+        List<BatchGradAlgorithmJobHistoryEntity> list = new ArrayList<>();
+        BatchGradAlgorithmJobHistoryEntity hist = new BatchGradAlgorithmJobHistoryEntity();
+        hist.setId(new UUID(1,1));
+        hist.setExpectedStudentsProcessed(20L);
+        hist.setJobExecutionId(121L);
+        Date today = new Date(System.currentTimeMillis());
+        Date startedDateTime = DateUtils.addDays(today, -3);
+        hist.setStartTime(startedDateTime);
+        hist.setStatus("STARTED");
+        list.add(hist);
+
+        BatchJobExecutionEntity batchJobExecution = new BatchJobExecutionEntity();
+        batchJobExecution.setJobExecutionId(hist.getJobExecutionId());
+        batchJobExecution.setId(Long.valueOf("123"));
+        batchJobExecution.setStatus("STARTED");
+        batchJobExecution.setExitCode("UNKNOWN");
+        batchJobExecution.setStartTime(hist.getStartTime());
+
+        when(batchGradAlgorithmJobHistoryRepository.findAll()).thenReturn(list);
+        when(batchJobExecutionRepository.findById(hist.getJobExecutionId())).thenReturn(Optional.of(batchJobExecution));
+
+        GradDashboard dash = gradDashboardService.getDashboardInfo();
+        assertThat(dash).isNotNull();
+        assertThat(dash.getTotalBatchRuns()).isEqualTo(1);
+        assertThat(dash.getBatchInfoList()).isNotEmpty();
+        assertThat(dash.getBatchInfoList().get(0).getStatus()).isEqualTo("FAILED");
 
     }
 
