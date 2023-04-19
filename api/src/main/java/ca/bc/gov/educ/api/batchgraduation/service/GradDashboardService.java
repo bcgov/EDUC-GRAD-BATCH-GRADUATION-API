@@ -3,13 +3,12 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchJobExecutionEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.*;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchProcessingTransformer;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,8 +33,8 @@ public class GradDashboardService extends GradService {
 								RestUtils restUtils,
 								BatchJobExecutionRepository batchJobExecutionRepository,BatchProcessingRepository batchProcessingRepository,BatchProcessingTransformer batchProcessingTransformer,
 								BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository) {
-    	this.batchGradAlgorithmJobHistoryRepository = batchGradAlgorithmJobHistoryRepository;
-    	this.batchGradAlgorithmJobHistoryTransformer = batchGradAlgorithmJobHistoryTransformer;
+		this.batchGradAlgorithmJobHistoryRepository = batchGradAlgorithmJobHistoryRepository;
+		this.batchGradAlgorithmJobHistoryTransformer = batchGradAlgorithmJobHistoryTransformer;
 		this.batchProcessingTransformer = batchProcessingTransformer;
 		this.batchGradAlgorithmStudentRepository = batchGradAlgorithmStudentRepository;
 		this.batchJobExecutionRepository = batchJobExecutionRepository;
@@ -45,24 +44,25 @@ public class GradDashboardService extends GradService {
 
     @Transactional(readOnly = true)
 	public GradDashboard getDashboardInfo() {
-    	start();
-    	GradDashboard gradDash = new GradDashboard();
-    	List<BatchGradAlgorithmJobHistory> infoDetailsList= batchGradAlgorithmJobHistoryTransformer.transformToDTO(batchGradAlgorithmJobHistoryRepository.findAll());
-    	infoDetailsList.sort(Comparator.comparing(BatchGradAlgorithmJobHistory::getStartTime).reversed());
-    	if(!infoDetailsList.isEmpty()) {
-    		BatchGradAlgorithmJobHistory info = infoDetailsList.get(0);
-    		gradDash.setLastActualStudentsProcessed(info.getActualStudentsProcessed());
-    		gradDash.setLastExpectedStudentsProcessed(info.getExpectedStudentsProcessed());
-    		gradDash.setLastFailedStudentsProcessed(info.getFailedStudentsProcessed());
-    		gradDash.setLastJobendTime(info.getEndTime());
-    		gradDash.setLastJobExecutionId(info.getJobExecutionId());
-    		gradDash.setLastJobstartTime(info.getStartTime());
-    		gradDash.setLastStatus(info.getStatus());
-    		gradDash.setTotalBatchRuns(infoDetailsList.size());
-    		gradDash.setBatchInfoList(infoDetailsList);
-    	
-    	}
-    	end();
+		start();
+		GradDashboard gradDash = new GradDashboard();
+		List<BatchGradAlgorithmJobHistory> infoDetailsList= batchGradAlgorithmJobHistoryTransformer.transformToDTO(batchGradAlgorithmJobHistoryRepository.findAll());
+		infoDetailsList = infoDetailsList.stream().map(this::handleDeadJob).collect(Collectors.toList());
+		infoDetailsList.sort(Comparator.comparing(BatchGradAlgorithmJobHistory::getStartTime).reversed());
+		if(!infoDetailsList.isEmpty()) {
+			BatchGradAlgorithmJobHistory info = infoDetailsList.get(0);
+			gradDash.setLastActualStudentsProcessed(info.getActualStudentsProcessed());
+			gradDash.setLastExpectedStudentsProcessed(info.getExpectedStudentsProcessed());
+			gradDash.setLastFailedStudentsProcessed(info.getFailedStudentsProcessed());
+			gradDash.setLastJobendTime(info.getEndTime());
+			gradDash.setLastJobExecutionId(info.getJobExecutionId());
+			gradDash.setLastJobstartTime(info.getStartTime());
+			gradDash.setLastStatus(info.getStatus());
+			gradDash.setTotalBatchRuns(infoDetailsList.size());
+			gradDash.setBatchInfoList(infoDetailsList);
+
+		}
+		end();
 		return gradDash;
     }
 
@@ -70,9 +70,9 @@ public class GradDashboardService extends GradService {
     public ErrorDashBoard getErrorInfo(Long batchId, Integer pageNumber, Integer pageSize,String accessToken) {
 		ErrorDashBoard edb = new ErrorDashBoard();
 		Pageable paging = PageRequest.of(pageNumber, pageSize);
-		Page<BatchGradAlgorithmStudentEntity> pagedDate = batchGradAlgorithmStudentRepository.findByJobExecutionIdAndStatusIn(batchId, Arrays.asList("STARTED", "FAILED"), paging);
+		Page<BatchGradAlgorithmStudentEntity> pagedDate = batchGradAlgorithmStudentRepository.findByJobExecutionIdAndStatusIn(batchId, Arrays.asList(BatchStatusEnum.STARTED.toString(), BatchStatusEnum.FAILED.toString()), paging);
 		List<BatchGradAlgorithmStudentEntity> list = pagedDate.getContent();
-		List<UUID> studentIds = list.stream().map(BatchGradAlgorithmStudentEntity::getStudentID).collect(Collectors.toList());
+		List<UUID> studentIds = list.stream().map(BatchGradAlgorithmStudentEntity::getStudentID).toList();
 		List<ErrorBoard> eList = new ArrayList<>();
 		if(!studentIds.isEmpty()) {
 			List<GraduationStudentRecord> studentList = restUtils.getStudentData(studentIds, accessToken);
@@ -139,5 +139,32 @@ public class GradDashboardService extends GradService {
 	@Transactional(readOnly = true)
 	public Optional<BatchProcessingEntity> findBatchProcessing(String jobType) {
 		return batchProcessingRepository.findByJobType(jobType);
+	}
+
+	@Transactional
+	public BatchGradAlgorithmJobHistory handleDeadJob(BatchGradAlgorithmJobHistory batchJobHistory) {
+		if ("STARTED".equalsIgnoreCase(batchJobHistory.getStatus())
+			&& batchJobHistory.getEndTime() == null) {
+			Integer jobExecutionId = batchJobHistory.getJobExecutionId();
+
+			Date now = new Date(System.currentTimeMillis());
+			Date deadline = DateUtils.addDays(now, -3);
+
+			if (batchJobHistory.getStartTime().before(deadline)) {
+				Optional<BatchJobExecutionEntity> optional = batchJobExecutionRepository.findById(jobExecutionId.longValue());
+				if (optional.isPresent()) {
+					BatchJobExecutionEntity batchJobExecution = optional.get();
+					if ("UNKNOWN".equalsIgnoreCase(batchJobExecution.getExitCode())
+							|| BatchStatusEnum.FAILED.toString().equalsIgnoreCase(batchJobExecution.getExitCode()) ) {
+						BatchGradAlgorithmJobHistoryEntity entity = batchGradAlgorithmJobHistoryTransformer.transformToEntity(batchJobHistory);
+						entity.setStatus(BatchStatusEnum.FAILED.toString());
+						batchGradAlgorithmJobHistoryRepository.save(entity);
+						batchJobHistory.setStatus(BatchStatusEnum.FAILED.toString());
+					}
+				}
+			}
+		}
+
+		return batchJobHistory;
 	}
 }

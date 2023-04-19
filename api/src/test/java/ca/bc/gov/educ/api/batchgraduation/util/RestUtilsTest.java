@@ -1148,6 +1148,8 @@ public class RestUtilsTest {
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
         Long batchId = 3344L;
+        //Grad2-1931
+        String transmissionType = "ftp";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(constants.getMergePsiAndUpload(),batchId,"Y"))).thenReturn(this.requestBodyUriMock);
@@ -1157,7 +1159,7 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
 
 
-        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y");
+        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y", transmissionType);
         assertThat(result).isNotNull();
     }
 
@@ -1166,6 +1168,7 @@ public class RestUtilsTest {
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
         Long batchId = 3344L;
+        String transmissionType = "ftp";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(constants.getMergePsiAndUpload(),batchId,"Y"))).thenReturn(this.requestBodyUriMock);
@@ -1176,7 +1179,7 @@ public class RestUtilsTest {
         when(this.inputResponsePSI.block()).thenReturn(null);
 
 
-        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y");
+        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y",transmissionType);
         assertThat(result).isNotNull();
     }
 
