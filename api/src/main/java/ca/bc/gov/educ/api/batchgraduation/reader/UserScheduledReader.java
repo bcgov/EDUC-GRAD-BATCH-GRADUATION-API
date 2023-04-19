@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class UserScheduledReader implements ItemReader<UserScheduledJobs> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserScheduledReader.class);

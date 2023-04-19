@@ -13,6 +13,7 @@ public class BlankDistributionRunProcessor implements ItemProcessor<BlankCredent
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BlankDistributionRunProcessor.class);
 
+	@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 	@Autowired
 	RestUtils restUtils;
 
