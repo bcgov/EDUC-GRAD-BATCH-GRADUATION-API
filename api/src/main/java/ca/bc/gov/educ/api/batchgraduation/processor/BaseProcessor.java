@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.UUID;
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public abstract class BaseProcessor implements ItemProcessor<UUID, GraduationStudentRecord> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseProcessor.class);
 

@@ -17,6 +17,7 @@ public abstract class PsiDistributionRunBaseReader implements ItemReader<PsiCred
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PsiDistributionRunBaseReader.class);
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     RestUtils restUtils;
 

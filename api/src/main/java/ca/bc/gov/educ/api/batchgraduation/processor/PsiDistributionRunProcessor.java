@@ -13,6 +13,7 @@ public class PsiDistributionRunProcessor implements ItemProcessor<PsiCredentialD
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PsiDistributionRunProcessor.class);
 
+	@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 	@Autowired
 	RestUtils restUtils;
 

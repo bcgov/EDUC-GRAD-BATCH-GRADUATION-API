@@ -12,6 +12,7 @@ public class TvrRunBatchPerformanceWriter extends BaseWriter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TvrRunBatchPerformanceWriter.class);
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
     
