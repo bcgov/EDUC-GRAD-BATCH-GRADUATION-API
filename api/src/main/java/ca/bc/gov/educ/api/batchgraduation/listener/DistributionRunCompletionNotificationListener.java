@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class DistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
@@ -40,19 +39,11 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			String jobType = jobParameters.getString("jobType");
 			String activityCode = "MONTHLYDIST";
 			if(StringUtils.isNotBlank(jobType)) {
-				switch(jobType) {
-					case "DISTRUN":
-						activityCode = "MONTHLYDIST";
-						break;
-					case "DISTRUN_YE":
-						activityCode = "YEARENDDIST";
-						break;
-					case "DISTRUN_SUPP":
-						activityCode = "SUPPDIST";
-						break;
-					case "NONGRADRUN":
-						activityCode = "NONGRADDIST";
-						break;
+				switch (jobType) {
+					case "DISTRUN" -> activityCode = "MONTHLYDIST";
+					case "DISTRUN_YE" -> activityCode = "YEARENDDIST";
+					case "DISTRUN_SUPP" -> activityCode = "SUPPDIST";
+					case "NONGRADRUN" -> activityCode = "NONGRADDIST";
 				}
 			}
 			String studentSearchRequest = jobParameters.getString("searchRequest");
@@ -72,6 +63,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
 
 			// save batch job & error history
+			//TODO: move this to the end
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
@@ -85,19 +77,20 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
     }
 
 	private void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String,DistributionPrintRequest> mapDist,String activityCode,String accessToken) {
-    	List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
+    	List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().toList();
 		uniqueSchoolList.forEach(usl->{
-			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
-			List<StudentCredentialDistribution> yed2List = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
-			List<StudentCredentialDistribution> yedrList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
-			List<StudentCredentialDistribution> yedbList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
-			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());
+			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED4") == 0).toList();
+			List<StudentCredentialDistribution> yed2List = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED2") == 0).toList();
+			List<StudentCredentialDistribution> yedrList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YEDR") == 0).toList();
+			List<StudentCredentialDistribution> yedbList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YEDB") == 0).toList();
+			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).toList();
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 			supportListener.certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",null);
 			supportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",null);
 			supportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",null);
 		});
+		// TODO: handle failure here
 		DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,null);
 		if(disres != null) {
 			ResponseObj obj = restUtils.getTokenResponseObject();
@@ -125,6 +118,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 	}
 
 	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode,String accessToken) {
+ 		//TODO: catch and report errors here
         cList.forEach(scd-> {
             restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
             restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);

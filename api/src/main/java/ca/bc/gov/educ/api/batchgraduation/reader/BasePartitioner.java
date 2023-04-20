@@ -4,7 +4,9 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -12,13 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.partition.support.SimplePartitioner;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public abstract class BasePartitioner extends SimplePartitioner {
 
@@ -75,7 +74,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
     protected List<UUID> getInputDataForErroredStudents(Long batchId) {
         List<BatchGradAlgorithmStudentEntity> entityList = gradBatchHistoryService.getErroredStudents(batchId);
         if (entityList != null && !entityList.isEmpty()) {
-            return entityList.stream().map(BatchGradAlgorithmStudentEntity::getStudentID).collect(Collectors.toList());
+            return entityList.stream().map(BatchGradAlgorithmStudentEntity::getStudentID).toList();
         }
         return new ArrayList<>();
     }
@@ -83,7 +82,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
     protected List<UUID> getInputDataForAllStudents(Long batchId) {
         List<BatchGradAlgorithmStudentEntity> entityList = gradBatchHistoryService.getAllStudents(batchId);
         if (entityList != null && !entityList.isEmpty()) {
-            return entityList.stream().map(BatchGradAlgorithmStudentEntity::getStudentID).collect(Collectors.toList());
+            return entityList.stream().map(BatchGradAlgorithmStudentEntity::getStudentID).toList();
         }
         return new ArrayList<>();
     }
@@ -148,5 +147,31 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     private void copyErroredStudentsFromPreviousJob(Long batchId, Long fromBatchId, String username) {
         gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, fromBatchId, username);
+    }
+
+    static Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
+        int partitionSize = credentialList.size()/gridSize + 1;
+        List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
+        for (int i = 0; i < credentialList.size(); i += partitionSize) {
+            partitions.add(credentialList.subList(i, Math.min(i + partitionSize, credentialList.size())));
+        }
+        Map<String, ExecutionContext> map = new HashMap<>(partitions.size());
+        for (int i = 0; i < partitions.size(); i++) {
+            ExecutionContext executionContext = new ExecutionContext();
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.initializeCredentialCountMap();
+            List<StudentCredentialDistribution> data = partitions.get(i);
+            executionContext.put("data", data);
+            summaryDTO.setReadCount(data.size());
+            if(credentialType != null){
+                summaryDTO.setCredentialType(credentialType);
+            }
+            executionContext.put("summary", summaryDTO);
+            executionContext.put("index",0);
+            String key = "partition" + i;
+            map.put(key, executionContext);
+        }
+        logger.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
+        return map;
     }
 }

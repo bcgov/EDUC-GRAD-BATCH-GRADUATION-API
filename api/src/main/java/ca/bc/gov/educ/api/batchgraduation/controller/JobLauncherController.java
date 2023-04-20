@@ -439,6 +439,7 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUN);
         try {
+            // TODO: make asyncJobLauncher
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
