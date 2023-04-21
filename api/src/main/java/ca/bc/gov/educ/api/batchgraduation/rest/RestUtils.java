@@ -451,10 +451,10 @@ public class RestUtils {
         return  result;
     }
 
-    public Boolean executePostDistribution(Long batchId, String download, List<School> schools) {
+    public Boolean executePostDistribution(Long batchId, String download, List<School> schools, String activityCode) {
         UUID correlationID = UUID.randomUUID();
         return webClient.post()
-                .uri(String.format(constants.getPostingDistribution(),batchId,download))
+                .uri(String.format(constants.getPostingDistribution(),batchId,download,activityCode))
                 .headers(h -> { h.setBearerAuth(getAccessToken()); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .body(BodyInserters.fromValue(schools))
                 .retrieve()
@@ -499,9 +499,16 @@ public class RestUtils {
                 .retrieve().bodyToMono(boolean.class).block();
     }
 
-    public void updateSchoolReportRecord(String schoolOfRecord, String reportTypeCode,String accessToken) {
+    public void updateSchoolReportRecord(String schoolOfRecord, String reportTypeCode, String accessToken) {
         UUID correlationID = UUID.randomUUID();
         webClient.get().uri(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode))
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .retrieve().bodyToMono(boolean.class).block();
+    }
+
+    public void deleteSchoolReportRecord(String schoolOfRecord, String reportTypeCode, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        webClient.delete().uri(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(boolean.class).block();
     }
@@ -554,5 +561,7 @@ public class RestUtils {
     public String getAccessToken() {
         return this.fetchAccessToken();
     }
+
+
 
 }

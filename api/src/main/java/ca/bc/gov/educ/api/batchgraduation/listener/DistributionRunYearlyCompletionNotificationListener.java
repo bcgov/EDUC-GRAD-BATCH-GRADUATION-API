@@ -12,18 +12,18 @@ import org.springframework.stereotype.Component;
 import javax.annotation.processing.Generated;
 import java.util.Date;
 
-@Component
-public class DistributionRunYearlyNonGradCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
+@Component(value="DistributionRunYearlyCompletionNotificationListener")
+public class DistributionRunYearlyCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradCompletionNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyCompletionNotificationListener.class);
 
     @Override
 	@Generated("default")
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
-			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
+			LOGGER.debug("=======================================================================================");
+	    	LOGGER.debug("Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 			JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
@@ -41,7 +41,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 				summaryDTO.initializeCredentialCountMap();
 			}
 
-			restUtils.executePostDistribution(summaryDTO.getBatchId(), "N", summaryDTO.getSchools(), "NONGRADDIST");
+			restUtils.executePostDistribution(summaryDTO.getBatchId(), "N", summaryDTO.getSchools(), "YEARENDDIST");
 
 			// display Summary Details
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
