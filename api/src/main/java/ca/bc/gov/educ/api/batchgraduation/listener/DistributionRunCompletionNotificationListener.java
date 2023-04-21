@@ -1,5 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
+import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -10,9 +12,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class DistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
@@ -63,21 +63,32 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 
 		ResponseObj tokenResponse = restUtils.getTokenResponseObject();
 		LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-		//TODO: catch errors here, break up processGlobalList.
 		DistributionResponse distributionResponse = null;
 		try {
 			distributionResponse = processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),activityCode,tokenResponse.getAccess_token());
+			if(distributionResponse != null && distributionResponse.getMergeProcessResponse().toLowerCase().contains("successful")){
+				ResponseObj obj = restUtils.getTokenResponseObject();
+				Map<String, ServiceException> unprocessed = updateBackStudentRecords(summaryDTO.getGlobalList(),jobExecutionId,activityCode,obj.getAccess_token());
+				if(!unprocessed.isEmpty()){
+					status = BatchStatusEnum.FAILED.name();
+					this.handleUnprocessedErrors(unprocessed);
+				}
+			} else {
+				status = BatchStatusEnum.FAILED.name();
+				LOGGER.error("Distribution Failed for Batch JOB: {} due to: {}", jobExecutionId, Optional.of(distributionResponse.getMergeProcessResponse()).orElse("response was null"));
+			}
 		} catch (Exception e) {
+			status = BatchStatusEnum.FAILED.name();
 			LOGGER.error("Distribution Failed for Batch JOB: {} due to: {}", jobExecutionId, e.getLocalizedMessage());
-		}
-		if(distributionResponse != null) {
-			ResponseObj obj = restUtils.getTokenResponseObject();
-			updateBackStudentRecords(summaryDTO.getGlobalList(),jobExecutionId,activityCode,obj.getAccess_token());
 		}
 		LOGGER.info("=======================================================================================");
 		String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
 		processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
     }
+
+	private void handleUnprocessedErrors(Map<String, ServiceException> unprocessed) {
+		unprocessed.forEach((k, v) -> LOGGER.error("Student with id: {} did not have distribution date updated during monthly run due to: {}", k, v.getLocalizedMessage()));
+	}
 
 	private DistributionResponse processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String,DistributionPrintRequest> mapDist,String activityCode,String accessToken) {
     	List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().toList();
@@ -93,7 +104,6 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			supportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",null);
 			supportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",null);
 		});
-		// TODO: handle failure here
 		return restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,null);
 	}
 
@@ -116,11 +126,16 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		}
 	}
 
-	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode,String accessToken) {
- 		//TODO: catch and report errors here
+	private Map<String, ServiceException> updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode,String accessToken) {
+		Map<String, ServiceException> unprocessedStudents = new HashMap<>();
         cList.forEach(scd-> {
-            restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
-            restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
-        });
+			try {
+				restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
+				restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
+			} catch (Exception e) {
+				unprocessedStudents.put(scd.getStudentID().toString(), (ServiceException) e);
+			}
+		});
+		return unprocessedStudents;
     }
 }

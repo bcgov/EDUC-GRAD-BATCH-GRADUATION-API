@@ -83,6 +83,43 @@ public class RestUtils {
         return obj;
     }
 
+    /**
+     * Generic GET call out to services. Uses blocking webclient and will throw
+     * runtime exceptions. Will attempt retries if 5xx errors are encountered.
+     * You can catch Exception in calling method.
+     * @param url the url you are calling
+     * @param clazz the return type you are expecting
+     * @param accessToken access token
+     * @return return type
+     * @param <T> expected return type
+     */
+    public <T> T get(String url, Class<T> clazz, String accessToken) {
+        T obj;
+        try {
+            obj = webClient
+                    .get()
+                    .uri(url)
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
+                    .retrieve()
+                    // if 5xx errors, throw Service error
+                    .onStatus(HttpStatus::is5xxServerError,
+                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, "5xx error."), clientResponse.statusCode().value())))
+                    .bodyToMono(clazz)
+                    // only does retry if initial error was 5xx as service may be temporarily down
+                    // 4xx errors will always happen if 404, 401, 403 etc, so does not retry
+                    .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
+                            .filter(ServiceException.class::isInstance)
+                            .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                                throw new ServiceException(getErrorMessage(url, "Service failed to process after max retries."), HttpStatus.SERVICE_UNAVAILABLE.value());
+                            }))
+                    .block();
+        } catch (Exception e) {
+            // catches IOExceptions and the like
+            throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
+        }
+        return obj;
+    }
+
 
     private String getErrorMessage(String url, String errorMessage) {
         return "Service failed to process at url: " + url + " due to: " + errorMessage;
@@ -449,7 +486,6 @@ public class RestUtils {
     }
 
     public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String activityCode,String localDownload) {
-        //UUID correlationID = UUID.randomUUID();
         String distributionUrl;
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
@@ -458,18 +494,6 @@ public class RestUtils {
         } else {
             distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
-
-        /**DistributionResponse result = webClient.post()
-                .uri(distributionUrl)
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .body(BodyInserters.fromValue(mapDist))
-                .retrieve()
-                .bodyToMono(DistributionResponse.class)
-                .block();
-
-        if(result != null)
-            LOGGER.info(MERGE_MSG,result.getMergeProcessResponse());**/
-
         return this.post(distributionUrl, mapDist, DistributionResponse.class, accessToken);
     }
 
@@ -504,10 +528,8 @@ public class RestUtils {
     }
 
     public void updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String documentStatusCode,String activityCode,String accessToken) {
-        UUID correlationID = UUID.randomUUID();
-        webClient.get().uri(String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode,activityCode))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .retrieve().bodyToMono(boolean.class).block();
+        String url = String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode,activityCode);
+        this.get(url, boolean.class, accessToken);
     }
 
     public void updateSchoolReportRecord(String schoolOfRecord, String reportTypeCode,String accessToken) {
@@ -531,14 +553,8 @@ public class RestUtils {
     }
 
     public void updateStudentGradRecord(UUID studentID, Long batchId,String activityCode, String accessToken) {
-        try {
-            UUID correlationID = UUID.randomUUID();
-            webClient.post().uri(String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .retrieve().bodyToMono(GraduationStudentRecord.class).block();
-        }catch (Exception e) {
-            LOGGER.debug("Student {} not found",studentID);
-        }
+        String url = String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode);
+        this.post(url, "{}", GraduationStudentRecord.class, accessToken);
     }
 
     public List<GraduationStudentRecord> updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {
