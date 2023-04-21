@@ -42,7 +42,7 @@ public class DistributionRunYearlyNonGradPartitioner extends SimplePartitioner {
 
             //TODO: TEST CODE - REMOVE
             /*********** TEST CODE - REMOVE **********/
-            schoolsList = schoolsList.subList(0, 8);
+            schoolsList = schoolsList.subList(0, 20);
             /*********** TEST CODE - REMOVE **********/
 
             int partitionSize = schoolsList.size();
