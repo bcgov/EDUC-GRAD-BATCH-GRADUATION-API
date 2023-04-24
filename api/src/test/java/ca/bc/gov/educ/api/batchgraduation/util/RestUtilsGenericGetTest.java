@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
-import ca.bc.gov.educ.api.batchgraduation.EducGradBatchGraduationApplication;
 import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.Assert;
@@ -18,7 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
-public class RestUtilsPostTest {
+public class RestUtilsGenericGetTest {
 
     @Autowired
     private RestUtils restUtils;
