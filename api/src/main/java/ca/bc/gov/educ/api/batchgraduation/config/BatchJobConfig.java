@@ -688,12 +688,6 @@ public class BatchJobConfig {
      */
 
     @Bean
-    @StepScope
-    public DistributionRunPartitionerYearly partitionerDisRunYearly() {
-        return new DistributionRunPartitionerYearly();
-    }
-
-    @Bean
     public Step masterStepDisRunYearly(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepDisRunYearly")
                 .partitioner(slaveStepDisRunYearly(stepBuilderFactory).getName(), partitionerDisRunYearly())
@@ -717,6 +711,12 @@ public class BatchJobConfig {
     @StepScope
     public DistributionRunYearlyNonGradPartitioner partitionerDisRunYearlyNonGrad() {
         return new DistributionRunYearlyNonGradPartitioner();
+    }
+
+    @Bean
+    @StepScope
+    public DistributionRunYearlyPartitioner partitionerDisRunYearly() {
+        return new DistributionRunYearlyPartitioner();
     }
 
     @Bean
