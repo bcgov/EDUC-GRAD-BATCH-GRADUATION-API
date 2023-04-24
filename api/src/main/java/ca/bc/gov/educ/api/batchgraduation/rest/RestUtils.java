@@ -63,7 +63,7 @@ public class RestUtils {
     public <T> T post(String url, Object body, Class<T> clazz, String accessToken) {
         T obj;
         try {
-            obj = webClient.post()
+            obj = this.webClient.post()
                     .uri(url)
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
                     .body(BodyInserters.fromValue(body))
@@ -96,7 +96,7 @@ public class RestUtils {
     public <T> T get(String url, Class<T> clazz, String accessToken) {
         T obj;
         try {
-            obj = webClient
+            obj = this.webClient
                     .get()
                     .uri(url)
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
