@@ -24,10 +24,7 @@ public class GradBatchHistoryService {
     @Transactional(readOnly = true)
     public BatchGradAlgorithmJobHistoryEntity getGradAlgorithmJobHistory(Long batchId) {
         Optional<BatchGradAlgorithmJobHistoryEntity> optional = batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+        return optional.orElse(null);
     }
 
     @Transactional
@@ -42,6 +39,7 @@ public class GradBatchHistoryService {
             current.setActualStudentsProcessed(ent.getActualStudentsProcessed());
             current.setFailedStudentsProcessed(ent.getFailedStudentsProcessed());
             current.setLocalDownload(ent.getLocalDownload());
+            current.setJobParameters(ent.getJobParameters());
             return batchGradAlgorithmJobHistoryRepository.save(current);
         } else {
             // create
@@ -72,10 +70,7 @@ public class GradBatchHistoryService {
     @Transactional(readOnly = true)
     public BatchGradAlgorithmStudentEntity getBatchGradAlgorithmStudent(Long batchId, UUID studentID) {
         Optional<BatchGradAlgorithmStudentEntity> optional = batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(studentID, batchId);
-        if (optional.isPresent()) {
-            return optional.get();
-        }
-        return null;
+        return optional.orElse(null);
     }
 
     @Transactional

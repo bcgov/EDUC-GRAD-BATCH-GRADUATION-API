@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 public class UserScheduledProcessor implements ItemProcessor<UserScheduledJobs, UserScheduledJobs> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(UserScheduledProcessor.class);

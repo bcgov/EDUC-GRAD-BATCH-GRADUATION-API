@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 public abstract class BaseWriter implements ItemWriter<GraduationStudentRecord> {
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
 

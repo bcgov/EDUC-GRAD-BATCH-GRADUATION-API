@@ -13,6 +13,7 @@ import java.util.UUID;
 
 public abstract class BaseReader implements ItemReader<UUID> {
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     RestUtils restUtils;
 

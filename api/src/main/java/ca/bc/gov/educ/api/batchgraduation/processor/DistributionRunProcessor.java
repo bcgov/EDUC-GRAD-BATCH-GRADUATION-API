@@ -13,6 +13,7 @@ public class DistributionRunProcessor implements ItemProcessor<StudentCredential
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunProcessor.class);
 
+	@SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
 	@Autowired
 	RestUtils restUtils;
 
