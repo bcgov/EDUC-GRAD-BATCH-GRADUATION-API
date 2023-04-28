@@ -65,10 +65,14 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
 		DistributionResponse distributionResponse = null;
 		try {
+			// TODO: processGlobalList should do a fire and forget to distribution api and finish.
+			// then when distribution api is completed (failed or not) should callback to a new
+			// endpoint on batch-api so that the rest of the process can proceed
 			distributionResponse = processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),activityCode,tokenResponse.getAccess_token());
+			// TODO: Create callback for this part below
 			if(distributionResponse != null && distributionResponse.getMergeProcessResponse().toLowerCase().contains("successful")){
 				ResponseObj obj = restUtils.getTokenResponseObject();
-				Map<String, ServiceException> unprocessed = updateBackStudentRecords(summaryDTO.getGlobalList(),jobExecutionId,activityCode,obj.getAccess_token());
+				Map<String, ServiceException> unprocessed = updateBackStudentRecords(summaryDTO.getGlobalList(),jobExecutionId,activityCode);
 				if(!unprocessed.isEmpty()){
 					status = BatchStatusEnum.FAILED.name();
 					this.handleUnprocessedErrors(unprocessed);
@@ -126,12 +130,13 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		}
 	}
 
-	private Map<String, ServiceException> updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode,String accessToken) {
+	private Map<String, ServiceException> updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId,String activityCode) {
 		Map<String, ServiceException> unprocessedStudents = new HashMap<>();
         cList.forEach(scd-> {
 			try {
-				restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
-				restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
+				final String token = restUtils.getTokenResponseObject().getAccess_token();
+				restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,token);
+				restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,token);
 			} catch (Exception e) {
 				unprocessedStudents.put(scd.getStudentID().toString(), (ServiceException) e);
 			}
