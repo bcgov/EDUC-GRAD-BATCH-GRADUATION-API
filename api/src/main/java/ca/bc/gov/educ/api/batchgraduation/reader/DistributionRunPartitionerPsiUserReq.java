@@ -50,7 +50,6 @@ public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
         if (responseObj != null) {
             accessToken = responseObj.getAccess_token();
         }
-        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_PSI", accessToken);
         List<PsiCredentialDistribution> credentialList = getRecordsForPSIUserReqDisRun(req,transmissionType,accessToken);
         if(!credentialList.isEmpty()) {
             // update count size
@@ -73,6 +72,7 @@ public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }
+            restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_PSI", accessToken);
             LOGGER.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
             return map;
         }
