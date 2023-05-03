@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.rest;
 
+import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -20,7 +23,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -65,6 +72,70 @@ public class RestUtils {
         return this.getTokenResponseObject().getAccess_token();
     }
 
+    public <T> T post(String url, Object body, Class<T> clazz, String accessToken) {
+        T obj;
+        try {
+            obj = this.webClient.post()
+                    .uri(url)
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
+                    .body(BodyInserters.fromValue(body))
+                    .retrieve()
+                    .onStatus(HttpStatus::is5xxServerError,
+                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, "5xx error."), clientResponse.statusCode().value())))
+                    .bodyToMono(clazz)
+                    .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
+                            .filter(ServiceException.class::isInstance)
+                            .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                                throw new ServiceException(getErrorMessage(url, "Service failed to process after max retries."), HttpStatus.SERVICE_UNAVAILABLE.value());
+                            }))
+                    .block();
+        } catch (Exception e) {
+            throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
+        }
+        return obj;
+    }
+
+    /**
+     * Generic GET call out to services. Uses blocking webclient and will throw
+     * runtime exceptions. Will attempt retries if 5xx errors are encountered.
+     * You can catch Exception in calling method.
+     * @param url the url you are calling
+     * @param clazz the return type you are expecting
+     * @param accessToken access token
+     * @return return type
+     * @param <T> expected return type
+     */
+    public <T> T get(String url, Class<T> clazz, String accessToken) {
+        T obj;
+        try {
+            obj = this.webClient
+                    .get()
+                    .uri(url)
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
+                    .retrieve()
+                    // if 5xx errors, throw Service error
+                    .onStatus(HttpStatus::is5xxServerError,
+                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, "5xx error."), clientResponse.statusCode().value())))
+                    .bodyToMono(clazz)
+                    // only does retry if initial error was 5xx as service may be temporarily down
+                    // 4xx errors will always happen if 404, 401, 403 etc, so does not retry
+                    .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
+                            .filter(ServiceException.class::isInstance)
+                            .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                                throw new ServiceException(getErrorMessage(url, "Service failed to process after max retries."), HttpStatus.SERVICE_UNAVAILABLE.value());
+                            }))
+                    .block();
+        } catch (Exception e) {
+            // catches IOExceptions and the like
+            throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
+        }
+        return obj;
+    }
+
+    private String getErrorMessage(String url, String errorMessage) {
+        return "Service failed to process at url: " + url + " due to: " + errorMessage;
+    }
+
     @Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
     private ResponseObj getResponseObj() {
         LOGGER.info("Fetch token");
@@ -85,8 +156,8 @@ public class RestUtils {
         return null;
     }
 
+    @Retry(name = "rt-getStudent")
     public List<Student> getStudentsByPen(String pen, String accessToken) {
-        // No need to add a correlationID here.
         final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
         };
         LOGGER.debug("url = {}",constants.getPenStudentApiByPenUrl());
@@ -326,11 +397,20 @@ public class RestUtils {
         if(pObj != null) {
             item.setStudentID(pObj.getStudentID());
         }else {
-            List<Student> stuDataList = this.getStudentsByPen(item.getPen(), accessToken);
-            if(!stuDataList.isEmpty())
-                item.setStudentID(UUID.fromString(stuDataList.get(0).getStudentID()));
+            List<Student> stuDataList;
+            try {
+                stuDataList = this.getStudentsByPen(item.getPen(), accessToken);
+                if(!stuDataList.isEmpty()) {
+                    item.setStudentID(UUID.fromString(stuDataList.get(0).getStudentID()));
+                }
+                summary.getGlobalList().add(item);
+            } catch (Exception e) {
+                LOGGER.error("Error processing student with id {} due to {}", item.getStudentID(), e.getLocalizedMessage());
+                summary.getErrors().add(
+                        new ProcessError(item.getStudentID().toString(), e.getLocalizedMessage(), e.getMessage())
+                );
+            }
         }
-        summary.getGlobalList().add(item);
         return item;
     }
 
@@ -409,11 +489,11 @@ public class RestUtils {
             LOGGER.info("Create and Store School Report Success {}",result);
     }
 
-
-    public DistributionResponse mergePsiAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String localDownload) {
+    //Grad2-1931 sending transmissionType with the webclient.
+    public DistributionResponse mergePsiAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String localDownload, String transmissionType) {
         UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
-                .uri(String.format(constants.getMergePsiAndUpload(),batchId,localDownload))
+                .uri(String.format(constants.getMergePsiAndUpload(),batchId,localDownload,transmissionType))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .body(BodyInserters.fromValue(mapDist))
                 .retrieve()
@@ -425,8 +505,9 @@ public class RestUtils {
         return  new DistributionResponse();
     }
 
+    //@Retry(name = "defaultRetry")
     public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String activityCode,String localDownload) {
-        UUID correlationID = UUID.randomUUID();
+        // TODO: Fire and forget
         String distributionUrl;
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
@@ -437,18 +518,7 @@ public class RestUtils {
         } else {
             distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
-        DistributionResponse result = webClient.post()
-                .uri(distributionUrl)
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .body(BodyInserters.fromValue(mapDist))
-                .retrieve()
-                .bodyToMono(DistributionResponse.class)
-                .block();
-
-        if(result != null)
-            LOGGER.info(MERGE_MSG,result.getMergeProcessResponse());
-
-        return  result;
+        return this.post(distributionUrl, mapDist, DistributionResponse.class, this.getTokenResponseObject().getAccess_token());
     }
 
     public Boolean executePostDistribution(Long batchId, String download, List<School> schools, String activityCode) {
@@ -493,10 +563,8 @@ public class RestUtils {
     }
 
     public void updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String documentStatusCode,String activityCode,String accessToken) {
-        UUID correlationID = UUID.randomUUID();
-        webClient.get().uri(String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode,activityCode))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .retrieve().bodyToMono(boolean.class).block();
+        String url = String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode,activityCode);
+        this.get(url, boolean.class, accessToken);
     }
 
     public void updateSchoolReportRecord(String schoolOfRecord, String reportTypeCode, String accessToken) {
@@ -527,14 +595,8 @@ public class RestUtils {
     }
 
     public void updateStudentGradRecord(UUID studentID, Long batchId,String activityCode, String accessToken) {
-        try {
-            UUID correlationID = UUID.randomUUID();
-            webClient.post().uri(String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .retrieve().bodyToMono(GraduationStudentRecord.class).block();
-        }catch (Exception e) {
-            LOGGER.error("Update Student Record {} failed {}",studentID,e.getMessage());
-        }
+        String url = String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode);
+        this.post(url, "{}", GraduationStudentRecord.class, accessToken);
     }
 
     public List<GraduationStudentRecord> updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {

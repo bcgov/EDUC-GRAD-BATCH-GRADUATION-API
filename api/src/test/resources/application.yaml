@@ -31,9 +31,10 @@ spring:
           issuer-uri: https://soam-dev.apps.silver.devops.gov.bc.ca/auth/realms/master
           jwk-set-uri: https://soam-dev.apps.silver.devops.gov.bc.ca/auth/realms/master/protocol/openid-connect/certs
   batch:
-    initialize-schema: NEVER
     job:
       enabled: false
+    jdbc:
+      initialize-schema: NEVER
   flyway:
     enabled: false
     baseline-on-migrate: false
@@ -76,6 +77,11 @@ batch:
     cron: 0 0 02 1 * *
   token-expiry:
     offset: 30
+  user:
+    scheduled:
+      jobs:
+        lockAtLeastFor: 10
+        lockAtMostFor: 180
 
 #Endpoints
 endpoint:

@@ -5,6 +5,8 @@ public enum JobProperName {
 	STBJ ("Special Achievement Batch Job"),
     YDBJ ("Year-End Distribution Batch Job"),
     MDBJ ("Monthly Distribution Batch Job"),
+    SDBJ ("Supplemental Distribution Batch Job"),
+    NDBJ("Non-Grad Distribution Batch Job"),
 	URDBJ ("User Req Distribution Batch Job"),
     URPDBJ("PSI Distribution Batch Job"),
     BDBJ ("Blank Distribution Batch Job");

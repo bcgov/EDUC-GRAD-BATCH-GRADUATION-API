@@ -15,6 +15,7 @@ public abstract class DistributionRunBaseReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunBaseReader.class);
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     RestUtils restUtils;
 

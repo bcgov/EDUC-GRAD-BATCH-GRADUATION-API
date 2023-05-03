@@ -15,6 +15,7 @@ public abstract class BlankDistributionRunBaseReader implements ItemReader<Blank
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlankDistributionRunBaseReader.class);
 
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     RestUtils restUtils;
 

@@ -337,7 +337,7 @@ public class BatchJobConfig {
     @Bean
     @StepScope
     public ItemReader<UUID> itemReaderSpcRegGrad() {
-        return new SpecialProjectedGradRunReader();
+        return new SpecialGradRunStudentReader();
     }
 
     @Bean
@@ -465,7 +465,7 @@ public class BatchJobConfig {
     @Bean
     @StepScope
     public ItemReader<UUID> itemReaderSpcTvrRun() {
-        return new SpecialGradRunStudentReader();
+        return new SpecialProjectedGradRunReader();
     }
 
     @Bean

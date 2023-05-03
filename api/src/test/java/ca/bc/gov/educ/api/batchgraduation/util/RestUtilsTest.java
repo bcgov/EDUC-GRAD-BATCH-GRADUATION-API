@@ -1,11 +1,13 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
 
+import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import lombok.val;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +23,10 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+import reactor.util.retry.RetryBackoffSpec;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -29,8 +34,7 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -59,6 +63,12 @@ public class RestUtilsTest {
 
     @Mock
     private Mono<Integer> inputResponseI;
+
+    @Mock
+    private Retry retryMock;
+
+    @Mock
+    private RetryBackoffSpec retryBackoffSpecMock;
 
     @Mock
     private WebClient.RequestHeadersSpec requestHeadersMock;
@@ -1000,6 +1010,7 @@ public class RestUtilsTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode,activityCode))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(boolean.class)).thenReturn(Mono.just(true));
 
         this.restUtils.updateStudentCredentialRecord(UUID.fromString(studentID),credentialTypeCode,paperType,documentStatusCode,activityCode,"accessToken");
@@ -1105,6 +1116,7 @@ public class RestUtilsTest {
         when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictYearEndReport())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
 
         val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,null);
@@ -1121,22 +1133,15 @@ public class RestUtilsTest {
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(constants.getMergeAndUpload(),batchId,activityCode,null))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
-        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestBodyMock.retrieve()).thenReturn(this.responseMock);
+        when(this.requestBodyMock.body(any())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
+        when(this.retryBackoffSpecMock.filter(any())).thenReturn(retryBackoffSpecMock);
+        when(this.retryBackoffSpecMock.onRetryExhaustedThrow(any())).thenReturn(retryBackoffSpecMock);
+        when(this.inputResponsePSI.retryWhen(any(reactor.util.retry.Retry.class))).thenReturn(inputResponsePSI);
         when(this.inputResponsePSI.block()).thenReturn(null);
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictMonthReport())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getSchoolDistrictYearEndReport())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(4));
 
         val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,null);
         assertThat(result).isNull();
@@ -1148,6 +1153,8 @@ public class RestUtilsTest {
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
         Long batchId = 3344L;
+        //Grad2-1931
+        String transmissionType = "ftp";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(constants.getMergePsiAndUpload(),batchId,"Y"))).thenReturn(this.requestBodyUriMock);
@@ -1157,7 +1164,7 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
 
 
-        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y");
+        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y", transmissionType);
         assertThat(result).isNotNull();
     }
 
@@ -1166,6 +1173,7 @@ public class RestUtilsTest {
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
         Long batchId = 3344L;
+        String transmissionType = "ftp";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(constants.getMergePsiAndUpload(),batchId,"Y"))).thenReturn(this.requestBodyUriMock);
@@ -1176,7 +1184,7 @@ public class RestUtilsTest {
         when(this.inputResponsePSI.block()).thenReturn(null);
 
 
-        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y");
+        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y",transmissionType);
         assertThat(result).isNotNull();
     }
 
@@ -1209,6 +1217,9 @@ public class RestUtilsTest {
         when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentRecord(),studentID,batchId,activityCode))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.retrieve()).thenReturn(this.responseMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(rec));
 
         this.restUtils.updateStudentGradRecord(studentID,batchId,activityCode,"acb");

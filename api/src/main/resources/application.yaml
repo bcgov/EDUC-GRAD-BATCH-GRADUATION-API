@@ -36,9 +36,10 @@ spring:
           issuer-uri: ${TOKEN_ISSUER_URL}
           jwk-set-uri: ${TOKEN_ISSUER_URL}/protocol/openid-connect/certs
   batch:
-    initialize-schema: NEVER
     job:
       enabled: false
+    jdbc:
+      initialize-schema: NEVER
   flyway:
     enabled: ${ENABLE_FLYWAY}
     baseline-on-migrate: false
@@ -96,36 +97,40 @@ springdoc:
     operationsSorter: alpha
 
 #Resilience
-resilience4j.retry:
-  instances:
-    rt-getToken:
-      maxAttempts: 35
-      waitDuration: 5s
-      retryExceptions:
-        - org.springframework.web.client.HttpServerErrorException
-      ignoreExceptions:
-        - java.lang.NullPointerException
-    reggradrun:
-      maxAttempts: ${MAX_RETRY_ATTEMPTS}
-      waitDuration: 2s
-      retryExceptions:
-        - org.springframework.web.client.HttpServerErrorException
-      ignoreExceptions:
-        - java.lang.NullPointerException
-    tvrrun:
-      maxAttempts: ${MAX_RETRY_ATTEMPTS}
-      waitDuration: 2s
-      retryExceptions:
-        - org.springframework.web.client.HttpServerErrorException
-      ignoreExceptions:
-        - java.lang.NullPointerException
-    rt-getStudent:
-      maxAttempts: ${MAX_RETRY_ATTEMPTS}
-      waitDuration: 2s
-      retryExceptions:
-        - org.springframework.web.client.HttpServerErrorException
-      ignoreExceptions:
-        - java.lang.NullPointerException
+resilience4j:
+  retry:
+    instances:
+      defaultRetry:
+        maxAttempts: 3
+        waitDuration: 2s
+      rt-getToken:
+        maxAttempts: 35
+        waitDuration: 5s
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+        ignoreExceptions:
+          - java.lang.NullPointerException
+      reggradrun:
+        maxAttempts: ${MAX_RETRY_ATTEMPTS}
+        waitDuration: 2s
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+        ignoreExceptions:
+          - java.lang.NullPointerException
+      tvrrun:
+        maxAttempts: ${MAX_RETRY_ATTEMPTS}
+        waitDuration: 2s
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+        ignoreExceptions:
+          - java.lang.NullPointerException
+      rt-getStudent:
+        maxAttempts: ${MAX_RETRY_ATTEMPTS}
+        waitDuration: 2s
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+        ignoreExceptions:
+          - java.lang.NullPointerException
 
 authorization:
   user: ${GRAD_CLIENT_NAME}
@@ -142,6 +147,11 @@ batch:
     cron: ${DIST_RUN_CRON}
   token-expiry:
     offset: ${TOKEN_EXPIRY_OFFSET}
+  user:
+    scheduled:
+      jobs:
+        lockAtLeastFor: ${CRON_USER_SCHEDULED_JOBS_LOCK_AT_LEAST_FOR}
+        lockAtMostFor: ${CRON_USER_SCHEDULED_JOBS_LOCK_AT_MOST_FOR}
 
 #Endpoints
 endpoint:
@@ -220,7 +230,7 @@ endpoint:
     read-n-post:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSR?batchId=%s
     merge-psi-n-upload:
-      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSPR?batchId=%s&localDownload=%s
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSPR?batchId=%s&localDownload=%s&transmissionType=%s
   grad-trax-api:
     get-psi-student-list:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
