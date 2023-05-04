@@ -19,9 +19,7 @@ public class DistributionRunYearlyNonGradReader extends DistributionRunBaseReade
 
     @Override
     public String read() throws Exception {
-        fetchAccessToken();
         summaryDTO.setReadCount(schoolsList.size());
-
         String nextSchool = null;
         
         if (nxtCredentialForProcessing < schoolsList.size()) {

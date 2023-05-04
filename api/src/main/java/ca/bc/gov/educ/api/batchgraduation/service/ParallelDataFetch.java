@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -13,6 +14,9 @@ public class ParallelDataFetch {
 
     @Autowired
     GraduationReportService graduationReportService;
+
+    @Autowired
+    RestUtils restUtils;
 
     public Mono<DistributionDataParallelDTO> fetchDistributionRequiredData(String accessToken) {
         Mono<List<StudentCredentialDistribution>> transcriptList = graduationReportService.getTranscriptList(accessToken);
@@ -26,6 +30,10 @@ public class ParallelDataFetch {
         return Mono.zip(transcriptList,certificateList).map(tuple -> new DistributionDataParallelDTO(tuple.getT1(),tuple.getT2()));
     }
 
+    public List<StudentCredentialDistribution> fetchStudentCredentialsDistributionDataYearly() {
+        return restUtils.fetchDistributionRequiredDataStudentsYearly();
+    }
+
     public List<String> fetchDistributionRequiredDataSchoolsNonGradYearly(String accessToken) {
         return graduationReportService.getSchoolsNonGradYearly(accessToken);
     }
@@ -34,7 +42,4 @@ public class ParallelDataFetch {
         return graduationReportService.getDistrictsNonGradYearly(accessToken);
     }
 
-    public List<String> fetchDistributionRequiredDataDistrictsYearly(String accessToken) {
-        return graduationReportService.getDistrictsYearly(accessToken);
-    }
 }

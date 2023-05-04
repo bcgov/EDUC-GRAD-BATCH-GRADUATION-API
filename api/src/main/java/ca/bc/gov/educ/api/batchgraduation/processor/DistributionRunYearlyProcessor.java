@@ -9,9 +9,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.List;
-
-public class DistributionRunYearlyProcessor implements ItemProcessor<String, List<StudentCredentialDistribution>> {
+public class DistributionRunYearlyProcessor implements ItemProcessor<StudentCredentialDistribution, StudentCredentialDistribution> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyProcessor.class);
 
@@ -23,12 +21,12 @@ public class DistributionRunYearlyProcessor implements ItemProcessor<String, Lis
 
 	@Value("#{stepExecution.jobExecution.id}")
 	Long batchId;
-    
+
 	@Override
-	public List<StudentCredentialDistribution> process(String mincode) throws Exception {
-		LOGGER.info("Processing partitionData = {}", mincode);
+	public StudentCredentialDistribution process(StudentCredentialDistribution item) throws Exception {
+		LOGGER.info("Processing partitionData = {}", item.getCredentialTypeCode());
 		summaryDTO.setBatchId(batchId);
-		return restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode, summaryDTO);
-		
+		return restUtils.processDistribution(item, summaryDTO);
+
 	}
 }

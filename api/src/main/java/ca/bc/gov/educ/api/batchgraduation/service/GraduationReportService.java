@@ -47,8 +47,17 @@ public class GraduationReportService {
 				}).retrieve().bodyToMono(responseType).block();
 	}
 
-	public List<StudentCredentialDistribution> getStudentsNonGradYearly(String mincode, String accessToken) {
+	public List<StudentCredentialDistribution> getStudentsNonGradForYearlyDistribution(String mincode, String accessToken) {
 		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(String.format(constants.getStudentDataNonGradEarly(), mincode)).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
+		return populateStudentCredentialDistributions(reportGradStudentDataList);
+	}
+
+	public List<StudentCredentialDistribution> getStudentsForYearlyDistribution(String accessToken) {
+		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(String.format(constants.getStudentReportDataEarly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
+		return populateStudentCredentialDistributions(reportGradStudentDataList);
+	}
+
+	private List<StudentCredentialDistribution> populateStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
 		List<StudentCredentialDistribution> result = new ArrayList<>();
 		for(ReportGradStudentData data: reportGradStudentDataList) {
 			StudentCredentialDistribution dist = new StudentCredentialDistribution();
@@ -81,6 +90,6 @@ public class GraduationReportService {
 	}
 
 	public List<String> getDistrictsYearly(String accessToken) {
-		return webClient.get().uri(String.format(constants.getDistrictDataEarly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<String>>(){}).block();
+		return webClient.get().uri(String.format(constants.getDistrictDataYearly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<String>>(){}).block();
 	}
 }

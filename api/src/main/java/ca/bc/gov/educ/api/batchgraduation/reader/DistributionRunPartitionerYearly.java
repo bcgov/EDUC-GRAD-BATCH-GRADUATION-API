@@ -1,9 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +8,10 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DistributionRunPartitionerYearly extends BasePartitioner {
 
@@ -23,21 +21,12 @@ public class DistributionRunPartitionerYearly extends BasePartitioner {
     JobExecution context;
 
     @Autowired
-    RestUtils restUtils;
-
-    @Autowired
     ParallelDataFetch parallelDataFetch;
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
 
-        Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredDataYearly(restUtils.getAccessToken());
-        DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
-        List<StudentCredentialDistribution> credentialList = new ArrayList<>();
-        if(parallelDTO != null) {
-            credentialList.addAll(parallelDTO.transcriptList());
-            credentialList.addAll(parallelDTO.certificateList());
-        }
+        List<StudentCredentialDistribution> credentialList = parallelDataFetch.fetchStudentCredentialsDistributionDataYearly();
         if(!credentialList.isEmpty()) {
             return getStringExecutionContextMap(gridSize, credentialList, null, LOGGER);
         }

@@ -584,12 +584,6 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ItemProcessor<String, List<StudentCredentialDistribution>> itemProcessorDisRunYearly() {
-        return new DistributionRunYearlyProcessor();
-    }
-
-    @Bean
-    @StepScope
     public ItemReader<StudentCredentialDistribution> itemReaderDisRun() {
         return new DistributionRunStudentCredentialsReader();
     }
@@ -602,12 +596,6 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ItemReader<String> itemReaderDisRunYearly() {
-        return new DistributionRunYearlyReader();
-    }
-
-    @Bean
-    @StepScope
     public ItemWriter<StudentCredentialDistribution> itemWriterDisRun() {
         return new DistributionRunWriter();
     }
@@ -616,12 +604,6 @@ public class BatchJobConfig {
     @StepScope
     public ItemWriter<List<StudentCredentialDistribution>> itemWriterDisRunYearlyNonGrad() {
         return new DistributionRunYearlyNonGradWriter();
-    }
-
-    @Bean
-    @StepScope
-    public ItemWriter<List<StudentCredentialDistribution>> itemWriterDisRunYearly() {
-        return new DistributionRunYearlyWriter();
     }
 
     @Bean
@@ -652,16 +634,6 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step slaveStepDisRunYearly(StepBuilderFactory stepBuilderFactory) {
-        return stepBuilderFactory.get("slaveStepDisRunYearly")
-                .<String, List<StudentCredentialDistribution>>chunk(1)
-                .reader(itemReaderDisRunYearly())
-                .processor(itemProcessorDisRunYearly())
-                .writer(itemWriterDisRunYearly())
-                .build();
-    }
-
-    @Bean
     public Step masterStepDisRun(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepDisRun")
                 .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRun())
@@ -688,9 +660,15 @@ public class BatchJobConfig {
      */
 
     @Bean
+    @StepScope
+    public DistributionRunPartitionerYearly partitionerDisRunYearly() {
+        return new DistributionRunPartitionerYearly();
+    }
+
+    @Bean
     public Step masterStepDisRunYearly(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepDisRunYearly")
-                .partitioner(slaveStepDisRunYearly(stepBuilderFactory).getName(), partitionerDisRunYearly())
+                .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRunYearly())
                 .step(slaveStepDisRun(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants))
@@ -698,7 +676,7 @@ public class BatchJobConfig {
     }
 
     @Bean(name="YearlyDistributionBatchJob")
-    public Job distributionBatchJobYearly(DistributionRunYearlyCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Job distributionBatchJobYearly(DistributionRunCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("YearlyDistributionBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
@@ -711,12 +689,6 @@ public class BatchJobConfig {
     @StepScope
     public DistributionRunYearlyNonGradPartitioner partitionerDisRunYearlyNonGrad() {
         return new DistributionRunYearlyNonGradPartitioner();
-    }
-
-    @Bean
-    @StepScope
-    public DistributionRunYearlyPartitioner partitionerDisRunYearly() {
-        return new DistributionRunYearlyPartitioner();
     }
 
     @Bean

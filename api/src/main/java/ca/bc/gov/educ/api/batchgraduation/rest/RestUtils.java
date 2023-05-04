@@ -207,10 +207,16 @@ public class RestUtils {
     public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(String mincode, DistributionSummaryDTO summaryDTO) {
         summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
         String accessToken = getTokenResponseObject().getAccess_token();
-        List<StudentCredentialDistribution> result = graduationReportService.getStudentsNonGradYearly(mincode, accessToken);
+        List<StudentCredentialDistribution> result = graduationReportService.getStudentsNonGradForYearlyDistribution(mincode, accessToken);
         List<StudentCredentialDistribution> globalList = summaryDTO.getGlobalList();
         globalList.clear();
         globalList.addAll(result);
+        return result;
+    }
+
+    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearly() {
+        String accessToken = getTokenResponseObject().getAccess_token();
+        List<StudentCredentialDistribution> result = graduationReportService.getStudentsForYearlyDistribution(accessToken);
         return result;
     }
 
@@ -358,8 +364,8 @@ public class RestUtils {
                 .orElse(null);
         if(scObj != null) {
             item.setSchoolOfRecord(scObj.getSchoolOfRecord());
-        }else {
-            GraduationStudentRecordDistribution stuRec =this.getStudentData(item.getStudentID().toString(),accessToken);
+        } else {
+            GraduationStudentRecordDistribution stuRec = getStudentData(item.getStudentID().toString(),accessToken);
             if (stuRec != null) {
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
