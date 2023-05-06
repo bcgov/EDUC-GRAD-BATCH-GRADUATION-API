@@ -204,6 +204,10 @@ public class RestUtils {
         }
     }
 
+    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(String accessToken) {
+        return graduationReportService.getStudentsNonGradForYearlyDistribution(accessToken);
+    }
+
     public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(String mincode, DistributionSummaryDTO summaryDTO) {
         summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
         String accessToken = getTokenResponseObject().getAccess_token();

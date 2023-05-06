@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
-public class DistributionRunYearlyNonGradReader extends DistributionRunBaseReader implements ItemReader<String> {
+public class DistributionRunYearlyNonGradByMincodeReader extends DistributionRunBaseReader implements ItemReader<String> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradByMincodeReader.class);
 
     @Value("#{stepExecutionContext['index']}")
     private Integer nxtCredentialForProcessing;

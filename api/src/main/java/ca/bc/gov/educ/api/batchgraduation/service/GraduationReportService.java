@@ -47,8 +47,13 @@ public class GraduationReportService {
 				}).retrieve().bodyToMono(responseType).block();
 	}
 
+	public List<StudentCredentialDistribution> getStudentsNonGradForYearlyDistribution(String accessToken) {
+		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(String.format(constants.getStudentDataNonGradEarly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
+		return populateStudentCredentialDistributions(reportGradStudentDataList);
+	}
+
 	public List<StudentCredentialDistribution> getStudentsNonGradForYearlyDistribution(String mincode, String accessToken) {
-		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(String.format(constants.getStudentDataNonGradEarly(), mincode)).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
+		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(String.format(constants.getStudentDataNonGradEarlyByMincode(), mincode)).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 

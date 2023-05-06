@@ -578,8 +578,8 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ItemProcessor<String, List<StudentCredentialDistribution>> itemProcessorDisRunYearlyNonGrad() {
-        return new DistributionRunYearlyNonGradProcessor();
+    public ItemProcessor<String, List<StudentCredentialDistribution>> itemProcessorDisRunYearlyNonGradByMincode() {
+        return new DistributionRunYearlyNonGradByMincodeProcessor();
     }
 
     @Bean
@@ -590,8 +590,8 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ItemReader<String> itemReaderDisRunYearlyNonGrad() {
-        return new DistributionRunYearlyNonGradReader();
+    public ItemReader<String> itemReaderDisRunYearlyNonGradByMincode() {
+        return new DistributionRunYearlyNonGradByMincodeReader();
     }
 
     @Bean
@@ -603,7 +603,7 @@ public class BatchJobConfig {
     @Bean
     @StepScope
     public ItemWriter<List<StudentCredentialDistribution>> itemWriterDisRunYearlyNonGrad() {
-        return new DistributionRunYearlyNonGradWriter();
+        return new DistributionRunYearlyNonGradByMincodeWriter();
     }
 
     @Bean
@@ -624,11 +624,11 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step slaveStepDisRunYearlyNonGrad(StepBuilderFactory stepBuilderFactory) {
+    public Step slaveStepDisRunYearlyNonGradByMincode(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("slaveStepDisRunYearlyNonGrad")
                 .<String, List<StudentCredentialDistribution>>chunk(1)
-                .reader(itemReaderDisRunYearlyNonGrad())
-                .processor(itemProcessorDisRunYearlyNonGrad())
+                .reader(itemReaderDisRunYearlyNonGradByMincode())
+                .processor(itemProcessorDisRunYearlyNonGradByMincode())
                 .writer(itemWriterDisRunYearlyNonGrad())
                 .build();
     }
@@ -687,26 +687,26 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public DistributionRunYearlyNonGradPartitioner partitionerDisRunYearlyNonGrad() {
-        return new DistributionRunYearlyNonGradPartitioner();
+    public DistributionRunYearlyNonGradByMincodePartitioner partitionerDisRunYearlyNonGradByMincode() {
+        return new DistributionRunYearlyNonGradByMincodePartitioner();
     }
 
     @Bean
-    public Step masterStepDisRunYearlyNonGrad(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Step masterStepDisRunYearlyNonGradByMincode(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepDisRunYearlyNonGrad")
-                .partitioner(slaveStepDisRunYearlyNonGrad(stepBuilderFactory).getName(), partitionerDisRunYearlyNonGrad())
-                .step(slaveStepDisRunYearlyNonGrad(stepBuilderFactory))
+                .partitioner(slaveStepDisRunYearlyNonGradByMincode(stepBuilderFactory).getName(), partitionerDisRunYearlyNonGradByMincode())
+                .step(slaveStepDisRunYearlyNonGradByMincode(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants))
                 .build();
     }
 
     @Bean(name="YearlyNonGradDistributionBatchJob")
-    public Job distributionBatchJobYearlyNonGrad(DistributionRunYearlyNonGradCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+    public Job distributionBatchJobYearlyNonGrad(DistributionRunYearlyNonGradByMincodeCompletionNotificationListener listener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return jobBuilderFactory.get("YearlyNonGradDistributionBatchJob")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(masterStepDisRunYearlyNonGrad(stepBuilderFactory,constants))
+                .flow(masterStepDisRunYearlyNonGradByMincode(stepBuilderFactory,constants))
                 .end()
                 .build();
     }

@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
-public class DistributionRunYearlyNonGradProcessor implements ItemProcessor<String, List<StudentCredentialDistribution>> {
+public class DistributionRunYearlyNonGradByMincodeProcessor implements ItemProcessor<String, List<StudentCredentialDistribution>> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradProcessor.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradByMincodeProcessor.class);
 
 	@Autowired
 	RestUtils restUtils;

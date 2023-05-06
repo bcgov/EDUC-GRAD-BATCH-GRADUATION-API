@@ -173,13 +173,16 @@ public class EducGradBatchGraduationApiConstants {
     private String updateStudentRecord;
 
     @Value("${endpoint.grad-student-api.get-student-data-nongrad-yearly}")
-    private String studentDataNonGradEarly;
+    private String studentDataNonGradEarlyByMincode;
 
     @Value("${endpoint.grad-student-api.get-school-data-nongrad-yearly}")
     private String schoolDataNonGradEarly;
 
     @Value("${endpoint.grad-student-api.get-district-data-nongrad-yearly}")
     private String districtDataNonGradEarly;
+
+    @Value("${endpoint.grad-student-api.read-student-data-nongrad-yearly}")
+    private String studentDataNonGradEarly;
 
     @Value("${endpoint.grad-graduation-report-api.get-district-data-yearly.url}")
     private String districtDataYearly;

@@ -13,9 +13,9 @@ import javax.annotation.processing.Generated;
 import java.util.Date;
 
 @Component
-public class DistributionRunYearlyNonGradCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
+public class DistributionRunYearlyNonGradByMincodeCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradCompletionNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradByMincodeCompletionNotificationListener.class);
 
     @Override
 	@Generated("default")

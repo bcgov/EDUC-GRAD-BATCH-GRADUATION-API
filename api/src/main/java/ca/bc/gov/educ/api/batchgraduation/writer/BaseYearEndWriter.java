@@ -60,10 +60,7 @@ public abstract class BaseYearEndWriter {
         DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,"N");
         if(disres != null) {
             summaryDTO.getSchools().addAll(disres.getSchools());
-            //TODO: TEST CODE - UNCOMMENT
-            /*********** TEST CODE - UNCOMMENT **********/
-            //updateBackStudentRecords(cList,batchId);
-            /*********** TEST CODE - UNCOMMENT **********/
+            updateBackStudentRecords(cList,batchId);
         }
     }
 
