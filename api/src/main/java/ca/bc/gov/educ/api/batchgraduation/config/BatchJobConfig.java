@@ -601,6 +601,7 @@ public class BatchJobConfig {
                 .reader(itemReaderDisRun())
                 .processor(itemProcessorDisRun())
                 .writer(itemWriterDisRun())
+                .transactionManager(batchTransactionManager)
                 .build();
     }
 
