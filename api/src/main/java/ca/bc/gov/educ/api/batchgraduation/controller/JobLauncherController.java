@@ -699,10 +699,10 @@ public class JobLauncherController {
         String activityCode = "MONTHLYDIST";
         if(StringUtils.isNotBlank(jobType)) {
             switch (jobType) {
-                case "DISTRUN" -> activityCode = "MONTHLYDIST";
-                case "DISTRUN_YE" -> activityCode = "YEARENDDIST";
-                case "DISTRUN_SUPP" -> activityCode = "SUPPDIST";
-                case "NONGRADRUN" -> activityCode = "NONGRADDIST";
+                case DISTRUN -> activityCode = "MONTHLYDIST";
+                case DISTRUN_YE -> activityCode = "YEARENDDIST";
+                case DISTRUN_SUPP -> activityCode = "SUPPDIST";
+                case NONGRADRUN -> activityCode = "NONGRADDIST";
             }
         }
         return activityCode;
