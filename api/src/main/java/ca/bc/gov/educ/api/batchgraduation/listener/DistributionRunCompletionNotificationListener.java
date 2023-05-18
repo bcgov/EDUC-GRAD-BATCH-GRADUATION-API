@@ -82,7 +82,8 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			supportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",null);
 			supportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",null);
 		});
-		restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,null);
+		if (!cList.isEmpty())
+			restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,null);
 	}
 
 	private void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
