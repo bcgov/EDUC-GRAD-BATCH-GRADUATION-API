@@ -149,7 +149,7 @@ objects:
           resource:
             name: cpu
             target:
-              averageUtilization: 1000
+              averageUtilization: 500
               type: Utilization
         - type: Resource
           resource:

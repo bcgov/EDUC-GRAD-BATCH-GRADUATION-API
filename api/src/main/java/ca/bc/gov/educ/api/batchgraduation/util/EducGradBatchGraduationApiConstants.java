@@ -57,10 +57,8 @@ public class EducGradBatchGraduationApiConstants {
 
     public static final String UPDATE_PARAM = "/parameters";
 
-    // **** Data Conversion
-    public static final String EXECUTE_DATA_CONVERSION_BATCH_JOB = "/executeGradStudentDataConversionJob";
-    public static final String GRAD_CONVERSION_API_MAPPING = "/dataconversion";
-    public static final String EXECUTE_COURSE_RESTRICTIONS_CONVERSION_JOB = "/courseRestrictions";
+    // **** Notify the distribution job is completed, and update its status(batch job & student) back
+    public static final String NOTIFY_DISTRIBUTION_JOB_IS_COMPLETED = "/notifyDistributionJobCompleted";
        
     // **** Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";

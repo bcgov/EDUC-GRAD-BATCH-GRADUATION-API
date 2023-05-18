@@ -24,7 +24,7 @@ env:
   BRANCH: "main"
   TAG: "latest"
   MIN_CPU: "50m"
-  MAX_CPU: "250m"
+  MAX_CPU: "300m"
   MIN_MEM: "1024Mi"
   MAX_MEM: "5Gi"
   MIN_REPLICAS: "1"
