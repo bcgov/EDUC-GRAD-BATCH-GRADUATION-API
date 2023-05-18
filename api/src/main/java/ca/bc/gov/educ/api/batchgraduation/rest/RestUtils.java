@@ -485,9 +485,7 @@ public class RestUtils {
         return  new DistributionResponse();
     }
 
-    //@Retry(name = "defaultRetry")
     public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String activityCode,String localDownload) {
-        // TODO: Fire and forget
         String distributionUrl;
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
@@ -496,7 +494,7 @@ public class RestUtils {
         } else {
             distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
-        return this.post(distributionUrl, mapDist, DistributionResponse.class, this.getTokenResponseObject().getAccess_token());
+        return this.post(distributionUrl, mapDist, DistributionResponse.class, accessToken);
     }
 
     @SneakyThrows
