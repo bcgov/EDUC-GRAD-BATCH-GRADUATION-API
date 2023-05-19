@@ -662,9 +662,12 @@ public class JobLauncherController {
             // update graduation_student_record & student_certificate
             Map<String, ServiceException> unprocessed = updateBackStudentRecords(cList, batchId, getActivitCode(jobType));
             if (!unprocessed.isEmpty()) {
+                jobHistory.setFailedStudentsProcessed(unprocessed.size());
+                jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed() - unprocessed.size());
                 status = BatchStatusEnum.FAILED.name();
                 this.handleUnprocessedErrors(unprocessed);
             } else {
+                jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed());
                 status = BatchStatusEnum.COMPLETED.name();
             }
         } else {
