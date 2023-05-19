@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
@@ -17,7 +18,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseDistributionRunCompletionNotificationListener.class);
 
     @Autowired
-    private GradBatchHistoryService gradBatchHistoryService;
+    GradBatchHistoryService gradBatchHistoryService;
 
     @Autowired
     RestUtils restUtils;
@@ -70,11 +71,13 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         jobParamsDto.setJobName(jobType);
         jobParamsDto.setCredentialType(credentialType);
 
-        try {
-            StudentSearchRequest payload = new ObjectMapper().readValue(studentSearchRequest, StudentSearchRequest.class);
-            jobParamsDto.setPayload(payload);
-        } catch (Exception e) {
-            LOGGER.error("StudentSearchRequest payload parse error - {}", e.getMessage());
+        if (StringUtils.isNotBlank(studentSearchRequest)) {
+            try {
+                StudentSearchRequest payload = new ObjectMapper().readValue(studentSearchRequest, StudentSearchRequest.class);
+                jobParamsDto.setPayload(payload);
+            } catch (Exception e) {
+                LOGGER.error("StudentSearchRequest payload parse error - {}", e.getMessage());
+            }
         }
 
         String jobParamsDtoStr = null;

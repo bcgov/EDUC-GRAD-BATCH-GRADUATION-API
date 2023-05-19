@@ -485,7 +485,6 @@ public class RestUtils {
         return  new DistributionResponse();
     }
 
-    @Retry(name = "defaultRetry")
     public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String activityCode,String localDownload) {
         String distributionUrl;
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
