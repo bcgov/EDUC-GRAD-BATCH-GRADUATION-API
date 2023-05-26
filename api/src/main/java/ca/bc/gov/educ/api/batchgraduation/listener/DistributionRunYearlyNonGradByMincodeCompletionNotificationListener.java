@@ -47,7 +47,7 @@ public class DistributionRunYearlyNonGradByMincodeCompletionNotificationListener
 				summaryDTO.initializeCredentialCountMap();
 			}
 
-			processGlobalList(summaryDTO);
+			processGlobalList(summaryDTO, "NONGRADDIST");
 
 			String studentSearchRequest = jobParameters.getString("searchRequest");
 			// display Summary Details
@@ -66,7 +66,7 @@ public class DistributionRunYearlyNonGradByMincodeCompletionNotificationListener
 		}
     }
 
-	protected void processGlobalList(DistributionSummaryDTO summaryDTO) {
+	protected void processGlobalList(DistributionSummaryDTO summaryDTO, String activityCode) {
     	Long batchId = summaryDTO.getBatchId();
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
@@ -77,13 +77,13 @@ public class DistributionRunYearlyNonGradByMincodeCompletionNotificationListener
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
-		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(summaryDTO.getCredentialType()).build();
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
 		distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
 		distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
 		distributionRequest.setSchools(summaryDTO.getSchools());
 		String accessToken = restUtils.getAccessToken();
 		if (!cList.isEmpty()) {
-			restUtils.mergeAndUpload(batchId, accessToken, distributionRequest, summaryDTO.getCredentialType(), "N");
+			restUtils.mergeAndUpload(batchId, accessToken, distributionRequest, activityCode, "N");
 		}
 	}
 
