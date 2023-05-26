@@ -22,14 +22,13 @@ env:
 
   REPO_NAME: "educ-grad-batch-graduation-api"
   APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
-  BRANCH: "main"
   TAG: "latest"
   MIN_CPU: "50m"
   MAX_CPU: "300m"
   MIN_MEM: "1024Mi"
   MAX_MEM: "5Gi"
-  MIN_REPLICAS: "1"
-  MAX_REPLICAS: "1"
+  MIN_REPLICAS: "3"
+  MAX_REPLICAS: "3"
 
 on:
   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
