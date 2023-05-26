@@ -517,12 +517,17 @@ public class RestUtils {
         return this.post(distributionUrl, distributionRequest, DistributionResponse.class, accessToken);
     }
 
-    public Boolean executePostDistribution(Long batchId, String download, List<School> schools, String activityCode) {
+    public Boolean executePostDistribution(DistributionResponse distributionResponse) {
         UUID correlationID = UUID.randomUUID();
+        Long batchId = distributionResponse.getBatchId();
+        String download = distributionResponse.getLocalDownload();
+        List<School> schools = distributionResponse.getSchools();
+        String activityCode = distributionResponse.getActivityCode();
+        int numberOfPdfs = distributionResponse.getNumberOfPdfs();
         return webClient.post()
-                .uri(String.format(constants.getPostingDistribution(),batchId,download,activityCode))
+                .uri(constants.getPostingDistribution())
                 .headers(h -> { h.setBearerAuth(getAccessToken()); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .body(BodyInserters.fromValue(schools))
+                .body(BodyInserters.fromValue(distributionResponse))
                 .retrieve()
                 .bodyToMono(Boolean.class)
                 .block();

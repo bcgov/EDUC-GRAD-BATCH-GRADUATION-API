@@ -230,7 +230,7 @@ endpoint:
     blanks-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/BCPR?batchId=%s&localDownload=%s
     posting-distribution:
-      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/zipandupload/%s?localDownload=%s&activityCode=%s
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/zipandupload
     read-n-post:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSR?batchId=%s
     merge-psi-n-upload:

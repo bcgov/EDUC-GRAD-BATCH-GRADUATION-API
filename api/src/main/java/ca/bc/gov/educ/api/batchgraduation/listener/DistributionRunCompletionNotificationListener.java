@@ -10,6 +10,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -86,6 +87,9 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		});
 		if (!cList.isEmpty()) {
 			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
+			distributionRequest.setTotalCyclesCount(1);
+			distributionRequest.setProcessedCyclesCount(1);
+			distributionRequest.setSchools(new ArrayList<>());
 			restUtils.mergeAndUpload(batchId, accessToken, distributionRequest, activityCode, null);
 		}
 	}
