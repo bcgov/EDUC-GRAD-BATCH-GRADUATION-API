@@ -39,9 +39,9 @@ public class DistributionRunYearlyNonGradByMincodeWriter extends BaseYearEndWrit
         if (!list.isEmpty()) {
             summaryDTO.increment("YED4");
             LOGGER.debug("Left:{}\n", summaryDTO.getReadCount() - summaryDTO.getProcessedCount());
-            LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-            processGlobalList(summaryDTO.getGlobalList(), jobExecutionId, summaryDTO.getMapDist(), "NONGRADDIST", restUtils.fetchAccessToken());
-            LOGGER.info("=======================================================================================");
+//            LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
+//            processGlobalList(summaryDTO.getGlobalList(), jobExecutionId, summaryDTO.getMapDist(), "NONGRADDIST", restUtils.fetchAccessToken());
+//            LOGGER.info("=======================================================================================");
         }
     }
 }

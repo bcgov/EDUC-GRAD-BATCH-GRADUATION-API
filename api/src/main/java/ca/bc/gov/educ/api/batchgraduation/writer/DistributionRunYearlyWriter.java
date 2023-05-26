@@ -16,9 +16,9 @@ public class DistributionRunYearlyWriter extends BaseYearEndWriter implements It
         if (!list.isEmpty()) {
             summaryDTO.increment("YED4");
             LOGGER.debug("Left:{}\n", summaryDTO.getReadCount() - summaryDTO.getProcessedCount());
-            LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-            processGlobalList(summaryDTO.getGlobalList(), jobExecutionId, summaryDTO.getMapDist(), "YEARENDDIST", restUtils.fetchAccessToken());
-            LOGGER.info("=======================================================================================");
+//            LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
+//            processGlobalList(summaryDTO.getGlobalList(), jobExecutionId, summaryDTO.getMapDist(), "YEARENDDIST", restUtils.fetchAccessToken());
+//            LOGGER.info("=======================================================================================");
         }
     }
 }

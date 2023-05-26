@@ -8,7 +8,6 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import io.github.resilience4j.retry.annotation.Retry;
-import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
@@ -204,18 +206,12 @@ public class RestUtils {
         }
     }
 
-    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(String accessToken) {
-        return graduationReportService.getStudentsNonGradForYearlyDistribution(accessToken);
+    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly() {
+        return graduationReportService.getStudentsNonGradForYearlyDistribution(getTokenResponseObject().getAccess_token());
     }
 
-    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(String mincode, DistributionSummaryDTO summaryDTO) {
-        summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
-        String accessToken = getTokenResponseObject().getAccess_token();
-        List<StudentCredentialDistribution> result = graduationReportService.getStudentsNonGradForYearlyDistribution(mincode, accessToken);
-        List<StudentCredentialDistribution> globalList = summaryDTO.getGlobalList();
-        globalList.clear();
-        globalList.addAll(result);
-        return result;
+    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(String mincode) {
+        return graduationReportService.getStudentsNonGradForYearlyDistribution(mincode, getTokenResponseObject().getAccess_token());
     }
 
     public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearly() {
@@ -491,12 +487,12 @@ public class RestUtils {
     }
 
     //Grad2-1931 sending transmissionType with the webclient.
-    public DistributionResponse mergePsiAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String localDownload, String transmissionType) {
+    public DistributionResponse mergePsiAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest,String localDownload, String transmissionType) {
         UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
                 .uri(String.format(constants.getMergePsiAndUpload(),batchId,localDownload,transmissionType))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .body(BodyInserters.fromValue(mapDist))
+                .body(BodyInserters.fromValue(distributionRequest))
                 .retrieve()
                 .bodyToMono(DistributionResponse.class)
                 .block();
@@ -506,8 +502,9 @@ public class RestUtils {
         return  new DistributionResponse();
     }
 
-    public DistributionResponse mergeAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String activityCode,String localDownload) {
+    public DistributionResponse mergeAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest, String activityCode, String localDownload) {
         String distributionUrl;
+        distributionRequest.setActivityCode(activityCode);
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
         } else if(NONGRADDIST.equalsIgnoreCase(activityCode)) {
@@ -517,7 +514,7 @@ public class RestUtils {
         } else {
             distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
-        return this.post(distributionUrl, mapDist, DistributionResponse.class, accessToken);
+        return this.post(distributionUrl, distributionRequest, DistributionResponse.class, accessToken);
     }
 
     public Boolean executePostDistribution(Long batchId, String download, List<School> schools, String activityCode) {
@@ -531,15 +528,12 @@ public class RestUtils {
                 .block();
     }
 
-    @SneakyThrows
-    public void createBlankCredentialsAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist, String localDownload) {
+    public void createBlankCredentialsAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest, String localDownload) {
         UUID correlationID = UUID.randomUUID();
-        String mapDistJson = jsonTransformer.marshall(mapDist);
-        LOGGER.debug(mapDistJson);
         DistributionResponse result = webClient.post()
                 .uri(String.format(constants.getCreateBlanksAndUpload(),batchId,localDownload))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .body(BodyInserters.fromValue(mapDist))
+                .body(BodyInserters.fromValue(distributionRequest))
                 .retrieve()
                 .bodyToMono(DistributionResponse.class)
                 .block();
@@ -547,12 +541,13 @@ public class RestUtils {
             LOGGER.info("Create and Upload Success {}",result.getMergeProcessResponse());
     }
 
-    public DistributionResponse createReprintAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist, String activityCode,String localDownload) {
+    public DistributionResponse createReprintAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest, String activityCode,String localDownload) {
         UUID correlationID = UUID.randomUUID();
+        distributionRequest.setActivityCode(activityCode);
         DistributionResponse result = webClient.post()
                 .uri(String.format(constants.getReprintAndUpload(),batchId,activityCode,localDownload))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .body(BodyInserters.fromValue(mapDist))
+                .body(BodyInserters.fromValue(distributionRequest))
                 .retrieve()
                 .bodyToMono(DistributionResponse.class)
                 .block();
@@ -624,5 +619,11 @@ public class RestUtils {
     }
 
 
+    public CommonSchool getCommonSchool(String schoolOfRecord) {
+        return get(String.format(constants.getCommonSchoolByMincode(), schoolOfRecord), CommonSchool.class, getAccessToken());
+    }
 
+    public TraxSchool getTraxSchool(String mincode) {
+        return get(String.format(constants.getTraxSchoolByMincode(), mincode), TraxSchool.class, getAccessToken());
+    }
 }

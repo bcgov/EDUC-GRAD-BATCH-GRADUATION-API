@@ -727,7 +727,8 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(res));
 
-        this.restUtils.createBlankCredentialsAndUpload(batchId,"abc",new HashMap<>(),"N");
+        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).build();
+        this.restUtils.createBlankCredentialsAndUpload(batchId,"abc",distributionRequest,"N");
         assertNotNull(res);
     }
 
@@ -747,7 +748,8 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
         when(this.inputResponsePSI.block()).thenReturn(null);
 
-        this.restUtils.createBlankCredentialsAndUpload(batchId,"abc",new HashMap<>(),"N");
+        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).build();
+        this.restUtils.createBlankCredentialsAndUpload(batchId,"abc",distributionRequest,"N");
         assertNotNull(res);
     }
 
@@ -1040,8 +1042,8 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(Mono.just(req));
 
-
-        val result = this.restUtils.createReprintAndUpload(batchId,null,new HashMap<>(), activityCode,null);
+        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).activityCode(activityCode).build();
+        val result = this.restUtils.createReprintAndUpload(batchId,null, distributionRequest, activityCode,null);
         assertThat(result).isNotNull();
     }
 
@@ -1062,8 +1064,8 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
         when(this.inputResponsePSI.block()).thenReturn(null);
 
-
-        val result = this.restUtils.createReprintAndUpload(batchId,null,new HashMap<>(), activityCode,null);
+        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).activityCode(activityCode).build();
+        val result = this.restUtils.createReprintAndUpload(batchId,null, distributionRequest, activityCode,null);
         assertThat(result).isNull();
     }
 
@@ -1096,7 +1098,8 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,"Y");
+        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).activityCode(activityCode).build();
+        val result = this.restUtils.mergeAndUpload(batchId,null,distributionRequest,activityCode,"Y");
         assertThat(result).isNotNull();
     }
 
@@ -1122,7 +1125,8 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        val result = this.restUtils.mergeAndUpload(batchId,null,new HashMap<>(),activityCode,"Y");
+        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).activityCode(activityCode).build();
+        val result = this.restUtils.mergeAndUpload(batchId,null,distributionRequest,activityCode,"Y");
         assertThat(result).isNull();
     }
 
@@ -1144,7 +1148,8 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y", transmissionType);
+        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).build();
+        val result = this.restUtils.mergePsiAndUpload(batchId,null, distributionRequest,"Y", transmissionType);
         assertThat(result).isNotNull();
     }
 
@@ -1163,8 +1168,8 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(DistributionResponse.class)).thenReturn(inputResponsePSI);
         when(this.inputResponsePSI.block()).thenReturn(null);
 
-
-        val result = this.restUtils.mergePsiAndUpload(batchId,null,new HashMap<>(),"Y",transmissionType);
+        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).build();
+        val result = this.restUtils.mergePsiAndUpload(batchId,null, distributionRequest,"Y",transmissionType);
         assertThat(result).isNotNull();
     }
 

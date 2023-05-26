@@ -40,6 +40,7 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: NEVER
+      isolation-level-for-create: READ_COMMITTED
   flyway:
     enabled: ${ENABLE_FLYWAY}
     baseline-on-migrate: false
@@ -237,6 +238,11 @@ endpoint:
   grad-trax-api:
     get-psi-student-list:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
+    school-by-min-code:
+      url: ${GRAD_TRAX_API}api/v1/trax/school/%s
+  educ-school-api:
+    school-by-min-code:
+      url: ${EDUC_SCHOOL_API}api/v1/schools/%s
 
 #Splunk LogHelper
 splunk:

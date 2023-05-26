@@ -10,14 +10,16 @@ import java.util.List;
 @NoArgsConstructor
 public class DistributionSummaryDTO extends BaseDistributionSummaryDTO {
 
-  private List<StudentCredentialDistribution> globalList = new ArrayList<>();
-  private List<School> schools = new ArrayList<>();
+    private List<StudentCredentialDistribution> globalList = new ArrayList<>();
+    private List<School> schools = new ArrayList<>();
+    private int totalCyclesCount;
+    private int processedCyclesCount;
 
-  @Override
-  public void initializeCredentialCountMap() {
-    credentialCountMap.put("YED4", 0L);
-    credentialCountMap.put("YED2", 0L);
-    credentialCountMap.put("YEDR", 0L);
-    credentialCountMap.put("YEDB", 0L);
-  }
+    @Override
+    public void initializeCredentialCountMap() {
+        credentialCountMap.put("YED4", 0L);
+        credentialCountMap.put("YED2", 0L);
+        credentialCountMap.put("YEDR", 0L);
+        credentialCountMap.put("YEDB", 0L);
+    }
 }

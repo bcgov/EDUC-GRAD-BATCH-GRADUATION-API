@@ -23,12 +23,16 @@ public class DistributionRunYearlyNonGradByMincodeProcessor implements ItemProce
 
 	@Value("#{stepExecution.jobExecution.id}")
 	Long batchId;
-    
+
 	@Override
 	public List<StudentCredentialDistribution> process(String mincode) throws Exception {
-		LOGGER.info("Processing partitionData = {}", mincode);
+		LOGGER.debug("Processing partitionData = {}", mincode);
 		summaryDTO.setBatchId(batchId);
-		return restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode, summaryDTO);
-		
+		summaryDTO.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount() + 1);
+		summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
+		List<StudentCredentialDistribution> studentCredentials = restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
+		LOGGER.debug("Completed partitionData = {}", studentCredentials.size());
+		summaryDTO.getGlobalList().addAll(studentCredentials);
+		return summaryDTO.getGlobalList();
 	}
 }

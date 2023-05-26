@@ -34,8 +34,8 @@ public class ParallelDataFetch {
         return restUtils.fetchDistributionRequiredDataStudentsYearly();
     }
 
-    public List<StudentCredentialDistribution> fetchStudentCredentialsDistributionDataYearlyNonGrad(String accessToken) {
-        return restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(accessToken);
+    public List<StudentCredentialDistribution> fetchStudentCredentialsDistributionDataYearlyNonGrad() {
+        return restUtils.fetchDistributionRequiredDataStudentsNonGradYearly();
     }
 
     public List<String> fetchDistributionRequiredDataSchoolsNonGradYearly(String accessToken) {

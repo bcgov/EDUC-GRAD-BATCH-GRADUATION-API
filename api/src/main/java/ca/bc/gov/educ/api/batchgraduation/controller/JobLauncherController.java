@@ -645,42 +645,44 @@ public class JobLauncherController {
         return null;
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.NOTIFY_DISTRIBUTION_JOB_IS_COMPLETED)
+    @PostMapping(EducGradBatchGraduationApiConstants.NOTIFY_DISTRIBUTION_JOB_IS_COMPLETED)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<Void> notifyDistributionJobIsCompleted(
             @RequestParam(name = "batchId", defaultValue = "0") Long batchId,
-            @RequestParam(name = "status", defaultValue = "success") String status) {
+            @RequestParam(name = "status", defaultValue = "success") String status,
+            @RequestBody DistributionResponse distributionResponse) {
 
         BatchGradAlgorithmJobHistoryEntity jobHistory = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
-        String jobType = jobHistory.getJobType();
+        if(jobHistory != null) {
+            String jobType = jobHistory.getJobType();
 
-        if (StringUtils.equalsIgnoreCase(status, "success")) {
-            List<StudentCredentialDistribution> cList = gradBatchHistoryService.getStudentCredentialDistributions(batchId);
+            if (StringUtils.equalsIgnoreCase(status, "success")) {
+                List<StudentCredentialDistribution> cList = gradBatchHistoryService.getStudentCredentialDistributions(batchId);
 
-            // update graduation_student_record & student_certificate
-            Map<String, ServiceException> unprocessed = updateBackStudentRecords(cList, batchId, getActivitCode(jobType));
-            if (!unprocessed.isEmpty()) {
-                jobHistory.setFailedStudentsProcessed(unprocessed.size());
-                jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed() - unprocessed.size());
-                status = BatchStatusEnum.FAILED.name();
-                this.handleUnprocessedErrors(unprocessed);
+                // update graduation_student_record & student_certificate
+                Map<String, ServiceException> unprocessed = updateBackStudentRecords(cList, batchId, getActivitCode(jobType));
+                if (!unprocessed.isEmpty()) {
+                    jobHistory.setFailedStudentsProcessed(unprocessed.size());
+                    jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed() - unprocessed.size());
+                    status = BatchStatusEnum.FAILED.name();
+                    this.handleUnprocessedErrors(unprocessed);
+                } else {
+                    jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed());
+                    status = BatchStatusEnum.COMPLETED.name();
+                }
             } else {
-                jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed());
-                status = BatchStatusEnum.COMPLETED.name();
+                status = BatchStatusEnum.FAILED.name();
             }
-        } else {
-            status = BatchStatusEnum.FAILED.name();
+
+            // update status for batch job history
+            Date endTime = new Date(System.currentTimeMillis());
+            jobHistory.setEndTime(endTime);
+            jobHistory.setStatus(status);
+            jobHistory.setJobParameters(populateJobParametersDTO(jobType, null));
+            gradBatchHistoryService.saveGradAlgorithmJobHistory(jobHistory);
         }
-
-        // update status for batch job history
-        Date endTime = new Date(System.currentTimeMillis());
-        jobHistory.setEndTime(endTime);
-        jobHistory.setStatus(status);
-        jobHistory.setJobParameters(populateJobParametersDTO(jobType, null));
-        gradBatchHistoryService.saveGradAlgorithmJobHistory(jobHistory);
-
         return ResponseEntity.ok(null);
     }
 

@@ -4,7 +4,6 @@ import ca.bc.gov.educ.api.batchgraduation.listener.SupportListener;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
-import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,6 @@ public abstract class BaseYearEndWriter {
     @Value("#{stepExecution.jobExecution.endTime}")
     Date endTime;
 
-    @SneakyThrows
     protected void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String accessToken) {
         List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
         uniqueSchoolList.forEach(usl->{
@@ -56,12 +54,11 @@ public abstract class BaseYearEndWriter {
             supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
             schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
         });
-        //System.out.println(jsonTransformer.marshall(mapDist));
-        DistributionResponse disres = restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,"N");
-        if(disres != null) {
-            summaryDTO.getSchools().addAll(disres.getSchools());
-            updateBackStudentRecords(cList,batchId);
-        }
+        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
+        distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
+        distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
+        distributionRequest.setSchools(summaryDTO.getSchools());
+        restUtils.mergeAndUpload(batchId,accessToken,distributionRequest,activityCode,"N");
     }
 
     protected void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {

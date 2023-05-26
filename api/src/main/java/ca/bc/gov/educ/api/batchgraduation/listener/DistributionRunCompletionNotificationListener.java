@@ -10,7 +10,9 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class DistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
@@ -82,8 +84,10 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			supportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",null);
 			supportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",null);
 		});
-		if (!cList.isEmpty())
-			restUtils.mergeAndUpload(batchId,accessToken,mapDist,activityCode,null);
+		if (!cList.isEmpty()) {
+			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
+			restUtils.mergeAndUpload(batchId, accessToken, distributionRequest, activityCode, null);
+		}
 	}
 
 	private void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {

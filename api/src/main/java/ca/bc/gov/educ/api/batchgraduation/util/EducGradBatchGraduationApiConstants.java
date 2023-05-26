@@ -233,6 +233,12 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-student-api.update-flag-ready-for-batch}")
     private String updateStudentFlagReadyForBatchByStudentIDs;
 
+    @Value("${endpoint.educ-school-api.school-by-min-code.url}")
+    private String commonSchoolByMincode;
+
+    @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
+    private String traxSchoolByMincode;
+
     // Splunk LogHelper Enabled
     @Value("${splunk.log-helper.enabled}")
     private boolean splunkLogHelperEnabled;

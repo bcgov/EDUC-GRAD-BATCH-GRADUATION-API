@@ -11,5 +11,10 @@ public class DistributionResponse {
     private String yedrResponse;
     private String yedbResponse;
     private String mergeProcessResponse;
+    private Long batchId;
+    private String localDownload;
+    private int totalCyclesCount;
+    private int processedCyclesCount;
+    private String activityCode;
     private List<School> schools;
 }

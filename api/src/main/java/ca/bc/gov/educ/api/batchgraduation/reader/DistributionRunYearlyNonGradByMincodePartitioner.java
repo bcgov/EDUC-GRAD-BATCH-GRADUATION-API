@@ -39,7 +39,7 @@ public class DistributionRunYearlyNonGradByMincodePartitioner extends SimplePart
         List<String> schoolsList = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
         if(!schoolsList.isEmpty()) {
 
-            int partitionSize = schoolsList.size();
+            int partitionSize = schoolsList.size()/gridSize + 1;
             List<List<String>> partitions = new LinkedList<>();
             for (int i = 0; i < schoolsList.size(); i += partitionSize) {
                 partitions.add(schoolsList.subList(i, Math.min(i + partitionSize, schoolsList.size())));
@@ -49,6 +49,8 @@ public class DistributionRunYearlyNonGradByMincodePartitioner extends SimplePart
                 ExecutionContext executionContext = new ExecutionContext();
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
                 summaryDTO.initializeCredentialCountMap();
+                summaryDTO.setTotalCyclesCount(partitionSize);
+                summaryDTO.setCredentialType("NONGRADDIST");
                 List<String> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

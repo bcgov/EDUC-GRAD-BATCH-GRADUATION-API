@@ -105,7 +105,8 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			supportListener.blankCertificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
 			supportListener.blankCertificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
 		});
-		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, mapDist,localDownload);
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, distributionRequest,localDownload);
 	}
 
 }

@@ -1,21 +1,29 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.processing.Generated;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class DistributionRunYearlyNonGradByMincodeCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradByMincodeCompletionNotificationListener.class);
+
+	@Autowired
+	SupportListener supportListener;
 
     @Override
 	@Generated("default")
@@ -33,16 +41,15 @@ public class DistributionRunYearlyNonGradByMincodeCompletionNotificationListener
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
 
-			String studentSearchRequest = jobParameters.getString("searchRequest");
-
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new DistributionSummaryDTO();
 				summaryDTO.initializeCredentialCountMap();
 			}
 
-			restUtils.executePostDistribution(summaryDTO.getBatchId(), "N", summaryDTO.getSchools(), "NONGRADDIST");
+			processGlobalList(summaryDTO);
 
+			String studentSearchRequest = jobParameters.getString("searchRequest");
 			// display Summary Details
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
@@ -58,4 +65,44 @@ public class DistributionRunYearlyNonGradByMincodeCompletionNotificationListener
 
 		}
     }
+
+	protected void processGlobalList(DistributionSummaryDTO summaryDTO) {
+    	Long batchId = summaryDTO.getBatchId();
+    	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
+    	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
+		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
+		uniqueSchoolList.forEach(usl->{
+			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
+			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());
+			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
+			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
+		});
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(summaryDTO.getCredentialType()).build();
+		distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
+		distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
+		distributionRequest.setSchools(summaryDTO.getSchools());
+		String accessToken = restUtils.getAccessToken();
+		if (!cList.isEmpty()) {
+			restUtils.mergeAndUpload(batchId, accessToken, distributionRequest, summaryDTO.getCredentialType(), "N");
+		}
+	}
+
+	protected void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
+		if(!studentList.isEmpty()) {
+			SchoolDistributionRequest tpReq = new SchoolDistributionRequest();
+			tpReq.setBatchId(batchId);
+			tpReq.setPsId(usl +" " +batchId);
+			tpReq.setCount(studentList.size());
+			tpReq.setStudentList(studentList);
+			if(mapDist.get(usl) != null) {
+				DistributionPrintRequest dist = mapDist.get(usl);
+				dist.setSchoolDistributionRequest(tpReq);
+				mapDist.put(usl,dist);
+			} else {
+				DistributionPrintRequest dist = new DistributionPrintRequest();
+				dist.setSchoolDistributionRequest(tpReq);
+				mapDist.put(usl,dist);
+			}
+		}
+	}
 }

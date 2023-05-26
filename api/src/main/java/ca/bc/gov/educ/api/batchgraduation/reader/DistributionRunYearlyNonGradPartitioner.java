@@ -36,9 +36,9 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SD", restUtils.getAccessToken());
 
-        List<StudentCredentialDistribution> credentialList = parallelDataFetch.fetchStudentCredentialsDistributionDataYearlyNonGrad(restUtils.getAccessToken());
+        List<StudentCredentialDistribution> credentialList = parallelDataFetch.fetchStudentCredentialsDistributionDataYearlyNonGrad();
         if(!credentialList.isEmpty()) {
-            return getStringExecutionContextMap(gridSize, credentialList, null, LOGGER);
+            return getStringExecutionContextMap(gridSize, credentialList, "NONGRADDIST", LOGGER);
         }
         LOGGER.info("No Credentials Found for Processing");
         return new HashMap<>();
