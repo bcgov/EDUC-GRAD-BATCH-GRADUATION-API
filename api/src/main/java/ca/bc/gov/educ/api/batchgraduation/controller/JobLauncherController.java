@@ -653,9 +653,9 @@ public class JobLauncherController {
     public ResponseEntity<Void> notifyDistributionJobIsCompleted(
             @RequestParam(name = "batchId", defaultValue = "0") Long batchId,
             @RequestParam(name = "status", defaultValue = "success") String status) {
-        logger.info("Start - notifyDistributionJobIsCompleted: batchId [{}], status = {}", batchId, status);
+        logger.debug("Start - notifyDistributionJobIsCompleted: batchId [{}], status = {}", batchId, status);
         distributionService.updateDistributionJob(batchId, status);
-        logger.info("End - notifyDistributionJobIsCompleted: batchId [{}], status = {}", batchId, status);
+        logger.debug("End - notifyDistributionJobIsCompleted: batchId [{}], status = {}", batchId, status);
         return ResponseEntity.ok(null);
     }
 

@@ -75,6 +75,7 @@ public class DistributionService extends GradService {
     @Async("asyncExecutor")
     @Transactional
     public void updateDistributionJob(Long batchId, String status) {
+        log.info("START - updateDistributionJob: batchId = {}, status = {}", batchId, status);
         String jobType = gradBatchHistoryService.getJobTypeFromBatchJobHistory(batchId);
         int failedCount = 0;
 
@@ -94,18 +95,23 @@ public class DistributionService extends GradService {
             status = BatchStatusEnum.FAILED.name();
         }
 
+        log.debug("updateBackStudentRecords are completed");
         // update status for batch job history
         updateDistributionBatchJobStatus(batchId, failedCount, status, populateJobParametersDTO(jobType, null));
+        log.info("END - updateDistributionJob: batchId = {}, status = {}", batchId, status);
     }
 
     @Transactional
     public void updateDistributionBatchJobStatus(Long batchId, int failedCount, String status, String jobParameters) {
+        log.debug("updateDistributionBatchJobStatus - retrieve the batch job history: batchId = {}", batchId);
         BatchGradAlgorithmJobHistoryEntity jobHistory = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
         jobHistory.setEndTime(new Date(System.currentTimeMillis()));
         jobHistory.setStatus(status);
         jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed() - failedCount);
         jobHistory.setJobParameters(jobParameters);
+        log.debug("updateDistributionBatchJobStatus - save the batch job history: batchId = {}, status = {}. actual processed count = {}", batchId, status, jobHistory.getActualStudentsProcessed());
         gradBatchHistoryService.saveGradAlgorithmJobHistory(jobHistory);
+        log.debug("updateDistributionBatchJobStatus - save the batch job history is completed!");
     }
 
     private Map<String, ServiceException> updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId, String activityCode) {
@@ -113,6 +119,7 @@ public class DistributionService extends GradService {
         cList.forEach(scd-> {
             try {
                 final String token = restUtils.getTokenResponseObject().getAccess_token();
+                log.debug("Dist Job [{}] / [{}] - update student credential record & student grad record: studentID [{}]", batchId, activityCode, scd.getStudentID());
                 restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,token);
                 restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,token);
             } catch (Exception e) {
