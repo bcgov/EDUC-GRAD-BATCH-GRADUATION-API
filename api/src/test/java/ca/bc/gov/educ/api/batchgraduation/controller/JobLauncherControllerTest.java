@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import org.junit.Test;
@@ -52,6 +53,9 @@ public class JobLauncherControllerTest {
 
     @MockBean
     GradBatchHistoryService gradBatchHistoryService;
+
+    @Mock
+    DistributionService distributionService;
 
     @Mock
     @Qualifier("jobLauncher")
@@ -472,5 +476,13 @@ public class JobLauncherControllerTest {
         org.mockito.Mockito.when(gradDashboardService.getDashboardInfo()).thenReturn(null);
         jobLauncherController.loadDashboard();
         org.mockito.Mockito.verify(gradDashboardService).getDashboardInfo();
+    }
+
+    @Test
+    public void testNotifyDistributionJobIsCompleted() {
+        Long batchId = 3001L;
+        org.mockito.Mockito.doNothing().when(distributionService).updateDistributionJob(batchId, "success");
+        jobLauncherController.notifyDistributionJobIsCompleted(batchId, "success");
+        org.mockito.Mockito.verify(distributionService).updateDistributionJob(batchId, "success");
     }
 }

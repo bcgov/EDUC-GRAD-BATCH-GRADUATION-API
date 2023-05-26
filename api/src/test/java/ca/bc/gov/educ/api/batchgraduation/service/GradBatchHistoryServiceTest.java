@@ -3,14 +3,9 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
-import ca.bc.gov.educ.api.batchgraduation.entity.StudentCredentialDistributionEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.Student;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.StudentCredentialDistributionRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -44,9 +39,6 @@ public class GradBatchHistoryServiceTest {
     BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository;
 
     @MockBean
-    StudentCredentialDistributionRepository studentCredentialDistributionRepository;
-
-    @MockBean
     private RestUtils restUtils;
 
     @MockBean
@@ -68,6 +60,23 @@ public class GradBatchHistoryServiceTest {
         BatchGradAlgorithmJobHistoryEntity response = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
         assertThat(response).isNotNull();
         assertThat(response.getJobExecutionId()).isEqualTo(batchId);
+    }
+
+    @Test
+    public void testGetJobTypeFromBatchJobHistory() {
+        Long batchId = 3001L;
+
+        BatchGradAlgorithmJobHistoryEntity batchGradAlgorithmJobHistoryEntity = new BatchGradAlgorithmJobHistoryEntity();
+        batchGradAlgorithmJobHistoryEntity.setId(UUID.randomUUID());
+        batchGradAlgorithmJobHistoryEntity.setJobExecutionId(batchId);
+        batchGradAlgorithmJobHistoryEntity.setStatus("STARTED");
+        batchGradAlgorithmJobHistoryEntity.setJobType("REGALG");
+        batchGradAlgorithmJobHistoryEntity.setTriggerBy("MANUAL");
+
+        when(batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId)).thenReturn(Optional.of(batchGradAlgorithmJobHistoryEntity));
+
+        String response = gradBatchHistoryService.getJobTypeFromBatchJobHistory(batchId);
+        assertThat(response).isEqualTo(batchGradAlgorithmJobHistoryEntity.getJobType());
     }
 
     @Test
@@ -366,72 +375,6 @@ public class GradBatchHistoryServiceTest {
         when(batchGradAlgorithmStudentRepository.getGraduationProgramCounts(batchId)).thenReturn(gradCounts);
         Map<String, Integer> response = gradBatchHistoryService.getGraduationProgramCountsForBatchRunSummary(batchId);
         assertThat(response).hasSize(4).containsEntry("2018-EN", Integer.valueOf(10));
-    }
-
-    @Test
-    public void testGetStudentCredentialDistributions() throws Exception {
-        Long batchId = 3001L;
-        StudentCredentialDistributionEntity entity = new StudentCredentialDistributionEntity();
-        entity.setId(UUID.randomUUID());
-        entity.setJobExecutionId(batchId);
-        entity.setJobType("DISTRUN");
-        entity.setSchoolOfRecord("12345678");
-
-        StudentCredentialDistribution dto = new StudentCredentialDistribution();
-        dto.setId(entity.getId());
-        dto.setStudentID(entity.getStudentID());
-        dto.setPen("123456789");
-        dto.setSchoolOfRecord(entity.getSchoolOfRecord());
-
-        entity.setPayload(JsonUtil.getJsonStringFromObject(dto));
-
-        when(studentCredentialDistributionRepository.findByJobExecutionId(batchId)).thenReturn(Arrays.asList(entity));
-
-        List<StudentCredentialDistribution> response = gradBatchHistoryService.getStudentCredentialDistributions(batchId);
-        assertThat(response).hasSize(1);
-        assertThat(response.get(0).getId()).isEqualTo(entity.getId());
-
-    }
-
-    @Test
-    public void testGetSchoolListForDistribution() {
-        Long batchId = 3001L;
-        String schoolOfRecord = "12345678";
-
-        when(studentCredentialDistributionRepository.getSchoolList(batchId)).thenReturn(Arrays.asList(schoolOfRecord));
-
-        List<String> response = gradBatchHistoryService.getSchoolListForDistribution(batchId);
-        assertThat(response).hasSize(1);
-        assertThat(response.get(0)).isEqualTo(schoolOfRecord);
-    }
-
-    @Test
-    public void testSaveStudentCredentialDistribution() throws Exception {
-        Long batchId = 3001L;
-        StudentCredentialDistributionEntity entity = new StudentCredentialDistributionEntity();
-        entity.setId(UUID.randomUUID());
-        entity.setJobExecutionId(batchId);
-        entity.setJobType("DISTRUN");
-        entity.setSchoolOfRecord("12345678");
-
-        StudentCredentialDistribution dto = new StudentCredentialDistribution();
-        dto.setId(entity.getId());
-        dto.setStudentID(entity.getStudentID());
-        dto.setPen("123456789");
-        dto.setSchoolOfRecord(entity.getSchoolOfRecord());
-
-        entity.setPayload(JsonUtil.getJsonStringFromObject(dto));
-
-        when(studentCredentialDistributionRepository.save(entity)).thenReturn(entity);
-
-        boolean isExceptionThrown = false;
-        try {
-            gradBatchHistoryService.saveStudentCredentialDistribution(entity.getJobExecutionId(), entity.getJobType(), dto);
-        } catch (Exception ex) {
-            isExceptionThrown = true;
-        }
-
-        assertThat(isExceptionThrown).isFalse();
     }
 
 }
