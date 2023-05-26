@@ -49,7 +49,7 @@ public class DistributionRunYearlyNonGradByMincodePartitioner extends SimplePart
                 ExecutionContext executionContext = new ExecutionContext();
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
                 summaryDTO.initializeCredentialCountMap();
-                summaryDTO.setTotalCyclesCount(partitionSize);
+                summaryDTO.setTotalCyclesCount(schoolsList.size());
                 summaryDTO.setCredentialType("NONGRADDIST");
                 List<String> data = partitions.get(i);
                 executionContext.put("data", data);
