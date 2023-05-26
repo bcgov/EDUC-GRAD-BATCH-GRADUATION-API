@@ -9,6 +9,7 @@ env:
   OPENSHIFT_NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}-dev
   COMMON_NAMESPACE: ${{ secrets.COMMON_NAMESPACE }}
   NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}
+  BUSINESS_NAMESPACE: ${{ secrets.GRAD_BUSINESS_NAMESPACE }}
 
   # 🖊️ EDIT to change the image registry settings.
   # Registries such as GHCR, Quay.io, and Docker Hub are supported.
