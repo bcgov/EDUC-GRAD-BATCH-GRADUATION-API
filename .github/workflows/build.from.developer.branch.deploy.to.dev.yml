@@ -60,6 +60,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.choice }}
 
       - name: Determine image tags
         if: env.TAG == ''
