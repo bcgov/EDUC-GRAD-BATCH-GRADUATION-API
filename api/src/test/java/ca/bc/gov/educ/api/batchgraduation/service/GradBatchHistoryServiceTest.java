@@ -63,23 +63,6 @@ public class GradBatchHistoryServiceTest {
     }
 
     @Test
-    public void testGetJobTypeFromBatchJobHistory() {
-        Long batchId = 3001L;
-
-        BatchGradAlgorithmJobHistoryEntity batchGradAlgorithmJobHistoryEntity = new BatchGradAlgorithmJobHistoryEntity();
-        batchGradAlgorithmJobHistoryEntity.setId(UUID.randomUUID());
-        batchGradAlgorithmJobHistoryEntity.setJobExecutionId(batchId);
-        batchGradAlgorithmJobHistoryEntity.setStatus("STARTED");
-        batchGradAlgorithmJobHistoryEntity.setJobType("REGALG");
-        batchGradAlgorithmJobHistoryEntity.setTriggerBy("MANUAL");
-
-        when(batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId)).thenReturn(Optional.of(batchGradAlgorithmJobHistoryEntity));
-
-        String response = gradBatchHistoryService.getJobTypeFromBatchJobHistory(batchId);
-        assertThat(response).isEqualTo(batchGradAlgorithmJobHistoryEntity.getJobType());
-    }
-
-    @Test
     public void testGetGradAlgorithmJobHistory_when_givenBatchId_does_notExist() {
         Long batchId = 3001L;
 

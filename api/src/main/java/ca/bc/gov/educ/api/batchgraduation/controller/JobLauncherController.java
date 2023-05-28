@@ -3,8 +3,8 @@ package ca.bc.gov.educ.api.batchgraduation.controller;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateProcessor;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
@@ -82,7 +82,7 @@ public class JobLauncherController {
     private final RestUtils restUtils;
     private final GradDashboardService gradDashboardService;
     private final GradBatchHistoryService gradBatchHistoryService;
-    private final DistributionService distributionService;
+    private final DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor;
 
     @Autowired
     public JobLauncherController(
@@ -93,14 +93,14 @@ public class JobLauncherController {
             RestUtils restUtils,
             GradDashboardService gradDashboardService,
             GradBatchHistoryService gradBatchHistoryService,
-            DistributionService distributionService) {
+            DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor) {
         this.jobLauncher = jobLauncher;
         this.asyncJobLauncher = asyncJobLauncher;
         this.jobRegistry = jobRegistry;
         this.restUtils = restUtils;
         this.gradDashboardService = gradDashboardService;
         this.gradBatchHistoryService = gradBatchHistoryService;
-        this.distributionService = distributionService;
+        this.distributionRunStatusUpdateProcessor = distributionRunStatusUpdateProcessor;
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_REG_GRAD_BATCH_JOB)
@@ -653,9 +653,9 @@ public class JobLauncherController {
     public ResponseEntity<Void> notifyDistributionJobIsCompleted(
             @RequestParam(name = "batchId", defaultValue = "0") Long batchId,
             @RequestParam(name = "status", defaultValue = "success") String status) {
-        logger.debug("Start - notifyDistributionJobIsCompleted: batchId [{}], status = {}", batchId, status);
-        distributionService.updateDistributionJob(batchId, status);
-        logger.debug("End - notifyDistributionJobIsCompleted: batchId [{}], status = {}", batchId, status);
+        logger.debug("notifyDistributionJobIsCompleted: batchId [{}], status = {}", batchId, status);
+        distributionRunStatusUpdateProcessor.process(batchId, status);
+        logger.debug("distributionRunStatusUpdateProcessor is invoked: batchId [{}], status = {}", batchId, status);
         return ResponseEntity.ok(null);
     }
 

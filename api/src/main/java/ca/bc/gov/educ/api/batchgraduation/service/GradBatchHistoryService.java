@@ -27,12 +27,6 @@ public class GradBatchHistoryService {
         return optional.orElse(null);
     }
 
-    @Transactional(readOnly = true)
-    public String getJobTypeFromBatchJobHistory(Long batchId) {
-        Optional<BatchGradAlgorithmJobHistoryEntity> optional = batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId);
-        return optional.map(BatchGradAlgorithmJobHistoryEntity::getJobType).orElse(null);
-    }
-
     @Transactional
     public BatchGradAlgorithmJobHistoryEntity saveGradAlgorithmJobHistory(BatchGradAlgorithmJobHistoryEntity ent) {
         Optional<BatchGradAlgorithmJobHistoryEntity> optional = batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(ent.getJobExecutionId());
