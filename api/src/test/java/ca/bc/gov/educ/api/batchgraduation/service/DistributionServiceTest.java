@@ -1,11 +1,9 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.entity.StudentCredentialDistributionEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.StudentCredentialDistributionRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonUtil;
@@ -18,10 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -35,12 +30,6 @@ public class DistributionServiceTest {
 
     @MockBean
     GradBatchHistoryService gradBatchHistoryService;
-
-    @MockBean
-    BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-
-    @MockBean
-    BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository;
 
     @MockBean
     StudentCredentialDistributionRepository studentCredentialDistributionRepository;
@@ -119,67 +108,26 @@ public class DistributionServiceTest {
     }
 
     @Test
-    public void testUpdateDistributionJob() throws Exception {
+    public void testGetJobTypeFromBatchJobHistory() {
         Long batchId = 3001L;
-        String status = "success";
-        String jobType = "DISTRUN";
 
         BatchGradAlgorithmJobHistoryEntity batchGradAlgorithmJobHistoryEntity = new BatchGradAlgorithmJobHistoryEntity();
         batchGradAlgorithmJobHistoryEntity.setId(UUID.randomUUID());
         batchGradAlgorithmJobHistoryEntity.setJobExecutionId(batchId);
-        batchGradAlgorithmJobHistoryEntity.setStartTime(new Date(System.currentTimeMillis()));
-        batchGradAlgorithmJobHistoryEntity.setExpectedStudentsProcessed(1L);
-        batchGradAlgorithmJobHistoryEntity.setActualStudentsProcessed(0L);
-        batchGradAlgorithmJobHistoryEntity.setFailedStudentsProcessed(1);
-        batchGradAlgorithmJobHistoryEntity.setJobType(jobType);
-
-        StudentCredentialDistributionEntity entity = new StudentCredentialDistributionEntity();
-        entity.setId(UUID.randomUUID());
-        entity.setJobExecutionId(batchId);
-        entity.setStudentID(UUID.randomUUID());
-        entity.setJobType(jobType);
-        entity.setSchoolOfRecord("12345678");
-
-        StudentCredentialDistribution dto = new StudentCredentialDistribution();
-        dto.setId(entity.getId());
-        dto.setStudentID(entity.getStudentID());
-        dto.setPen("123456789");
-        dto.setSchoolOfRecord(entity.getSchoolOfRecord());
-        dto.setCredentialTypeCode("Test");
-        dto.setPaperType("A4");
-        dto.setDocumentStatusCode("COMPLETED");
-
-        entity.setPayload(JsonUtil.getJsonStringFromObject(dto));
-
-        ResponseObj responseObj = new ResponseObj();
-        responseObj.setAccess_token("abc");
-        responseObj.setRefresh_token("efg");
-
-        when(restUtils.getTokenResponseObject()).thenReturn(responseObj);
-        when(studentCredentialDistributionRepository.findByJobExecutionId(batchId)).thenReturn(Arrays.asList(entity));
-        when(gradBatchHistoryService.getJobTypeFromBatchJobHistory(batchId)).thenReturn(jobType);
-
-        doNothing().when(restUtils).updateStudentCredentialRecord(dto.getStudentID(), dto.getCredentialTypeCode(), dto.getPaperType(), dto.getDocumentStatusCode(), "MONTHLYDIST", responseObj.getAccess_token());
-        doNothing().when(restUtils).updateStudentGradRecord(dto.getStudentID(), batchId, "MONTHLYDIST", responseObj.getAccess_token());
+        batchGradAlgorithmJobHistoryEntity.setStatus("STARTED");
+        batchGradAlgorithmJobHistoryEntity.setJobType("REGALG");
+        batchGradAlgorithmJobHistoryEntity.setTriggerBy("MANUAL");
 
         when(gradBatchHistoryService.getGradAlgorithmJobHistory(batchId)).thenReturn(batchGradAlgorithmJobHistoryEntity);
-        when(gradBatchHistoryService.saveGradAlgorithmJobHistory(batchGradAlgorithmJobHistoryEntity)).thenReturn(batchGradAlgorithmJobHistoryEntity);
 
-        boolean isExceptionThrown = false;
-        try {
-            distributionService.updateDistributionJob(batchId, status);
-        } catch (Exception ex) {
-            isExceptionThrown = true;
-        }
-
-        assertThat(isExceptionThrown).isFalse();
-
+        String response = distributionService.getJobTypeFromBatchJobHistory(batchId);
+        assertThat(response).isEqualTo(batchGradAlgorithmJobHistoryEntity.getJobType());
     }
 
     @Test
-    public void testUpdateDistributionJob_whenGradStudentAPI_isDown() throws Exception {
+    public void testUpdateDistributionBatchJobStatus() throws Exception {
         Long batchId = 3001L;
-        String status = "success";
+        String status = BatchStatusEnum.COMPLETED.name();
         String jobType = "DISTRUN";
 
         BatchGradAlgorithmJobHistoryEntity batchGradAlgorithmJobHistoryEntity = new BatchGradAlgorithmJobHistoryEntity();
@@ -188,80 +136,21 @@ public class DistributionServiceTest {
         batchGradAlgorithmJobHistoryEntity.setStartTime(new Date(System.currentTimeMillis()));
         batchGradAlgorithmJobHistoryEntity.setExpectedStudentsProcessed(1L);
         batchGradAlgorithmJobHistoryEntity.setActualStudentsProcessed(0L);
-        batchGradAlgorithmJobHistoryEntity.setFailedStudentsProcessed(1);
+        batchGradAlgorithmJobHistoryEntity.setFailedStudentsProcessed(0);
         batchGradAlgorithmJobHistoryEntity.setJobType(jobType);
-
-        StudentCredentialDistributionEntity entity = new StudentCredentialDistributionEntity();
-        entity.setId(UUID.randomUUID());
-        entity.setJobExecutionId(batchId);
-        entity.setStudentID(UUID.randomUUID());
-        entity.setJobType(jobType);
-        entity.setSchoolOfRecord("12345678");
-
-        StudentCredentialDistribution dto = new StudentCredentialDistribution();
-        dto.setId(entity.getId());
-        dto.setStudentID(entity.getStudentID());
-        dto.setPen("123456789");
-        dto.setSchoolOfRecord(entity.getSchoolOfRecord());
-        dto.setCredentialTypeCode("Test");
-        dto.setPaperType("A4");
-        dto.setDocumentStatusCode("COMPLETED");
-
-        entity.setPayload(JsonUtil.getJsonStringFromObject(dto));
-
-        ResponseObj responseObj = new ResponseObj();
-        responseObj.setAccess_token("abc");
-        responseObj.setRefresh_token("efg");
-
-        when(restUtils.getTokenResponseObject()).thenReturn(responseObj);
-        when(studentCredentialDistributionRepository.findByJobExecutionId(batchId)).thenReturn(Arrays.asList(entity));
-        when(gradBatchHistoryService.getJobTypeFromBatchJobHistory(batchId)).thenReturn(jobType);
-
-        doNothing().when(restUtils).updateStudentCredentialRecord(dto.getStudentID(), dto.getCredentialTypeCode(), dto.getPaperType(), dto.getDocumentStatusCode(), "MONTHLYDIST", responseObj.getAccess_token());
-        doThrow(new RuntimeException("Test")).when(restUtils).updateStudentGradRecord(dto.getStudentID(), batchId, "MONTHLYDIST", responseObj.getAccess_token());
+        batchGradAlgorithmJobHistoryEntity.setStatus(status);
 
         when(gradBatchHistoryService.getGradAlgorithmJobHistory(batchId)).thenReturn(batchGradAlgorithmJobHistoryEntity);
         when(gradBatchHistoryService.saveGradAlgorithmJobHistory(batchGradAlgorithmJobHistoryEntity)).thenReturn(batchGradAlgorithmJobHistoryEntity);
 
         boolean isExceptionThrown = false;
         try {
-            distributionService.updateDistributionJob(batchId, status);
+            distributionService.updateDistributionBatchJobStatus(batchId, 0, status, null);
         } catch (Exception ex) {
             isExceptionThrown = true;
         }
 
         assertThat(isExceptionThrown).isFalse();
-
-    }
-
-    @Test
-    public void testUpdateDistributionJob_whenStatus_isFailed() throws Exception {
-        Long batchId = 3001L;
-        String status = "error";
-        String jobType = "DISTRUN";
-
-        BatchGradAlgorithmJobHistoryEntity batchGradAlgorithmJobHistoryEntity = new BatchGradAlgorithmJobHistoryEntity();
-        batchGradAlgorithmJobHistoryEntity.setId(UUID.randomUUID());
-        batchGradAlgorithmJobHistoryEntity.setJobExecutionId(batchId);
-        batchGradAlgorithmJobHistoryEntity.setStartTime(new Date(System.currentTimeMillis()));
-        batchGradAlgorithmJobHistoryEntity.setExpectedStudentsProcessed(1L);
-        batchGradAlgorithmJobHistoryEntity.setActualStudentsProcessed(0L);
-        batchGradAlgorithmJobHistoryEntity.setFailedStudentsProcessed(1);
-        batchGradAlgorithmJobHistoryEntity.setJobType(jobType);
-
-        when(gradBatchHistoryService.getJobTypeFromBatchJobHistory(batchId)).thenReturn(jobType);
-        when(gradBatchHistoryService.getGradAlgorithmJobHistory(batchId)).thenReturn(batchGradAlgorithmJobHistoryEntity);
-        when(gradBatchHistoryService.saveGradAlgorithmJobHistory(batchGradAlgorithmJobHistoryEntity)).thenReturn(batchGradAlgorithmJobHistoryEntity);
-
-        boolean isExceptionThrown = false;
-        try {
-            distributionService.updateDistributionJob(batchId, status);
-        } catch (Exception ex) {
-            isExceptionThrown = true;
-        }
-
-        assertThat(isExceptionThrown).isFalse();
-
     }
 
 }
