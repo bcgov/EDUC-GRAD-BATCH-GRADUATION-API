@@ -2,7 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.writer;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -19,7 +19,7 @@ public class DistributionRunWriter implements ItemWriter<StudentCredentialDistri
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    GradBatchHistoryService gradBatchHistoryService;
+    DistributionService distributionService;
 
     @Value("#{stepExecutionContext['summary']}")
     DistributionSummaryDTO summaryDTO;
@@ -36,7 +36,7 @@ public class DistributionRunWriter implements ItemWriter<StudentCredentialDistri
             // save StudentCredentialDistribution
             JobParameters jobParameters = jobExecution.getJobParameters();
             String jobType = jobParameters.getString("jobType");
-            gradBatchHistoryService.saveStudentCredentialDistribution(summaryDTO.getBatchId(), jobType, cred);
+            distributionService.saveStudentCredentialDistribution(summaryDTO.getBatchId(), jobType, cred);
 
             LOGGER.debug("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }

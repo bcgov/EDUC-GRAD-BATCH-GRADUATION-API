@@ -3,13 +3,8 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
-import ca.bc.gov.educ.api.batchgraduation.entity.StudentCredentialDistributionEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.StudentCredentialDistributionRepository;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,9 +20,6 @@ public class GradBatchHistoryService {
 
     @Autowired
     private BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository;
-
-    @Autowired
-    private StudentCredentialDistributionRepository studentCredentialDistributionRepository;
 
     @Transactional(readOnly = true)
     public BatchGradAlgorithmJobHistoryEntity getGradAlgorithmJobHistory(Long batchId) {
@@ -165,40 +157,4 @@ public class GradBatchHistoryService {
         return response;
     }
 
-
-
-    // Distribution
-    @Transactional(readOnly = true)
-    public List<StudentCredentialDistribution> getStudentCredentialDistributions(Long batchId) {
-        List<StudentCredentialDistributionEntity> entityList = studentCredentialDistributionRepository.findByJobExecutionId(batchId);
-        return entityList.stream().map(e -> {
-            try {
-                return JsonUtil.getJsonObjectFromString(StudentCredentialDistribution.class, e.getPayload());
-            } catch (JsonProcessingException ex) {
-                throw new RuntimeException(ex);
-            }
-        }).toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<String> getSchoolListForDistribution(Long batchId) {
-        return studentCredentialDistributionRepository.getSchoolList(batchId);
-    }
-
-    @Transactional
-    public void saveStudentCredentialDistribution(Long batchId, String jobType, StudentCredentialDistribution scd) {
-        StudentCredentialDistributionEntity entity = new StudentCredentialDistributionEntity();
-        entity.setJobExecutionId(batchId);
-        entity.setJobType(jobType);
-        entity.setStudentID(scd.getStudentID());
-        entity.setSchoolOfRecord(scd.getSchoolOfRecord());
-        try {
-            String payload = JsonUtil.getJsonStringFromObject(scd);
-            entity.setPayload(payload);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
-        studentCredentialDistributionRepository.save(entity);
-    }
 }
