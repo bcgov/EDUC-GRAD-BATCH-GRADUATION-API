@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.entity.StudentCredentialDistributionEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.repository.StudentCredentialDistributionRepository;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonUtil;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
 
@@ -31,6 +33,12 @@ public class DistributionServiceTest {
 
     @MockBean
     StudentCredentialDistributionRepository studentCredentialDistributionRepository;
+
+    @MockBean
+    private RestUtils restUtils;
+
+    @MockBean
+    WebClient webClient;
 
     @Test
     public void testGetStudentCredentialDistributions() throws Exception {
