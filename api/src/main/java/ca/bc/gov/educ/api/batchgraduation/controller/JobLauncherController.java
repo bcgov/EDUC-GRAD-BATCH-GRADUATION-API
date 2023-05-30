@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.controller;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateProcessor;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
@@ -81,6 +82,7 @@ public class JobLauncherController {
     private final RestUtils restUtils;
     private final GradDashboardService gradDashboardService;
     private final GradBatchHistoryService gradBatchHistoryService;
+    private final DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor;
 
     @Autowired
     public JobLauncherController(
@@ -90,13 +92,15 @@ public class JobLauncherController {
             JobRegistry jobRegistry,
             RestUtils restUtils,
             GradDashboardService gradDashboardService,
-            GradBatchHistoryService gradBatchHistoryService) {
+            GradBatchHistoryService gradBatchHistoryService,
+            DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor) {
         this.jobLauncher = jobLauncher;
         this.asyncJobLauncher = asyncJobLauncher;
         this.jobRegistry = jobRegistry;
         this.restUtils = restUtils;
         this.gradDashboardService = gradDashboardService;
         this.gradBatchHistoryService = gradBatchHistoryService;
+        this.distributionRunStatusUpdateProcessor = distributionRunStatusUpdateProcessor;
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_REG_GRAD_BATCH_JOB)
@@ -641,4 +645,18 @@ public class JobLauncherController {
         }
         return null;
     }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.NOTIFY_DISTRIBUTION_JOB_IS_COMPLETED)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<Void> notifyDistributionJobIsCompleted(
+            @RequestParam(name = "batchId", defaultValue = "0") Long batchId,
+            @RequestParam(name = "status", defaultValue = "success") String status) {
+        logger.debug("notifyDistributionJobIsCompleted: batchId [{}], status = {}", batchId, status);
+        distributionRunStatusUpdateProcessor.process(batchId, status);
+        logger.debug("distributionRunStatusUpdateProcessor is invoked: batchId [{}], status = {}", batchId, status);
+        return ResponseEntity.ok(null);
+    }
+
 }
