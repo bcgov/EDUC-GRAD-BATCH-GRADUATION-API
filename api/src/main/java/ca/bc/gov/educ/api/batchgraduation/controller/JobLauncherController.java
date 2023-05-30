@@ -695,7 +695,9 @@ public class JobLauncherController {
         cList.forEach(scd-> {
             try {
                 final String token = restUtils.getTokenResponseObject().getAccess_token();
+                logger.debug("{} Update student credentials record {} for student {}", activityCode, scd.getCredentialTypeCode(), scd.getStudentID());
                 restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,token);
+                logger.debug("{} Update student graduation record for student {}", activityCode, scd.getStudentID());
                 restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,token);
             } catch (Exception e) {
                 unprocessedStudents.put(scd.getStudentID().toString(), (ServiceException) e);

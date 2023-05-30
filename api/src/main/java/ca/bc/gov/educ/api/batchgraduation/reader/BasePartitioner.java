@@ -150,6 +150,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
     }
 
     static Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
+        sortStudentCredentialDistributionByNames(credentialList);
         int partitionSize = credentialList.size()/gridSize + 1;
         List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
         for (int i = 0; i < credentialList.size(); i += partitionSize) {
@@ -173,5 +174,12 @@ public abstract class BasePartitioner extends SimplePartitioner {
         }
         logger.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
         return map;
+    }
+
+    static void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
+        students.sort(Comparator
+                .comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(StudentCredentialDistribution::getLegalFirstName, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(StudentCredentialDistribution::getLegalMiddleNames, Comparator.nullsLast(Comparator.naturalOrder())));
     }
 }
