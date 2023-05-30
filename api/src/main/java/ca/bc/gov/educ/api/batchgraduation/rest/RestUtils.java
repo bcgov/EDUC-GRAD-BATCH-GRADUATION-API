@@ -469,7 +469,7 @@ public class RestUtils {
             LOGGER.info("Create and Store School Report Success {}",result);
     }
 
-    //Grad2-1931 sending transmissionType with the webclient.
+    //Grad2-1931 sending transmissionType with the webclient. - mchintha
     public DistributionResponse mergePsiAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String localDownload, String transmissionType) {
         UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
@@ -576,6 +576,14 @@ public class RestUtils {
                         uri -> uri.queryParam("studentID", studentID).build())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
                 .retrieve().bodyToMono(Boolean.class).block();
+    }
+    //Grad2-1931
+    public void deleteSchoolReportRecord(String schoolOfRecord, String reportTypeCode, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        webClient.delete().uri(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode))
+                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                 .retrieve().bodyToMono(boolean.class).block();
+
     }
 
 }
