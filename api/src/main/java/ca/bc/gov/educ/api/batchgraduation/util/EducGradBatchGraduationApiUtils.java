@@ -62,8 +62,8 @@ public class EducGradBatchGraduationApiUtils {
         Date sDate = null;
         try {
             temp = EducGradBatchGraduationApiUtils.parseDate(actualSessionDate, EducGradBatchGraduationApiConstants.DATE_FORMAT);
-            String sDates = EducGradBatchGraduationApiUtils.formatDate(temp, EducGradBatchGraduationApiConstants.DATE_FORMAT);
-            sDate = EducGradBatchGraduationApiUtils.parseDate(sDates, EducGradBatchGraduationApiConstants.DATE_FORMAT);
+            String sDates = EducGradBatchGraduationApiUtils.formatDate(temp, EducGradBatchGraduationApiConstants.DEFAULT_DATE_FORMAT);
+            sDate = EducGradBatchGraduationApiUtils.parseDate(sDates, EducGradBatchGraduationApiConstants.DEFAULT_DATE_FORMAT);
         } catch (ParseException pe) {
             logger.error(ERROR_MSG,pe.getMessage());
         }

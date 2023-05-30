@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,9 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
 
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
+
+    @Autowired
+    DistributionService distributionService;
 
     @Autowired
     RestUtils restUtils;
