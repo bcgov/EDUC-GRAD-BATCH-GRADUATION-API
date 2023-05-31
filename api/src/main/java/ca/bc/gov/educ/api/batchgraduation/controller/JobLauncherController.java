@@ -55,7 +55,6 @@ public class JobLauncherController {
     private static final String TIME = "time";
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
-    private static final String BATCH_REQUEST="batchRequest";
     private static final String SEARCH_REQUEST = "searchRequest";
     private static final String RERUN_TYPE = "reRunType";
     private static final String RUN_BY = "runBy";
@@ -472,7 +471,7 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUN_YE);
         try {
-            builder.addString(BATCH_REQUEST, jsonTransformer.marshall(request));
+            builder.addString(SEARCH_REQUEST, jsonTransformer.marshall(request));
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
@@ -521,7 +520,7 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, NONGRADRUN);
         try {
-            builder.addString(BATCH_REQUEST, jsonTransformer.marshall(request));
+            builder.addString(SEARCH_REQUEST, jsonTransformer.marshall(request));
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("YearlyNonGradDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);

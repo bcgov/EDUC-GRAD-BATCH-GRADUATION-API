@@ -195,9 +195,9 @@ public abstract class BasePartitioner extends SimplePartitioner {
         JobParameters jobParameters = getJobExecution().getJobParameters();
         StudentSearchRequest request;
         try {
-            request = (StudentSearchRequest)jsonTransformer.unmarshall(jobParameters.getString("BATCH_REQUEST", "{}"), StudentSearchRequest.class);
+            request = (StudentSearchRequest)jsonTransformer.unmarshall(jobParameters.getString("searchRequest", "{}"), StudentSearchRequest.class);
         } catch (TransformerException e) {
-            LOGGER.warn("Unable to deserialize YearEndBatchJobRequest object");
+            LOGGER.warn("Unable to deserialize StudentSearchRequest object");
             request = new StudentSearchRequest();
         }
         return request;
