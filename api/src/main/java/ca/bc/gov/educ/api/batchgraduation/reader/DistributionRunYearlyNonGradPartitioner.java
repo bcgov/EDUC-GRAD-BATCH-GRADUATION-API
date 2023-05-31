@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchJobRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,23 +24,46 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
     JobExecution context;
 
     @Autowired
-    ParallelDataFetch parallelDataFetch;
+    RestUtils restUtils;
 
     @Autowired
-    RestUtils restUtils;
+    ParallelDataFetch parallelDataFetch;
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-
         // Clean up existing reports before running new one
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_YE", restUtils.getAccessToken());
-        restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SC", restUtils.getAccessToken());
-        restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SD", restUtils.getAccessToken());
+        restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SC", restUtils.getAccessToken());
 
-        List<StudentCredentialDistribution> credentialList = parallelDataFetch.fetchStudentCredentialsDistributionDataYearlyNonGrad();
-        if(!credentialList.isEmpty()) {
-            return getStringExecutionContextMap(gridSize, credentialList, "NONGRADDIST", LOGGER);
+        BatchJobRequest request = getBatchJobRequest();
+
+        List<String> schoolsList = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
+        if(!schoolsList.isEmpty()) {
+
+            int partitionSize = schoolsList.size()/gridSize + 1;
+            List<List<String>> partitions = new LinkedList<>();
+            for (int i = 0; i < schoolsList.size(); i += partitionSize) {
+                partitions.add(schoolsList.subList(i, Math.min(i + partitionSize, schoolsList.size())));
+            }
+            Map<String, ExecutionContext> map = new HashMap<>(partitions.size());
+            for (int i = 0; i < partitions.size(); i++) {
+                ExecutionContext executionContext = new ExecutionContext();
+                DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+                summaryDTO.initializeCredentialCountMap();
+                summaryDTO.setTotalCyclesCount(schoolsList.size());
+                summaryDTO.setCredentialType("NONGRADDIST");
+                List<String> data = partitions.get(i);
+                executionContext.put("data", data);
+                summaryDTO.setReadCount(data.size());
+                executionContext.put("batchRequest", request);
+                executionContext.put("summary", summaryDTO);
+                executionContext.put("index",0);
+                String key = "partition" + i;
+                map.put(key, executionContext);
+            }
+            LOGGER.info("Found {} in total running on {} partitions",schoolsList.size(),map.size());
+            return map;
         }
         LOGGER.info("No Credentials Found for Processing");
         return new HashMap<>();

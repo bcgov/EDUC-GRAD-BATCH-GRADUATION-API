@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
-public class DistributionRunYearlyNonGradByMincodeProcessor implements ItemProcessor<String, List<StudentCredentialDistribution>> {
+public class DistributionRunYearlyNonGradProcessor implements ItemProcessor<String, List<StudentCredentialDistribution>> {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradByMincodeProcessor.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradProcessor.class);
 
 	@Autowired
 	RestUtils restUtils;
@@ -26,12 +26,12 @@ public class DistributionRunYearlyNonGradByMincodeProcessor implements ItemProce
 
 	@Override
 	public List<StudentCredentialDistribution> process(String mincode) throws Exception {
-		LOGGER.debug("Processing partitionData = {}", mincode);
+		LOGGER.debug("Processing partitionData for district {} ", mincode);
 		summaryDTO.setBatchId(batchId);
 		summaryDTO.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount() + 1);
 		summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
 		List<StudentCredentialDistribution> studentCredentials = restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
-		LOGGER.debug("Completed partitionData = {}", studentCredentials.size());
+		LOGGER.debug("Completed partitionData for district {} with {} students", mincode, studentCredentials.size());
 		summaryDTO.getGlobalList().addAll(studentCredentials);
 		return summaryDTO.getGlobalList();
 	}

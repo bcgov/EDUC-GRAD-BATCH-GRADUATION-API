@@ -8,6 +8,7 @@ import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,6 +39,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.xml.transform.TransformerException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +55,7 @@ public class JobLauncherController {
     private static final String TIME = "time";
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
+    private static final String BATCH_REQUEST="batchRequest";
     private static final String SEARCH_REQUEST = "searchRequest";
     private static final String RERUN_TYPE = "reRunType";
     private static final String RUN_BY = "runBy";
@@ -84,6 +87,9 @@ public class JobLauncherController {
     private final RestUtils restUtils;
     private final GradDashboardService gradDashboardService;
     private final GradBatchHistoryService gradBatchHistoryService;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     @Autowired
     public JobLauncherController(
@@ -454,11 +460,11 @@ public class JobLauncherController {
         }
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_YEARLY_DIS_RUN_BATCH_JOB)
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_YEARLY_DIS_RUN_BATCH_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Yearly Distribution Runs", description = "Run Yearly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<DistributionSummaryDTO> launchYearlyDistributionRunJob() {
+    public ResponseEntity<DistributionSummaryDTO> launchYearlyDistributionRunJob(@RequestBody BatchJobRequest request) {
         logger.debug("launchYearlyDistributionRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
@@ -466,12 +472,13 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUN_YE);
         try {
+            builder.addString(BATCH_REQUEST, jsonTransformer.marshall(request));
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
             return ResponseEntity.ok(summaryDTO);
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                | JobParametersInvalidException | NoSuchJobException e) {
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException |
+                 JobParametersInvalidException | NoSuchJobException | TransformerException e) {
             DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
             summaryDTO.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(summaryDTO);
@@ -502,11 +509,11 @@ public class JobLauncherController {
         }
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_YEARLY_NON_GRAD_DIS_RUN_BATCH_JOB)
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_YEARLY_NON_GRAD_DIS_RUN_BATCH_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Year End Non Grad Distribution Runs", description = "Run Year End Non Grad Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<DistributionSummaryDTO> launchYearlyNonGradDistributionRunJob() {
+    public ResponseEntity<DistributionSummaryDTO> launchYearlyNonGradDistributionRunJob(@RequestBody BatchJobRequest request) {
         logger.debug("launchYearlyNonGradDistributionRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
@@ -514,12 +521,13 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, NONGRADRUN);
         try {
+            builder.addString(BATCH_REQUEST, jsonTransformer.marshall(request));
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("YearlyNonGradDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
             return ResponseEntity.ok(summaryDTO);
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                | JobParametersInvalidException | NoSuchJobException e) {
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException |
+                 JobParametersInvalidException | NoSuchJobException | TransformerException e) {
             DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
             summaryDTO.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(summaryDTO);

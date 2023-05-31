@@ -18,9 +18,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class DistributionRunYearlyNonGradByMincodeCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
+public class DistributionRunYearlyNonGradCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradByMincodeCompletionNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradCompletionNotificationListener.class);
 
 	@Autowired
 	SupportListener supportListener;

@@ -40,6 +40,7 @@ public class JobLauncherControllerTest {
     private static final String REGALG = "REGALG";
     private static final String DISTRUN = "DISTRUN";
     private static final String DISTRUN_YE = "DISTRUN_YE";
+    private static final String NONGRADRUN = "NONGRADRUN";
     private static final String DISTRUNUSER = "DISTRUNUSER";
     private static final String PSIDISTRUN = "PSIRUN";
     private static final String CREDENTIALTYPE = "credentialType";
@@ -345,6 +346,7 @@ public class JobLauncherControllerTest {
 
     @Test
     public void testlaunchYearlyDistributionRunJob() {
+        BatchJobRequest request = new BatchJobRequest();
         boolean exceptionIsThrown = false;
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
@@ -352,7 +354,24 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TYPE, DISTRUN_YE);
         try {
             org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
-            jobLauncherController.launchYearlyDistributionRunJob();
+            jobLauncherController.launchYearlyDistributionRunJob(request);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+        assertThat(builder).isNotNull();
+    }
+
+    @Test
+    public void testlaunchYearlyNonGradDistributionRunJob() {
+        BatchJobRequest request = new BatchJobRequest();
+        boolean exceptionIsThrown = false;
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, NONGRADRUN);
+        try {
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("YearlyNonGradDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            jobLauncherController.launchYearlyNonGradDistributionRunJob(request);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }

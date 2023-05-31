@@ -3,11 +3,9 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +15,7 @@ import org.springframework.batch.core.partition.support.SimplePartitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.xml.transform.TransformerException;
 import java.util.*;
 
 public abstract class BasePartitioner extends SimplePartitioner {
@@ -30,6 +29,9 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     protected RunTypeEnum runType;
 
@@ -149,7 +151,20 @@ public abstract class BasePartitioner extends SimplePartitioner {
         gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, fromBatchId, username);
     }
 
-    static Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
+    Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
+        BatchJobRequest request = getBatchJobRequest();
+        Iterator scdIt = credentialList.stream().iterator();
+        while (scdIt.hasNext()) {
+            StudentCredentialDistribution scd = (StudentCredentialDistribution)scdIt.next();
+            String districtCode = StringUtils.substring(scd.getSchoolOfRecord(), 0, 3);
+            if (
+                    (request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
+                    ||
+                    (request.getMincodes() != null && !request.getMincodes().isEmpty() && !request.getMincodes().contains(scd.getSchoolOfRecord()))
+            ) {
+                scdIt.remove();
+            }
+        }
         sortStudentCredentialDistributionByNames(credentialList);
         int partitionSize = credentialList.size()/gridSize + 1;
         List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
@@ -174,6 +189,18 @@ public abstract class BasePartitioner extends SimplePartitioner {
         }
         logger.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
         return map;
+    }
+
+    protected BatchJobRequest getBatchJobRequest() {
+        JobParameters jobParameters = getJobExecution().getJobParameters();
+        BatchJobRequest request;
+        try {
+            request = (BatchJobRequest)jsonTransformer.unmarshall(jobParameters.getString("BATCH_REQUEST", "{}"), BatchJobRequest.class);
+        } catch (TransformerException e) {
+            LOGGER.warn("Unable to deserialize YearEndBatchJobRequest object");
+            request = new BatchJobRequest();
+        }
+        return request;
     }
 
     static void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
