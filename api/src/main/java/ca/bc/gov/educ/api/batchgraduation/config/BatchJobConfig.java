@@ -866,6 +866,69 @@ public class BatchJobConfig {
     }
 
     /**
+     * Regenerate Current Student's Certificates whose distribution date is null
+     */
+    @Bean
+    @StepScope
+    public RegenerateCertificatePartitioner partitionerCertRegen() {
+        return new RegenerateCertificatePartitioner();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<UUID> itemReaderCertRegen() {
+        return new RegenerateCertificateReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<Integer> itemWriterCertRegen() {
+        return new RegenerateCertificateRunWriter();
+    }
+
+    @Bean
+    @StepScope
+    public ItemProcessor<UUID,Integer> itemProcessorCertRegen() {
+        return new RunCertificateRegenerationProcessor();
+    }
+
+    @Bean
+    public Step masterStepCertRegen(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
+        return stepBuilderFactory.get("masterStepRegGrad")
+                .partitioner(certRegenJobStep(stepBuilderFactory, skipListener).getName(), partitionerCertRegen())
+                .step(certRegenJobStep(stepBuilderFactory, skipListener))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants))
+                .build();
+    }
+
+    @Bean
+    public Step certRegenJobStep(StepBuilderFactory stepBuilderFactory, SkipSQLTransactionExceptionsListener skipListener) {
+        return stepBuilderFactory.get("certRegenJobStep")
+                .<UUID, Integer>chunk(1)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
+                .reader(itemReaderCertRegen())
+                .processor(itemProcessorCertRegen())
+                .writer(itemWriterCertRegen())
+                .transactionManager(batchTransactionManager)
+                .listener(skipListener)
+                .build();
+    }
+
+    @Bean(name="certRegenBatchJob")
+    public Job certRegenBatchJob(RegenCertRunCompletionNotificationListener listener, SkipSQLTransactionExceptionsListener skipListener, StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, EducGradBatchGraduationApiConstants constants) {
+        return jobBuilderFactory.get("certRegenBatchJob")
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .start(masterStepCertRegen(stepBuilderFactory,constants, skipListener))
+                .on("*")
+                .end().build()
+                .build();
+    }
+
+    /**
      * User Scheduled Jobs Refreshing Map on startup
      * ItemProcessor,ItemReader and ItemWriter
      * Partitioner

@@ -9,8 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -39,6 +38,7 @@ public class JobLauncherControllerTest {
     private static final String MANUAL = "MANUAL";
     private static final String TVRRUN = "TVRRUN";
     private static final String REGALG = "REGALG";
+    private static final String CERT_REGEN = "CERT_REGEN";
     private static final String DISTRUN = "DISTRUN";
     private static final String DISTRUN_YE = "DISTRUN_YE";
     private static final String DISTRUNUSER = "DISTRUNUSER";
@@ -105,6 +105,7 @@ public class JobLauncherControllerTest {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, TVRRUN);
+
         try {
             org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob("tvrBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchTvrRunJob();
@@ -484,5 +485,23 @@ public class JobLauncherControllerTest {
         org.mockito.Mockito.doNothing().when(distributionRunStatusUpdateProcessor).process(batchId, "success");
         jobLauncherController.notifyDistributionJobIsCompleted(batchId, "success");
         org.mockito.Mockito.verify(distributionRunStatusUpdateProcessor).process(batchId, "success");
+    }
+
+    @Test
+    public void testLaunchCertRegenJob() {
+        boolean exceptionIsThrown = false;
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, CERT_REGEN);
+
+        try {
+            org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob(CERT_REGEN), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            jobLauncherController.launchCertRegenJob();
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(builder).isNotNull();
     }
 }
