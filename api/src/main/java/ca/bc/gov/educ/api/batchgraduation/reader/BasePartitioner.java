@@ -152,7 +152,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
     }
 
     Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
-        BatchJobRequest request = getBatchJobRequest();
+        StudentSearchRequest request = getStudentSearchRequest();
         Iterator scdIt = credentialList.stream().iterator();
         while (scdIt.hasNext()) {
             StudentCredentialDistribution scd = (StudentCredentialDistribution)scdIt.next();
@@ -160,7 +160,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
             if (
                     (request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
                     ||
-                    (request.getMincodes() != null && !request.getMincodes().isEmpty() && !request.getMincodes().contains(scd.getSchoolOfRecord()))
+                    (request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
             ) {
                 scdIt.remove();
             }
@@ -191,14 +191,14 @@ public abstract class BasePartitioner extends SimplePartitioner {
         return map;
     }
 
-    protected BatchJobRequest getBatchJobRequest() {
+    protected StudentSearchRequest getStudentSearchRequest() {
         JobParameters jobParameters = getJobExecution().getJobParameters();
-        BatchJobRequest request;
+        StudentSearchRequest request;
         try {
-            request = (BatchJobRequest)jsonTransformer.unmarshall(jobParameters.getString("BATCH_REQUEST", "{}"), BatchJobRequest.class);
+            request = (StudentSearchRequest)jsonTransformer.unmarshall(jobParameters.getString("BATCH_REQUEST", "{}"), StudentSearchRequest.class);
         } catch (TransformerException e) {
             LOGGER.warn("Unable to deserialize YearEndBatchJobRequest object");
-            request = new BatchJobRequest();
+            request = new StudentSearchRequest();
         }
         return request;
     }

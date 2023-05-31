@@ -464,7 +464,7 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Yearly Distribution Runs", description = "Run Yearly Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<DistributionSummaryDTO> launchYearlyDistributionRunJob(@RequestBody BatchJobRequest request) {
+    public ResponseEntity<DistributionSummaryDTO> launchYearlyDistributionRunJob(@RequestBody StudentSearchRequest request) {
         logger.debug("launchYearlyDistributionRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
@@ -513,7 +513,7 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Year End Non Grad Distribution Runs", description = "Run Year End Non Grad Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<DistributionSummaryDTO> launchYearlyNonGradDistributionRunJob(@RequestBody BatchJobRequest request) {
+    public ResponseEntity<DistributionSummaryDTO> launchYearlyNonGradDistributionRunJob(@RequestBody StudentSearchRequest request) {
         logger.debug("launchYearlyNonGradDistributionRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();

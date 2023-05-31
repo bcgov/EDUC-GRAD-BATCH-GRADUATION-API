@@ -346,7 +346,7 @@ public class JobLauncherControllerTest {
 
     @Test
     public void testlaunchYearlyDistributionRunJob() {
-        BatchJobRequest request = new BatchJobRequest();
+        StudentSearchRequest request = new StudentSearchRequest();
         boolean exceptionIsThrown = false;
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
@@ -363,7 +363,7 @@ public class JobLauncherControllerTest {
 
     @Test
     public void testlaunchYearlyNonGradDistributionRunJob() {
-        BatchJobRequest request = new BatchJobRequest();
+        StudentSearchRequest request = new StudentSearchRequest();
         boolean exceptionIsThrown = false;
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
