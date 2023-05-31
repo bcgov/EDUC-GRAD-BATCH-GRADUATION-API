@@ -1353,5 +1353,20 @@ public class RestUtilsTest {
         assertThat(result).isTrue();
     }
 
+    @Test
+    public void testRunRegenerateStudentCertificates() {
+        final String pen = "123456789";
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(eq(String.format(constants.getStudentCertificateRegeneration(), pen)), any(Function.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(Integer.valueOf(1)));
+
+        val result = this.restUtils.runRegenerateStudentCertificate(pen, "abc");
+        assertThat(result).isEqualTo(1);
+    }
+
 
 }
