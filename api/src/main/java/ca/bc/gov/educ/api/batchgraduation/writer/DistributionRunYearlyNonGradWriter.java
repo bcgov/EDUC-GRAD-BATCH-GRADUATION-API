@@ -14,11 +14,8 @@ public class DistributionRunYearlyNonGradWriter extends BaseYearEndWriter implem
     @Override
     public void write(List<? extends List<StudentCredentialDistribution>> list) throws Exception {
         if (!list.isEmpty()) {
-            summaryDTO.increment("YED4");
+            summaryDTO.increment("YED4", list.size());
             LOGGER.debug("Left:{}\n", summaryDTO.getReadCount() - summaryDTO.getProcessedCount());
-//            LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-//            processGlobalList(summaryDTO.getGlobalList(), jobExecutionId, summaryDTO.getMapDist(), "NONGRADDIST", restUtils.fetchAccessToken());
-//            LOGGER.info("=======================================================================================");
         }
     }
 }

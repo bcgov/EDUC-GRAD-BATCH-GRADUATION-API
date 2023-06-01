@@ -22,4 +22,8 @@ public abstract class BaseDistributionSummaryDTO extends BaseSummaryDTO {
     public void increment(String programCode) {
         credentialCountMap.computeIfPresent(programCode,(key, val) -> val + 1);
     }
+
+    public void increment(String programCode, int count) {
+        credentialCountMap.computeIfPresent(programCode,(key, val) -> val + count);
+    }
 }

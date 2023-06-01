@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
         List<String> schoolsList = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
         if(!schoolsList.isEmpty()) {
-
+            StudentSearchRequest searchRequest = getStudentSearchRequest();
             int partitionSize = schoolsList.size()/gridSize + 1;
             List<List<String>> partitions = new LinkedList<>();
             for (int i = 0; i < schoolsList.size(); i += partitionSize) {
@@ -55,6 +56,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
                 summaryDTO.setReadCount(data.size());
                 executionContext.put("summary", summaryDTO);
                 executionContext.put("index",0);
+                executionContext.put("searchRequestObject", searchRequest);
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }

@@ -15,9 +15,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DistributionRunPartitionerYearly extends BasePartitioner {
+public class DistributionRunYearlyPartitioner extends BasePartitioner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitionerYearly.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyPartitioner.class);
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;

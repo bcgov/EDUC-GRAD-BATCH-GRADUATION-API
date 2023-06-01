@@ -153,6 +153,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
     }
 
     protected void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String searchRequest) {
+        LOGGER.debug("Filter Student Credential Distribution for {} student credentials", credentialList.size());
         StudentSearchRequest request = getStudentSearchRequest(searchRequest);
         Iterator scdIt = credentialList.iterator();
         while (scdIt.hasNext()) {
@@ -164,7 +165,9 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
                     (request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
             ) {
                 scdIt.remove();
+                LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()));
             }
         }
+        LOGGER.debug("Total {} selected after filter", credentialList.size());
     }
 }

@@ -151,7 +151,27 @@ public abstract class BasePartitioner extends SimplePartitioner {
         gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, fromBatchId, username);
     }
 
+    void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList) {
+        LOGGER.debug("Filter Student Credential Distribution for {} student credentials", credentialList.size());
+        StudentSearchRequest request = getStudentSearchRequest();
+        Iterator scdIt = credentialList.iterator();
+        while (scdIt.hasNext()) {
+            StudentCredentialDistribution scd = (StudentCredentialDistribution)scdIt.next();
+            String districtCode = StringUtils.substring(scd.getSchoolOfRecord(), 0, 3);
+            if (
+                    (request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
+                    ||
+                    (request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
+            ) {
+                scdIt.remove();
+                LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()));
+            }
+        }
+        LOGGER.debug("Total {} selected after filter", credentialList.size());
+    }
+
     Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
+        filterStudentCredentialDistribution(credentialList);
         sortStudentCredentialDistributionByNames(credentialList);
         int partitionSize = credentialList.size()/gridSize + 1;
         List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
@@ -178,7 +198,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
         return map;
     }
 
-    protected StudentSearchRequest getStudentSearchRequest() {
+    StudentSearchRequest getStudentSearchRequest() {
         JobParameters jobParameters = getJobExecution().getJobParameters();
         StudentSearchRequest request;
         try {
@@ -190,7 +210,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
         return request;
     }
 
-    static void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
+    void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
         students.sort(Comparator
                 .comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(Comparator.naturalOrder()))
                 .thenComparing(StudentCredentialDistribution::getLegalFirstName, Comparator.nullsLast(Comparator.naturalOrder()))
