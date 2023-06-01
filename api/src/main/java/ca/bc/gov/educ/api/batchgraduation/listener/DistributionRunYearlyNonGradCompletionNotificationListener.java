@@ -40,6 +40,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String jobType = jobParameters.getString("jobType");
+			String searchRequest = jobParameters.getString("searchRequest");
 
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
@@ -47,7 +48,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 				summaryDTO.initializeCredentialCountMap();
 			}
 
-			processGlobalList(summaryDTO, "NONGRADDIST");
+			processGlobalList(summaryDTO, searchRequest, "NONGRADDIST");
 
 			String studentSearchRequest = jobParameters.getString("searchRequest");
 			// display Summary Details
@@ -66,9 +67,10 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 		}
     }
 
-	protected void processGlobalList(DistributionSummaryDTO summaryDTO, String activityCode) {
+	protected void processGlobalList(DistributionSummaryDTO summaryDTO, String searchRequest, String activityCode) {
     	Long batchId = summaryDTO.getBatchId();
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
+		filterStudentCredentialDistribution(cList, searchRequest);
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
@@ -77,7 +79,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
-		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
 		distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
 		distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
 		distributionRequest.setSchools(summaryDTO.getSchools());

@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -11,7 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.xml.transform.TransformerException;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 public abstract class BaseDistributionRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
@@ -19,6 +23,9 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
 
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     @Autowired
     RestUtils restUtils;
@@ -134,4 +141,30 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
     }
 
+    protected StudentSearchRequest getStudentSearchRequest(String searchRequest) {
+        StudentSearchRequest request;
+        try {
+            request = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
+        } catch (TransformerException e) {
+            LOGGER.warn("Unable to deserialize StudentSearchRequest object");
+            request = new StudentSearchRequest();
+        }
+        return request;
+    }
+
+    protected void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String searchRequest) {
+        StudentSearchRequest request = getStudentSearchRequest(searchRequest);
+        Iterator scdIt = credentialList.iterator();
+        while (scdIt.hasNext()) {
+            StudentCredentialDistribution scd = (StudentCredentialDistribution)scdIt.next();
+            String districtCode = StringUtils.substring(scd.getSchoolOfRecord(), 0, 3);
+            if (
+                    (request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
+                            ||
+                    (request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
+            ) {
+                scdIt.remove();
+            }
+        }
+    }
 }

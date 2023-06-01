@@ -152,19 +152,6 @@ public abstract class BasePartitioner extends SimplePartitioner {
     }
 
     Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
-        StudentSearchRequest request = getStudentSearchRequest();
-        Iterator scdIt = credentialList.stream().iterator();
-        while (scdIt.hasNext()) {
-            StudentCredentialDistribution scd = (StudentCredentialDistribution)scdIt.next();
-            String districtCode = StringUtils.substring(scd.getSchoolOfRecord(), 0, 3);
-            if (
-                    (request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
-                    ||
-                    (request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
-            ) {
-                scdIt.remove();
-            }
-        }
         sortStudentCredentialDistributionByNames(credentialList);
         int partitionSize = credentialList.size()/gridSize + 1;
         List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
