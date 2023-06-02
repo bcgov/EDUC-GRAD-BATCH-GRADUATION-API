@@ -27,8 +27,8 @@ public class RunCertificateRegenerationProcessor implements ItemProcessor<UUID, 
 	@Override
 	public Integer process(UUID key) throws Exception {
 		GraduationStudentRecordDistribution stuRec = restUtils.getStudentData(key.toString(), summaryDTO.getAccessToken());
-		if (stuRec != null && "CUR".equalsIgnoreCase(stuRec.getStudentStatus())) {
-			LOGGER.info("Processing partitionData: studentID = {}, status = {}", stuRec.getStudentID(), stuRec.getStudentStatus());
+		if (stuRec != null) {
+			LOGGER.info("Processing partitionData: studentID = {}", stuRec.getStudentID());
 			summaryDTO.setBatchId(batchId);
 			try {
 				summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);

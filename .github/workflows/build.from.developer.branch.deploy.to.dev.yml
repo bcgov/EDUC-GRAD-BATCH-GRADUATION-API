@@ -1,4 +1,4 @@
-name: Build & Deploy to DEV-Jinil
+name: Build & Deploy to DEV from developer branch
 
 env:
   # 🖊️ EDIT your repository secrets to log into your OpenShift cluster and set up the context.
@@ -24,6 +24,7 @@ env:
   APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
   BRANCH: "main"
   TAG: "latest"
+  #GRAD2-1947 Resource optimization
   MIN_CPU: "50m"
   MAX_CPU: "300m"
   MIN_MEM: "1024Mi"
@@ -34,6 +35,16 @@ env:
 on:
   # https://docs.github.com/en/actions/reference/events-that-trigger-workflows
   workflow_dispatch:
+    inputs:
+      choice:
+        type: choice
+        description: Choose branch to build from
+        options:
+          - develop/alex
+          - develop/chris
+          - develop/jinil
+          - develop/km
+          - grad-hotfix
 
 jobs:
   openshift-ci-cd:
@@ -50,7 +61,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
         with:
-          ref: develop/jinil
+          ref: ${{ github.event.inputs.choice }}
 
       - name: Determine image tags
         if: env.TAG == ''
@@ -113,7 +124,7 @@ jobs:
           | oc apply -f -
           
           # UPDATE Configmaps
-          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ env.BRANCH }}/tools/update-configmap.sh | bash /dev/stdin dev ${{ env.REPO_NAME }} ${{ env.NAMESPACE }} ${{ env.COMMON_NAMESPACE }} ${{ secrets.SPLUNK_TOKEN }}
+          curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ github.event.inputs.choice }}/tools/update-configmap.sh | bash /dev/stdin dev ${{ env.REPO_NAME }} ${{ env.NAMESPACE }} ${{ env.COMMON_NAMESPACE }} ${{ env.BUSINESS_NAMESPACE }} ${{ secrets.SPLUNK_TOKEN }}
 
           # Start rollout (if necessary) and follow it
           oc rollout latest dc/${{ env.SPRING_BOOT_IMAGE_NAME }} 2> /dev/null \

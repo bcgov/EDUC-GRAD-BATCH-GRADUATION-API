@@ -894,7 +894,7 @@ public class BatchJobConfig {
 
     @Bean
     public Step masterStepCertRegen(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
-        return stepBuilderFactory.get("masterStepRegGrad")
+        return stepBuilderFactory.get("masterStepCertRegen")
                 .partitioner(certRegenJobStep(stepBuilderFactory, skipListener).getName(), partitionerCertRegen())
                 .step(certRegenJobStep(stepBuilderFactory, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
