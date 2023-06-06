@@ -70,6 +70,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 
 	private void processGlobalList(Long batchId, Map<String,DistributionPrintRequest> mapDist,String activityCode,String accessToken) {
     	List<StudentCredentialDistribution> cList = gradBatchHistoryService.getStudentCredentialDistributions(batchId);
+		sortStudentCredentialDistributionByNames(cList);
 		LOGGER.info("list size =  {}", cList.size());
 		List<String> uniqueSchoolList = gradBatchHistoryService.getSchoolListForDistribution(batchId);
 		LOGGER.info("unique schools =  {}", uniqueSchoolList.size());

@@ -71,6 +71,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
     	Long batchId = summaryDTO.getBatchId();
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
 		filterStudentCredentialDistribution(cList, searchRequest);
+		sortStudentCredentialDistributionByNames(cList);
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{

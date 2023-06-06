@@ -89,6 +89,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 
 	private void processGlobalList(DistributionSummaryDTO summaryDTO, Long batchId, String credentialType, String accessToken,String localDownload,String properName) {
 		List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
+		sortStudentCredentialDistributionByNames(cList);
 		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
     	List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{

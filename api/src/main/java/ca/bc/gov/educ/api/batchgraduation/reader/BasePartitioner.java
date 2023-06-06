@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -211,9 +212,6 @@ public abstract class BasePartitioner extends SimplePartitioner {
     }
 
     void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
-        students.sort(Comparator
-                .comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(Comparator.naturalOrder()))
-                .thenComparing(StudentCredentialDistribution::getLegalFirstName, Comparator.nullsLast(Comparator.naturalOrder()))
-                .thenComparing(StudentCredentialDistribution::getLegalMiddleNames, Comparator.nullsLast(Comparator.naturalOrder())));
+        GradSorter.sortStudentCredentialDistributionByNames(students);
     }
 }

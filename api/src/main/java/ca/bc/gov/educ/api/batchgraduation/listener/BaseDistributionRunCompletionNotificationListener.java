@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -152,7 +153,11 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         return request;
     }
 
-    protected void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String searchRequest) {
+    void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
+        GradSorter.sortStudentCredentialDistributionByNames(students);
+    }
+
+    void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String searchRequest) {
         LOGGER.debug("Filter Student Credential Distribution for {} student credentials", credentialList.size());
         StudentSearchRequest request = getStudentSearchRequest(searchRequest);
         Iterator scdIt = credentialList.iterator();
