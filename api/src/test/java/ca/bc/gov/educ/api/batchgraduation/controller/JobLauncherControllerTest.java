@@ -9,7 +9,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.batch.core.*;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -502,7 +503,7 @@ public class JobLauncherControllerTest {
     public void testNotifyDistributionJobIsCompleted() {
         Long batchId = 3001L;
         org.mockito.Mockito.doNothing().when(distributionRunStatusUpdateProcessor).process(batchId, "success");
-        jobLauncherController.notifyDistributionJobIsCompleted(batchId, "success");
+        jobLauncherController.notifyDistributionJobIsCompleted(batchId, "success", new DistributionResponse());
         org.mockito.Mockito.verify(distributionRunStatusUpdateProcessor).process(batchId, "success");
     }
 

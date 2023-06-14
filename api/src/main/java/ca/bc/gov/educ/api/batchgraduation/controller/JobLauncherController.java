@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
-import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateProcessor;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -42,9 +41,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.xml.transform.TransformerException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
@@ -112,6 +109,7 @@ public class JobLauncherController {
         this.restUtils = restUtils;
         this.gradDashboardService = gradDashboardService;
         this.gradBatchHistoryService = gradBatchHistoryService;
+        this.distributionRunStatusUpdateProcessor = distributionRunStatusUpdateProcessor;
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_REG_GRAD_BATCH_JOB)
