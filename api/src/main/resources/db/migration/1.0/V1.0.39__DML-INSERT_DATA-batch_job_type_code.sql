@@ -1,0 +1,1 @@
+INSERT INTO BATCH_JOB_TYPE_CODE (BATCH_JOB_TYPE_CODE,LABEL,DESCRIPTION,DISPLAY_ORDER,EFFECTIVE_DATE,EXPIRY_DATE) VALUES ('CERT_REGEN','User Request Certificate Regeneration','The User Batch Certificate Regeneration job regenerates new certificates for a selected set of students.',80,TIMESTAMP'2023-05-24  00:00:00.0',NULL);

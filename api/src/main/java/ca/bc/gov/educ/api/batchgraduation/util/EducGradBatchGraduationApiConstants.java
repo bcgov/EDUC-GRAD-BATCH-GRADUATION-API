@@ -26,6 +26,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_YEARLY_DIS_RUN_BATCH_JOB = "/executeyearlydisrunbatchjob";
     public static final String EXECUTE_SUPP_DIS_RUN_BATCH_JOB = "/executesuppdisrunbatchjob";
     public static final String EXECUTE_YEARLY_NON_GRAD_DIS_RUN_BATCH_JOB = "/executenongraddisrunbatchjob";
+    public static final String EXECUTE_CERT_REGEN_BATCH_JOB = "/executecertregenbatchjob";
 
     // Special Run
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
@@ -232,6 +233,9 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-student-api.update-flag-ready-for-batch}")
     private String updateStudentFlagReadyForBatchByStudentIDs;
+
+    @Value("${endpoint.grad-graduation-api.student-certificate-regeneration.url}")
+    private String studentCertificateRegeneration;
 
     @Value("${endpoint.educ-school-api.school-by-min-code.url}")
     private String commonSchoolByMincode;

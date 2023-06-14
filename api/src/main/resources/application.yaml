@@ -179,6 +179,8 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictyearend
     school_district_month_report:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictmonth
+    student-certificate-regeneration:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/certificate/%s
     student-data-yearly:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/studentsforyearend
   grad-student-api:

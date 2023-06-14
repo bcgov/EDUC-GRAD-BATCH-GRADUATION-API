@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateProcessor;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
@@ -62,6 +63,8 @@ public class JobLauncherController {
     private static final String MANUAL = "MANUAL";
     private static final String TVRRUN = "TVRRUN";
     private static final String REGALG = "REGALG";
+    private static final String CERT_REGEN = "CERT_REGEN";
+
     private static final String RERUN_ALL = "RERUN_ALL";
     private static final String RERUN_FAILED = "RERUN_FAILED";
     private static final String DISTRUN = "DISTRUN";
@@ -80,12 +83,15 @@ public class JobLauncherController {
     private static final String SPECIAL_GRADUATION_BATCH_JOB = "SpecialGraduationBatchJob";
     private static final String SPECIAL_TVR_RUN_BATCH_JOB = "SpecialTvrRunBatchJob";
 
+    private static final String CERTIFICATE_REGENERATION_BATCH_JOB = "certRegenBatchJob";
+
     private final JobLauncher jobLauncher;
     private final JobLauncher asyncJobLauncher;
     private final JobRegistry jobRegistry;
     private final RestUtils restUtils;
     private final GradDashboardService gradDashboardService;
     private final GradBatchHistoryService gradBatchHistoryService;
+    private final DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor;
 
     @Autowired
     JsonTransformer jsonTransformer;
@@ -98,7 +104,8 @@ public class JobLauncherController {
             JobRegistry jobRegistry,
             RestUtils restUtils,
             GradDashboardService gradDashboardService,
-            GradBatchHistoryService gradBatchHistoryService) {
+            GradBatchHistoryService gradBatchHistoryService,
+            DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor) {
         this.jobLauncher = jobLauncher;
         this.asyncJobLauncher = asyncJobLauncher;
         this.jobRegistry = jobRegistry;
@@ -652,6 +659,35 @@ public class JobLauncherController {
         return null;
     }
 
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_CERT_REGEN_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Manual Cert Regen Job", description = "Run Manual Cert Regen Job", tags = { "Cert Regen" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<BatchJobResponse> launchCertRegenJob() {
+        logger.debug("launchCertRegenJob");
+        BatchJobResponse response = new BatchJobResponse();
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, CERT_REGEN);
+        response.setJobType(CERT_REGEN);
+        response.setTriggerBy(MANUAL);
+        response.setStartTime(new Date(System.currentTimeMillis()));
+        response.setStatus(BatchStatusEnum.STARTED.name());
+
+        try {
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(CERTIFICATE_REGENERATION_BATCH_JOB), builder.toJobParameters());
+            response.setBatchId(jobExecution.getId());
+            return ResponseEntity.ok(response);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                 | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
+            response.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+
+    }
+
     @PostMapping(EducGradBatchGraduationApiConstants.NOTIFY_DISTRIBUTION_JOB_IS_COMPLETED)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
@@ -665,83 +701,10 @@ public class JobLauncherController {
             restUtils.executePostDistribution(distributionResponse);
         }
 
-        BatchGradAlgorithmJobHistoryEntity jobHistory = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
-        if(jobHistory != null) {
-            String jobType = jobHistory.getJobType();
-
-            if (StringUtils.equalsIgnoreCase(status, "success")) {
-                List<StudentCredentialDistribution> cList = gradBatchHistoryService.getStudentCredentialDistributions(batchId);
-
-                // update graduation_student_record & student_certificate
-                Map<String, ServiceException> unprocessed = updateBackStudentRecords(cList, batchId, getActivitCode(jobType));
-                if (!unprocessed.isEmpty()) {
-                    jobHistory.setFailedStudentsProcessed(unprocessed.size());
-                    jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed() - unprocessed.size());
-                    status = BatchStatusEnum.FAILED.name();
-                    this.handleUnprocessedErrors(unprocessed);
-                } else {
-                    jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed());
-                    status = BatchStatusEnum.COMPLETED.name();
-                }
-            } else {
-                status = BatchStatusEnum.FAILED.name();
-            }
-
-            // update status for batch job history
-            Date endTime = new Date(System.currentTimeMillis());
-            jobHistory.setEndTime(endTime);
-            jobHistory.setStatus(status);
-            jobHistory.setJobParameters(populateJobParametersDTO(jobType, null));
-            gradBatchHistoryService.saveGradAlgorithmJobHistory(jobHistory);
-        }
+        logger.debug("notifyDistributionJobIsCompleted: batchId [{}], status = {}", batchId, status);
+        distributionRunStatusUpdateProcessor.process(batchId, status);
+        logger.debug("distributionRunStatusUpdateProcessor is invoked: batchId [{}], status = {}", batchId, status);
         return ResponseEntity.ok(null);
     }
 
-    private Map<String, ServiceException> updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId, String activityCode) {
-        Map<String, ServiceException> unprocessedStudents = new HashMap<>();
-        cList.forEach(scd-> {
-            try {
-                final String token = restUtils.getTokenResponseObject().getAccess_token();
-                logger.debug("{} Update student credentials record {} for student {}", activityCode, scd.getCredentialTypeCode(), scd.getStudentID());
-                restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,token);
-                logger.debug("{} Update student graduation record for student {}", activityCode, scd.getStudentID());
-                restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,token);
-            } catch (Exception e) {
-                unprocessedStudents.put(scd.getStudentID().toString(), (ServiceException) e);
-            }
-        });
-        return unprocessedStudents;
-    }
-
-    private String getActivitCode(String jobType) {
-        String activityCode = "MONTHLYDIST";
-        if(StringUtils.isNotBlank(jobType)) {
-            switch (jobType) {
-                case DISTRUN -> activityCode = "MONTHLYDIST";
-                case DISTRUN_YE -> activityCode = "YEARENDDIST";
-                case DISTRUN_SUPP -> activityCode = "SUPPDIST";
-                case NONGRADRUN -> activityCode = "NONGRADDIST";
-            }
-        }
-        return activityCode;
-    }
-
-    private void handleUnprocessedErrors(Map<String, ServiceException> unprocessed) {
-        unprocessed.forEach((k, v) -> logger.error("Student with id: {} did not have distribution date updated during monthly run due to: {}", k, v.getLocalizedMessage()));
-    }
-
-    private String populateJobParametersDTO(String jobType, String credentialType) {
-        JobParametersForDistribution jobParamsDto = new JobParametersForDistribution();
-        jobParamsDto.setJobName(jobType);
-        jobParamsDto.setCredentialType(credentialType);
-
-        String jobParamsDtoStr = null;
-        try {
-            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
-        } catch (Exception e) {
-            logger.error("Job Parameters DTO parse error for User Request Distribution - {}", e.getMessage());
-        }
-
-        return jobParamsDtoStr;
-    }
 }

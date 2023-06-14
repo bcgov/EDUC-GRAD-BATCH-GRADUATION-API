@@ -69,10 +69,10 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
     }
 
 	private void processGlobalList(Long batchId, Map<String,DistributionPrintRequest> mapDist,String activityCode,String accessToken) {
-    	List<StudentCredentialDistribution> cList = gradBatchHistoryService.getStudentCredentialDistributions(batchId);
+    	List<StudentCredentialDistribution> cList = distributionService.getStudentCredentialDistributions(batchId);
 		sortStudentCredentialDistributionByNames(cList);
 		LOGGER.info("list size =  {}", cList.size());
-		List<String> uniqueSchoolList = gradBatchHistoryService.getSchoolListForDistribution(batchId);
+		List<String> uniqueSchoolList = distributionService.getSchoolListForDistribution(batchId);
 		LOGGER.info("unique schools =  {}", uniqueSchoolList.size());
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED4") == 0).toList();

@@ -8,6 +8,7 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import io.github.resilience4j.retry.annotation.Retry;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -218,6 +220,16 @@ public class RestUtils {
         String accessToken = getTokenResponseObject().getAccess_token();
         List<StudentCredentialDistribution> result = graduationReportService.getStudentsForYearlyDistribution(accessToken);
         return result;
+    }
+
+
+    public Integer runRegenerateStudentCertificate(String pen, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        return this.webClient.get()
+                .uri(String.format(constants.getStudentCertificateRegeneration(), pen),
+                        uri -> uri.queryParam("isOverwrite", "Y").build())
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .retrieve().bodyToMono(Integer.class).block();
     }
 
     public List<UUID> getStudentsForAlgorithm(String accessToken) {
