@@ -8,7 +8,6 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import io.github.resilience4j.retry.annotation.Retry;
-import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -217,9 +215,7 @@ public class RestUtils {
     }
 
     public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearly() {
-        String accessToken = getTokenResponseObject().getAccess_token();
-        List<StudentCredentialDistribution> result = graduationReportService.getStudentsForYearlyDistribution(accessToken);
-        return result;
+        return graduationReportService.getStudentsForYearlyDistribution(getTokenResponseObject().getAccess_token());
     }
 
 
@@ -531,11 +527,6 @@ public class RestUtils {
 
     public Boolean executePostDistribution(DistributionResponse distributionResponse) {
         UUID correlationID = UUID.randomUUID();
-        Long batchId = distributionResponse.getBatchId();
-        String download = distributionResponse.getLocalDownload();
-        List<School> schools = distributionResponse.getSchools();
-        String activityCode = distributionResponse.getActivityCode();
-        int numberOfPdfs = distributionResponse.getNumberOfPdfs();
         return webClient.post()
                 .uri(constants.getPostingDistribution())
                 .headers(h -> { h.setBearerAuth(getAccessToken()); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
