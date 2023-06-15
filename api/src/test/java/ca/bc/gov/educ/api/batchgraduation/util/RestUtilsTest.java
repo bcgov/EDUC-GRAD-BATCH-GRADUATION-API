@@ -718,6 +718,47 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testProcessPsiDistribution_Exception() {
+        final UUID studentID = UUID.randomUUID();
+        final String pen = "1232131231";
+        final String pen2 = "12321312";
+        final Long batchId = 9879L;
+        List<PsiCredentialDistribution> globalList = new ArrayList<>();
+
+        PsiCredentialDistribution scd = new PsiCredentialDistribution();
+        scd.setPen(pen);
+        scd.setPsiYear("2021");
+        scd.setStudentID(studentID);
+        globalList.add(scd);
+
+        PsiDistributionSummaryDTO summary = new PsiDistributionSummaryDTO();
+        summary.setBatchId(batchId);
+        summary.setGlobalList(globalList);
+
+        PsiCredentialDistribution bcd = new PsiCredentialDistribution();
+        bcd.setPen(pen2);
+        bcd.setPsiCode("001");
+        bcd.setPsiYear("2021");
+        bcd.setStudentID(studentID);
+
+        final Student student = new Student();
+        student.setStudentID(studentID.toString());
+        student.setPen(pen2);
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getPenStudentApiByPenUrl(), "1234567"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
+        };
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(new ArrayList<>()));
+
+        PsiCredentialDistribution res = this.restUtils.processPsiDistribution(bcd,summary);
+        assertNotNull(res);
+        assertThat(summary.getErrors()).isNotEmpty();
+    }
+
+    @Test
     public void testCreateBlankCredentialsAndUpload() {
         final Long batchId = 9879L;
 
@@ -757,8 +798,6 @@ public class RestUtilsTest {
         this.restUtils.createBlankCredentialsAndUpload(batchId,"abc",distributionRequest,"N");
         assertNotNull(res);
     }
-
-
 
     @Test
     public void testcreateAndStoreSchoolReports_null() {
@@ -1419,7 +1458,8 @@ public class RestUtilsTest {
     @Test
     public void testFetchAccessToken() {
         mockTokenResponseObject();
-        this.restUtils.fetchAccessToken();
+        String result = this.restUtils.fetchAccessToken();
+        assertThat(result).isNotNull();
     }
 
     private String mockTokenResponseObject() {
