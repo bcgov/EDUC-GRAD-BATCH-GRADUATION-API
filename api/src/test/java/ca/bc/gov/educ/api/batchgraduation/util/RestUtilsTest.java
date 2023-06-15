@@ -1,13 +1,12 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
 
-import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import lombok.val;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,17 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 import reactor.util.retry.RetryBackoffSpec;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -34,7 +30,8 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -42,6 +39,10 @@ import static org.mockito.MockitoAnnotations.openMocks;
 @SpringBootTest
 @ActiveProfiles("test")
 public class RestUtilsTest {
+
+    @Autowired
+    GraduationReportService graduationReportService;
+
     @Autowired
     RestUtils restUtils;
 
@@ -1364,6 +1365,55 @@ public class RestUtilsTest {
 
         val result = this.restUtils.runRegenerateStudentCertificate(pen, "abc");
         assertThat(result).isEqualTo(1);
+    }
+
+    @Test
+    public void testFetchDistributionRequiredDataStudentsNonGradYearly() {
+        ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+
+        mockTokenResponseObject();
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentDataNonGradEarly()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){})).thenReturn(Mono.just(List.of(reportGradStudentData)));
+
+        val result = this.restUtils.fetchDistributionRequiredDataStudentsNonGradYearly();
+        assertThat(result).isNotEmpty();
+    }
+
+    @Test
+    public void testFetchDistributionRequiredDataStudentsNonGradYearlyByMincode() {
+        String mincode = "1234567";
+        ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+
+        mockTokenResponseObject();
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentDataNonGradEarlyByMincode(), mincode))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){})).thenReturn(Mono.just(List.of(reportGradStudentData)));
+
+        val result = this.restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
+        assertThat(result).isNotEmpty();
+    }
+
+    @Test
+    public void testFetchDistributionRequiredDataStudentsYearly() {
+        ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+
+        mockTokenResponseObject();
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentReportDataEarly()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){})).thenReturn(Mono.just(List.of(reportGradStudentData)));
+
+        val result = this.restUtils.fetchDistributionRequiredDataStudentsYearly();
+        assertThat(result).isNotEmpty();
     }
 
     private String mockTokenResponseObject() {
