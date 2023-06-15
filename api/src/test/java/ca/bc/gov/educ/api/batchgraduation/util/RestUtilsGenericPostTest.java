@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.core.AutoConfigureCache;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -70,9 +69,12 @@ public class RestUtilsGenericPostTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException());
+        when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException(getErrorMessage(any(String.class), "5xx error.")));
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(TEST_BYTES));
         this.restUtils.post("https://fake.url.com", testBody, byte[].class, "1234");
     }
 
+    private String getErrorMessage(String url, String errorMessage) {
+        return "Service failed to process at url: " + url + " due to: " + errorMessage;
+    }
 }
