@@ -553,8 +553,11 @@ public class RestUtils {
     }
 
     public void updateStudentGradRecord(UUID studentID, Long batchId,String activityCode, String accessToken) {
-        String url = String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode);
-        this.post(url, "{}", GraduationStudentRecord.class, accessToken);
+        //Skipping to update the student record if student id is null - hotfix - mchintha
+        if(studentID != null) {
+            String url = String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode);
+            this.post(url, "{}", GraduationStudentRecord.class, accessToken);
+        }
     }
 
     public List<GraduationStudentRecord> updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {
