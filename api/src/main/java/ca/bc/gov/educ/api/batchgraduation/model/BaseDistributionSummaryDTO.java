@@ -2,10 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 public abstract class BaseDistributionSummaryDTO extends BaseSummaryDTO {
@@ -15,7 +12,7 @@ public abstract class BaseDistributionSummaryDTO extends BaseSummaryDTO {
     // stats
     protected Map<String, Long> credentialCountMap = new HashMap<>();
 
-    private Map<String, DistributionPrintRequest> mapDist = new HashMap<>();
+    private Map<String, DistributionPrintRequest> mapDist = new TreeMap<>();
 
     public abstract void initializeCredentialCountMap();
 
