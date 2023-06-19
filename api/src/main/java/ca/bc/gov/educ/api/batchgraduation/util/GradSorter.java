@@ -14,4 +14,22 @@ public class GradSorter {
                 .thenComparing(StudentCredentialDistribution::getLegalMiddleNames, Comparator.nullsLast(Comparator.naturalOrder())));
     }
 
+    public static synchronized void sortStudentCredentialDistributionBySchool(List<StudentCredentialDistribution> students) {
+        students.sort(Comparator
+                .comparing(StudentCredentialDistribution::getSchoolOfRecord, Comparator.nullsLast(Comparator.naturalOrder())));
+    }
+
+    public static synchronized void sortStudentCredentialDistributionBySchoolAndNames(List<StudentCredentialDistribution> students) {
+        students.sort(Comparator
+                .comparing(StudentCredentialDistribution::getSchoolOfRecord, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(StudentCredentialDistribution::getLegalFirstName, Comparator.nullsLast(Comparator.naturalOrder()))
+                .thenComparing(StudentCredentialDistribution::getLegalMiddleNames, Comparator.nullsLast(Comparator.naturalOrder())));
+    }
+
+    public static synchronized void sortSchoolBySchoolOfRecord(List<String> schools) {
+        schools.sort(Comparator.nullsLast(Comparator.naturalOrder()));
+
+    }
+
 }

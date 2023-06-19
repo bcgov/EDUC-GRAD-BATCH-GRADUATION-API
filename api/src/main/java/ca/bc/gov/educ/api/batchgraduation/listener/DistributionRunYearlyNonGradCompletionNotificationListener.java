@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
+import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
+
 @Component
 public class DistributionRunYearlyNonGradCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
@@ -71,9 +74,10 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
     	Long batchId = summaryDTO.getBatchId();
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
 		filterStudentCredentialDistribution(cList, searchRequest);
-		sortStudentCredentialDistributionByNames(cList);
+		sortStudentCredentialDistributionBySchoolAndNames(cList);
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
+		sortSchoolBySchoolOfRecord(uniqueSchoolList);
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
 			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());

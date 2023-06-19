@@ -157,7 +157,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         return request;
     }
 
-    void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
+    void sortStudentCredentialDistribution(List<StudentCredentialDistribution> students) {
         GradSorter.sortStudentCredentialDistributionByNames(students);
     }
 

@@ -17,6 +17,9 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
+import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
+
 @Component
 public class UserReqDistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
@@ -89,9 +92,10 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 
 	private void processGlobalList(DistributionSummaryDTO summaryDTO, Long batchId, String credentialType, String accessToken,String localDownload,String properName) {
 		List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
-		sortStudentCredentialDistributionByNames(cList);
+		sortStudentCredentialDistributionBySchoolAndNames(cList);
 		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
     	List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
+		sortSchoolBySchoolOfRecord(uniqueSchoolList);
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = new ArrayList<>();
 			List<StudentCredentialDistribution> yed2List = new ArrayList<>();
@@ -134,7 +138,6 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			}
 		}
 		if(disres != null) {
-			ResponseObj obj = restUtils.getTokenResponseObject();
 			updateBackStudentRecords(cList,batchId,activityCode);
 		}
 	}
