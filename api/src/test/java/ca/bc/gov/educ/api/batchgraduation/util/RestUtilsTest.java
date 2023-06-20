@@ -1243,6 +1243,21 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testDeleteSchoolReportRecord() {
+        final String mincode = "123213123";
+        String reportTypeCode = "E";
+
+        when(this.webClient.delete()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getUpdateSchoolReport(),mincode,reportTypeCode))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(boolean.class)).thenReturn(Mono.just(true));
+
+        this.restUtils.deleteSchoolReportRecord(mincode,reportTypeCode,null);
+        assertThat(reportTypeCode).isEqualTo("E");
+    }
+
+    @Test
     public void testGetStudentByPenFromStudentAPI() {
         final UUID studentID = UUID.randomUUID();
 
