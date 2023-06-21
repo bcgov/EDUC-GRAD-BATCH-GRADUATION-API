@@ -42,6 +42,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 				case "DISTRUN_YE" -> activityCode = "YEARENDDIST";
 				case "DISTRUN_SUPP" -> activityCode = "SUPPDIST";
 				case "NONGRADRUN" -> activityCode = "NONGRADDIST";
+				case "PSIRUN" -> activityCode = "PSIDIST";
 			}
 		}
 
