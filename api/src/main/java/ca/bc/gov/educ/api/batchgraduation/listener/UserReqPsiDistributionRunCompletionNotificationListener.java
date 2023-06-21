@@ -37,15 +37,16 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
     public void afterJob(JobExecution jobExecution) {
 		long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 		LOGGER.info(LOG_SEPARATION);
-		LOGGER.info("PSI Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 		JobParameters jobParameters = jobExecution.getJobParameters();
 		ExecutionContext jobContext = jobExecution.getExecutionContext();
 		Long jobExecutionId = jobExecution.getId();
+		String jobType = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TYPE);
+		LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
+
 		String status = jobExecution.getStatus().toString();
 		Date startTime = jobExecution.getStartTime();
 		Date endTime = jobExecution.getEndTime();
 		String jobTrigger = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TRIGGER);
-		String jobType = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TYPE);
 		String transmissionType = jobParameters.getString(EducGradBatchGraduationApiConstants.TRANSMISSION_TYPE);
 		String studentSearchRequest = jobParameters.getString(EducGradBatchGraduationApiConstants.SEARCH_REQUEST);
 

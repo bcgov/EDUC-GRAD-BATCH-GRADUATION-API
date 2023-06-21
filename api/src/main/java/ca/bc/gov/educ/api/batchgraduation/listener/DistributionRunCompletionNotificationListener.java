@@ -30,11 +30,12 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
     public void afterJob(JobExecution jobExecution) {
 		long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 		LOGGER.info("=======================================================================================");
-		LOGGER.info("Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 		JobParameters jobParameters = jobExecution.getJobParameters();
 		ExecutionContext jobContext = jobExecution.getExecutionContext();
 		Long jobExecutionId = jobExecution.getId();
 		String jobType = jobParameters.getString("jobType");
+		LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
+
 		String activityCode = "MONTHLYDIST";
 		if(StringUtils.isNotBlank(jobType)) {
 			switch (jobType) {

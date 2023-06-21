@@ -34,15 +34,16 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info("=======================================================================================");
-	    	LOGGER.info("Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 			JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
+			String jobType = jobParameters.getString("jobType");
+			LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
+
 			String status = jobExecution.getStatus().toString();
 			Date startTime = jobExecution.getStartTime();
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
-			String jobType = jobParameters.getString("jobType");
 			String searchRequest = jobParameters.getString("searchRequest");
 
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
