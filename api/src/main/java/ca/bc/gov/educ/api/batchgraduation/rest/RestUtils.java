@@ -563,9 +563,13 @@ public class RestUtils {
 
     public void updateStudentGradRecord(UUID studentID, Long batchId,String activityCode, String accessToken) {
         //Grad2-1931 not updating the school record if student id does not exist.
-        if(studentID != null) {
-            String url = String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode);
-            this.post(url, "{}", GraduationStudentRecord.class, accessToken);
+        try {
+            if (studentID != null) {
+                String url = String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode);
+                this.post(url, "{}", GraduationStudentRecord.class, accessToken);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Unable to update student record {}", studentID);
         }
     }
 

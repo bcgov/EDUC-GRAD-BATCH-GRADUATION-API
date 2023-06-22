@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 
 @Component
 public class UserReqPsiDistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
@@ -94,11 +94,15 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		});
 		String localDownload =  StringUtils.equalsIgnoreCase(transmissionType, "FTP")?"Y":"N";
 		//Grad2-1931 added transmissionType
-		DistributionResponse disres = restUtils.mergePsiAndUpload(batchId, accessToken, mapDist,localDownload,transmissionType);
-		if(disres != null) {
-			String activityCode = StringUtils.equalsIgnoreCase(transmissionType, "PAPER")?"USERDISTPSIP":"USERDISTPISF";
-			ResponseObj obj = restUtils.getTokenResponseObject();
-			updateBackStudentRecords(cList,batchId,activityCode,obj.getAccess_token());
+		if(!mapDist.isEmpty()) {
+			DistributionResponse disres = restUtils.mergePsiAndUpload(batchId, accessToken, mapDist, localDownload, transmissionType);
+			if (disres != null) {
+				String activityCode = StringUtils.equalsIgnoreCase(transmissionType, "PAPER") ? "USERDISTPSIP" : "USERDISTPSIF";
+				ResponseObj obj = restUtils.getTokenResponseObject();
+				updateBackStudentRecords(cList, batchId, activityCode, obj.getAccess_token());
+			}
+		} else {
+			LOGGER.warn("No records found to process PSI batch {}", batchId);
 		}
 	}
 
