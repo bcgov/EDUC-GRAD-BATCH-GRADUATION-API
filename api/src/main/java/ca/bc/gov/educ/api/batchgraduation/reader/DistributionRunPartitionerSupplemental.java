@@ -13,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DistributionRunPartitionerSupplemental extends BasePartitioner {
 
@@ -35,6 +38,11 @@ public class DistributionRunPartitionerSupplemental extends BasePartitioner {
         if (res != null) {
             accessToken = res.getAccess_token();
         }
+
+        // Clean up existing reports before running new one
+        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
+        restUtils.deleteSchoolReportRecord("", "DISTREP_SC", restUtils.getAccessToken());
+
         Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredDataYearly(accessToken);
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
