@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -139,11 +138,6 @@ public class RestUtils {
                 .body(BodyInserters.fromFormData(map))
                 .retrieve()
                 .bodyToMono(ResponseObj.class).block();
-    }
-
-    public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
-        LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
-        return null;
     }
 
     @Retry(name = "rt-getStudent")
@@ -380,25 +374,18 @@ public class RestUtils {
     public PsiCredentialDistribution processPsiDistribution(PsiCredentialDistribution item, PsiDistributionSummaryDTO summary) {
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         String accessToken = summary.getAccessToken();
-        PsiCredentialDistribution pObj = summary.getGlobalList().stream().filter(pr -> pr.getPen().compareTo(item.getPen()) == 0)
-                .findAny()
-                .orElse(null);
-        if(pObj != null) {
-            item.setStudentID(pObj.getStudentID());
-        }else {
-            List<Student> stuDataList;
-            try {
-                stuDataList = this.getStudentsByPen(item.getPen(), accessToken);
-                if(!stuDataList.isEmpty()) {
-                    item.setStudentID(UUID.fromString(stuDataList.get(0).getStudentID()));
-                }
-                summary.getGlobalList().add(item);
-            } catch (Exception e) {
-                LOGGER.error("Error processing student with id {} due to {}", item.getStudentID(), e.getLocalizedMessage());
-                summary.getErrors().add(
-                        new ProcessError(item.getStudentID().toString(), e.getLocalizedMessage(), e.getMessage())
-                );
+        List<Student> stuDataList;
+        try {
+            stuDataList = this.getStudentsByPen(item.getPen(), accessToken);
+            if(!stuDataList.isEmpty()) {
+                item.setStudentID(UUID.fromString(stuDataList.get(0).getStudentID()));
             }
+            summary.getGlobalList().add(item);
+        } catch (Exception e) {
+            LOGGER.error("Error processing student with id {} due to {}", item.getStudentID(), e.getLocalizedMessage());
+            summary.getErrors().add(
+                    new ProcessError(item.getStudentID().toString(), e.getLocalizedMessage(), e.getMessage())
+            );
         }
         return item;
     }
