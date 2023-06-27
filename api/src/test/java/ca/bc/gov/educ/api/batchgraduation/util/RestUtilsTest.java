@@ -1,13 +1,11 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
 
-import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import lombok.val;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,17 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 import reactor.util.retry.RetryBackoffSpec;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -34,7 +29,8 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -114,12 +110,6 @@ public class RestUtilsTest {
 
     public void testGetTokenResponseObject_givenExpiredToken_shouldReturnNewToken() {
 
-    }
-
-    @Test
-    public void testFallBackMethod_givenExcpetion_shouldReturnNull(){
-        val result = this.restUtils.rtGetTokenFallBack(new HttpServerErrorException(HttpStatus.I_AM_A_TEAPOT));
-        assertThat(result).isNull();
     }
 
     @Test
@@ -632,16 +622,14 @@ public class RestUtilsTest {
 
     @Test
     public void testProcessPsiDistribution() {
-        final UUID studentID = UUID.randomUUID();
-        final String pen = "1232131231";
         final Long batchId = 9879L;
         List<PsiCredentialDistribution> globalList = new ArrayList<>();
 
         PsiCredentialDistribution scd = new PsiCredentialDistribution();
-        scd.setPen(pen);
+        scd.setPen("1234567");
         scd.setPsiYear("2021");
         scd.setPsiCode("001");
-        scd.setStudentID(studentID);
+        scd.setStudentID(UUID.randomUUID());
         globalList.add(scd);
 
         PsiDistributionSummaryDTO summary = new PsiDistributionSummaryDTO();
@@ -649,9 +637,10 @@ public class RestUtilsTest {
         summary.setGlobalList(globalList);
 
         PsiCredentialDistribution bcd = new PsiCredentialDistribution();
-        bcd.setPen(pen);
+        bcd.setPen("2345678");
         bcd.setPsiCode("002");
         bcd.setPsiYear("2021");
+        bcd.setStudentID(UUID.randomUUID());
 
         PsiCredentialDistribution res = this.restUtils.processPsiDistribution(bcd,summary);
         assertNotNull(res);

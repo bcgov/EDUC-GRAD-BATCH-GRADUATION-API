@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -139,11 +138,6 @@ public class RestUtils {
                 .body(BodyInserters.fromFormData(map))
                 .retrieve()
                 .bodyToMono(ResponseObj.class).block();
-    }
-
-    public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
-        LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
-        return null;
     }
 
     @Retry(name = "rt-getStudent")
