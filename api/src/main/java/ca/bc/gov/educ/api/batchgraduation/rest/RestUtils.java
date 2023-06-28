@@ -502,9 +502,10 @@ public class RestUtils {
         return  new DistributionResponse();
     }
 
-    public DistributionResponse mergeAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest, String activityCode, String localDownload) {
+    public DistributionResponse mergeAndUpload(Long batchId, DistributionRequest distributionRequest, String activityCode, String localDownload) {
         String distributionUrl;
         distributionRequest.setActivityCode(activityCode);
+        String accessToken = getAccessToken();
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
         } else if(NONGRADDIST.equalsIgnoreCase(activityCode)) {
@@ -515,8 +516,10 @@ public class RestUtils {
             distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
         LOGGER.debug("****** Call distribution API to process the merge request for {} *******", batchId);
+        /*
         LOGGER.debug(jsonTransformer.marshall(distributionRequest));
         LOGGER.debug("************************************************************************");
+        */
         return this.post(distributionUrl, distributionRequest, DistributionResponse.class, accessToken);
     }
 

@@ -135,7 +135,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			if (credentialType.equalsIgnoreCase("RC")) {
 				disres = restUtils.createReprintAndUpload(batchId, accessToken, distributionRequest, activityCode,localDownload);
 			} else {
-				disres = restUtils.mergeAndUpload(batchId, accessToken, distributionRequest, activityCode,localDownload);
+				disres = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode,localDownload);
 			}
 		}
 		if(disres != null) {

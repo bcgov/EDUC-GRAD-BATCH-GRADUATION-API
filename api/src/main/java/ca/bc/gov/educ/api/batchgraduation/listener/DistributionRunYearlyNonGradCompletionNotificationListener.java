@@ -90,9 +90,8 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 		distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
 		distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
 		distributionRequest.setSchools(summaryDTO.getSchools());
-		String accessToken = restUtils.getAccessToken();
 		if (!cList.isEmpty()) {
-			restUtils.mergeAndUpload(batchId, accessToken, distributionRequest, activityCode, "N");
+			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
 		}
 	}
 

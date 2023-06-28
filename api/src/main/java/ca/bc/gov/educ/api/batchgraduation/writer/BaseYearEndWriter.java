@@ -58,7 +58,7 @@ public abstract class BaseYearEndWriter {
         distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
         distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
         distributionRequest.setSchools(summaryDTO.getSchools());
-        restUtils.mergeAndUpload(batchId,accessToken,distributionRequest,activityCode,"N");
+        restUtils.mergeAndUpload(batchId, distributionRequest,activityCode,"N");
     }
 
     protected void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {

@@ -77,7 +77,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 		filterStudentCredentialDistribution(cList, searchRequest);
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
-		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().toList();
+		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		sortSchoolBySchoolOfRecord(uniqueSchoolList);
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
@@ -85,13 +85,13 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
-		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
-		distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
-		distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
-		distributionRequest.setSchools(summaryDTO.getSchools());
-		String accessToken = restUtils.getAccessToken();
 		if (!cList.isEmpty()) {
-			restUtils.mergeAndUpload(batchId, accessToken, distributionRequest, activityCode, "N");
+			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
+			distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
+			distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
+			distributionRequest.setSchools(summaryDTO.getSchools());
+			String accessToken = restUtils.getAccessToken();
+			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
 		}
 	}
 

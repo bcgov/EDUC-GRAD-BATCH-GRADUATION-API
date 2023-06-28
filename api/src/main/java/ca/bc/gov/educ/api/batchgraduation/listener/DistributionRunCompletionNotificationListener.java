@@ -97,7 +97,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			distributionRequest.setTotalCyclesCount(1);
 			distributionRequest.setProcessedCyclesCount(1);
 			distributionRequest.setSchools(new ArrayList<>());
-			restUtils.mergeAndUpload(batchId, accessToken, distributionRequest, activityCode, null);
+			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, null);
 		}
 	}
 

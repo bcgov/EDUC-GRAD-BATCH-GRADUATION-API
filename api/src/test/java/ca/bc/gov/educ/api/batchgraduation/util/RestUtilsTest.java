@@ -1142,7 +1142,7 @@ public class RestUtilsTest {
         mockTokenResponseObject();
 
         DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).activityCode(activityCode).build();
-        val result = this.restUtils.mergeAndUpload(batchId,null,distributionRequest,activityCode,"Y");
+        val result = this.restUtils.mergeAndUpload(batchId, distributionRequest,activityCode,"Y");
         assertThat(result).isNotNull();
     }
 
@@ -1169,7 +1169,7 @@ public class RestUtilsTest {
         mockTokenResponseObject();
 
         DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).activityCode(activityCode).build();
-        val result = this.restUtils.mergeAndUpload(batchId,null,distributionRequest,activityCode,"Y");
+        val result = this.restUtils.mergeAndUpload(batchId, distributionRequest,activityCode,"Y");
         assertThat(result).isNull();
     }
 
