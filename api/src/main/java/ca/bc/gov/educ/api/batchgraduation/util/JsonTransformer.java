@@ -90,28 +90,27 @@ public class JsonTransformer implements Transformer {
     }
 
     @Override
-    public Object unmarshall(InputStream input, Class<?> clazz) throws TransformerException {
+    public Object unmarshall(InputStream input, Class<?> clazz) {
         Object result = null;
         long start = System.currentTimeMillis();
         try {
             result = OBJECT_MAPPER.readValue(input, clazz);
         } catch (IOException e) {
-            throw new TransformerException(e);
+            log.error("Unable to unmarshall object {}", clazz.getSimpleName());
         }
         log.debug("Time taken for unmarshalling response from stream to {} is {} ms", clazz.getName(), (System.currentTimeMillis() - start));
         return result;
     }
 
     @Override
-    public String marshall(Object input) throws TransformerException {
+    public String marshall(Object input) {
         ObjectWriter prettyPrinter = OBJECT_MAPPER.writerWithDefaultPrettyPrinter();
         String result = null;
         try {
             result = prettyPrinter.writeValueAsString(input);
         } catch (IOException e) {
-            throw new TransformerException(e);
+            log.error("Unable to marshall object {}", input.toString());
         }
-
         return result;
     }
 

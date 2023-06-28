@@ -9,9 +9,9 @@ public interface Transformer {
 
     public Object unmarshall(String input, Class<?> clazz) throws TransformerException;
 
-    public Object unmarshall(InputStream input, Class<?> clazz) throws TransformerException;
+    public Object unmarshall(InputStream input, Class<?> clazz);
 
-    public String marshall(Object input) throws TransformerException;
+    public String marshall(Object input);
 
     public String getAccept();
 

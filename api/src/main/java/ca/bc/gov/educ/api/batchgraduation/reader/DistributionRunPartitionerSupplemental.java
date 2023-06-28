@@ -51,6 +51,7 @@ public class DistributionRunPartitionerSupplemental extends BasePartitioner {
             credentialList.addAll(parallelDTO.certificateList());
         }
         if(!credentialList.isEmpty()) {
+            updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
             return getStringExecutionContextMap(gridSize, credentialList, null, LOGGER);
         }
         LOGGER.info("No Credentials Found for Processing");
