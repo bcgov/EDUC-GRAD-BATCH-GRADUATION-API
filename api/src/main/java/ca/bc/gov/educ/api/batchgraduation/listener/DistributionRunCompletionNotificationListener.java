@@ -94,8 +94,6 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		});
 		if (!cList.isEmpty()) {
 			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
-			distributionRequest.setTotalCyclesCount(1);
-			distributionRequest.setProcessedCyclesCount(1);
 			distributionRequest.setSchools(new ArrayList<>());
 			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, null);
 		}

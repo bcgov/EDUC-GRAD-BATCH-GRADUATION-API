@@ -33,7 +33,6 @@ public class DistributionRunYearlyNonGradProcessor implements ItemProcessor<Stri
 		summaryDTO.setBatchId(batchId);
 		if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty() && searchRequest.getDistricts().contains(mincode)) {
 			LOGGER.debug("Processing partitionData for district {} ", mincode);
-			summaryDTO.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount() + 1);
 			summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
 			List<StudentCredentialDistribution> studentCredentials = restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
 			LOGGER.debug("Completed partitionData for district {} with {} students", mincode, studentCredentials.size());

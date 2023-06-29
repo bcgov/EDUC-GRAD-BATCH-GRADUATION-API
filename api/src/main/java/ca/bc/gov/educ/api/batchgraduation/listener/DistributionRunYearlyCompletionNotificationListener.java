@@ -87,10 +87,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 		});
 		if (!cList.isEmpty()) {
 			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
-			distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
-			distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
 			distributionRequest.setSchools(summaryDTO.getSchools());
-			String accessToken = restUtils.getAccessToken();
 			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
 		}
 	}

@@ -42,6 +42,7 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
 
         List<StudentCredentialDistribution> credentialList = parallelDataFetch.fetchStudentCredentialsDistributionDataYearly();
         if(!credentialList.isEmpty()) {
+            updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
             return getStringExecutionContextMap(gridSize, credentialList, null, LOGGER);
         }
         LOGGER.info("No Credentials Found for Processing");

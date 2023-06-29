@@ -38,6 +38,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
         List<String> schoolsList = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
         if(!schoolsList.isEmpty()) {
+            updateBatchJobHistory(createBatchJobHistory(), (long) schoolsList.size());
             StudentSearchRequest searchRequest = getStudentSearchRequest();
             int partitionSize = schoolsList.size()/gridSize + 1;
             List<List<String>> partitions = new LinkedList<>();
@@ -49,7 +50,6 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
                 ExecutionContext executionContext = new ExecutionContext();
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
                 summaryDTO.initializeCredentialCountMap();
-                summaryDTO.setTotalCyclesCount(schoolsList.size());
                 summaryDTO.setCredentialType("NONGRADDIST");
                 List<String> data = partitions.get(i);
                 executionContext.put("data", data);

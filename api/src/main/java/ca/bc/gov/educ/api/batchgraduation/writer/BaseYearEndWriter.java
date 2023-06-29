@@ -55,8 +55,6 @@ public abstract class BaseYearEndWriter {
             schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
         });
         DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
-        distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
-        distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
         distributionRequest.setSchools(summaryDTO.getSchools());
         restUtils.mergeAndUpload(batchId, distributionRequest,activityCode,"N");
     }

@@ -12,13 +12,15 @@ public class DistributionRunYearlyWriter extends BaseYearEndWriter implements It
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyWriter.class);
 
     @Override
-    public void write(List<? extends List<StudentCredentialDistribution>> list) throws Exception {
+    public void write(List<? extends List<StudentCredentialDistribution>> list) {
         if (!list.isEmpty()) {
             summaryDTO.increment("YED4");
             LOGGER.debug("Left:{}\n", summaryDTO.getReadCount() - summaryDTO.getProcessedCount());
-//            LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-//            processGlobalList(summaryDTO.getGlobalList(), jobExecutionId, summaryDTO.getMapDist(), "YEARENDDIST", restUtils.fetchAccessToken());
-//            LOGGER.info("=======================================================================================");
+            /*
+            LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
+            processGlobalList(summaryDTO.getGlobalList(), jobExecutionId, summaryDTO.getMapDist(), "YEARENDDIST", restUtils.fetchAccessToken());
+            LOGGER.info("=======================================================================================");
+            */
         }
     }
 }

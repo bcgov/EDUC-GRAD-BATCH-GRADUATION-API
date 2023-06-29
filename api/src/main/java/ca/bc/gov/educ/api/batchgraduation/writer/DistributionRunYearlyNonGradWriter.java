@@ -12,7 +12,7 @@ public class DistributionRunYearlyNonGradWriter extends BaseYearEndWriter implem
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradWriter.class);
 
     @Override
-    public void write(List<? extends List<StudentCredentialDistribution>> list) throws Exception {
+    public void write(List<? extends List<StudentCredentialDistribution>> list) {
         if (!list.isEmpty()) {
             summaryDTO.increment("YED4", list.size());
             LOGGER.debug("Left:{}\n", summaryDTO.getReadCount() - summaryDTO.getProcessedCount());

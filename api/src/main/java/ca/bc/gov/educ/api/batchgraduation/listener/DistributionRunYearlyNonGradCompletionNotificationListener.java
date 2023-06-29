@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.STARTED;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
 
@@ -53,6 +54,9 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 				summaryDTO.initializeCredentialCountMap();
 			}
 
+			summaryDTO.setReadCount(summaryDTO.getGlobalList().size());
+			summaryDTO.setProcessedCount(0);
+
 			processGlobalList(summaryDTO, searchRequest, "NONGRADDIST");
 
 			String studentSearchRequest = jobParameters.getString("searchRequest");
@@ -64,7 +68,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
 			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
+			processBatchJobHistory(summaryDTO, jobExecutionId, STARTED.name(), jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
@@ -87,8 +91,6 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
-		distributionRequest.setTotalCyclesCount(summaryDTO.getTotalCyclesCount());
-		distributionRequest.setProcessedCyclesCount(summaryDTO.getProcessedCyclesCount());
 		distributionRequest.setSchools(summaryDTO.getSchools());
 		if (!cList.isEmpty()) {
 			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");

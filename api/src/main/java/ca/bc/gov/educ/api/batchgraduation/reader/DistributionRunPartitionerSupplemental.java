@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
@@ -33,15 +32,11 @@ public class DistributionRunPartitionerSupplemental extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        ResponseObj res = restUtils.getTokenResponseObject();
-        String accessToken = null;
-        if (res != null) {
-            accessToken = res.getAccess_token();
-        }
 
+        String accessToken = restUtils.getAccessToken();
         // Clean up existing reports before running new one
-        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
-        restUtils.deleteSchoolReportRecord("", "DISTREP_SC", restUtils.getAccessToken());
+        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", accessToken);
+        restUtils.deleteSchoolReportRecord("", "DISTREP_SC", accessToken);
 
         Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredDataYearly(accessToken);
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
