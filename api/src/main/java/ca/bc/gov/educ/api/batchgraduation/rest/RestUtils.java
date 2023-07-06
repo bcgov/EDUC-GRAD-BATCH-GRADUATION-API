@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -139,11 +138,6 @@ public class RestUtils {
                 .body(BodyInserters.fromFormData(map))
                 .retrieve()
                 .bodyToMono(ResponseObj.class).block();
-    }
-
-    public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
-        LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
-        return null;
     }
 
     @Retry(name = "rt-getStudent")
@@ -380,25 +374,18 @@ public class RestUtils {
     public PsiCredentialDistribution processPsiDistribution(PsiCredentialDistribution item, PsiDistributionSummaryDTO summary) {
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         String accessToken = summary.getAccessToken();
-        PsiCredentialDistribution pObj = summary.getGlobalList().stream().filter(pr -> pr.getPen().compareTo(item.getPen()) == 0)
-                .findAny()
-                .orElse(null);
-        if(pObj != null) {
-            item.setStudentID(pObj.getStudentID());
-        }else {
-            List<Student> stuDataList;
-            try {
-                stuDataList = this.getStudentsByPen(item.getPen(), accessToken);
-                if(!stuDataList.isEmpty()) {
-                    item.setStudentID(UUID.fromString(stuDataList.get(0).getStudentID()));
-                }
-                summary.getGlobalList().add(item);
-            } catch (Exception e) {
-                LOGGER.error("Error processing student with id {} due to {}", item.getStudentID(), e.getLocalizedMessage());
-                summary.getErrors().add(
-                        new ProcessError(item.getStudentID().toString(), e.getLocalizedMessage(), e.getMessage())
-                );
+        List<Student> stuDataList;
+        try {
+            stuDataList = this.getStudentsByPen(item.getPen(), accessToken);
+            if(!stuDataList.isEmpty()) {
+                item.setStudentID(UUID.fromString(stuDataList.get(0).getStudentID()));
             }
+            summary.getGlobalList().add(item);
+        } catch (Exception e) {
+            LOGGER.error("Error processing student with id {} due to {}", item.getStudentID(), e.getLocalizedMessage());
+            summary.getErrors().add(
+                    new ProcessError(item.getStudentID().toString(), e.getLocalizedMessage(), e.getMessage())
+            );
         }
         return item;
     }
@@ -478,7 +465,7 @@ public class RestUtils {
             LOGGER.info("Create and Store School Report Success {}",result);
     }
 
-    //Grad2-1931 sending transmissionType with the webclient.
+    //Grad2-1931 sending transmissionType with the webclient. - mchintha
     public DistributionResponse mergePsiAndUpload(Long batchId, String accessToken, Map<String, DistributionPrintRequest> mapDist,String localDownload, String transmissionType) {
         UUID correlationID = UUID.randomUUID();
         DistributionResponse result = webClient.post()
@@ -562,8 +549,15 @@ public class RestUtils {
     }
 
     public void updateStudentGradRecord(UUID studentID, Long batchId,String activityCode, String accessToken) {
-        String url = String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode);
-        this.post(url, "{}", GraduationStudentRecord.class, accessToken);
+        //Grad2-1931 not updating the school record if student id does not exist.
+        try {
+            if (studentID != null) {
+                String url = String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode);
+                this.post(url, "{}", GraduationStudentRecord.class, accessToken);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Unable to update student record {}", studentID);
+        }
     }
 
     public List<GraduationStudentRecord> updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {
@@ -585,6 +579,14 @@ public class RestUtils {
                         uri -> uri.queryParam("studentID", studentID).build())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
                 .retrieve().bodyToMono(Boolean.class).block();
+    }
+    //Grad2-1931
+    public void deleteSchoolReportRecord(String schoolOfRecord, String reportTypeCode, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        webClient.delete().uri(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode))
+                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                 .retrieve().bodyToMono(boolean.class).block();
+
     }
 
 }
