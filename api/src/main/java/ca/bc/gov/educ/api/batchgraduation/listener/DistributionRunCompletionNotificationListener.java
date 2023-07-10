@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
@@ -66,36 +67,42 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
 		try {
 			// GRAD2-2017: fire and forget to distribution api and finish.
-			processGlobalList(jobExecutionId,summaryDTO.getMapDist(),activityCode,tokenResponse.getAccess_token());
+			processGlobalList(summaryDTO,activityCode);
 		} catch (Exception e) {
 			LOGGER.error("Distribution Failed for Batch JOB: {} due to: {}", jobExecutionId, e.getLocalizedMessage());
 		}
 		LOGGER.info("=======================================================================================");
     }
 
-	private void processGlobalList(Long batchId, Map<String,DistributionPrintRequest> mapDist,String activityCode,String accessToken) {
-    	List<StudentCredentialDistribution> cList = distributionService.getStudentCredentialDistributions(batchId);
+	private void processGlobalList(DistributionSummaryDTO summaryDTO, String activityCode) {
+		Long batchId = summaryDTO.getBatchId();
+		List<StudentCredentialDistribution> cList = distributionService.getStudentCredentialDistributions(batchId);
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
 		LOGGER.info("list size =  {}", cList.size());
+		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = distributionService.getSchoolListForDistribution(batchId);
 		sortSchoolBySchoolOfRecord(uniqueSchoolList);
 		LOGGER.info("unique schools =  {}", uniqueSchoolList.size());
 		uniqueSchoolList.forEach(usl->{
-			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED4") == 0).toList();
-			List<StudentCredentialDistribution> yed2List = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED2") == 0).toList();
-			List<StudentCredentialDistribution> yedrList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YEDR") == 0).toList();
-			List<StudentCredentialDistribution> yedbList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YEDB") == 0).toList();
-			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).toList();
+			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
-			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
+
+			List<StudentCredentialDistribution> yed2List = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
 			supportListener.certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",null);
+
+			List<StudentCredentialDistribution> yedrList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
 			supportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",null);
+
+			List<StudentCredentialDistribution> yedbList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
 			supportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",null);
+
+			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());
+			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
 		if (!cList.isEmpty()) {
 			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
 			distributionRequest.setSchools(new ArrayList<>());
-			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, null);
+			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
 		}
 	}
 

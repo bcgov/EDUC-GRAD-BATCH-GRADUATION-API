@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public abstract class BaseYearEndWriter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyWriter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseYearEndWriter.class);
 
     @Autowired
     RestUtils restUtils;

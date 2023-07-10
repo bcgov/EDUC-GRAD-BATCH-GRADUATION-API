@@ -69,7 +69,7 @@ public class GraduationReportService {
 			dist.setId(data.getGraduationStudentRecordId());
 			dist.setCredentialTypeCode(data.getTranscriptTypeCode());
 			dist.setStudentID(data.getGraduationStudentRecordId());
-			dist.setPaperType("YED4");
+			dist.setPaperType(data.getPaperType());
 			dist.setSchoolOfRecord(data.getMincode());
 			dist.setDocumentStatusCode("CUR");
 			dist.setPen(data.getPen());

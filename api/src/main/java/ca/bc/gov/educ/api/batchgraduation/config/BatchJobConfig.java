@@ -625,6 +625,17 @@ public class BatchJobConfig {
     }
 
     @Bean
+    public Step slaveStepDisRunYearly(StepBuilderFactory stepBuilderFactory) {
+        return stepBuilderFactory.get("slaveStepDisRun")
+                .<StudentCredentialDistribution, StudentCredentialDistribution>chunk(1)
+                .reader(itemReaderDisRun())
+                .processor(itemProcessorDisRun())
+                .writer(itemWriterDisRun())
+                .transactionManager(batchTransactionManager)
+                .build();
+    }
+
+    @Bean
     public Step slaveStepDisRunYearlyNonGradByMincode(StepBuilderFactory stepBuilderFactory) {
         return stepBuilderFactory.get("slaveStepDisRunYearlyNonGrad")
                 .<String, List<StudentCredentialDistribution>>chunk(1)
@@ -670,7 +681,7 @@ public class BatchJobConfig {
     public Step masterStepDisRunYearly(StepBuilderFactory stepBuilderFactory, EducGradBatchGraduationApiConstants constants) {
         return stepBuilderFactory.get("masterStepDisRunYearly")
                 .partitioner(slaveStepDisRun(stepBuilderFactory).getName(), partitionerDisRunYearly())
-                .step(slaveStepDisRun(stepBuilderFactory))
+                .step(slaveStepDisRunYearly(stepBuilderFactory))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor(constants))
                 .build();

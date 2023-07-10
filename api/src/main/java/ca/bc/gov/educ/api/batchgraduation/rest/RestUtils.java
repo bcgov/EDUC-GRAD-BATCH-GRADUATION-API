@@ -7,7 +7,9 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstan
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.retry.annotation.Retry;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +72,10 @@ public class RestUtils {
         return this.getTokenResponseObject().getAccess_token();
     }
 
+    @SneakyThrows
     public <T> T post(String url, Object body, Class<T> clazz, String accessToken) {
         T obj;
+        System.out.println(new ObjectMapper().writeValueAsString(body));
         try {
             obj = this.webClient.post()
                     .uri(url)
