@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -27,9 +26,6 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
 
     @Autowired
     RestUtils restUtils;
-
-    @Autowired
-    JsonTransformer jsonTransformer;
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
