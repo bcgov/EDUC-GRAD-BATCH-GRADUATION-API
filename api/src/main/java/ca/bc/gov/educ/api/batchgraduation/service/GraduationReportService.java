@@ -62,30 +62,6 @@ public class GraduationReportService {
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
-	private List<StudentCredentialDistribution> populateStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
-		List<StudentCredentialDistribution> result = new ArrayList<>();
-		for(ReportGradStudentData data: reportGradStudentDataList) {
-			StudentCredentialDistribution dist = new StudentCredentialDistribution();
-			dist.setId(data.getGraduationStudentRecordId());
-			dist.setCredentialTypeCode(data.getTranscriptTypeCode());
-			dist.setStudentID(data.getGraduationStudentRecordId());
-			dist.setPaperType(data.getPaperType());
-			dist.setSchoolOfRecord(data.getMincode());
-			dist.setDocumentStatusCode("CUR");
-			dist.setPen(data.getPen());
-			dist.setLegalFirstName(data.getFirstName());
-			dist.setLegalMiddleNames(data.getMiddleName());
-			dist.setLegalLastName(data.getLastName());
-			dist.setProgramCompletionDate(data.getProgramCompletionDate());
-			dist.setHonoursStanding(data.getHonorsStanding());
-			dist.setProgram(data.getProgramCode());
-			dist.setStudentGrade(data.getStudentGrade());
-			dist.setNonGradReasons(data.getNonGradReasons());
-			result.add(dist);
-		}
-		return result;
-	}
-
 	public List<String> getSchoolsNonGradYearly(String accessToken) {
 		return webClient.get().uri(String.format(constants.getSchoolDataNonGradEarly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<String>>(){}).block();
 	}
@@ -96,5 +72,37 @@ public class GraduationReportService {
 
 	public List<String> getDistrictsYearly(String accessToken) {
 		return webClient.get().uri(String.format(constants.getDistrictDataYearly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<String>>(){}).block();
+	}
+
+	private List<StudentCredentialDistribution> populateStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
+		List<StudentCredentialDistribution> result = new ArrayList<>();
+		for(ReportGradStudentData data: reportGradStudentDataList) {
+			result.add(populateStudentCredentialDistribution(data));
+		}
+		return result;
+	}
+
+	private StudentCredentialDistribution populateStudentCredentialDistribution(ReportGradStudentData data) {
+		StudentCredentialDistribution dist = new StudentCredentialDistribution();
+		dist.setId(data.getGraduationStudentRecordId());
+		if("YED4".equalsIgnoreCase(data.getPaperType())) {
+			dist.setCredentialTypeCode(data.getTranscriptTypeCode());
+		} else {
+			dist.setCredentialTypeCode(data.getCertificateTypeCode());
+		}
+		dist.setStudentID(data.getGraduationStudentRecordId());
+		dist.setPaperType(data.getPaperType());
+		dist.setSchoolOfRecord(data.getMincode());
+		dist.setDocumentStatusCode("COMPL");
+		dist.setPen(data.getPen());
+		dist.setLegalFirstName(data.getFirstName());
+		dist.setLegalMiddleNames(data.getMiddleName());
+		dist.setLegalLastName(data.getLastName());
+		dist.setProgramCompletionDate(data.getProgramCompletionDate());
+		dist.setHonoursStanding(data.getHonorsStanding());
+		dist.setProgram(data.getProgramCode());
+		dist.setStudentGrade(data.getStudentGrade());
+		dist.setNonGradReasons(data.getNonGradReasons());
+		return dist;
 	}
 }

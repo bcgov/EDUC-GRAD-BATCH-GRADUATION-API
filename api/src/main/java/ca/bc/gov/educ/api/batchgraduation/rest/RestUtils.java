@@ -5,11 +5,9 @@ import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.resilience4j.retry.annotation.Retry;
-import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,14 +46,11 @@ public class RestUtils {
 
     private final WebClient webClient;
 
-    @Autowired
-    JsonTransformer jsonTransformer;
-
-    @Autowired
     GraduationReportService graduationReportService;
 
     @Autowired
-    public RestUtils(final EducGradBatchGraduationApiConstants constants, final WebClient webClient, ResponseObjCache objCache) {
+    public RestUtils(final GraduationReportService graduationReportService, final EducGradBatchGraduationApiConstants constants, final WebClient webClient, ResponseObjCache objCache) {
+        this.graduationReportService = graduationReportService;
         this.constants = constants;
         this.webClient = webClient;
         this.responseObjCache = objCache;
@@ -72,11 +67,13 @@ public class RestUtils {
         return this.getTokenResponseObject().getAccess_token();
     }
 
-    @SneakyThrows
     public <T> T post(String url, Object body, Class<T> clazz, String accessToken) {
         T obj;
-        System.out.println(new ObjectMapper().writeValueAsString(body));
         try {
+            if(LOGGER.isDebugEnabled()) {
+                String bodyJson = new ObjectMapper().writeValueAsString(body);
+                LOGGER.debug(bodyJson);
+            }
             obj = this.webClient.post()
                     .uri(url)
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
