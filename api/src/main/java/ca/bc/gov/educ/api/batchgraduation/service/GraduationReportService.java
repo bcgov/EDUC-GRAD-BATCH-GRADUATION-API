@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.ReportGradStudentData;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -85,13 +86,14 @@ public class GraduationReportService {
 	private StudentCredentialDistribution populateStudentCredentialDistribution(ReportGradStudentData data) {
 		StudentCredentialDistribution dist = new StudentCredentialDistribution();
 		dist.setId(data.getGraduationStudentRecordId());
-		if("YED4".equalsIgnoreCase(data.getPaperType())) {
+		String paperType = StringUtils.trimToNull(data.getPaperType()) == null ? "YED4" : data.getPaperType();
+		if("YED4".equalsIgnoreCase(paperType)) {
 			dist.setCredentialTypeCode(data.getTranscriptTypeCode());
 		} else {
 			dist.setCredentialTypeCode(data.getCertificateTypeCode());
 		}
 		dist.setStudentID(data.getGraduationStudentRecordId());
-		dist.setPaperType(data.getPaperType());
+		dist.setPaperType(paperType);
 		dist.setSchoolOfRecord(data.getMincode());
 		dist.setDocumentStatusCode("COMPL");
 		dist.setPen(data.getPen());
