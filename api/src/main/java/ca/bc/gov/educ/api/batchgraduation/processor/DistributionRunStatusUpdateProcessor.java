@@ -64,12 +64,16 @@ public class DistributionRunStatusUpdateProcessor {
 
     private Map<String, ServiceException> updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId, String activityCode) {
         Map<String, ServiceException> unprocessedStudents = new HashMap<>();
+        final int totalCount = cList.size();
+        final int[] processedCount = {0};
         cList.forEach(scd-> {
             try {
                 final String token = restUtils.getAccessToken();
-                LOGGER.debug("Dist Job [{}] / [{}] - update student credential record & student grad record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
                 restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,token);
                 restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,token);
+                processedCount[0]++;
+                LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student credential record & student grad record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0], totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
+
             } catch (Exception e) {
                 unprocessedStudents.put(scd.getStudentID().toString(), new ServiceException(e));
             }
