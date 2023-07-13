@@ -138,10 +138,10 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				} else {
 					disres = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, localDownload);
 				}
+				if(disres != null) {
+					updateBackStudentRecords(cList,batchId,activityCode);
+				}
 			}
-		}
-		if(disres != null) {
-			updateBackStudentRecords(cList,batchId,activityCode);
 		}
 	}
 
