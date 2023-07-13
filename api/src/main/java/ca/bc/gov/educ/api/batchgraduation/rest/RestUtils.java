@@ -636,7 +636,7 @@ public class RestUtils {
             return webClient.get().uri(url)
                     .headers(h -> {
                         h.setBearerAuth(getAccessToken());
-                        h.set(constants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
+                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
                     })
                     .retrieve().bodyToMono(responseType)
                     .block();

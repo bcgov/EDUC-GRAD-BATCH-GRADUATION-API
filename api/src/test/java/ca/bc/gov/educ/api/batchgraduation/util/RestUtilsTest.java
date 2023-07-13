@@ -60,6 +60,9 @@ public class RestUtilsTest {
     private Mono<GraduationStudentRecordSearchResult> inputResponseSR;
 
     @Mock
+    private Mono<Boolean> inputResponseBoolean;
+
+    @Mock
     private Mono<DistributionResponse> inputResponsePSI;
 
     @Mock
@@ -1231,6 +1234,40 @@ public class RestUtilsTest {
 
         GraduationStudentRecordDistribution res = this.restUtils.getStudentData(studentID.toString(),null);
         assertThat(res).isNotNull();
+    }
+
+    @Test
+    public void testGetDistrictBySchoolCategoryCode() {
+        District district = new District();
+        district.setDistrictNumber("042");
+
+        final ParameterizedTypeReference<List<District>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getTraxDistrictBySchoolCategory(), "002"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(List.of(district)));
+
+        List<District> res = this.restUtils.getDistrictBySchoolCategoryCode("02");
+        assertThat(res).isNotNull();
+    }
+
+    @Test
+    public void testExecutePostDistribution() {
+        DistributionResponse distributionResponse = new DistributionResponse();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(constants.getPostingDistribution())).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Boolean.class)).thenReturn(Mono.just(Boolean.TRUE));
+
+        Boolean res = this.restUtils.executePostDistribution(distributionResponse);
+        assertThat(res).isTrue();
     }
 
     @Test
