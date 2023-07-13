@@ -31,15 +31,15 @@ public class DistributionRunYearlyNonGradProcessor implements ItemProcessor<Stri
 	@Override
 	public List<StudentCredentialDistribution> process(String mincode) throws Exception {
 		summaryDTO.setBatchId(batchId);
-		if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty() && searchRequest.getDistricts().contains(mincode)) {
-			LOGGER.debug("Processing partitionData for district {} ", mincode);
-			summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
-			List<StudentCredentialDistribution> studentCredentials = restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
-			LOGGER.debug("Completed partitionData for district {} with {} students", mincode, studentCredentials.size());
-			summaryDTO.getGlobalList().addAll(studentCredentials);
-		} else {
+		if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty() && !searchRequest.getDistricts().contains(mincode)) {
 			LOGGER.debug("Skip partitionData for district {} due to filter {}", mincode, String.join(",", searchRequest.getDistricts()));
+			return summaryDTO.getGlobalList();
 		}
+		LOGGER.debug("Processing partitionData for district {} ", mincode);
+		summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
+		List<StudentCredentialDistribution> studentCredentials = restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
+		LOGGER.debug("Completed partitionData for district {} with {} students", mincode, studentCredentials.size());
+		summaryDTO.getGlobalList().addAll(studentCredentials);
 		return summaryDTO.getGlobalList();
 	}
 }
