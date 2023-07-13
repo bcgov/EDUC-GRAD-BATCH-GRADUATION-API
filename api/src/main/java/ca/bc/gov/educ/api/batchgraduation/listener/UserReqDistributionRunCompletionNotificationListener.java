@@ -132,10 +132,12 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
 			}
 			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
-			if (credentialType.equalsIgnoreCase("RC")) {
-				disres = restUtils.createReprintAndUpload(batchId, accessToken, distributionRequest, activityCode,localDownload);
-			} else {
-				disres = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode,localDownload);
+			if(!cList.isEmpty()) {
+				if (credentialType.equalsIgnoreCase("RC")) {
+					disres = restUtils.createReprintAndUpload(batchId, accessToken, distributionRequest, activityCode, localDownload);
+				} else {
+					disres = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, localDownload);
+				}
 			}
 		}
 		if(disres != null) {
