@@ -628,6 +628,24 @@ public class RestUtils {
         return get(String.format(constants.getCommonSchoolByMincode(), schoolOfRecord), CommonSchool.class, getAccessToken());
     }
 
+    public List<District> getDistrictBySchoolCategoryCode(String schoolCategoryCode) {
+        final ParameterizedTypeReference<List<District>> responseType = new ParameterizedTypeReference<>() {
+        };
+        try {
+            String url = String.format(constants.getTraxDistrictBySchoolCategory(), schoolCategoryCode);
+            return webClient.get().uri(url)
+                    .headers(h -> {
+                        h.setBearerAuth(getAccessToken());
+                        h.set(constants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
+                    })
+                    .retrieve().bodyToMono(responseType)
+                    .block();
+        } catch (Exception e) {
+            LOGGER.error("Trax API is not available {}", e.getLocalizedMessage());
+            return new ArrayList<>();
+        }
+    }
+
     public TraxSchool getTraxSchool(String mincode) {
         return get(String.format(constants.getTraxSchoolByMincode(), mincode), TraxSchool.class, getAccessToken());
     }

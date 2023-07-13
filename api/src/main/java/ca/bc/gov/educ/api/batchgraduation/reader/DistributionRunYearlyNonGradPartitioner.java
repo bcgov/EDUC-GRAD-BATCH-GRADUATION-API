@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.District;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
@@ -11,10 +12,8 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
@@ -37,14 +36,28 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SD", restUtils.getAccessToken());
 
-        List<String> schoolsList = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
-        if(!schoolsList.isEmpty()) {
-            updateBatchJobHistory(createBatchJobHistory(), (long) schoolsList.size());
-            StudentSearchRequest searchRequest = getStudentSearchRequest();
-            int partitionSize = schoolsList.size()/gridSize + 1;
+        List<String> eligibleStudentDistricts = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
+        StudentSearchRequest searchRequest = getStudentSearchRequest();
+        if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
+            List<String> useFilterDistricts = new ArrayList<>();
+            for(String schoolCategoryCode: searchRequest.getSchoolCategoryCodes()) {
+                List<District> districts = restUtils.getDistrictBySchoolCategoryCode(schoolCategoryCode);
+                for(District district: districts) {
+                    useFilterDistricts.add(district.getDistrictNumber());
+                }
+            }
+            eligibleStudentDistricts = eligibleStudentDistricts.stream().distinct().filter(useFilterDistricts::contains).collect(Collectors.toList());
+        }
+        if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
+            eligibleStudentDistricts = eligibleStudentDistricts.stream().distinct().filter(searchRequest.getDistricts()::contains).collect(Collectors.toList());
+        }
+        List<String> finalDistricts = eligibleStudentDistricts.stream().sorted().toList();
+        if(!finalDistricts.isEmpty()) {
+            updateBatchJobHistory(createBatchJobHistory(), (long) finalDistricts.size());
+            int partitionSize = finalDistricts.size()/gridSize + 1;
             List<List<String>> partitions = new LinkedList<>();
-            for (int i = 0; i < schoolsList.size(); i += partitionSize) {
-                partitions.add(schoolsList.subList(i, Math.min(i + partitionSize, schoolsList.size())));
+            for (int i = 0; i < finalDistricts.size(); i += partitionSize) {
+                partitions.add(finalDistricts.subList(i, Math.min(i + partitionSize, finalDistricts.size())));
             }
             Map<String, ExecutionContext> map = new HashMap<>(partitions.size());
             for (int i = 0; i < partitions.size(); i++) {
@@ -61,7 +74,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }
-            LOGGER.info("Found {} in total running on {} partitions",schoolsList.size(),map.size());
+            LOGGER.info("Found {} in total running on {} partitions",finalDistricts.size(),map.size());
             return map;
         }
         LOGGER.info("No Credentials Found for Processing");

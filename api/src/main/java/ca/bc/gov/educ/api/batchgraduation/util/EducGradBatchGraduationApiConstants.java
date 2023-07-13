@@ -243,6 +243,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
     private String traxSchoolByMincode;
 
+    @Value("${endpoint.grad-trax-api.district-by-school-category.url}")
+    private String traxDistrictBySchoolCategory;
+
     // Splunk LogHelper Enabled
     @Value("${splunk.log-helper.enabled}")
     private boolean splunkLogHelperEnabled;
