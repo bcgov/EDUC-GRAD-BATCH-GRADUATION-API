@@ -8,6 +8,7 @@ import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.SneakyThrows;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -156,12 +157,12 @@ public class RestUtils {
         UUID correlationID = UUID.randomUUID();
         if(isReportOnly(studentID, gradProgram, programCompleteDate, accessToken)) {
             return this.webClient.get()
-            		.uri(String.format(constants.getGraduationApiReportOnlyUrl(), studentID,batchId))
+                    .uri(String.format(constants.getGraduationApiReportOnlyUrl(), studentID,batchId))
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                     .retrieve().bodyToMono(AlgorithmResponse.class).block();
         }
-    	return this.webClient.get()
-        		.uri(String.format(constants.getGraduationApiUrl(), studentID,batchId))
+        return this.webClient.get()
+                .uri(String.format(constants.getGraduationApiUrl(), studentID,batchId))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(AlgorithmResponse.class).block();
     }
@@ -350,6 +351,10 @@ public class RestUtils {
                 .orElse(null);
         if(scObj != null) {
             item.setSchoolOfRecord(scObj.getSchoolOfRecord());
+            item.setPen(scObj.getPen());
+            item.setLegalLastName(scObj.getLegalLastName());
+            item.setLegalFirstName(scObj.getLegalFirstName());
+            item.setLegalMiddleNames(scObj.getLegalMiddleNames());
         }else {
             GraduationStudentRecordDistribution stuRec =this.getStudentData(item.getStudentID().toString(),accessToken);
             if (stuRec != null) {
