@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -103,6 +105,12 @@ public class RestUtilsTest {
         assertThat(result).isNotNull();
         assertThat(result.getAccess_token()).isEqualTo(mockToken);
         assertThat(result.getRefresh_token()).isEqualTo("456");
+    }
+
+    @Test
+    public void testFallBackMethod_givenExcpetion_shouldReturnNull(){
+        val result = this.restUtils.rtGetTokenFallBack(new HttpServerErrorException(HttpStatus.I_AM_A_TEAPOT));
+        assertThat(result).isNull();
     }
 
     @Test
