@@ -79,7 +79,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 	protected void processGlobalList(DistributionSummaryDTO summaryDTO, String searchRequest, String activityCode) {
     	Long batchId = summaryDTO.getBatchId();
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
-		filterStudentCredentialDistribution(cList, searchRequest);
+		filterStudentCredentialDistribution(cList, searchRequest, activityCode);
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());

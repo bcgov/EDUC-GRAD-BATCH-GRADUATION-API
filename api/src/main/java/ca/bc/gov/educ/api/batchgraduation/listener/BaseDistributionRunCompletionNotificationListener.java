@@ -161,7 +161,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         GradSorter.sortStudentCredentialDistributionByNames(students);
     }
 
-    void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String searchRequest) {
+    void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String searchRequest, String activityCode) {
         LOGGER.debug("Filter Student Credential Distribution for {} student credentials", credentialList.size());
         StudentSearchRequest request = getStudentSearchRequest(searchRequest);
         Iterator scdIt = credentialList.iterator();
@@ -176,6 +176,12 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
                 scdIt.remove();
                 LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()));
             }
+        }
+        if("NONGRADDIST".equalsIgnoreCase(activityCode)) {
+            LOGGER.debug("Apply {} filters for the list of {} students", "NONGRADDIST", credentialList.size());
+            credentialList.removeIf(s->"SCCP".equalsIgnoreCase(s.getProgram()));
+            credentialList.removeIf(s->"1950".equalsIgnoreCase(s.getProgram()) && !"AD".equalsIgnoreCase(s.getStudentGrade()) && !StringUtils.isBlank(s.getProgramCompletionDate()));
+            credentialList.removeIf(s->!"1950".equalsIgnoreCase(s.getProgram()) && !"12".equalsIgnoreCase(s.getStudentGrade()) && !StringUtils.isBlank(s.getProgramCompletionDate()));
         }
         LOGGER.debug("Total {} selected after filter", credentialList.size());
     }

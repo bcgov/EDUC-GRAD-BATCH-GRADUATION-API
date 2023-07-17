@@ -74,7 +74,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 	protected void processGlobalList(DistributionSummaryDTO summaryDTO, String searchRequest, String activityCode) {
     	Long batchId = summaryDTO.getBatchId();
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
-		filterStudentCredentialDistribution(cList, searchRequest);
+		filterStudentCredentialDistribution(cList, searchRequest, activityCode);
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
 		LOGGER.info("list size =  {}", cList.size());
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
