@@ -23,10 +23,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
@@ -374,8 +371,12 @@ public class RestUtils {
                 .orElse(null);
         if(scObj != null) {
             item.setSchoolOfRecord(scObj.getSchoolOfRecord());
+            item.setPen(scObj.getPen());
+            item.setLegalLastName(scObj.getLegalLastName());
+            item.setLegalFirstName(scObj.getLegalFirstName());
+            item.setLegalMiddleNames(scObj.getLegalMiddleNames());
         } else {
-            GraduationStudentRecordDistribution stuRec = getStudentData(item.getStudentID().toString(),accessToken);
+            GraduationStudentRecordDistribution stuRec =this.getStudentData(item.getStudentID().toString(),accessToken);
             if (stuRec != null) {
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
