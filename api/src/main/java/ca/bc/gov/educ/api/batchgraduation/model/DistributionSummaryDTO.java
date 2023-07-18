@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,5 +20,15 @@ public class DistributionSummaryDTO extends BaseDistributionSummaryDTO {
         credentialCountMap.put("YED2", 0L);
         credentialCountMap.put("YEDR", 0L);
         credentialCountMap.put("YEDB", 0L);
+    }
+
+    public void recalculateCredentialCountMap() {
+        credentialCountMap.clear();
+        for(StudentCredentialDistribution scd: globalList) {
+            String paperType = scd.getPaperType();
+            if(StringUtils.isNotBlank(paperType)) {
+                increment(paperType);
+            }
+        }
     }
 }
