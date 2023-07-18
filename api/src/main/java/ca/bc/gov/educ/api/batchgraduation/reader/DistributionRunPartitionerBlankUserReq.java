@@ -1,9 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.BlankDistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -25,17 +26,15 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
     @Autowired
     RestUtils restUtils;
 
+    @Autowired
+    JsonTransformer jsonTransformer;
+
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         JobParameters jobParameters = context.getJobParameters();
-        String searchRequest = jobParameters.getString("searchRequest");
+        String searchRequest = jobParameters.getString("searchRequest" ,"{}");
         String credentialType = jobParameters.getString("credentialType");
-        BlankCredentialRequest req = null;
-        try {
-            req = new ObjectMapper().readValue(searchRequest, BlankCredentialRequest.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        BlankCredentialRequest req = (BlankCredentialRequest)jsonTransformer.unmarshall(searchRequest, BlankCredentialRequest.class);
         List<BlankCredentialDistribution> credentialList = getRecordsForBlankUserReqDisRun(req);
         if(!credentialList.isEmpty()) {
             int partitionSize = credentialList.size()/gridSize + 1;

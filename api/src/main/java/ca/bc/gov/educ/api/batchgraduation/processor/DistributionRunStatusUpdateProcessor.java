@@ -6,7 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.JobParametersForDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +27,13 @@ public class DistributionRunStatusUpdateProcessor {
 
     private final RestUtils restUtils;
 
+    private final JsonTransformer jsonTransformer;
+
     @Autowired
-    public DistributionRunStatusUpdateProcessor(DistributionService distributionService, RestUtils restUtils) {
+    public DistributionRunStatusUpdateProcessor(DistributionService distributionService, RestUtils restUtils, JsonTransformer jsonTransformer) {
         this.distributionService = distributionService;
         this.restUtils = restUtils;
+        this.jsonTransformer = jsonTransformer;
     }
 
     @Async("asyncExecutor")
@@ -102,15 +105,7 @@ public class DistributionRunStatusUpdateProcessor {
         JobParametersForDistribution jobParamsDto = new JobParametersForDistribution();
         jobParamsDto.setJobName(jobType);
         jobParamsDto.setCredentialType(credentialType);
-
-        String jobParamsDtoStr = null;
-        try {
-            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
-        } catch (Exception e) {
-            LOGGER.error("Job Parameters DTO parse error for User Request Distribution - {}", e.getMessage());
-        }
-
-        return jobParamsDtoStr;
+        return jsonTransformer.marshall(jobParamsDto);
     }
 
 }

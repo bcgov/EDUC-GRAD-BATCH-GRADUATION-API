@@ -11,8 +11,6 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstan
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -230,13 +228,13 @@ public class JobLauncherController {
             return ResponseEntity.status(400).body(response);
         }
         try {
-            String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
+            String studentSearchData = jsonTransformer.marshall(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
             response.setJobParameters(studentSearchData);
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(SPECIAL_GRADUATION_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             response.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(response);
         }
@@ -288,13 +286,13 @@ public class JobLauncherController {
             return ResponseEntity.status(400).body(response);
         }
         try {
-            String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
+            String studentSearchData = jsonTransformer.marshall(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
             response.setJobParameters(studentSearchData);
             JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob(SPECIAL_TVR_RUN_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             response.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(response);
         }
@@ -567,14 +565,14 @@ public class JobLauncherController {
             return ResponseEntity.status(400).body(validate);
         }
         try {
-            String studentSearchData = new ObjectMapper().writeValueAsString(studentSearchRequest);
+            String studentSearchData = jsonTransformer.marshall(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
             builder.addString(CREDENTIALTYPE,credentialType);
             JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("UserReqDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
             return ResponseEntity.ok(summaryDTO);
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
             summaryDTO.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(summaryDTO);
@@ -600,13 +598,13 @@ public class JobLauncherController {
             return ResponseEntity.status(400).body(validate);
         }
         try {
-            String searchData = new ObjectMapper().writeValueAsString(blankCredentialRequest);
-            builder.addString(SEARCH_REQUEST, searchData);
+            String studentSearchData = jsonTransformer.marshall(blankCredentialRequest);
+            builder.addString(SEARCH_REQUEST, studentSearchData);
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
             return ResponseEntity.ok(summaryDTO);
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
             summaryDTO.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(summaryDTO);
@@ -634,13 +632,13 @@ public class JobLauncherController {
             return ResponseEntity.status(400).body(validate);
         }
         try {
-            String searchData = new ObjectMapper().writeValueAsString(psiCredentialRequest);
-            builder.addString(SEARCH_REQUEST, searchData);
+            String studentSearchData = jsonTransformer.marshall(psiCredentialRequest);
+            builder.addString(SEARCH_REQUEST, studentSearchData);
             JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob("psiDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
             return ResponseEntity.ok(summaryDTO);
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException | JsonProcessingException e) {
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             PsiDistributionSummaryDTO summaryDTO = new PsiDistributionSummaryDTO();
             summaryDTO.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(summaryDTO);

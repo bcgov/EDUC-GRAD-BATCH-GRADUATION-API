@@ -1,5 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
 import org.modelmapper.ModelMapper;
@@ -29,5 +32,12 @@ public class EducGradBatchApiConfig {
         return new JdbcTemplateLockProvider(jdbcTemplate, transactionManager, "BATCH_SHEDLOCK");
     }
 
+    @Bean
+    ObjectMapper jacksonObjectMapper() {
+        return JsonMapper.builder()
+                .findAndAddModules()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
+    }
     
 }

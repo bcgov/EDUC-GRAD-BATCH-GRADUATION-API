@@ -54,7 +54,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 
 			processGlobalList(summaryDTO, searchRequest, "YEARENDDIST");
 
-			String studentSearchRequest = jobParameters.getString("searchRequest");
+			String studentSearchRequest = jobParameters.getString("searchRequest", "{}");
 			// display Summary Details
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());

@@ -48,7 +48,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		Date endTime = jobExecution.getEndTime();
 		String jobTrigger = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TRIGGER);
 		String transmissionType = jobParameters.getString(EducGradBatchGraduationApiConstants.TRANSMISSION_TYPE);
-		String studentSearchRequest = jobParameters.getString(EducGradBatchGraduationApiConstants.SEARCH_REQUEST);
+		String studentSearchRequest = jobParameters.getString(EducGradBatchGraduationApiConstants.SEARCH_REQUEST, "{}");
 
 		String userScheduledId = jobParameters.getString(EducGradBatchGraduationApiConstants.USER_SCHEDULED);
 		if(userScheduledId != null) {

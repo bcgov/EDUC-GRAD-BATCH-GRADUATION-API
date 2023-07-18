@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.batchgraduation.repository.StudentCredentialDistributi
 import ca.bc.gov.educ.api.batchgraduation.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class DistributionService extends GradService {
+
+    @Autowired
+    JsonUtil jsonUtil;
 
     private final GradBatchHistoryService gradBatchHistoryService;
     private final StudentCredentialDistributionRepository studentCredentialDistributionRepository;
@@ -38,7 +42,7 @@ public class DistributionService extends GradService {
         List<StudentCredentialDistributionEntity> entityList = studentCredentialDistributionRepository.findByJobExecutionId(batchId);
         return entityList.stream().map(e -> {
             try {
-                return JsonUtil.getJsonObjectFromString(StudentCredentialDistribution.class, e.getPayload());
+                return jsonUtil.getJsonObjectFromString(StudentCredentialDistribution.class, e.getPayload());
             } catch (JsonProcessingException ex) {
                 throw new RuntimeException(ex);
             }
@@ -58,7 +62,7 @@ public class DistributionService extends GradService {
         entity.setStudentID(scd.getStudentID());
         entity.setSchoolOfRecord(scd.getSchoolOfRecord());
         try {
-            String payload = JsonUtil.getJsonStringFromObject(scd);
+            String payload = jsonUtil.getJsonStringFromObject(scd);
             entity.setPayload(payload);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

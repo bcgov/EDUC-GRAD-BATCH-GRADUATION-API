@@ -59,7 +59,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 
 			processGlobalList(summaryDTO, searchRequest, "NONGRADDIST");
 
-			String studentSearchRequest = jobParameters.getString("searchRequest");
+			String studentSearchRequest = jobParameters.getString("searchRequest", "{}");
 			// display Summary Details
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());

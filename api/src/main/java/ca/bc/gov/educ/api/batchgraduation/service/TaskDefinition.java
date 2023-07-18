@@ -3,8 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +43,9 @@ public class TaskDefinition implements Runnable{
 
     @Autowired
     UserScheduledJobsRepository userScheduledJobsRepository;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     private Task task;
 
@@ -99,12 +101,8 @@ public class TaskDefinition implements Runnable{
         if(task.getBlankPayLoad() != null) {
             BlankDistributionSummaryDTO validate = validateInputBlankDisRun(task.getBlankPayLoad());
             if (validate == null) {
-                try {
-                    String blankSearchData = new ObjectMapper().writeValueAsString(task.getBlankPayLoad());
-                    executeBatchJob(builder, taskType,blankSearchData);
-                } catch (JsonProcessingException e) {
-                    LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
-                }
+                String blankSearchData = jsonTransformer.marshall(task.getBlankPayLoad());
+                executeBatchJob(builder, taskType,blankSearchData);
             }
         }
     }
@@ -113,12 +111,8 @@ public class TaskDefinition implements Runnable{
         if(task.getPsiPayLoad() != null) {
             PsiDistributionSummaryDTO validate = validateInputPsiDisRun(task.getPsiPayLoad());
             if (validate == null) {
-                try {
-                    String psiSearchData = new ObjectMapper().writeValueAsString(task.getPsiPayLoad());
-                    executeBatchJob(builder, taskType,psiSearchData);
-                } catch (JsonProcessingException e) {
-                    LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
-                }
+                String psiSearchData = jsonTransformer.marshall(task.getPsiPayLoad());
+                executeBatchJob(builder, taskType,psiSearchData);
             }
         }
     }
@@ -126,12 +120,8 @@ public class TaskDefinition implements Runnable{
         if(task.getPayload() != null) {
             AlgorithmSummaryDTO validate = validateInput(task.getPayload());
             if (validate == null) {
-                try {
-                    String studentSearchData = new ObjectMapper().writeValueAsString(task.getPayload());
-                    executeBatchJob(builder, taskType,studentSearchData);
-                }catch (JsonProcessingException e) {
-                    LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
-                }
+                String studentSearchData = jsonTransformer.marshall(task.getPayload());
+                executeBatchJob(builder, taskType,studentSearchData);
             }
         }
     }

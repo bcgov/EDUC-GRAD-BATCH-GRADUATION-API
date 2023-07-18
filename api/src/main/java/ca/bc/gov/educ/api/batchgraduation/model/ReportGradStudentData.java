@@ -40,7 +40,7 @@ public class ReportGradStudentData implements Serializable {
     private String transcriptTypeCode;
     private String certificateTypeCode;
     private String paperType;
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date updateDate;
     private List<CertificateType> certificateTypes;
     private List<GradRequirement> nonGradReasons;

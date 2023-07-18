@@ -6,8 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -41,6 +40,9 @@ public class TaskSchedulingServiceTest {
 
     @Autowired
     TaskScheduler taskScheduler;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     @MockBean
     private RestUtils restUtils;
@@ -116,9 +118,7 @@ public class TaskSchedulingServiceTest {
         entity.setJobCode(task.getJobName());
         entity.setJobName("User Req Distribution Batch Job");
         entity.setCronExpression(task.getCronExpression());
-        try {
-            entity.setJobParameters(new ObjectMapper().writeValueAsString(task));
-        } catch (JsonProcessingException ignored) {}
+        entity.setJobParameters(jsonTransformer.marshall(task));
 
         entity.setStatus("QUEUED");
 

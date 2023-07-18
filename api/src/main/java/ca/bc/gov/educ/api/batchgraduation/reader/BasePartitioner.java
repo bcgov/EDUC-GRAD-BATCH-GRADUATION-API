@@ -16,7 +16,6 @@ import org.springframework.batch.core.partition.support.SimplePartitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.xml.transform.TransformerException;
 import java.util.*;
 
 public abstract class BasePartitioner extends SimplePartitioner {
@@ -201,14 +200,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     StudentSearchRequest getStudentSearchRequest() {
         JobParameters jobParameters = getJobExecution().getJobParameters();
-        StudentSearchRequest request;
-        try {
-            request = (StudentSearchRequest)jsonTransformer.unmarshall(jobParameters.getString("searchRequest", "{}"), StudentSearchRequest.class);
-        } catch (TransformerException e) {
-            LOGGER.warn("Unable to deserialize StudentSearchRequest object");
-            request = new StudentSearchRequest();
-        }
-        return request;
+        return (StudentSearchRequest)jsonTransformer.unmarshall(jobParameters.getString("searchRequest", "{}"), StudentSearchRequest.class);
     }
 
     void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {

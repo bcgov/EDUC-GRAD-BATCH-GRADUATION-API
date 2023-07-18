@@ -7,14 +7,12 @@ import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.xml.transform.TransformerException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -84,17 +82,13 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         jobParamsDto.setCredentialType(credentialType);
 
         if (StringUtils.isNotBlank(studentSearchRequest)) {
-            try {
-                StudentSearchRequest payload = new ObjectMapper().readValue(studentSearchRequest, StudentSearchRequest.class);
-                jobParamsDto.setPayload(payload);
-            } catch (Exception e) {
-                LOGGER.error("StudentSearchRequest payload parse error - {}", e.getMessage());
-            }
+            StudentSearchRequest payload = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+            jobParamsDto.setPayload(payload);
         }
 
         String jobParamsDtoStr = null;
         try {
-            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
+            jobParamsDtoStr = jsonTransformer.marshall(jobParamsDto);
         } catch (Exception e) {
             LOGGER.error("Job Parameters DTO parse error for User Request Distribution - {}", e.getMessage());
         }
@@ -107,21 +101,11 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         jobParamsDto.setJobName(jobType);
         jobParamsDto.setCredentialType(credentialType);
 
-        try {
-            BlankCredentialRequest payload = new ObjectMapper().readValue(studentSearchRequest, BlankCredentialRequest.class);
+        if(StringUtils.isNotBlank(studentSearchRequest)) {
+            BlankCredentialRequest payload = (BlankCredentialRequest) jsonTransformer.unmarshall(studentSearchRequest, BlankCredentialRequest.class);
             jobParamsDto.setPayload(payload);
-        } catch (Exception e) {
-            LOGGER.error("BlankCredentialRequest payload parse error - {}", e.getMessage());
         }
-
-        String jobParamsDtoStr = null;
-        try {
-            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
-        } catch (Exception e) {
-            LOGGER.error("Job Parameters DTO parse error for Blank Distribution - {}", e.getMessage());
-        }
-
-        return jobParamsDtoStr;
+        return jsonTransformer.marshall(jobParamsDto);
     }
 
     private String populateJobParametersDTOForPsiDistribution(String jobType, String transmissionType, String studentSearchRequest) {
@@ -129,32 +113,20 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         jobParamsDto.setJobName(jobType);
         jobParamsDto.setTransmissionType(transmissionType);
 
-        try {
-            PsiCredentialRequest payload = new ObjectMapper().readValue(studentSearchRequest, PsiCredentialRequest.class);
+        if(StringUtils.isNotBlank(studentSearchRequest)) {
+            PsiCredentialRequest payload = (PsiCredentialRequest) jsonTransformer.unmarshall(studentSearchRequest, PsiCredentialRequest.class);
             jobParamsDto.setPayload(payload);
-        } catch (Exception e) {
-            LOGGER.error("PsiCredentialRequest payload parse error - {}", e.getMessage());
         }
 
-        String jobParamsDtoStr = null;
-        try {
-            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
-        } catch (Exception e) {
-            LOGGER.error("Job Parameters DTO parse error for PSI Distribution - {}", e.getMessage());
-        }
-
+        String jobParamsDtoStr = jsonTransformer.marshall(jobParamsDto);
         return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
     }
 
     protected StudentSearchRequest getStudentSearchRequest(String searchRequest) {
-        StudentSearchRequest request;
-        try {
-            request = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
-        } catch (TransformerException e) {
-            LOGGER.warn("Unable to deserialize StudentSearchRequest object");
-            request = new StudentSearchRequest();
+        if(StringUtils.isNotBlank(searchRequest)) {
+            return (StudentSearchRequest) jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
         }
-        return request;
+        return new StudentSearchRequest();
     }
 
     void sortStudentCredentialDistribution(List<StudentCredentialDistribution> students) {
@@ -164,17 +136,19 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
     void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String searchRequest, String activityCode) {
         LOGGER.debug("Filter Student Credential Distribution for {} student credentials", credentialList.size());
         StudentSearchRequest request = getStudentSearchRequest(searchRequest);
-        Iterator scdIt = credentialList.iterator();
-        while (scdIt.hasNext()) {
-            StudentCredentialDistribution scd = (StudentCredentialDistribution)scdIt.next();
-            String districtCode = StringUtils.substring(scd.getSchoolOfRecord(), 0, 3);
-            if (
-                    (request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
-                            ||
-                    (request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
-            ) {
-                scdIt.remove();
-                LOGGER.debug("Student Credential {}/{} removed by the filters \"{}\" and \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()), String.join(",", request.getSchoolCategoryCodes()));
+        if(request != null) {
+            Iterator scdIt = credentialList.iterator();
+            while (scdIt.hasNext()) {
+                StudentCredentialDistribution scd = (StudentCredentialDistribution) scdIt.next();
+                String districtCode = StringUtils.substring(scd.getSchoolOfRecord(), 0, 3);
+                if (
+                        (request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
+                                ||
+                                (request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
+                ) {
+                    scdIt.remove();
+                    LOGGER.debug("Student Credential {}/{} removed by the filters \"{}\" and \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()), String.join(",", request.getSchoolCategoryCodes()));
+                }
             }
         }
         if("NONGRADDIST".equalsIgnoreCase(activityCode)) {

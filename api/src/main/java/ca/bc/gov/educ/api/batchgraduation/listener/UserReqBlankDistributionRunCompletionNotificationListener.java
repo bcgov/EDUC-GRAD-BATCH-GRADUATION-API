@@ -49,7 +49,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			String credentialType = jobParameters.getString("credentialType");
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String properName = jobParameters.getString("properName");
-			String studentSearchRequest = jobParameters.getString("searchRequest");
+			String studentSearchRequest = jobParameters.getString("searchRequest", "{}");
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
 				taskSchedulingService.updateUserScheduledJobs(userScheduledId);

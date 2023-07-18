@@ -14,7 +14,7 @@ public class DistributionRunYearlyNonGradWriter extends BaseYearEndWriter implem
     @Override
     public void write(List<? extends List<StudentCredentialDistribution>> list) {
         if (!list.isEmpty()) {
-            summaryDTO.increment("YED4", summaryDTO.getGlobalList().size());
+            summaryDTO.setCredentialCounter("YED4", summaryDTO.getGlobalList().size());
             LOGGER.debug("Left:{}\n", summaryDTO.getReadCount() - summaryDTO.getProcessedCount());
         }
     }

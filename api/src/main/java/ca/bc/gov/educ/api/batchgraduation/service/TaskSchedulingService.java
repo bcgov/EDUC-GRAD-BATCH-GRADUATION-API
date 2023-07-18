@@ -7,8 +7,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.transformer.UserScheduledJobsTransformer;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import net.javacrumbs.shedlock.spring.LockableTaskScheduler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -34,6 +33,7 @@ public class TaskSchedulingService {
     @Autowired UserScheduledJobsRepository userScheduledJobsRepository;
     @Autowired CodeService codeService;
     @Autowired UserScheduledJobsTransformer userScheduledJobsTransformer;
+    @Autowired JsonTransformer jsonTransformer;
 
     Map<UUID, ScheduledFuture<?>> jobsMap = new HashMap<>();
 
@@ -84,11 +84,7 @@ public class TaskSchedulingService {
         entity.setJobCode(task.getJobName());
         entity.setJobName(jobName);
         entity.setCronExpression(task.getCronExpression());
-        try {
-            entity.setJobParameters(new ObjectMapper().writeValueAsString(task));
-        } catch (JsonProcessingException e) {
-            logger.debug("Error {}",e.getLocalizedMessage());
-        }
+        entity.setJobParameters(jsonTransformer.marshall(task));
         entity.setStatus("QUEUED");
         entity = userScheduledJobsRepository.save(entity);
         task.setJobIdReference(entity.getId());
