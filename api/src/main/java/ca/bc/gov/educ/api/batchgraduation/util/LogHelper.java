@@ -20,13 +20,13 @@ import java.util.Map;
 @Component
 public final class LogHelper {
 
-    @Autowired
     JsonTransformer jsonTransformer;
 
     private static final String EXCEPTION = "Exception ";
 
-    private LogHelper() {
-
+    @Autowired
+    public LogHelper(JsonTransformer jsonTransformer) {
+        this.jsonTransformer = jsonTransformer;
     }
 
     public void logServerHttpReqResponseDetails(@NonNull final HttpServletRequest request, final HttpServletResponse response, final boolean logging) {
