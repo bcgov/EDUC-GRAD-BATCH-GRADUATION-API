@@ -174,7 +174,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
                     (request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
             ) {
                 scdIt.remove();
-                LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()));
+                LOGGER.debug("Student Credential {}/{} removed by the filters \"{}\" and \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()), String.join(",", request.getSchoolCategoryCodes()));
             }
         }
         if("NONGRADDIST".equalsIgnoreCase(activityCode)) {
