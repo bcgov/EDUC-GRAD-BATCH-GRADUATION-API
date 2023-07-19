@@ -147,8 +147,8 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         if("NONGRADDIST".equalsIgnoreCase(activityCode)) {
             LOGGER.debug("Apply {} filters for the list of {} students", "NONGRADDIST", credentialList.size());
             credentialList.removeIf(s->"SCCP".equalsIgnoreCase(s.getProgram()));
-            credentialList.removeIf(s->"1950".equalsIgnoreCase(s.getProgram()) && !"AD".equalsIgnoreCase(s.getStudentGrade()) && !StringUtils.isBlank(s.getProgramCompletionDate()));
-            credentialList.removeIf(s->!"1950".equalsIgnoreCase(s.getProgram()) && !"12".equalsIgnoreCase(s.getStudentGrade()) && !StringUtils.isBlank(s.getProgramCompletionDate()));
+            credentialList.removeIf(s->"1950".equalsIgnoreCase(s.getProgram()) && !"AD".equalsIgnoreCase(s.getStudentGrade()));
+            credentialList.removeIf(s->!"1950".equalsIgnoreCase(s.getProgram()) && !"12".equalsIgnoreCase(s.getStudentGrade()));
         }
         LOGGER.debug("Total {} selected after filter", credentialList.size());
     }
