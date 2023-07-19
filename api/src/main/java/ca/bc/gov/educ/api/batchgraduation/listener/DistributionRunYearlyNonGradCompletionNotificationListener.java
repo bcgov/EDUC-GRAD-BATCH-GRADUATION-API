@@ -81,7 +81,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
 		filterStudentCredentialDistribution(cList, searchRequest, activityCode);
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
-		summaryDTO.recalculateCredentialCountMap();
+		summaryDTO.recalculateCredentialCounts();
 		LOGGER.info("list size =  {}", cList.size());
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());

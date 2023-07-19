@@ -22,7 +22,7 @@ public class DistributionSummaryDTO extends BaseDistributionSummaryDTO {
         credentialCountMap.put("YEDB", 0L);
     }
 
-    public void recalculateCredentialCountMap() {
+    public void recalculateCredentialCounts() {
         credentialCountMap.clear();
         for(StudentCredentialDistribution scd: globalList) {
             String paperType = scd.getPaperType();
@@ -30,5 +30,6 @@ public class DistributionSummaryDTO extends BaseDistributionSummaryDTO {
                 increment(paperType);
             }
         }
+        setReadCount(globalList.size());
     }
 }

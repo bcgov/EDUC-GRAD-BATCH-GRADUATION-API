@@ -86,14 +86,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
             jobParamsDto.setPayload(payload);
         }
 
-        String jobParamsDtoStr = null;
-        try {
-            jobParamsDtoStr = jsonTransformer.marshall(jobParamsDto);
-        } catch (Exception e) {
-            LOGGER.error("Job Parameters DTO parse error for User Request Distribution - {}", e.getMessage());
-        }
-
-        return jobParamsDtoStr;
+        return jsonTransformer.marshall(jobParamsDto);
     }
 
     private String populateJobParametersDTOForBlankDistribution(String jobType, String credentialType, String studentSearchRequest) {
