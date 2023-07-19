@@ -52,7 +52,7 @@ public class RestUtilsGenericGetTest {
 
     @Test
     public void testDoNothing() {
-
+        Assert.assertTrue(true);
     }
 
 }
