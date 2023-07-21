@@ -3,11 +3,10 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +29,9 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     protected RunTypeEnum runType;
 
@@ -149,7 +151,28 @@ public abstract class BasePartitioner extends SimplePartitioner {
         gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, fromBatchId, username);
     }
 
-    static Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
+    void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList) {
+        LOGGER.debug("Filter Student Credential Distribution for {} student credentials", credentialList.size());
+        StudentSearchRequest request = getStudentSearchRequest();
+        Iterator scdIt = credentialList.iterator();
+        while (scdIt.hasNext()) {
+            StudentCredentialDistribution scd = (StudentCredentialDistribution)scdIt.next();
+            String districtCode = StringUtils.substring(scd.getSchoolOfRecord(), 0, 3);
+            if (
+                    (request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
+                    ||
+                    (request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
+            ) {
+                scdIt.remove();
+                LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()));
+            }
+        }
+        LOGGER.debug("Total {} selected after filter", credentialList.size());
+    }
+
+    Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
+        filterStudentCredentialDistribution(credentialList);
+        sortStudentCredentialDistributionByNames(credentialList);
         int partitionSize = credentialList.size()/gridSize + 1;
         List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
         for (int i = 0; i < credentialList.size(); i += partitionSize) {
@@ -173,5 +196,14 @@ public abstract class BasePartitioner extends SimplePartitioner {
         }
         logger.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
         return map;
+    }
+
+    StudentSearchRequest getStudentSearchRequest() {
+        JobParameters jobParameters = getJobExecution().getJobParameters();
+        return (StudentSearchRequest)jsonTransformer.unmarshall(jobParameters.getString("searchRequest", "{}"), StudentSearchRequest.class);
+    }
+
+    void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
+        GradSorter.sortStudentCredentialDistributionByNames(students);
     }
 }

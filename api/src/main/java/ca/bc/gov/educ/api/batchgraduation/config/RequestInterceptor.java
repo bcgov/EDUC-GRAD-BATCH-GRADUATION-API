@@ -25,9 +25,12 @@ public class RequestInterceptor implements AsyncHandlerInterceptor {
 
 	EducGradBatchGraduationApiConstants constants;
 
+	LogHelper logHelper;
+
 	@Autowired
-	public RequestInterceptor(EducGradBatchGraduationApiConstants constants) {
+	public RequestInterceptor(EducGradBatchGraduationApiConstants constants, LogHelper logHelper) {
 		this.constants = constants;
+		this.logHelper = logHelper;
 	}
 
 	@Override
@@ -61,7 +64,7 @@ public class RequestInterceptor implements AsyncHandlerInterceptor {
 	 */
 	@Override
 	public void afterCompletion(@NonNull final HttpServletRequest request, final HttpServletResponse response, @NonNull final Object handler, final Exception ex) {
-		LogHelper.logServerHttpReqResponseDetails(request, response, constants.isSplunkLogHelperEnabled());
+		logHelper.logServerHttpReqResponseDetails(request, response, constants.isSplunkLogHelperEnabled());
 		val correlationID = request.getHeader(constants.CORRELATION_ID);
 		if (correlationID != null) {
 			response.setHeader(constants.CORRELATION_ID, request.getHeader(constants.CORRELATION_ID));

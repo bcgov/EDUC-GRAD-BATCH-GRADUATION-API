@@ -2,16 +2,23 @@ package ca.bc.gov.educ.api.batchgraduation.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 /**
  * The type Json util.
  */
+@Component
 public class JsonUtil {
-  public static final ObjectMapper mapper = new ObjectMapper();
 
-  private JsonUtil() {
+
+  ObjectMapper mapper;
+
+  @Autowired
+  public JsonUtil(ObjectMapper mapper) {
+    this.mapper = mapper;
   }
 
   /**
@@ -21,7 +28,7 @@ public class JsonUtil {
    * @return the json string from object
    * @throws JsonProcessingException the json processing exception
    */
-  public static String getJsonStringFromObject(Object payload) throws JsonProcessingException {
+  public String getJsonStringFromObject(Object payload) throws JsonProcessingException {
     return mapper.writeValueAsString(payload);
   }
 
@@ -34,7 +41,7 @@ public class JsonUtil {
    * @return the json object from string
    * @throws JsonProcessingException the json processing exception
    */
-  public static <T> T getJsonObjectFromString(Class<T> clazz, String payload) throws JsonProcessingException {
+  public <T> T getJsonObjectFromString(Class<T> clazz, String payload) throws JsonProcessingException {
     return mapper.readValue(payload, clazz);
   }
 
@@ -45,7 +52,7 @@ public class JsonUtil {
    * @return the byte [ ]
    * @throws JsonProcessingException the json processing exception
    */
-  public static byte[] getJsonBytesFromObject(Object payload) throws JsonProcessingException {
+  public byte[] getJsonBytesFromObject(Object payload) throws JsonProcessingException {
     return mapper.writeValueAsBytes(payload);
   }
 
@@ -58,7 +65,7 @@ public class JsonUtil {
    * @return the json object from byte []
    * @throws JsonProcessingException the json processing exception
    */
-  public static <T> T getObjectFromJsonBytes(Class<T> clazz, byte[] payload) throws IOException {
+  public <T> T getObjectFromJsonBytes(Class<T> clazz, byte[] payload) throws IOException {
     return mapper.readValue(payload, clazz);
   }
 }

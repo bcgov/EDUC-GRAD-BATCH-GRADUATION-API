@@ -37,17 +37,18 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
     public void afterJob(JobExecution jobExecution) {
 		long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 		LOGGER.info(LOG_SEPARATION);
-		LOGGER.info("PSI Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 		JobParameters jobParameters = jobExecution.getJobParameters();
 		ExecutionContext jobContext = jobExecution.getExecutionContext();
 		Long jobExecutionId = jobExecution.getId();
+		String jobType = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TYPE);
+		LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
+
 		String status = jobExecution.getStatus().toString();
 		Date startTime = jobExecution.getStartTime();
 		Date endTime = jobExecution.getEndTime();
 		String jobTrigger = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TRIGGER);
-		String jobType = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TYPE);
 		String transmissionType = jobParameters.getString(EducGradBatchGraduationApiConstants.TRANSMISSION_TYPE);
-		String studentSearchRequest = jobParameters.getString(EducGradBatchGraduationApiConstants.SEARCH_REQUEST);
+		String studentSearchRequest = jobParameters.getString(EducGradBatchGraduationApiConstants.SEARCH_REQUEST, "{}");
 
 		String userScheduledId = jobParameters.getString(EducGradBatchGraduationApiConstants.USER_SCHEDULED);
 		if(userScheduledId != null) {
@@ -92,21 +93,23 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 			List<PsiCredentialDistribution> yed4List = cList.stream().filter(scd -> scd.getPsiCode().compareTo(upl) == 0).collect(Collectors.toList());
 			supportListener.psiPrintFile(yed4List,batchId,upl,mapDist);
 		});
-		String localDownload =  StringUtils.equalsIgnoreCase(transmissionType, "FTP")?"Y":"N";
-		//Grad2-1931 added transmissionType
-		if(!mapDist.isEmpty()) {
-			DistributionResponse disres = restUtils.mergePsiAndUpload(batchId, accessToken, mapDist, localDownload, transmissionType);
+		if(!cList.isEmpty()) {
+			String localDownload = StringUtils.equalsIgnoreCase(transmissionType, "FTP") ? "Y" : "N";
+			//Grad2-1931 added transmissionType
+			String activityCode = StringUtils.equalsIgnoreCase(transmissionType, "PAPER") ? "USERDISTPSIP" : "USERDISTPSIF";
+			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
+			DistributionResponse disres = restUtils.mergePsiAndUpload(batchId, accessToken, distributionRequest, localDownload, transmissionType);
 			if (disres != null) {
-				String activityCode = StringUtils.equalsIgnoreCase(transmissionType, "PAPER") ? "USERDISTPSIP" : "USERDISTPSIF";
-				ResponseObj obj = restUtils.getTokenResponseObject();
-				updateBackStudentRecords(cList, batchId, activityCode, obj.getAccess_token());
+				updateBackStudentRecords(cList, batchId, activityCode);
 			}
-		} else {
-			LOGGER.warn("No records found to process PSI batch {}", batchId);
 		}
 	}
 
-	private void updateBackStudentRecords(List<PsiCredentialDistribution> cList, Long batchId,String activityCode, String accessToken) {
-		cList.forEach(scd->	restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken));
+	private void updateBackStudentRecords(List<PsiCredentialDistribution> cList, Long batchId,String activityCode) {
+		cList.forEach(scd->	{
+			LOGGER.debug("Update back Student Record {}", scd.getStudentID());
+			String accessToken = restUtils.fetchAccessToken();
+			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
+		});
 	}
 }

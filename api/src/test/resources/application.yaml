@@ -110,6 +110,8 @@ endpoint:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/schooldistrictmonth
     student-certificate-regeneration:
       url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/certificate/%s
+    student-data-yearly:
+      url: https://educ-grad-graduation-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduate/report/studentsforyearend
   grad-student-api:
     grad-status: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s
     student-for-grad-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/recalculate
@@ -123,7 +125,10 @@ endpoint:
     read-grad-student-record: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentid/%s/algorithm
     read-grad-student-record-batch: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/batch/%s
     update-flag-ready-for-batch: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/multistudentids/batchflag/jobtype/%s
-    get-student-data-nongrad-yearly: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentnongradreportdata
+    read-student-data-nongrad-yearly: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentnongradreportdata
+    get-student-data-nongrad-yearly: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentnongradreportdata/%s
+    get-school-data-nongrad-yearly: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/schoolnongradreportdata
+    get-district-data-nongrad-yearly: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/districtnongradreportdata
   grad-graduation-report-api:
     get-transcript-list:
       yearly:
@@ -135,6 +140,8 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s&activityCode=%s
     user-req-dis-run:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/userrequest/%s
+    get-district-data-yearly:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/districtdataearly
     get-certificate-types:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/certificatetype/%s
     update-school-report:
@@ -153,6 +160,8 @@ endpoint:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/RPR?batchId=%s&activityCode=%s&localDownload=%s
     blanks-n-upload:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/BCPR?batchId=%s&localDownload=%s
+    posting-distribution:
+      url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/zipandupload
     read-n-post:
       url: https://educ-grad-distribution-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/distribute/run/PSR?batchId=%s
     merge-psi-n-upload:
@@ -160,6 +169,13 @@ endpoint:
   grad-trax-api:
     get-psi-student-list:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
+    school-by-min-code:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/%s
+    district-by-school-category:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/district/schoolCategories?schoolCategory=%s
+  educ-school-api:
+    school-by-min-code:
+      url: https://educ-school-api-75e61b-dev.apps.silver.devops.gov.bc.ca/api/v1/schools/%s
 
 #Splunk LogHelper
 splunk:

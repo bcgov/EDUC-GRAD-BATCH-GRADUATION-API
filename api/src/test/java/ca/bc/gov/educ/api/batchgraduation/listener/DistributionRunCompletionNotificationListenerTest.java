@@ -185,7 +185,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         };
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getStudentDataNonGradEarly())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(constants.getStudentDataNonGradEarlyByMincode())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(repListRes)).thenReturn(Mono.just(List.of(reportGradStudentData)));
@@ -201,13 +201,14 @@ public class DistributionRunCompletionNotificationListenerTest {
 
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
+
+        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode("YEARENDDIST").build();
         Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
         Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
         Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredDataYearly(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
-        Mockito.when(parallelDataFetch.fetchDistributionRequiredDataNonGradYearly(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
-        Mockito.when(restUtils.mergeAndUpload(121L,"asdasd",mapDist,"YEARENDDIST",null)).thenReturn(new DistributionResponse());
+        Mockito.when(restUtils.mergeAndUpload(121L, distributionRequest,"YEARENDDIST",null)).thenReturn(new DistributionResponse());
         distributionRunCompletionNotificationListener.afterJob(ex);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);

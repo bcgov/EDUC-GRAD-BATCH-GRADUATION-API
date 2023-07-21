@@ -25,7 +25,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_MONTHLY_DIS_RUN_BATCH_JOB = "/executemonthlydisrunbatchjob";
     public static final String EXECUTE_YEARLY_DIS_RUN_BATCH_JOB = "/executeyearlydisrunbatchjob";
     public static final String EXECUTE_SUPP_DIS_RUN_BATCH_JOB = "/executesuppdisrunbatchjob";
-    public static final String EXECUTE_YEARLY_NON_GRAD_DIS_RUN_BATCH_JOB = "/executeyearlynongraddisrunbatchjob";
+    public static final String EXECUTE_YEARLY_NON_GRAD_DIS_RUN_BATCH_JOB = "/executenongraddisrunbatchjob";
     public static final String EXECUTE_CERT_REGEN_BATCH_JOB = "/executecertregenbatchjob";
 
     // Special Run
@@ -159,6 +159,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-distribution-api.blanks-n-upload.url}")
     private String createBlanksAndUpload;
 
+    @Value("${endpoint.grad-distribution-api.posting-distribution.url}")
+    private String postingDistribution;
+
     @Value("${endpoint.grad-graduation-report-api.update-student-credential.url}")
     private String updateStudentCredential;
 
@@ -169,7 +172,22 @@ public class EducGradBatchGraduationApiConstants {
     private String updateStudentRecord;
 
     @Value("${endpoint.grad-student-api.get-student-data-nongrad-yearly}")
+    private String studentDataNonGradEarlyByMincode;
+
+    @Value("${endpoint.grad-student-api.get-school-data-nongrad-yearly}")
+    private String schoolDataNonGradEarly;
+
+    @Value("${endpoint.grad-student-api.get-district-data-nongrad-yearly}")
+    private String districtDataNonGradEarly;
+
+    @Value("${endpoint.grad-student-api.read-student-data-nongrad-yearly}")
     private String studentDataNonGradEarly;
+
+    @Value("${endpoint.grad-graduation-report-api.get-district-data-yearly.url}")
+    private String districtDataYearly;
+
+    @Value("${endpoint.grad-graduation-api.student-data-yearly.url}")
+    private String studentReportDataEarly;
 
     @Value("${endpoint.grad-graduation-report-api.user-req-dis-run.url}")
     private String studentDataForUserReqDisRun;
@@ -218,6 +236,15 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-api.student-certificate-regeneration.url}")
     private String studentCertificateRegeneration;
+
+    @Value("${endpoint.educ-school-api.school-by-min-code.url}")
+    private String commonSchoolByMincode;
+
+    @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
+    private String traxSchoolByMincode;
+
+    @Value("${endpoint.grad-trax-api.district-by-school-category.url}")
+    private String traxDistrictBySchoolCategory;
 
     // Splunk LogHelper Enabled
     @Value("${splunk.log-helper.enabled}")
