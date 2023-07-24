@@ -2,15 +2,17 @@ package ca.bc.gov.educ.api.batchgraduation.util;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.TimeZone;
 
 @Component
@@ -18,20 +20,24 @@ public class JsonTransformer implements Transformer {
 
     private static final Logger log = LoggerFactory.getLogger(JsonTransformer.class);
 
+    @Autowired
     ObjectMapper objectMapper;
 
     @PostConstruct
     void initMapper() {
-        objectMapper = new ObjectMapper();
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addSerializer(LocalDate.class, new GradLocalDateSerializer());
+        simpleModule.addSerializer(LocalDateTime.class, new GradLocalDateTimeSerializer());
+        simpleModule.addDeserializer(LocalDate.class, new GradLocalDateDeserializer());
+        simpleModule.addDeserializer(LocalDateTime.class, new GradLocalDateTimeDeserializer());
         objectMapper
                 .findAndRegisterModules()
+                .registerModule(simpleModule)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .disable(SerializationFeature.INDENT_OUTPUT)
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
                 .enable(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
                 .enable(JsonGenerator.Feature.ESCAPE_NON_ASCII)
-                .setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
                 .setTimeZone(TimeZone.getDefault())
         //        .enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS)
         ;
@@ -50,7 +56,7 @@ public class JsonTransformer implements Transformer {
         return result;
     }
 
-    public Object unmarshallWithWrapper(String input, Class<?> clazz) throws TransformerException {
+    public Object unmarshallWithWrapper(String input, Class<?> clazz) {
         final ObjectReader reader = objectMapper.readerFor(clazz);
         Object result = null;
         long start = System.currentTimeMillis();
@@ -66,7 +72,7 @@ public class JsonTransformer implements Transformer {
         return result;
     }
 
-    public String marshallWithWrapper(Object input) throws TransformerException {
+    public String marshallWithWrapper(Object input) {
         ObjectWriter prettyPrinter = objectMapper.writer();
         String result = null;
         try {
