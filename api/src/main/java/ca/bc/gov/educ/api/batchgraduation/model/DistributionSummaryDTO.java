@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
