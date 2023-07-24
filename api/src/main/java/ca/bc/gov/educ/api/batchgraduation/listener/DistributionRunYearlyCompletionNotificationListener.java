@@ -17,10 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-<<<<<<< HEAD
 import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.STARTED;
-=======
->>>>>>> e2d4283ee07cbc922a8aabceec8acab4ccc0a8f0
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
 
