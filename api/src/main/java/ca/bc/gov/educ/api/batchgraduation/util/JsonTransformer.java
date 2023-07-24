@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -57,7 +56,7 @@ public class JsonTransformer implements Transformer {
         return result;
     }
 
-    public Object unmarshallWithWrapper(String input, Class<?> clazz) throws TransformerException {
+    public Object unmarshallWithWrapper(String input, Class<?> clazz) {
         final ObjectReader reader = objectMapper.readerFor(clazz);
         Object result = null;
         long start = System.currentTimeMillis();
@@ -73,7 +72,7 @@ public class JsonTransformer implements Transformer {
         return result;
     }
 
-    public String marshallWithWrapper(Object input) throws TransformerException {
+    public String marshallWithWrapper(Object input) {
         ObjectWriter prettyPrinter = objectMapper.writer();
         String result = null;
         try {
