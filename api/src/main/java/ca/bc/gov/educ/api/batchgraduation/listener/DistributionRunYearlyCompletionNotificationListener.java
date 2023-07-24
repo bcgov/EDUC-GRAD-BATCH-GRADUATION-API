@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.STARTED;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
 
@@ -63,7 +64,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
 			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
+			processBatchJobHistory(summaryDTO, jobExecutionId, STARTED.name(), jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
