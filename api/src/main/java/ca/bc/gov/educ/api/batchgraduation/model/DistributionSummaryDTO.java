@@ -31,5 +31,6 @@ public class DistributionSummaryDTO extends BaseDistributionSummaryDTO {
             }
         }
         setReadCount(globalList.size());
+        setProcessedCount(0);
     }
 }
