@@ -51,7 +51,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
             eligibleStudentSchoolDistricts = searchRequest.getDistricts();
         }
-        if(searchRequest == null || ((searchRequest.getDistricts() != null && searchRequest.getDistricts().isEmpty()) || (searchRequest.getSchoolCategoryCodes() != null && searchRequest.getSchoolCategoryCodes().isEmpty()))) {
+        if(eligibleStudentSchoolDistricts.isEmpty()) {
             eligibleStudentSchoolDistricts = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
         }
         List<String> finalDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
