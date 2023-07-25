@@ -1,14 +1,15 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,12 +38,19 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
         if (res != null) {
             accessToken = res.getAccess_token();
         }
-        Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
-        DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
-        if(parallelDTO != null) {
-            credentialList.addAll(parallelDTO.certificateList());
+        JobParameters jobParameters = context.getJobParameters();
+        String searchRequest = jobParameters.getString("searchRequest");
+        if (StringUtils.isBlank(searchRequest)) {
+            Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
+            DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
+            if(parallelDTO != null) {
+                credentialList.addAll(parallelDTO.certificateList());
+            }
+        } else {
+            credentialList.addAll(getStudentsForUserReqRun(searchRequest, accessToken));
         }
+
         Set<UUID> studentSet = new HashSet<>();
         if(!credentialList.isEmpty()) {
             studentSet = credentialList.stream().map(StudentCredentialDistribution::getStudentID).collect(Collectors.toSet());
@@ -76,6 +84,32 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
         return new HashMap<>();
     }
 
+    private List<StudentCredentialDistribution> getStudentsForDistRun(String accessToken) {
+        List<StudentCredentialDistribution> credentialList = new ArrayList<>();
+        Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
+        DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
+        if(parallelDTO != null) {
+            credentialList.addAll(parallelDTO.certificateList());
+        }
+        return credentialList;
+    }
+
+    // retrieve students based on the search criteria requested by user
+    private List<StudentCredentialDistribution> getStudentsForUserReqRun(String searchRequest, String accessToken) {
+        CertificateRegenerationRequest certRegenReq = null;
+        try {
+            certRegenReq = new ObjectMapper().readValue(searchRequest, CertificateRegenerationRequest.class);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        if (certRegenReq != null && "Y".equalsIgnoreCase(certRegenReq.getRunMode())) {
+            StudentSearchRequest req = new StudentSearchRequest();
+            req.setPens(certRegenReq.getPens());
+            return restUtils.getStudentsForUserReqDisRun("OC", req, accessToken);
+        } else {
+            return getStudentsForDistRun(accessToken);
+        }
+    }
 
     @Override
     protected JobExecution getJobExecution() {

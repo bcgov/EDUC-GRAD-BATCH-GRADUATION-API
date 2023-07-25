@@ -666,6 +666,7 @@ public class JobLauncherController {
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, CERT_REGEN);
+        builder.addString(SEARCH_REQUEST, "");
         response.setJobType(CERT_REGEN);
         response.setTriggerBy(MANUAL);
         response.setStartTime(new Date(System.currentTimeMillis()));
@@ -680,7 +681,37 @@ public class JobLauncherController {
             response.setException(e.getLocalizedMessage());
             return ResponseEntity.status(500).body(response);
         }
+    }
 
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_CERT_REGEN_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Specialized User Req Cert Regen Job", description = "Run Specialized Cert Regen Job", tags = { "Cert Regen" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<BatchJobResponse> launchUserReqCertRegenJob(@RequestBody CertificateRegenerationRequest certificateRegenerationRequest) {
+        logger.debug("launchUserReqCertRegenJob");
+        BatchJobResponse response = new BatchJobResponse();
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, CERT_REGEN);
+        response.setJobType(CERT_REGEN);
+        response.setTriggerBy(MANUAL);
+        response.setStartTime(new Date(System.currentTimeMillis()));
+        response.setStatus(BatchStatusEnum.STARTED.name());
+
+        try {
+            String searchData = jsonTransformer.marshall(certificateRegenerationRequest);
+            builder.addString(SEARCH_REQUEST, searchData);
+            response.setJobParameters(searchData);
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(CERTIFICATE_REGENERATION_BATCH_JOB), builder.toJobParameters());
+            response.setBatchId(jobExecution.getId());
+            return ResponseEntity.ok(response);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                 | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
+            response.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(response);
+        }
     }
 
     @PostMapping(EducGradBatchGraduationApiConstants.NOTIFY_DISTRIBUTION_JOB_IS_COMPLETED)
