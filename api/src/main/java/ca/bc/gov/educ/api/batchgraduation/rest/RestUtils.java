@@ -23,7 +23,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
@@ -640,6 +643,24 @@ public class RestUtils {
         };
         try {
             String url = String.format(constants.getTraxDistrictBySchoolCategory(), schoolCategoryCode);
+            return webClient.get().uri(url)
+                    .headers(h -> {
+                        h.setBearerAuth(getAccessToken());
+                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
+                    })
+                    .retrieve().bodyToMono(responseType)
+                    .block();
+        } catch (Exception e) {
+            LOGGER.error("Trax API is not available {}", e.getLocalizedMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<School> getSchoolBySchoolCategoryCode(String schoolCategoryCode) {
+        final ParameterizedTypeReference<List<School>> responseType = new ParameterizedTypeReference<>() {
+        };
+        try {
+            String url = String.format(constants.getTraxSchoolBySchoolCategory(), schoolCategoryCode);
             return webClient.get().uri(url)
                     .headers(h -> {
                         h.setBearerAuth(getAccessToken());

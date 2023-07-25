@@ -31,6 +31,10 @@ public class School implements Serializable {
         this.mincode = value;
     }
 
+    public void setMinCode(String value) {
+        this.mincode = value;
+    }
+
     public String getName() {
         return name;
     }
