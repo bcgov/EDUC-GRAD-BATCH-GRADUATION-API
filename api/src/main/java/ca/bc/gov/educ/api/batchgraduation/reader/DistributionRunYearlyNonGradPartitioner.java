@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.District;
+import ca.bc.gov.educ.api.batchgraduation.model.School;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
@@ -37,22 +36,25 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SD", restUtils.getAccessToken());
 
-        List<String> eligibleStudentDistricts = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
+        List<String> eligibleStudentSchoolDistricts = new ArrayList();
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
-            List<String> useFilterDistricts = new ArrayList<>();
+            List<String> useFilterSchoolDistricts = new ArrayList<>();
             for(String schoolCategoryCode: searchRequest.getSchoolCategoryCodes()) {
-                List<District> districts = restUtils.getDistrictBySchoolCategoryCode(schoolCategoryCode);
-                for(District district: districts) {
-                    useFilterDistricts.add(district.getDistrictNumber());
+                List<School> schools = restUtils.getSchoolBySchoolCategoryCode(schoolCategoryCode);
+                for(School school: schools) {
+                    useFilterSchoolDistricts.add(school.getMincode());
                 }
             }
-            eligibleStudentDistricts = eligibleStudentDistricts.stream().distinct().filter(useFilterDistricts::contains).collect(Collectors.toList());
+            eligibleStudentSchoolDistricts = useFilterSchoolDistricts;
         }
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
-            eligibleStudentDistricts = eligibleStudentDistricts.stream().distinct().filter(searchRequest.getDistricts()::contains).collect(Collectors.toList());
+            eligibleStudentSchoolDistricts = searchRequest.getDistricts();
         }
-        List<String> finalDistricts = eligibleStudentDistricts.stream().sorted().toList();
+        if(searchRequest == null || ((searchRequest.getDistricts() != null && searchRequest.getDistricts().isEmpty()) || (searchRequest.getSchoolCategoryCodes() != null && searchRequest.getSchoolCategoryCodes().isEmpty()))) {
+            eligibleStudentSchoolDistricts = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
+        }
+        List<String> finalDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(!finalDistricts.isEmpty()) {
             updateBatchJobHistory(createBatchJobHistory(), (long) finalDistricts.size());
             int partitionSize = finalDistricts.size();
