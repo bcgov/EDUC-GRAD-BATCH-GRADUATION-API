@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,5 +43,12 @@ public class ReportGradStudentData implements Serializable {
     private LocalDateTime updateDate;
     private List<CertificateType> certificateTypes;
     private List<GradRequirement> nonGradReasons;
+
+    public String lastUpdateDateAsString() {
+        if(updateDate != null) {
+            return updateDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
+        return null;
+    }
 
 }

@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +20,7 @@ public class StudentCredentialDistribution {
 	private String legalMiddleNames;
 	private String legalLastName;
 	private String programCompletionDate;
-	private LocalDateTime lastUpdateDate;
+	private String lastUpdateDate;
 	private String honoursStanding;
 	private String program;
 	private String studentGrade;
