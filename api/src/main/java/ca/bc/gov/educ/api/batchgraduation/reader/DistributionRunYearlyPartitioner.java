@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.District;
+import ca.bc.gov.educ.api.batchgraduation.model.School;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -20,7 +20,7 @@ import java.util.Map;
 
 public class DistributionRunYearlyPartitioner extends BasePartitioner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyPartitioner.class);
+    private static final Logger logger = LoggerFactory.getLogger(DistributionRunYearlyPartitioner.class);
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;
@@ -40,26 +40,28 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SD", restUtils.getAccessToken());
 
-        List<StudentCredentialDistribution> credentialList = parallelDataFetch.fetchStudentCredentialsDistributionDataYearly();
+        List<StudentCredentialDistribution> eligibleStudentSchoolDistricts = parallelDataFetch.fetchStudentCredentialsDistributionDataYearly();
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
-            List<String> useFilterDistricts = new ArrayList<>();
+            List<String> useFilterSchoolDistricts = new ArrayList<>();
             for(String schoolCategoryCode: searchRequest.getSchoolCategoryCodes()) {
-                List<District> districts = restUtils.getDistrictBySchoolCategoryCode(schoolCategoryCode);
-                for(District district: districts) {
-                    useFilterDistricts.add(district.getDistrictNumber());
+                logger.debug("Use schoolCategory code {} to find list of schools", schoolCategoryCode);
+                List<School> schools = restUtils.getSchoolBySchoolCategoryCode(schoolCategoryCode);
+                for(School school: schools) {
+                    logger.debug("School {} found by schoolCategory code {}", school.getMincode(), schoolCategoryCode);
+                    useFilterSchoolDistricts.add(school.getMincode());
                 }
             }
-            credentialList.removeIf(scr->!useFilterDistricts.contains(StringUtils.substring(scr.getSchoolOfRecord(), 0, 3)));
+            eligibleStudentSchoolDistricts.removeIf(scr->!useFilterSchoolDistricts.contains(scr.getSchoolOfRecord()));
         }
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
-            credentialList.removeIf(scr->!searchRequest.getDistricts().contains(StringUtils.substring(scr.getSchoolOfRecord(), 0, 3)));
+            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getDistricts().contains(StringUtils.substring(scr.getSchoolOfRecord(), 0, 3)));
         }
-        if(!credentialList.isEmpty()) {
-            updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
-            return getStringExecutionContextMap(gridSize, credentialList, null, LOGGER);
+        if(!eligibleStudentSchoolDistricts.isEmpty()) {
+            updateBatchJobHistory(createBatchJobHistory(), (long) eligibleStudentSchoolDistricts.size());
+            return getStringExecutionContextMap(gridSize, eligibleStudentSchoolDistricts, null, logger);
         }
-        LOGGER.info("No Credentials Found for Processing");
+        logger.info("No Credentials Found for Processing");
         return new HashMap<>();
     }
 
