@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateP
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -13,6 +14,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -49,6 +51,9 @@ public class JobLauncherControllerTest {
     private static final String TRANMISSION_TYPE = "transmissionType";
     private static final String DISDTO = "distributionSummaryDTO";
     private static final String SCHREPORT = "SCHREP";
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     @Mock
     GradDashboardService gradDashboardService;
@@ -518,6 +523,28 @@ public class JobLauncherControllerTest {
         try {
             org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob(CERT_REGEN), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchCertRegenJob();
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(builder).isNotNull();
+    }
+
+    @Test
+    public void testLaunchUserReqCertRegenJob() {
+        boolean exceptionIsThrown = false;
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, CERT_REGEN);
+
+        CertificateRegenerationRequest req = new CertificateRegenerationRequest();
+        req.setPens(Arrays.asList("123456789", "234567890"));
+        req.setRunMode("Y");
+
+        try {
+            org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob(CERT_REGEN), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            jobLauncherController.launchUserReqCertRegenJob(req);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
