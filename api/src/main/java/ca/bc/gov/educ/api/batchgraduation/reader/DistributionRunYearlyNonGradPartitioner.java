@@ -57,7 +57,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         List<String> finalDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(!finalDistricts.isEmpty()) {
             updateBatchJobHistory(createBatchJobHistory(), (long) finalDistricts.size());
-            int partitionSize = finalDistricts.size();
+            int partitionSize = finalDistricts.size()/gridSize + 1;
             List<List<String>> partitions = new LinkedList<>();
             for (int i = 0; i < finalDistricts.size(); i += partitionSize) {
                 partitions.add(finalDistricts.subList(i, Math.min(i + partitionSize, finalDistricts.size())));
