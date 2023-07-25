@@ -105,7 +105,7 @@ public class GraduationReportService {
 		dist.setProgram(data.getProgramCode());
 		dist.setStudentGrade(data.getStudentGrade());
 		dist.setNonGradReasons(data.getNonGradReasons());
-		dist.setLastUpdateDate(data.getUpdateDate());
+		dist.setLastUpdateDate(data.lastUpdateDateAsString());
 		return dist;
 	}
 }

@@ -1,10 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,9 +40,15 @@ public class ReportGradStudentData implements Serializable {
     private String transcriptTypeCode;
     private String certificateTypeCode;
     private String paperType;
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private Date updateDate;
+    private LocalDateTime updateDate;
     private List<CertificateType> certificateTypes;
     private List<GradRequirement> nonGradReasons;
+
+    public String lastUpdateDateAsString() {
+        if(updateDate != null) {
+            return updateDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
+        return null;
+    }
 
 }

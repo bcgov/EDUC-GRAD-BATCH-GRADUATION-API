@@ -1,9 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,8 +20,7 @@ public class StudentCredentialDistribution {
 	private String legalMiddleNames;
 	private String legalLastName;
 	private String programCompletionDate;
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-	private Date lastUpdateDate;
+	private String lastUpdateDate;
 	private String honoursStanding;
 	private String program;
 	private String studentGrade;
