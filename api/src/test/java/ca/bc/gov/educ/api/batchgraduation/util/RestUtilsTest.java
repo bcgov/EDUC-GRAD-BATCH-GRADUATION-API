@@ -1253,12 +1253,30 @@ public class RestUtilsTest {
         };
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getTraxDistrictBySchoolCategory(), "002"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getTraxDistrictBySchoolCategory(), "02"))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(List.of(district)));
 
         List<District> res = this.restUtils.getDistrictBySchoolCategoryCode("02");
+        assertThat(res).isNotNull();
+    }
+
+    @Test
+    public void testGetSchoolBySchoolCategoryCode() {
+        School school = new School();
+        school.setMincode("1234567");
+
+        final ParameterizedTypeReference<List<School>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getTraxSchoolBySchoolCategory(), "02"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(List.of(school)));
+
+        List<School> res = this.restUtils.getSchoolBySchoolCategoryCode("02");
         assertThat(res).isNotNull();
     }
 
