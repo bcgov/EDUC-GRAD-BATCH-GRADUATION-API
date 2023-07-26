@@ -42,7 +42,7 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
 
         logger.debug("Retrieve students for yearly distribution");
         List<StudentCredentialDistribution> eligibleStudentSchoolDistricts = parallelDataFetch.fetchStudentCredentialsDistributionDataYearly();
-        logger.debug("Total {} eligible StudentCredentialDistributions found", eligibleStudentSchoolDistricts);
+        logger.debug("Total {} eligible StudentCredentialDistributions found", eligibleStudentSchoolDistricts.size());
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
             List<String> useFilterSchoolDistricts = new ArrayList<>();
