@@ -54,6 +54,9 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
             eligibleStudentSchoolDistricts = searchRequest.getDistricts();
         }
+        if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
+            eligibleStudentSchoolDistricts = searchRequest.getSchoolOfRecords();
+        }
         logger.debug("Total {} schools after filters", eligibleStudentSchoolDistricts.size());
         if(eligibleStudentSchoolDistricts.isEmpty()) {
             logger.debug("No filter found, retrieve all districts");

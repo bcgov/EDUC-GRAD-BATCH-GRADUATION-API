@@ -59,6 +59,10 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getDistricts().contains(StringUtils.substring(scr.getSchoolOfRecord(), 0, 3)));
         }
+        if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
+            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getSchoolOfRecords().contains(scr.getSchoolOfRecord()));
+        }
+
         if(!eligibleStudentSchoolDistricts.isEmpty()) {
             updateBatchJobHistory(createBatchJobHistory(), (long) eligibleStudentSchoolDistricts.size());
             return getStringExecutionContextMap(gridSize, eligibleStudentSchoolDistricts, null, logger);
