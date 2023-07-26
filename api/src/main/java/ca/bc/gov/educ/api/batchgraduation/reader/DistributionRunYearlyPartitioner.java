@@ -40,7 +40,7 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SD", restUtils.getAccessToken());
 
-        logger.debug("Retrieve students for early distribution");
+        logger.debug("Retrieve students for yearly distribution");
         List<StudentCredentialDistribution> eligibleStudentSchoolDistricts = parallelDataFetch.fetchStudentCredentialsDistributionDataYearly();
         logger.debug("Total {} eligible StudentCredentialDistributions found", eligibleStudentSchoolDistricts);
         StudentSearchRequest searchRequest = getStudentSearchRequest();
