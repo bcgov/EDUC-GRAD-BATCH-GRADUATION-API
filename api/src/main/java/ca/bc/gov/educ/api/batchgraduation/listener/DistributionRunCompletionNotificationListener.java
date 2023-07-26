@@ -63,14 +63,8 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 		summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
-		ResponseObj tokenResponse = restUtils.getTokenResponseObject();
 		LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-		try {
-			// GRAD2-2017: fire and forget to distribution api and finish.
-			processGlobalList(summaryDTO,activityCode);
-		} catch (Exception e) {
-			LOGGER.error("Distribution Failed for Batch JOB: {} due to: {}", jobExecutionId, e.getLocalizedMessage());
-		}
+		processGlobalList(summaryDTO,activityCode);
 		LOGGER.info("=======================================================================================");
     }
 
@@ -99,11 +93,9 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
-		if (!cList.isEmpty()) {
-			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
-			distributionRequest.setSchools(new ArrayList<>());
-			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
-		}
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
+		distributionRequest.setSchools(new ArrayList<>());
+		restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
 	}
 
 	private void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {

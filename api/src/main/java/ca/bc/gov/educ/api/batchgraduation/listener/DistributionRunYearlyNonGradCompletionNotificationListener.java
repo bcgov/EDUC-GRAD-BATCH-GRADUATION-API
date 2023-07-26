@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.COMPLETED;
 import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.STARTED;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
@@ -57,7 +58,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 			summaryDTO.setReadCount(summaryDTO.getGlobalList().size());
 			summaryDTO.setProcessedCount(0);
 
-			processGlobalList(summaryDTO, searchRequest, "NONGRADDIST");
+			String processGlobalListStatus = processGlobalList(summaryDTO, searchRequest, "NONGRADDIST") ? STARTED.name() : COMPLETED.name();
 
 			String studentSearchRequest = jobParameters.getString("searchRequest", "{}");
 			// display Summary Details
@@ -68,7 +69,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
 			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, STARTED.name(), jobTrigger, jobType, startTime, endTime, jobParametersDTO);
+			processBatchJobHistory(summaryDTO, jobExecutionId, processGlobalListStatus, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
@@ -76,7 +77,8 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 		}
     }
 
-	protected void processGlobalList(DistributionSummaryDTO summaryDTO, String searchRequest, String activityCode) {
+	protected boolean processGlobalList(DistributionSummaryDTO summaryDTO, String searchRequest, String activityCode) {
+		boolean callDistribution = false;
     	Long batchId = summaryDTO.getBatchId();
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
 		filterStudentCredentialDistribution(cList, searchRequest, activityCode);
@@ -93,11 +95,13 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
-		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
-		distributionRequest.setSchools(summaryDTO.getSchools());
 		if (!cList.isEmpty()) {
+			callDistribution = true;
+			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
+			distributionRequest.setSchools(summaryDTO.getSchools());
 			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
 		}
+		return callDistribution;
 	}
 
 	protected void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
