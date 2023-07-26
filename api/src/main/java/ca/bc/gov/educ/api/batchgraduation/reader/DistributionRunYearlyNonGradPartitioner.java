@@ -36,6 +36,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SD", restUtils.getAccessToken());
 
+        logger.debug("Retrieve schools for non grad early distribution");
         List<String> eligibleStudentSchoolDistricts = new ArrayList();
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
@@ -53,13 +54,14 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
             eligibleStudentSchoolDistricts = searchRequest.getDistricts();
         }
+        logger.debug("Total {} schools after filters", eligibleStudentSchoolDistricts.size());
         if(eligibleStudentSchoolDistricts.isEmpty()) {
             logger.debug("No filter found, retrieve all districts");
             eligibleStudentSchoolDistricts = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
         }
         List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {
-            logger.debug("Final list of eligible district/School codes {}", String.join(", ", finalSchoolDistricts));
+            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
         }
         if(!finalSchoolDistricts.isEmpty()) {
             updateBatchJobHistory(createBatchJobHistory(), (long) finalSchoolDistricts.size());
