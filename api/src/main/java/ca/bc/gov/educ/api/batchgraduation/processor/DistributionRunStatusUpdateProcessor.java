@@ -60,7 +60,7 @@ public class DistributionRunStatusUpdateProcessor {
 
         LOGGER.debug("updateBackStudentRecords are completed");
         // update status for batch job history
-        distributionService.updateDistributionBatchJobStatus(batchId, failedCount, status, populateJobParametersDTO(jobType, null));
+        distributionService.updateDistributionBatchJobStatus(batchId, failedCount, status);
         LOGGER.info("END - DistributionRunStatusUpdateProcessor for batchId = {}, status = {}", batchId, status);
     }
 
@@ -99,13 +99,6 @@ public class DistributionRunStatusUpdateProcessor {
 
     private void handleUnprocessedErrors(Map<String, ServiceException> unprocessed) {
         unprocessed.forEach((k, v) -> LOGGER.error("Student with id: {} did not have distribution date updated during monthly run due to: {}", k, v.getLocalizedMessage()));
-    }
-
-    private String populateJobParametersDTO(String jobType, String credentialType) {
-        JobParametersForDistribution jobParamsDto = new JobParametersForDistribution();
-        jobParamsDto.setJobName(jobType);
-        jobParamsDto.setCredentialType(credentialType);
-        return jsonTransformer.marshall(jobParamsDto);
     }
 
 }

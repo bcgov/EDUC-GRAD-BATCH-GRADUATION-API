@@ -152,7 +152,7 @@ public class DistributionServiceTest {
 
         boolean isExceptionThrown = false;
         try {
-            distributionService.updateDistributionBatchJobStatus(batchId, 0, status, null);
+            distributionService.updateDistributionBatchJobStatus(batchId, 0, status);
         } catch (Exception ex) {
             isExceptionThrown = true;
         }

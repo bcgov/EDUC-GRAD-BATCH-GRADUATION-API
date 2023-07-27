@@ -72,17 +72,15 @@ public class DistributionService extends GradService {
     }
 
     @Transactional
-    public void updateDistributionBatchJobStatus(Long batchId, int failedCount, String status, String jobParameters) {
+    public void updateDistributionBatchJobStatus(Long batchId, int failedCount, String status) {
         log.debug("updateDistributionBatchJobStatus - retrieve the batch job history: batchId = {}", batchId);
         BatchGradAlgorithmJobHistoryEntity jobHistory = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
         jobHistory.setEndTime(new Date(System.currentTimeMillis()));
         jobHistory.setStatus(status);
         jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed() - failedCount);
-        jobHistory.setJobParameters(jobParameters);
         log.debug("updateDistributionBatchJobStatus - save the batch job history: batchId = {}, status = {}. actual processed count = {}", batchId, status, jobHistory.getActualStudentsProcessed());
         gradBatchHistoryService.saveGradAlgorithmJobHistory(jobHistory);
         log.debug("updateDistributionBatchJobStatus - save the batch job history is completed!");
     }
-
 
 }
