@@ -1,29 +1,13 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
-import ca.bc.gov.educ.api.batchgraduation.util.GradLocalDateTimeDeserializer;
-import ca.bc.gov.educ.api.batchgraduation.util.GradLocalDateTimeSerializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 public class BaseModel {
 	private String createUser;
-	@JsonSerialize(using = GradLocalDateTimeSerializer.class)
-	@JsonDeserialize(using = GradLocalDateTimeDeserializer.class)
-	private LocalDateTime createDate;
+	private Date createDate;
 	private String updateUser;
-	@JsonSerialize(using = GradLocalDateTimeSerializer.class)
-	@JsonDeserialize(using = GradLocalDateTimeDeserializer.class)
-	private LocalDateTime updateDate;
-
-	public LocalDateTime getUpdateDate() {
-		return updateDate == null ? LocalDateTime.now() : updateDate;
-	}
-
-	public LocalDateTime getCreateDate() {
-		return createDate == null ? LocalDateTime.now() : createDate;
-	}
+	private Date updateDate;
 }
