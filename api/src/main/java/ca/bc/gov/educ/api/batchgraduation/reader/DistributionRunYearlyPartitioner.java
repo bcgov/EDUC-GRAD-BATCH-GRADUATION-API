@@ -41,9 +41,12 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SD", restUtils.getAccessToken());
 
-        logger.debug("Retrieve students for yearly distribution");
+        long startTime = System.currentTimeMillis();
+        logger.debug("Retrieve students for Yearly Distribution");
         List<StudentCredentialDistribution> eligibleStudentSchoolDistricts = parallelDataFetch.fetchStudentCredentialsDistributionDataYearly();
-        logger.debug("Total {} eligible StudentCredentialDistributions found", eligibleStudentSchoolDistricts.size());
+        long endTime = System.currentTimeMillis();
+        long diff = (endTime - startTime)/1000;
+        logger.debug("Total {} eligible StudentCredentialDistributions found in {} sec", eligibleStudentSchoolDistricts.size(), diff);
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
             List<String> useFilterSchoolDistricts = new ArrayList<>();
@@ -62,6 +65,9 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         }
         if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getSchoolOfRecords().contains(scr.getSchoolOfRecord()));
+        }
+        if(searchRequest != null && searchRequest.getPens() != null && !searchRequest.getPens().isEmpty()) {
+            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getPens().contains(scr.getPen()));
         }
         if(!eligibleStudentSchoolDistricts.isEmpty()) {
             updateBatchJobHistory(createBatchJobHistory(), (long) eligibleStudentSchoolDistricts.size());

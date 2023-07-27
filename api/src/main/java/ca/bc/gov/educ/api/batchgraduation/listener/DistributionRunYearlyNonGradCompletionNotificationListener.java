@@ -81,7 +81,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 		boolean callDistribution = false;
     	Long batchId = summaryDTO.getBatchId();
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
-		filterStudentCredentialDistribution(cList, searchRequest, activityCode);
+		filterStudentCredentialDistribution(cList, activityCode);
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
 		summaryDTO.recalculateCredentialCounts();
 		LOGGER.info("list size =  {}", cList.size());

@@ -9,7 +9,7 @@ import java.util.UUID;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Component
-public class GraduationStudentRecord extends BaseModel{
+public class GraduationStudentRecord extends BaseModel {
 
     private String studentGradData;
     private String studentProjectedGradData;

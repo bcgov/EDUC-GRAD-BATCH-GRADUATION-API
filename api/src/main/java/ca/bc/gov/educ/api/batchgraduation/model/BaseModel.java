@@ -1,8 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
-import java.util.Date;
-
 import lombok.Data;
+
+import java.util.Date;
 
 @Data
 public class BaseModel {

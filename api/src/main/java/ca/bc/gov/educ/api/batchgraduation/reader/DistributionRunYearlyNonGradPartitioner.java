@@ -37,7 +37,8 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SD", restUtils.getAccessToken());
 
-        logger.debug("Retrieve schools for non grad early distribution");
+        long startTime = System.currentTimeMillis();
+        logger.debug("Retrieve schools for Non Grad Yearly Distribution");
         List<String> eligibleStudentSchoolDistricts = new ArrayList();
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
@@ -58,10 +59,16 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
             eligibleStudentSchoolDistricts = searchRequest.getSchoolOfRecords();
         }
-        logger.debug("Total {} schools after filters", eligibleStudentSchoolDistricts.size());
+        long endTime = System.currentTimeMillis();
+        long diff = (endTime - startTime)/1000;
+        logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
         if(eligibleStudentSchoolDistricts.isEmpty()) {
             logger.debug("No filter found, retrieve all districts");
+            startTime = System.currentTimeMillis();
             eligibleStudentSchoolDistricts = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
+            endTime = System.currentTimeMillis();
+            diff = (endTime - startTime)/1000;
+            logger.debug("All {} districts retrieved in {} sec", eligibleStudentSchoolDistricts.size(), diff);
         }
         List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {

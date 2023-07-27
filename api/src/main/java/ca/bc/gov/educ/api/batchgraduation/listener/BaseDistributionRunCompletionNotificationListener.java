@@ -14,7 +14,6 @@ import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 public abstract class BaseDistributionRunCompletionNotificationListener extends JobExecutionListenerSupport {
@@ -126,24 +125,8 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         GradSorter.sortStudentCredentialDistributionByNames(students);
     }
 
-    void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String searchRequest, String activityCode) {
-        LOGGER.debug("Filter Student Credential Distribution for {} student credentials", credentialList.size());
-        StudentSearchRequest request = getStudentSearchRequest(searchRequest);
-        if(request != null) {
-            Iterator scdIt = credentialList.iterator();
-            while (scdIt.hasNext()) {
-                StudentCredentialDistribution scd = (StudentCredentialDistribution) scdIt.next();
-                String districtCode = StringUtils.substring(scd.getSchoolOfRecord(), 0, 3);
-                if (
-                        (request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
-                                ||
-                                (request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
-                ) {
-                    scdIt.remove();
-                    LOGGER.debug("Student Credential {}/{} removed by the filters \"{}\" and \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()), String.join(",", request.getSchoolCategoryCodes()));
-                }
-            }
-        }
+    void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String activityCode) {
+        LOGGER.debug("Filter {} Student Credential Distribution for {} student credentials", activityCode, credentialList.size());
         if("NONGRADDIST".equalsIgnoreCase(activityCode)) {
             LOGGER.debug("Apply {} filters for the list of {} students", "NONGRADDIST", credentialList.size());
             credentialList.removeIf(s->"SCCP".equalsIgnoreCase(s.getProgram()));
