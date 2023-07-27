@@ -56,20 +56,18 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         String jobParamsDtoStr = null;
 
         if (taskSelection == null) {
-            // Scheduled Distribution (Monthly or Yearly)
+            // Distribution (Monthly, Year-end, Year-end NonGrad, Supplemental)
             jobParamsDtoStr = populateJobParametersDTO(jobType, null, studentSearchRequest);
         } else {
-            switch (taskSelection) {
-                case URDBJ: // User Request Distribution
-                    jobParamsDtoStr = populateJobParametersDTO(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
-                    break;
-                case BDBJ: // Blank Distribution
-                    jobParamsDtoStr = populateJobParametersDTOForBlankDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
-                    break;
-                case URPDBJ: // PSI Distribution
-                    jobParamsDtoStr = populateJobParametersDTOForPsiDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
-                    break;
-            }
+            jobParamsDtoStr = switch (taskSelection) {
+                case URDBJ -> // User Request Distribution
+                        populateJobParametersDTO(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
+                case BDBJ -> // Blank Distribution
+                        populateJobParametersDTOForBlankDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
+                case URPDBJ -> // PSI Distribution
+                        populateJobParametersDTOForPsiDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
+                default -> jobParamsDtoStr;
+            };
         }
 
         return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
