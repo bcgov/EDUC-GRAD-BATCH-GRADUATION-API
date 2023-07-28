@@ -35,17 +35,21 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
     public Map<String, ExecutionContext> partition(int gridSize) {
 
         // Clean up existing reports before running new one
+        logger.debug("Delete School Reports for Yearly Distribution");
+        long startTime = System.currentTimeMillis();
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_YE", restUtils.getAccessToken());
-        restUtils.deleteSchoolReportRecord("", "DISTREP_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SD", restUtils.getAccessToken());
-
-        long startTime = System.currentTimeMillis();
-        logger.debug("Retrieve students for Yearly Distribution");
-        List<StudentCredentialDistribution> eligibleStudentSchoolDistricts = parallelDataFetch.fetchStudentCredentialsDistributionDataYearly();
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
+        logger.debug("Old School Reports deleted in {} sec", diff);
+
+        startTime = System.currentTimeMillis();
+        logger.debug("Retrieve students for Yearly Distribution");
+        List<StudentCredentialDistribution> eligibleStudentSchoolDistricts = parallelDataFetch.fetchStudentCredentialsDistributionDataYearly();
+        endTime = System.currentTimeMillis();
+        diff = (endTime - startTime)/1000;
         logger.debug("Total {} eligible StudentCredentialDistributions found in {} sec", eligibleStudentSchoolDistricts.size(), diff);
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
