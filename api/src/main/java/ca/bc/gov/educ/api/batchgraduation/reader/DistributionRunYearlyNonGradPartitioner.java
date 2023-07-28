@@ -29,15 +29,21 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
+
         // Clean up existing reports before running new one
+        logger.debug("Delete School Reports for Yearly Distribution");
+        long startTime = System.currentTimeMillis();
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_YE", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "DISTREP_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SD", restUtils.getAccessToken());
+        long endTime = System.currentTimeMillis();
+        long diff = (endTime - startTime)/1000;
+        logger.debug("Old School Reports deleted in {} sec", diff);
 
-        long startTime = System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
         logger.debug("Retrieve schools for Non Grad Yearly Distribution");
         List<String> eligibleStudentSchoolDistricts = new ArrayList();
         StudentSearchRequest searchRequest = getStudentSearchRequest();
@@ -59,8 +65,8 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
             eligibleStudentSchoolDistricts = searchRequest.getSchoolOfRecords();
         }
-        long endTime = System.currentTimeMillis();
-        long diff = (endTime - startTime)/1000;
+        endTime = System.currentTimeMillis();
+        diff = (endTime - startTime)/1000;
         logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
         if(eligibleStudentSchoolDistricts.isEmpty()) {
             logger.debug("No filter found, retrieve all districts");
