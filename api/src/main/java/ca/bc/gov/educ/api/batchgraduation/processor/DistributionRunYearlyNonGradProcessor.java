@@ -32,6 +32,6 @@ public class DistributionRunYearlyNonGradProcessor implements ItemProcessor<Stri
 		List<StudentCredentialDistribution> studentCredentials = restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
 		LOGGER.debug("Completed partitionData for district {} with {} students", mincode, studentCredentials.size());
 		summaryDTO.getGlobalList().addAll(studentCredentials);
-		return summaryDTO.getGlobalList();
+		return studentCredentials;
 	}
 }
