@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.writer;
 import ca.bc.gov.educ.api.batchgraduation.listener.SupportListener;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -23,6 +24,8 @@ public abstract class BaseYearEndWriter {
 
     @Autowired
     RestUtils restUtils;
+    @Autowired
+    DistributionService distributionService;
     @Autowired
     SupportListener supportListener;
     @Autowired

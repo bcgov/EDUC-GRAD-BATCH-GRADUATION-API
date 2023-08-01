@@ -35,8 +35,6 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         long startTime = System.currentTimeMillis();
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_YE", restUtils.getAccessToken());
-        restUtils.deleteSchoolReportRecord("", "DISTREP_SC", restUtils.getAccessToken());
-        restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SC", restUtils.getAccessToken());
         restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SD", restUtils.getAccessToken());
         long endTime = System.currentTimeMillis();
@@ -92,7 +90,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
                 ExecutionContext executionContext = new ExecutionContext();
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
                 summaryDTO.initializeCredentialCountMap();
-                summaryDTO.setCredentialType("NONGRADDIST");
+                summaryDTO.setCredentialType("NONGRADYERUN");
                 List<String> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

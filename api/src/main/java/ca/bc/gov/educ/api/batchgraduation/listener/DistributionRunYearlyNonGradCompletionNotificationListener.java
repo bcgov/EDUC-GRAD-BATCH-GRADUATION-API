@@ -58,7 +58,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 			summaryDTO.setReadCount(summaryDTO.getGlobalList().size());
 			summaryDTO.setProcessedCount(0);
 
-			String processGlobalListStatus = processGlobalList(summaryDTO, searchRequest, "NONGRADDIST") ? STARTED.name() : COMPLETED.name();
+			String processGlobalListStatus = processGlobalList(summaryDTO, searchRequest, "NONGRADYERUN") ? STARTED.name() : COMPLETED.name();
 
 			String studentSearchRequest = jobParameters.getString("searchRequest", "{}");
 			// display Summary Details

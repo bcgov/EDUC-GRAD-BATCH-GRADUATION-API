@@ -723,7 +723,7 @@ public class JobLauncherController {
             @RequestParam(name = "status", defaultValue = "success") String status,
             @RequestBody DistributionResponse distributionResponse) {
 
-        if(("NONGRADDIST".equalsIgnoreCase(distributionResponse.getActivityCode()) || "YEARENDDIST".equalsIgnoreCase(distributionResponse.getActivityCode()))) {
+        if(("NONGRADYERUN".equalsIgnoreCase(distributionResponse.getActivityCode()) || "YEARENDDIST".equalsIgnoreCase(distributionResponse.getActivityCode()))) {
             restUtils.executePostDistribution(distributionResponse);
         }
 

@@ -39,7 +39,7 @@ public class RestUtils {
     private static final String MERGE_MSG="Merge and Upload Success {}";
     private static final String YEARENDDIST = "YEARENDDIST";
     private static final String SUPPDIST = "SUPPDIST";
-    private static final String NONGRADDIST = "NONGRADDIST";
+    private static final String NONGRADYERUN = "NONGRADYERUN";
     private final EducGradBatchGraduationApiConstants constants;
 
     private ResponseObjCache responseObjCache;
@@ -514,7 +514,7 @@ public class RestUtils {
         String accessToken = getAccessToken();
         if(YEARENDDIST.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
-        } else if(NONGRADDIST.equalsIgnoreCase(activityCode)) {
+        } else if(NONGRADYERUN.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadYearly(),batchId,activityCode);
         } else if(SUPPDIST.equalsIgnoreCase(activityCode)) {
             distributionUrl = String.format(constants.getMergeAndUploadSupplemental(),batchId,activityCode);
@@ -565,7 +565,8 @@ public class RestUtils {
     }
 
     public void updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String documentStatusCode,String activityCode,String accessToken) {
-        String url = String.format(constants.getUpdateStudentCredential(),studentID,credentialTypeCode,paperType,documentStatusCode,activityCode);
+        String url = String.format(constants.getUpdateStudentCredential(),studentID,
+                credentialTypeCode != null? credentialTypeCode : "",paperType,documentStatusCode,activityCode);
         this.get(url, boolean.class, accessToken);
     }
 

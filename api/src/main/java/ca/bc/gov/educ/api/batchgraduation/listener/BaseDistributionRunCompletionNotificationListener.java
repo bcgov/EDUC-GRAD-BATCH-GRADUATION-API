@@ -125,8 +125,8 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
 
     void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String activityCode) {
         LOGGER.debug("Filter {} Student Credential Distribution for {} student credentials", activityCode, credentialList.size());
-        if("NONGRADDIST".equalsIgnoreCase(activityCode)) {
-            LOGGER.debug("Apply {} filters for the list of {} students", "NONGRADDIST", credentialList.size());
+        if("NONGRADYERUN".equalsIgnoreCase(activityCode)) {
+            LOGGER.debug("Apply {} filters for the list of {} students", "NONGRADYERUN", credentialList.size());
             credentialList.removeIf(s->"SCCP".equalsIgnoreCase(s.getProgram()));
             credentialList.removeIf(s->"1950".equalsIgnoreCase(s.getProgram()) && !"AD".equalsIgnoreCase(s.getStudentGrade()));
             credentialList.removeIf(s->!"1950".equalsIgnoreCase(s.getProgram()) && !"12".equalsIgnoreCase(s.getStudentGrade()));

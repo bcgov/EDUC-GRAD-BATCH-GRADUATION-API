@@ -642,6 +642,7 @@ public class BatchJobConfig {
                 .reader(itemReaderDisRunYearlyNonGrad())
                 .processor(itemProcessorDisRunYearlyNonGradByMincode())
                 .writer(itemWriterDisRunYearlyNonGrad())
+                .transactionManager(batchTransactionManager)
                 .build();
     }
 

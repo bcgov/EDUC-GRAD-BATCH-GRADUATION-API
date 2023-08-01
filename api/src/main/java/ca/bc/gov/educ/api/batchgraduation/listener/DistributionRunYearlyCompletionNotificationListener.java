@@ -89,16 +89,16 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
 
-			List<StudentCredentialDistribution> yed2List = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YED2".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+			List<StudentCredentialDistribution> yed2List = cList.stream().filter(scd->!"NONGRADYERUN".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YED2".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 			supportListener.certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",null);
 
-			List<StudentCredentialDistribution> yedrList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YEDR".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+			List<StudentCredentialDistribution> yedrList = cList.stream().filter(scd->!"NONGRADYERUN".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YEDR".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 			supportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",null);
 
-			List<StudentCredentialDistribution> yedbList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YEDB".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+			List<StudentCredentialDistribution> yedbList = cList.stream().filter(scd->!"NONGRADYERUN".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YEDB".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 			supportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",null);
 
-			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->!"NONGRADDIST".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());
+			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->!"NONGRADYERUN".equalsIgnoreCase(activityCode) && scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
 		if (!cList.isEmpty()) {
