@@ -40,6 +40,7 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: NEVER
+      isolation-level-for-create: READ_COMMITTED
   flyway:
     enabled: ${ENABLE_FLYWAY}
     baseline-on-migrate: false
@@ -180,6 +181,8 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/schooldistrictmonth
     student-certificate-regeneration:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/report/certificate/%s
+    student-data-yearly:
+      url: ${GRAD_GRADUATION_API}api/v1/graduate/report/studentsforyearend
   grad-student-api:
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate
@@ -193,7 +196,10 @@ endpoint:
     read-grad-student-record: ${GRAD_STUDENT_API}api/v1/student/studentid/%s/algorithm
     read-grad-student-record-batch: ${GRAD_STUDENT_API}api/v1/student/batch/%s
     update-flag-ready-for-batch: ${GRAD_STUDENT_API}api/v1/student/multistudentids/batchflag/jobtype/%s
-    get-student-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/studentnongradreportdata
+    read-student-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/studentnongradreportdata
+    get-student-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/studentnongradreportdata/%s
+    get-school-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/schoolnongradreportdata
+    get-district-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/districtnongradreportdata
   grad-graduation-report-api:
     get-transcript-list:
       yearly:
@@ -205,6 +211,8 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s&activityCode=%s
     user-req-dis-run:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/userrequest/%s
+    get-district-data-yearly:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/districtdataearly
     get-certificate-types:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/certificatetype/%s
     update-school-report:
@@ -223,6 +231,8 @@ endpoint:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/RPR?batchId=%s&activityCode=%s&localDownload=%s
     blanks-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/BCPR?batchId=%s&localDownload=%s
+    posting-distribution:
+      url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/zipandupload
     read-n-post:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSR?batchId=%s
     merge-psi-n-upload:
@@ -230,6 +240,15 @@ endpoint:
   grad-trax-api:
     get-psi-student-list:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
+    school-by-min-code:
+      url: ${GRAD_TRAX_API}api/v1/trax/school/%s
+    district-by-school-category:
+      url: ${GRAD_TRAX_API}api/v1/trax/district/schoolCategories?schoolCategory=%s
+    school-by-school-category:
+      url: ${GRAD_TRAX_API}api/v1/trax/school/schoolCategories?schoolCategory=%s
+  educ-school-api:
+    school-by-min-code:
+      url: ${EDUC_SCHOOL_API}api/v1/schools/%s
 
 #Splunk LogHelper
 splunk:

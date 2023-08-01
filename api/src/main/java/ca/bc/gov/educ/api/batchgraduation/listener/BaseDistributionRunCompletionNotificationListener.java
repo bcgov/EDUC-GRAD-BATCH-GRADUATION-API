@@ -5,7 +5,8 @@ import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.List;
 
 public abstract class BaseDistributionRunCompletionNotificationListener extends JobExecutionListenerSupport {
 
@@ -20,6 +22,9 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
 
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     @Autowired
     DistributionService distributionService;
@@ -51,20 +56,18 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         String jobParamsDtoStr = null;
 
         if (taskSelection == null) {
-            // Scheduled Distribution (Monthly or Yearly)
+            // Distribution (Monthly, Year-end, Year-end NonGrad, Supplemental)
             jobParamsDtoStr = populateJobParametersDTO(jobType, null, studentSearchRequest);
         } else {
-            switch (taskSelection) {
-                case URDBJ: // User Request Distribution
-                    jobParamsDtoStr = populateJobParametersDTO(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
-                    break;
-                case BDBJ: // Blank Distribution
-                    jobParamsDtoStr = populateJobParametersDTOForBlankDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
-                    break;
-                case URPDBJ: // PSI Distribution
-                    jobParamsDtoStr = populateJobParametersDTOForPsiDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
-                    break;
-            }
+            jobParamsDtoStr = switch (taskSelection) {
+                case URDBJ -> // User Request Distribution
+                        populateJobParametersDTO(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
+                case BDBJ -> // Blank Distribution
+                        populateJobParametersDTOForBlankDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
+                case URPDBJ -> // PSI Distribution
+                        populateJobParametersDTOForPsiDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
+                default -> jobParamsDtoStr;
+            };
         }
 
         return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
@@ -76,22 +79,11 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         jobParamsDto.setCredentialType(credentialType);
 
         if (StringUtils.isNotBlank(studentSearchRequest)) {
-            try {
-                StudentSearchRequest payload = new ObjectMapper().readValue(studentSearchRequest, StudentSearchRequest.class);
-                jobParamsDto.setPayload(payload);
-            } catch (Exception e) {
-                LOGGER.error("StudentSearchRequest payload parse error - {}", e.getMessage());
-            }
+            StudentSearchRequest payload = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+            jobParamsDto.setPayload(payload);
         }
 
-        String jobParamsDtoStr = null;
-        try {
-            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
-        } catch (Exception e) {
-            LOGGER.error("Job Parameters DTO parse error for User Request Distribution - {}", e.getMessage());
-        }
-
-        return jobParamsDtoStr;
+        return jsonTransformer.marshall(jobParamsDto);
     }
 
     private String populateJobParametersDTOForBlankDistribution(String jobType, String credentialType, String studentSearchRequest) {
@@ -99,21 +91,11 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         jobParamsDto.setJobName(jobType);
         jobParamsDto.setCredentialType(credentialType);
 
-        try {
-            BlankCredentialRequest payload = new ObjectMapper().readValue(studentSearchRequest, BlankCredentialRequest.class);
+        if(StringUtils.isNotBlank(studentSearchRequest)) {
+            BlankCredentialRequest payload = (BlankCredentialRequest) jsonTransformer.unmarshall(studentSearchRequest, BlankCredentialRequest.class);
             jobParamsDto.setPayload(payload);
-        } catch (Exception e) {
-            LOGGER.error("BlankCredentialRequest payload parse error - {}", e.getMessage());
         }
-
-        String jobParamsDtoStr = null;
-        try {
-            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
-        } catch (Exception e) {
-            LOGGER.error("Job Parameters DTO parse error for Blank Distribution - {}", e.getMessage());
-        }
-
-        return jobParamsDtoStr;
+        return jsonTransformer.marshall(jobParamsDto);
     }
 
     private String populateJobParametersDTOForPsiDistribution(String jobType, String transmissionType, String studentSearchRequest) {
@@ -121,21 +103,34 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         jobParamsDto.setJobName(jobType);
         jobParamsDto.setTransmissionType(transmissionType);
 
-        try {
-            PsiCredentialRequest payload = new ObjectMapper().readValue(studentSearchRequest, PsiCredentialRequest.class);
+        if(StringUtils.isNotBlank(studentSearchRequest)) {
+            PsiCredentialRequest payload = (PsiCredentialRequest) jsonTransformer.unmarshall(studentSearchRequest, PsiCredentialRequest.class);
             jobParamsDto.setPayload(payload);
-        } catch (Exception e) {
-            LOGGER.error("PsiCredentialRequest payload parse error - {}", e.getMessage());
         }
 
-        String jobParamsDtoStr = null;
-        try {
-            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
-        } catch (Exception e) {
-            LOGGER.error("Job Parameters DTO parse error for PSI Distribution - {}", e.getMessage());
-        }
-
+        String jobParamsDtoStr = jsonTransformer.marshall(jobParamsDto);
         return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
     }
 
+    protected StudentSearchRequest getStudentSearchRequest(String searchRequest) {
+        if(StringUtils.isNotBlank(searchRequest)) {
+            return (StudentSearchRequest) jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
+        }
+        return new StudentSearchRequest();
+    }
+
+    void sortStudentCredentialDistribution(List<StudentCredentialDistribution> students) {
+        GradSorter.sortStudentCredentialDistributionByNames(students);
+    }
+
+    void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String activityCode) {
+        LOGGER.debug("Filter {} Student Credential Distribution for {} student credentials", activityCode, credentialList.size());
+        if("NONGRADYERUN".equalsIgnoreCase(activityCode)) {
+            LOGGER.debug("Apply {} filters for the list of {} students", "NONGRADYERUN", credentialList.size());
+            credentialList.removeIf(s->"SCCP".equalsIgnoreCase(s.getProgram()));
+            credentialList.removeIf(s->"1950".equalsIgnoreCase(s.getProgram()) && !"AD".equalsIgnoreCase(s.getStudentGrade()));
+            credentialList.removeIf(s->!"1950".equalsIgnoreCase(s.getProgram()) && !"12".equalsIgnoreCase(s.getStudentGrade()));
+        }
+        LOGGER.debug("Total {} selected after filter", credentialList.size());
+    }
 }

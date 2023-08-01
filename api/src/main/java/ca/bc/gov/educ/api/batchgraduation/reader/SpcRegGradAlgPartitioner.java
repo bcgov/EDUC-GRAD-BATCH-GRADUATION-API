@@ -6,8 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -27,6 +26,9 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
 
     @Autowired
     RestUtils restUtils;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     public SpcRegGradAlgPartitioner() {
         super();
@@ -49,13 +51,8 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
                 accessToken = res.getAccess_token();
             }
             JobParameters jobParameters = jobExecution.getJobParameters();
-            String searchRequest = jobParameters.getString("searchRequest");
-            StudentSearchRequest req = null;
-            try {
-                req = new ObjectMapper().readValue(searchRequest, StudentSearchRequest.class);
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
+            String searchRequest = jobParameters.getString("searchRequest", "{}");
+            StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
             studentList = restUtils.getStudentsForSpecialGradRun(req, accessToken);
         } else {
             studentList = getInputDataFromPreviousJob();

@@ -16,15 +16,22 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 public class DistributionServiceTest {
+
+    @Autowired
+    JsonUtil jsonUtil;
+
     @Autowired
     DistributionService distributionService;
 
@@ -56,7 +63,7 @@ public class DistributionServiceTest {
         dto.setPen("123456789");
         dto.setSchoolOfRecord(entity.getSchoolOfRecord());
 
-        entity.setPayload(JsonUtil.getJsonStringFromObject(dto));
+        entity.setPayload(jsonUtil.getJsonStringFromObject(dto));
 
         when(studentCredentialDistributionRepository.findByJobExecutionId(batchId)).thenReturn(Arrays.asList(entity));
 
@@ -93,7 +100,7 @@ public class DistributionServiceTest {
         dto.setPen("123456789");
         dto.setSchoolOfRecord(entity.getSchoolOfRecord());
 
-        entity.setPayload(JsonUtil.getJsonStringFromObject(dto));
+        entity.setPayload(jsonUtil.getJsonStringFromObject(dto));
 
         when(studentCredentialDistributionRepository.save(entity)).thenReturn(entity);
 
@@ -145,7 +152,7 @@ public class DistributionServiceTest {
 
         boolean isExceptionThrown = false;
         try {
-            distributionService.updateDistributionBatchJobStatus(batchId, 0, status, null);
+            distributionService.updateDistributionBatchJobStatus(batchId, 0, status);
         } catch (Exception ex) {
             isExceptionThrown = true;
         }

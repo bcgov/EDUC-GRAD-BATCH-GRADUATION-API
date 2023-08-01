@@ -36,19 +36,20 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
 	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
 			LOGGER.info(LOG_SEPARATION);
-	    	LOGGER.info("Distribution Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
-	    	JobParameters jobParameters = jobExecution.getJobParameters();
+			JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
+			String jobType = jobParameters.getString("jobType");
+			LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
+
 			String status = jobExecution.getStatus().toString();
 			Date startTime = jobExecution.getStartTime();
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
-			String jobType = jobParameters.getString("jobType");
 			String credentialType = jobParameters.getString("credentialType");
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String properName = jobParameters.getString("properName");
-			String studentSearchRequest = jobParameters.getString("searchRequest");
+			String studentSearchRequest = jobParameters.getString("searchRequest", "{}");
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
 				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
@@ -90,13 +91,13 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 
 			if(credentialType != null) {
 				if (StringUtils.equalsIgnoreCase(credentialType, "OT")) {
-					yed4List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED4") == 0).collect(Collectors.toList());
+					yed4List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 				}
 
 				if (StringUtils.equalsIgnoreCase(credentialType, "OC")) {
-					yed2List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YED2") == 0).collect(Collectors.toList());
-					yedrList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDR") == 0).collect(Collectors.toList());
-					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && scd.getPaperType().compareTo("YEDB") == 0).collect(Collectors.toList());
+					yed2List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YED2".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+					yedrList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YEDR".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YEDB".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 				}
 			}
 
@@ -105,7 +106,8 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			supportListener.blankCertificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
 			supportListener.blankCertificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
 		});
-		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, mapDist,localDownload);
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, distributionRequest,localDownload);
 	}
 
 }

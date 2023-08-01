@@ -1,14 +1,11 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialRequest;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiDistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -30,30 +27,24 @@ public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
     RestUtils restUtils;
 
     @Autowired
+    JsonTransformer jsonTransformer;
+
+    @Autowired
     GraduationReportService graduationReportService;
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         JobParameters jobParameters = context.getJobParameters();
-        String searchRequest = jobParameters.getString("searchRequest");
+        String searchRequest = jobParameters.getString("searchRequest", "{}");
         String transmissionType = jobParameters.getString("transmissionType");
-        PsiCredentialRequest req = null;
-        try {
-            req = new ObjectMapper().readValue(searchRequest, PsiCredentialRequest.class);
-        } catch (JsonProcessingException e) {
-            LOGGER.error(e.getLocalizedMessage());
-        }
+        PsiCredentialRequest req = (PsiCredentialRequest)jsonTransformer.unmarshall(searchRequest, PsiCredentialRequest.class);
+        String accessToken = restUtils.getAccessToken();
+        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_PSI", accessToken);
 
-        ResponseObj responseObj = restUtils.getTokenResponseObject();
-        String accessToken = null;
-        if (responseObj != null) {
-            accessToken = responseObj.getAccess_token();
-        }
         List<PsiCredentialDistribution> credentialList = getRecordsForPSIUserReqDisRun(req,transmissionType,accessToken);
         if(!credentialList.isEmpty()) {
             // update count size
-            updateBatchJobHistory(jobHistory, (long) credentialList.size());
+            updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
             int partitionSize = credentialList.size()/gridSize + 1;
             List<List<PsiCredentialDistribution>> partitions = new LinkedList<>();
             for (int i = 0; i < credentialList.size(); i += partitionSize) {
@@ -72,7 +63,6 @@ public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }
-            restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_PSI", accessToken);
             LOGGER.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
             return map;
         }

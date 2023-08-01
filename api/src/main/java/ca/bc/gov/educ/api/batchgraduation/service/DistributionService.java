@@ -7,15 +7,20 @@ import ca.bc.gov.educ.api.batchgraduation.repository.StudentCredentialDistributi
 import ca.bc.gov.educ.api.batchgraduation.util.JsonUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class DistributionService extends GradService {
+
+    @Autowired
+    JsonUtil jsonUtil;
 
     private final GradBatchHistoryService gradBatchHistoryService;
     private final StudentCredentialDistributionRepository studentCredentialDistributionRepository;
@@ -37,11 +42,11 @@ public class DistributionService extends GradService {
         List<StudentCredentialDistributionEntity> entityList = studentCredentialDistributionRepository.findByJobExecutionId(batchId);
         return entityList.stream().map(e -> {
             try {
-                return JsonUtil.getJsonObjectFromString(StudentCredentialDistribution.class, e.getPayload());
+                return jsonUtil.getJsonObjectFromString(StudentCredentialDistribution.class, e.getPayload());
             } catch (JsonProcessingException ex) {
                 throw new RuntimeException(ex);
             }
-        }).toList();
+        }).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -57,7 +62,7 @@ public class DistributionService extends GradService {
         entity.setStudentID(scd.getStudentID());
         entity.setSchoolOfRecord(scd.getSchoolOfRecord());
         try {
-            String payload = JsonUtil.getJsonStringFromObject(scd);
+            String payload = jsonUtil.getJsonStringFromObject(scd);
             entity.setPayload(payload);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
@@ -67,17 +72,15 @@ public class DistributionService extends GradService {
     }
 
     @Transactional
-    public void updateDistributionBatchJobStatus(Long batchId, int failedCount, String status, String jobParameters) {
+    public void updateDistributionBatchJobStatus(Long batchId, int failedCount, String status) {
         log.debug("updateDistributionBatchJobStatus - retrieve the batch job history: batchId = {}", batchId);
         BatchGradAlgorithmJobHistoryEntity jobHistory = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
         jobHistory.setEndTime(new Date(System.currentTimeMillis()));
         jobHistory.setStatus(status);
         jobHistory.setActualStudentsProcessed(jobHistory.getExpectedStudentsProcessed() - failedCount);
-        jobHistory.setJobParameters(jobParameters);
         log.debug("updateDistributionBatchJobStatus - save the batch job history: batchId = {}, status = {}. actual processed count = {}", batchId, status, jobHistory.getActualStudentsProcessed());
         gradBatchHistoryService.saveGradAlgorithmJobHistory(jobHistory);
         log.debug("updateDistributionBatchJobStatus - save the batch job history is completed!");
     }
-
 
 }

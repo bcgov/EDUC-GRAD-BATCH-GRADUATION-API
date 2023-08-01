@@ -6,7 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.JobParametersForDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +27,13 @@ public class DistributionRunStatusUpdateProcessor {
 
     private final RestUtils restUtils;
 
+    private final JsonTransformer jsonTransformer;
+
     @Autowired
-    public DistributionRunStatusUpdateProcessor(DistributionService distributionService, RestUtils restUtils) {
+    public DistributionRunStatusUpdateProcessor(DistributionService distributionService, RestUtils restUtils, JsonTransformer jsonTransformer) {
         this.distributionService = distributionService;
         this.restUtils = restUtils;
+        this.jsonTransformer = jsonTransformer;
     }
 
     @Async("asyncExecutor")
@@ -57,19 +60,24 @@ public class DistributionRunStatusUpdateProcessor {
 
         LOGGER.debug("updateBackStudentRecords are completed");
         // update status for batch job history
-        distributionService.updateDistributionBatchJobStatus(batchId, failedCount, status, populateJobParametersDTO(jobType, null));
+        distributionService.updateDistributionBatchJobStatus(batchId, failedCount, status);
         LOGGER.info("END - DistributionRunStatusUpdateProcessor for batchId = {}, status = {}", batchId, status);
     }
 
 
     private Map<String, ServiceException> updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId, String activityCode) {
         Map<String, ServiceException> unprocessedStudents = new HashMap<>();
+        final int totalCount = cList.size();
+        final int[] processedCount = {0};
         cList.forEach(scd-> {
             try {
-                final String token = restUtils.getTokenResponseObject().getAccess_token();
-                LOGGER.debug("Dist Job [{}] / [{}] - update student credential record & student grad record: studentID [{}]", batchId, activityCode, scd.getStudentID());
-                restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,token);
+                final String token = restUtils.getAccessToken();
+                restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),
+                        "NONGRADYERUN".equalsIgnoreCase(activityCode)? "IP" : scd.getDocumentStatusCode(),activityCode,token);
                 restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,token);
+                processedCount[0]++;
+                LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student credential record & student grad record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0], totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
+
             } catch (Exception e) {
                 unprocessedStudents.put(scd.getStudentID().toString(), new ServiceException(e));
             }
@@ -84,7 +92,7 @@ public class DistributionRunStatusUpdateProcessor {
                 case "DISTRUN" -> activityCode = "MONTHLYDIST";
                 case "DISTRUN_YE" -> activityCode = "YEARENDDIST";
                 case "DISTRUN_SUPP" -> activityCode = "SUPPDIST";
-                case "NONGRADRUN" -> activityCode = "NONGRADDIST";
+                case "NONGRADRUN" -> activityCode = "NONGRADYERUN";
             }
         }
         return activityCode;
@@ -92,21 +100,6 @@ public class DistributionRunStatusUpdateProcessor {
 
     private void handleUnprocessedErrors(Map<String, ServiceException> unprocessed) {
         unprocessed.forEach((k, v) -> LOGGER.error("Student with id: {} did not have distribution date updated during monthly run due to: {}", k, v.getLocalizedMessage()));
-    }
-
-    private String populateJobParametersDTO(String jobType, String credentialType) {
-        JobParametersForDistribution jobParamsDto = new JobParametersForDistribution();
-        jobParamsDto.setJobName(jobType);
-        jobParamsDto.setCredentialType(credentialType);
-
-        String jobParamsDtoStr = null;
-        try {
-            jobParamsDtoStr = new ObjectMapper().writeValueAsString(jobParamsDto);
-        } catch (Exception e) {
-            LOGGER.error("Job Parameters DTO parse error for User Request Distribution - {}", e.getMessage());
-        }
-
-        return jobParamsDtoStr;
     }
 
 }

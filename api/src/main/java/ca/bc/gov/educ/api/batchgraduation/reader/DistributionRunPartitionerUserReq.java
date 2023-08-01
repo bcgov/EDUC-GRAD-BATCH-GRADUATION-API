@@ -4,8 +4,6 @@ import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -36,14 +34,8 @@ public class DistributionRunPartitionerUserReq extends BasePartitioner {
             accessToken = res.getAccess_token();
         }
         JobParameters jobParameters = context.getJobParameters();
-        String searchRequest = jobParameters.getString("searchRequest");
         String credentialType = jobParameters.getString("credentialType");
-        StudentSearchRequest req = null;
-        try {
-            req = new ObjectMapper().readValue(searchRequest, StudentSearchRequest.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        StudentSearchRequest req = getStudentSearchRequest();
         List<StudentCredentialDistribution> credentialList = restUtils.getStudentsForUserReqDisRun(credentialType,req,accessToken);
         if(!credentialList.isEmpty()) {
             Map<String, ExecutionContext> map = getStringExecutionContextMap(gridSize, credentialList, credentialType, LOGGER);

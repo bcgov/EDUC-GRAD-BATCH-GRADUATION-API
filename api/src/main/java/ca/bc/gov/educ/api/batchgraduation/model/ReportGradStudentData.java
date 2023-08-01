@@ -3,6 +3,8 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +16,8 @@ public class ReportGradStudentData implements Serializable {
     private UUID graduationStudentRecordId;
     private String mincode;
     private String mincodeAtGrad;
+    private String distcode;
+    private String distcodeAtGrad;
     private String pen;
     private String firstName;
     private String middleName;
@@ -34,7 +38,17 @@ public class ReportGradStudentData implements Serializable {
     private String honorsStanding;
     private String graduated;
     private String transcriptTypeCode;
+    private String certificateTypeCode;
+    private String paperType;
+    private LocalDateTime updateDate;
     private List<CertificateType> certificateTypes;
     private List<GradRequirement> nonGradReasons;
+
+    public String lastUpdateDateAsString() {
+        if(updateDate != null) {
+            return updateDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
+        return null;
+    }
 
 }

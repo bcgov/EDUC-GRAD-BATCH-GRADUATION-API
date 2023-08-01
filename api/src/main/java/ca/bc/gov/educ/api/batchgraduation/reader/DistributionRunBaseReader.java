@@ -1,17 +1,17 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Map;
 
-public abstract class DistributionRunBaseReader implements ItemReader<StudentCredentialDistribution> {
+public abstract class DistributionRunBaseReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunBaseReader.class);
 
@@ -38,6 +38,7 @@ public abstract class DistributionRunBaseReader implements ItemReader<StudentCre
         totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());
         totalSummaryDTO.getErrors().addAll(summaryDTO.getErrors());
         totalSummaryDTO.getGlobalList().addAll(summaryDTO.getGlobalList());
+        totalSummaryDTO.setSchools(summaryDTO.getSchools());
         mergeMapCounts(totalSummaryDTO.getCredentialCountMap(),summaryDTO.getCredentialCountMap());
     }
 
