@@ -114,10 +114,10 @@ public class JsonTransformer implements Transformer {
 
     @Override
     public String marshall(Object input) {
-        ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
+        //ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
         String result = null;
         try {
-            result = prettyPrinter.writeValueAsString(input);
+            result = objectMapper.writeValueAsString(input);
         } catch (IOException e) {
             log.error("Unable to marshall object {}", input.toString());
         }
