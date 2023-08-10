@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
 
@@ -56,7 +57,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String credentialType = jobParameters.getString("credentialType");
 			String properName = jobParameters.getString("properName");
-			String studentSearchRequest = jobParameters.getString("searchRequest", "{}");
+			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
 				taskSchedulingService.updateUserScheduledJobs(userScheduledId);

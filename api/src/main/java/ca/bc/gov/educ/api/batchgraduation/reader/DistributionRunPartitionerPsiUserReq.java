@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+
 public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitionerPsiUserReq.class);
@@ -35,7 +37,7 @@ public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         JobParameters jobParameters = context.getJobParameters();
-        String searchRequest = jobParameters.getString("searchRequest", "{}");
+        String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
         String transmissionType = jobParameters.getString("transmissionType");
         PsiCredentialRequest req = (PsiCredentialRequest)jsonTransformer.unmarshall(searchRequest, PsiCredentialRequest.class);
         String accessToken = restUtils.getAccessToken();

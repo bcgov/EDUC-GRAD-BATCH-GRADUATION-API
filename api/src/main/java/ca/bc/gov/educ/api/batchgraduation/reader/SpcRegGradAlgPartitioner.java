@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+
 public class SpcRegGradAlgPartitioner extends BasePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpcRegGradAlgPartitioner.class);
@@ -51,7 +53,7 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
                 accessToken = res.getAccess_token();
             }
             JobParameters jobParameters = jobExecution.getJobParameters();
-            String searchRequest = jobParameters.getString("searchRequest", "{}");
+            String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
             StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
             studentList = restUtils.getStudentsForSpecialGradRun(req, accessToken);
         } else {

@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
@@ -18,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+
 public abstract class BasePartitioner extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePartitioner.class);
@@ -29,6 +32,9 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
+
+    @Autowired
+    RestUtils restUtils;
 
     @Autowired
     JsonTransformer jsonTransformer;
@@ -118,7 +124,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
         String username = jobParameters.getString(RUN_BY);
-        String studentSearchRequest = jobParameters.getString("searchRequest");
+        String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST);
         String status = getJobExecution().getStatus().toString();
         Date startTime = getJobExecution().getStartTime();
 
@@ -200,10 +206,35 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     StudentSearchRequest getStudentSearchRequest() {
         JobParameters jobParameters = getJobExecution().getJobParameters();
-        return (StudentSearchRequest)jsonTransformer.unmarshall(jobParameters.getString("searchRequest", "{}"), StudentSearchRequest.class);
+        return (StudentSearchRequest)jsonTransformer.unmarshall(jobParameters.getString(SEARCH_REQUEST, "{}"), StudentSearchRequest.class);
     }
 
     void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
         GradSorter.sortStudentCredentialDistributionByNames(students);
+    }
+
+    void filterByStudentSearchRequest(List<StudentCredentialDistribution> eligibleStudentSchoolDistricts) {
+        StudentSearchRequest searchRequest = getStudentSearchRequest();
+        if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
+            List<String> useFilterSchoolDistricts = new ArrayList<>();
+            for(String schoolCategoryCode: searchRequest.getSchoolCategoryCodes()) {
+                LOGGER.debug("Use schoolCategory code {} to find list of schools", schoolCategoryCode);
+                List<School> schools = restUtils.getSchoolBySchoolCategoryCode(schoolCategoryCode);
+                for(School school: schools) {
+                    LOGGER.debug("School {} found by schoolCategory code {}", school.getMincode(), schoolCategoryCode);
+                    useFilterSchoolDistricts.add(school.getMincode());
+                }
+            }
+            eligibleStudentSchoolDistricts.removeIf(scr->!useFilterSchoolDistricts.contains(scr.getSchoolOfRecord()));
+        }
+        if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
+            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getDistricts().contains(StringUtils.substring(scr.getSchoolOfRecord(), 0, 3)));
+        }
+        if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
+            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getSchoolOfRecords().contains(scr.getSchoolOfRecord()));
+        }
+        if(searchRequest != null && searchRequest.getPens() != null && !searchRequest.getPens().isEmpty()) {
+            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getPens().contains(scr.getPen()));
+        }
     }
 }

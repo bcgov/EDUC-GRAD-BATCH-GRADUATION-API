@@ -18,6 +18,8 @@ import reactor.core.publisher.Mono;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+
 public class RegenerateCertificatePartitioner extends BasePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegenerateCertificatePartitioner.class);
@@ -40,7 +42,7 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
         }
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
         JobParameters jobParameters = context.getJobParameters();
-        String searchRequest = jobParameters.getString("searchRequest");
+        String searchRequest = jobParameters.getString(SEARCH_REQUEST);
         if (StringUtils.isBlank(searchRequest)) {
             Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
             DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();

@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+
 @Service
 public class TaskDefinition implements Runnable{
 
@@ -29,7 +31,6 @@ public class TaskDefinition implements Runnable{
     private static final String TIME = "time";
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
-    private static final String SEARCH_REQUEST = "searchRequest";
     private static final String MANUAL = "MANUAL";
     private static final String CREDENTIAL_TYPE = "credentialType";
     private static final String ERROR_MSG = "Error {}";

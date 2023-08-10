@@ -40,6 +40,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
 @CrossOrigin
@@ -50,7 +52,6 @@ public class JobLauncherController {
     private static final String TIME = "time";
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
-    private static final String SEARCH_REQUEST = "searchRequest";
     private static final String RERUN_TYPE = "reRunType";
     private static final String RUN_BY = "runBy";
     private static final String PREV_BATCH_ID = "previousBatchId";
@@ -486,11 +487,11 @@ public class JobLauncherController {
         }
     }
 
-    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_SUPP_DIS_RUN_BATCH_JOB)
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SUPP_DIS_RUN_BATCH_JOB)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Run Supplemental Distribution Runs", description = "Run Supplemental Distribution Runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<DistributionSummaryDTO> launchSupplementalDistributionRunJob() {
+    public ResponseEntity<DistributionSummaryDTO> launchSupplementalDistributionRunJob(@RequestBody StudentSearchRequest request) {
         logger.debug("launchSupplementallyDistributionRunJob");
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
@@ -498,6 +499,7 @@ public class JobLauncherController {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUN_SUPP);
         try {
+            builder.addString(SEARCH_REQUEST, jsonTransformer.marshall(request));
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("SupplementalDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);

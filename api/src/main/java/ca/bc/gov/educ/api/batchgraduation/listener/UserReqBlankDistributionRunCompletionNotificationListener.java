@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+
 @Component
 public class UserReqBlankDistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
@@ -49,7 +51,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			String credentialType = jobParameters.getString("credentialType");
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String properName = jobParameters.getString("properName");
-			String studentSearchRequest = jobParameters.getString("searchRequest", "{}");
+			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
 				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
