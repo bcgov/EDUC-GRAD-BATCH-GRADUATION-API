@@ -3,9 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialRequest;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiDistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -24,12 +22,6 @@ public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;
-
-    @Autowired
-    RestUtils restUtils;
-
-    @Autowired
-    JsonTransformer jsonTransformer;
 
     @Autowired
     GraduationReportService graduationReportService;

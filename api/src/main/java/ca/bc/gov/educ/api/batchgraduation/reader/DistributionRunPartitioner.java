@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +23,6 @@ public class DistributionRunPartitioner extends BasePartitioner {
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;
-
-    @Autowired
-    RestUtils restUtils;
 
     @Autowired
     ParallelDataFetch parallelDataFetch;

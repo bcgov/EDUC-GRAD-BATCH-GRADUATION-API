@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,9 +25,6 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;
-
-    @Autowired
-    RestUtils restUtils;
 
     @Autowired
     ParallelDataFetch parallelDataFetch;
