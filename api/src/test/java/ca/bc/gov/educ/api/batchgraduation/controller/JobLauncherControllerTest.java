@@ -373,6 +373,24 @@ public class JobLauncherControllerTest {
     }
 
     @Test
+    public void testlaunchSupplementalDistributionRunJob() {
+        StudentSearchRequest request = new StudentSearchRequest();
+        boolean exceptionIsThrown = false;
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, DISTRUN_YE);
+        try {
+            builder.addString(SEARCH_REQUEST, "{}");
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("SupplementalDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            jobLauncherController.launchSupplementalDistributionRunJob(request);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+        assertThat(builder).isNotNull();
+    }
+
+    @Test
     public void testlaunchYearlyNonGradDistributionRunJob() {
         StudentSearchRequest request = new StudentSearchRequest();
         boolean exceptionIsThrown = false;
