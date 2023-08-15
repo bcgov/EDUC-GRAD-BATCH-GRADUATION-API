@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.batchgraduation.processor;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
-import ca.bc.gov.educ.api.batchgraduation.model.JobParametersForDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
@@ -46,7 +45,7 @@ public class DistributionRunStatusUpdateProcessor {
             List<StudentCredentialDistribution> cList = distributionService.getStudentCredentialDistributions(batchId);
 
             // update graduation_student_record & student_certificate
-            Map<String, ServiceException> unprocessed = updateBackStudentRecords(cList, batchId, getActivitCode(jobType));
+            Map<String, ServiceException> unprocessed = updateBackStudentRecords(cList, batchId, jobType);
             if (!unprocessed.isEmpty()) {
                 failedCount = unprocessed.size();
                 status = BatchStatusEnum.FAILED.name();
@@ -65,8 +64,9 @@ public class DistributionRunStatusUpdateProcessor {
     }
 
 
-    private Map<String, ServiceException> updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId, String activityCode) {
+    private Map<String, ServiceException> updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId, String jobType) {
         Map<String, ServiceException> unprocessedStudents = new HashMap<>();
+        String activityCode = getActivitCode(jobType);
         final int totalCount = cList.size();
         final int[] processedCount = {0};
         cList.forEach(scd-> {
@@ -74,7 +74,9 @@ public class DistributionRunStatusUpdateProcessor {
                 final String token = restUtils.getAccessToken();
                 restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),
                         "NONGRADYERUN".equalsIgnoreCase(activityCode)? "IP" : scd.getDocumentStatusCode(),activityCode,token);
-                restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,token);
+                if(!StringUtils.containsAnyIgnoreCase(jobType, "REGALG", "TVRRUN")) {
+                    restUtils.updateStudentGradRecord(scd.getStudentID(), batchId, activityCode, token);
+                }
                 processedCount[0]++;
                 LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student credential record & student grad record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0], totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
 
