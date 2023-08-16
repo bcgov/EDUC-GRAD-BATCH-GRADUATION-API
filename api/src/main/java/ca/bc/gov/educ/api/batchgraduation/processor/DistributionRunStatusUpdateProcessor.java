@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.processor;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
+import ca.bc.gov.educ.api.batchgraduation.model.JobParametersForDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
@@ -77,7 +78,7 @@ public class DistributionRunStatusUpdateProcessor {
                 LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student credential record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0], totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
                 if(!StringUtils.equalsAnyIgnoreCase(jobType, "DISTRUN_YE", "NONGRADRUN")) {
                     restUtils.updateStudentGradRecord(scd.getStudentID(), batchId, activityCode, token);
-                    LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student student grad record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0], totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
+                    LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student grad record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0], totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
                 }
                 processedCount[0]++;
             } catch (Exception e) {
