@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.batchgraduation.processor;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
-import ca.bc.gov.educ.api.batchgraduation.model.JobParametersForDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
