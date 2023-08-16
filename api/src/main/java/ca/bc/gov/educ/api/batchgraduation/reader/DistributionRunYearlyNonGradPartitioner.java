@@ -62,7 +62,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         endTime = System.currentTimeMillis();
         diff = (endTime - startTime)/1000;
         logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
-        if(eligibleStudentSchoolDistricts.isEmpty()) {
+        if(eligibleStudentSchoolDistricts.isEmpty() ) {
             logger.debug("No filter found, retrieve all districts");
             startTime = System.currentTimeMillis();
             eligibleStudentSchoolDistricts = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
@@ -87,6 +87,9 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
                 summaryDTO.initializeCredentialCountMap();
                 summaryDTO.setCredentialType("NONGRADYERUN");
+                if(searchRequest != null) {
+                    summaryDTO.setStudentSearchRequest(searchRequest);
+                }
                 List<String> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

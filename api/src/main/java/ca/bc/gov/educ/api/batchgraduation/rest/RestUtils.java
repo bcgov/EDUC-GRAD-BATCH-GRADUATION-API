@@ -324,7 +324,7 @@ public class RestUtils {
             String accessToken = summary.getAccessToken();
             AlgorithmResponse algorithmResponse = this.runProjectedGradAlgorithm(item.getStudentID(), accessToken,summary.getBatchId());
             return processGraduationStudentRecord(item, summary, algorithmResponse);
-        }catch(Exception e) {
+        } catch(Exception e) {
             summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
