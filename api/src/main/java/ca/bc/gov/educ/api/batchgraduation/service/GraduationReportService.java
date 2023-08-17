@@ -53,13 +53,15 @@ public class GraduationReportService {
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
+	// Year-end NonGrad distribution
 	public List<StudentCredentialDistribution> getStudentsNonGradForYearlyDistribution(String mincode, String accessToken) {
 		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(String.format(constants.getStudentDataNonGradEarlyByMincode(), mincode)).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
+	// Year-end distribution
 	public List<StudentCredentialDistribution> getStudentsForYearlyDistribution(String accessToken) {
-		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(String.format(constants.getStudentReportDataEarly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
+		List<ReportGradStudentData> reportGradStudentDataList = webClient.get().uri(String.format(constants.getStudentReportDataYearly())).headers(h -> h.setBearerAuth(accessToken)).retrieve().bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){}).block();
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
@@ -78,7 +80,9 @@ public class GraduationReportService {
 	private List<StudentCredentialDistribution> populateStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
 		List<StudentCredentialDistribution> result = new ArrayList<>();
 		for(ReportGradStudentData data: reportGradStudentDataList) {
-			result.add(populateStudentCredentialDistribution(data));
+			if (!"DEC".equalsIgnoreCase(data.getStudentStatus())) {
+				result.add(populateStudentCredentialDistribution(data));
+			}
 		}
 		return result;
 	}

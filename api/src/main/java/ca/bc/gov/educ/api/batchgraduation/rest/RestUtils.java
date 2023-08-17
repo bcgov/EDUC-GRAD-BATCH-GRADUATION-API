@@ -678,4 +678,15 @@ public class RestUtils {
     public TraxSchool getTraxSchool(String mincode) {
         return get(String.format(constants.getTraxSchoolByMincode(), mincode), TraxSchool.class, getAccessToken());
     }
+
+    public List<UUID> getDeceasedStudentIDs(List<UUID> studentIDs, String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
+        };
+        return this.webClient.post()
+                .uri(constants.getDeceasedStudentIDList())
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .body(BodyInserters.fromValue(studentIDs))
+                .retrieve().bodyToMono(responseType).block();
+    }
 }

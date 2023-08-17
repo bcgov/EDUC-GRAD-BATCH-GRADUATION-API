@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+/**
+ * Monthly Distribution Partitioner
+ */
 public class DistributionRunPartitioner extends BasePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitioner.class);
@@ -46,6 +46,14 @@ public class DistributionRunPartitioner extends BasePartitioner {
             credentialList.addAll(parallelDTO.certificateList());
         }
         if(!credentialList.isEmpty()) {
+            LOGGER.debug("Total size of credential list: {}", credentialList.size());
+            // Filter deceased students out
+            List<UUID> deceasedIDs = restUtils.getDeceasedStudentIDs(credentialList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList(), restUtils.getAccessToken());
+            if (!deceasedIDs.isEmpty()) {
+                LOGGER.debug("Deceased students: {}", deceasedIDs.size());
+                credentialList.removeIf(cr -> deceasedIDs.contains(cr.getStudentID()));
+                LOGGER.debug("Revised size of credential list: {}", credentialList.size());
+            }
             updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
             return getStringExecutionContextMap(gridSize, credentialList, null, LOGGER);
         }
