@@ -3,13 +3,11 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
@@ -22,9 +20,6 @@ public class DistributionRunPartitionerUserReq extends BasePartitioner {
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;
-
-    @Autowired
-    RestUtils restUtils;
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {

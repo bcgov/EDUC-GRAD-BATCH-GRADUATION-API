@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
@@ -134,8 +134,8 @@ public class TaskSchedulingServiceTest {
         obj.setDescription("Student Achievement Report (TVR)");
         obj.setCreateUser("GRADUATION");
         obj.setUpdateUser("GRADUATION");
-        obj.setCreateDate(new java.sql.Date(System.currentTimeMillis()));
-        obj.setUpdateDate(new Date(System.currentTimeMillis()));
+        obj.setCreateDate(LocalDateTime.now());
+        obj.setUpdateDate(LocalDateTime.now());
         Mockito.when(codeService.getSpecificBatchJobTypeCode(batchJobType)).thenReturn(obj);
 
         Mockito.when(userScheduledJobsRepository.save(entity)).thenReturn(ent2);
