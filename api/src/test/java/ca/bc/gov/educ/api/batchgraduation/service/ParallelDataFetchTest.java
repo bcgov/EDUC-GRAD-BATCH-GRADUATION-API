@@ -53,7 +53,7 @@ public class ParallelDataFetchTest {
         mockTokenResponseObject();
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentReportDataEarly()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentReportDataYearly()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){})).thenReturn(Mono.just(List.of(reportGradStudentData)));
