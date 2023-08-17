@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -76,7 +77,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process " + LOG_SEPARATION_SINGLE);
-			processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,properName);
+			processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,properName,jobType);
 
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
@@ -92,7 +93,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		}
     }
 
-	private void processGlobalList(DistributionSummaryDTO summaryDTO, Long batchId, String credentialType, String accessToken,String localDownload,String properName) {
+	private void processGlobalList(DistributionSummaryDTO summaryDTO, Long batchId, String credentialType, String accessToken,String localDownload,String properName,String jobType) {
 		List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
 		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
@@ -140,7 +141,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 					disres = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, localDownload);
 				}
 				if(disres != null) {
-					updateBackStudentRecords(cList,batchId,activityCode);
+					updateBackStudentRecords(cList,batchId,activityCode,jobType);
 				}
 			}
 		}
@@ -177,17 +178,19 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		});
 	}
 
-	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode) {
+	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode,String jobType) {
 		cList.forEach(scd-> {
 			LOGGER.debug("Update back Student Record {}", scd.getStudentID());
 			String accessToken = restUtils.fetchAccessToken();
 			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
 		});
-		List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().collect(Collectors.toList());
-		studentIDs.forEach(sid-> {
-			String accessToken = restUtils.fetchAccessToken();
-			restUtils.updateStudentGradRecord(sid,batchId,activityCode,accessToken);
-		});
+		if(!StringUtils.equalsAnyIgnoreCase(jobType, "REGALG", "TVRRUN")) {
+			List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().collect(Collectors.toList());
+			studentIDs.forEach(sid -> {
+				String accessToken = restUtils.fetchAccessToken();
+				restUtils.updateStudentGradRecord(sid, batchId, activityCode, accessToken);
+			});
+		}
 	}
 
 }
