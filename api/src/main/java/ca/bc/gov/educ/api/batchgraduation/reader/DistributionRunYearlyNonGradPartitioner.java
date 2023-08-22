@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.School;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -39,25 +40,23 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
         startTime = System.currentTimeMillis();
         logger.debug("Retrieve schools for Non Grad Yearly Distribution");
-        List<String> eligibleStudentSchoolDistricts = new ArrayList();
+        List<String> eligibleStudentSchoolDistricts = new ArrayList<>();
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
-            List<String> useFilterSchoolDistricts = new ArrayList<>();
             for(String schoolCategoryCode: searchRequest.getSchoolCategoryCodes()) {
                 logger.debug("Use schoolCategory code {} to find list of schools", schoolCategoryCode);
                 List<School> schools = restUtils.getSchoolBySchoolCategoryCode(schoolCategoryCode);
                 for(School school: schools) {
                     logger.debug("School {} found by schoolCategory code {}", school.getMincode(), schoolCategoryCode);
-                    useFilterSchoolDistricts.add(school.getMincode());
+                    eligibleStudentSchoolDistricts.add(school.getMincode());
                 }
             }
-            eligibleStudentSchoolDistricts = useFilterSchoolDistricts;
         }
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
-            eligibleStudentSchoolDistricts = searchRequest.getDistricts();
+            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getDistricts().contains(StringUtils.substring(scr, 0, 3)));
         }
         if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
-            eligibleStudentSchoolDistricts = searchRequest.getSchoolOfRecords();
+            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getSchoolOfRecords().contains(scr));
         }
         endTime = System.currentTimeMillis();
         diff = (endTime - startTime)/1000;
