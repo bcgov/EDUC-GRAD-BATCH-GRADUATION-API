@@ -53,10 +53,18 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
             }
         }
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
-            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getDistricts().contains(StringUtils.substring(scr, 0, 3)));
+            if(!eligibleStudentSchoolDistricts.isEmpty()) {
+                eligibleStudentSchoolDistricts.removeIf(scr -> !searchRequest.getDistricts().contains(StringUtils.substring(scr, 0, 3)));
+            } else {
+                eligibleStudentSchoolDistricts = searchRequest.getDistricts();
+            }
         }
         if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
-            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getSchoolOfRecords().contains(scr));
+            if(!eligibleStudentSchoolDistricts.isEmpty()) {
+                eligibleStudentSchoolDistricts.removeIf(scr -> !searchRequest.getSchoolOfRecords().contains(scr));
+            } else {
+                eligibleStudentSchoolDistricts = searchRequest.getSchoolOfRecords();
+            }
         }
         endTime = System.currentTimeMillis();
         diff = (endTime - startTime)/1000;
