@@ -5,17 +5,16 @@ import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
+
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
 public class SpcRegGradAlgPartitioner extends BasePartitioner {
 
@@ -23,12 +22,6 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution jobExecution;
-
-    @Autowired
-    RestUtils restUtils;
-
-    @Autowired
-    JsonTransformer jsonTransformer;
 
     public SpcRegGradAlgPartitioner() {
         super();
@@ -51,7 +44,7 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
                 accessToken = res.getAccess_token();
             }
             JobParameters jobParameters = jobExecution.getJobParameters();
-            String searchRequest = jobParameters.getString("searchRequest", "{}");
+            String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
             StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
             studentList = restUtils.getStudentsForSpecialGradRun(req, accessToken);
         } else {

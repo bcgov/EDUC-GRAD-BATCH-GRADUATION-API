@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.School;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,9 +20,6 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;
-
-    @Autowired
-    RestUtils restUtils;
 
     @Autowired
     ParallelDataFetch parallelDataFetch;
@@ -65,7 +61,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         endTime = System.currentTimeMillis();
         diff = (endTime - startTime)/1000;
         logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
-        if(eligibleStudentSchoolDistricts.isEmpty()) {
+        if(eligibleStudentSchoolDistricts.isEmpty() ) {
             logger.debug("No filter found, retrieve all districts");
             startTime = System.currentTimeMillis();
             eligibleStudentSchoolDistricts = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly(restUtils.getAccessToken());
@@ -90,6 +86,9 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
                 summaryDTO.initializeCredentialCountMap();
                 summaryDTO.setCredentialType("NONGRADYERUN");
+                if(searchRequest != null) {
+                    summaryDTO.setStudentSearchRequest(searchRequest);
+                }
                 List<String> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

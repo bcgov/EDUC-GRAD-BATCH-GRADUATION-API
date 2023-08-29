@@ -1523,13 +1523,34 @@ public class RestUtilsTest {
         mockTokenResponseObject();
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentReportDataEarly()))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getStudentReportDataYearly()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){})).thenReturn(Mono.just(List.of(reportGradStudentData)));
 
         val result = this.restUtils.fetchDistributionRequiredDataStudentsYearly();
         assertThat(result).isNotEmpty();
+    }
+
+    @Test
+    public void testGetDeceasedStudentIDs() {
+        final UUID studentID1 = UUID.randomUUID();
+        final UUID studentID2 = UUID.randomUUID();
+
+        List<UUID> studentIDs = Arrays.asList(studentID1, studentID2);
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(constants.getDeceasedStudentIDList())).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
+        };
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(studentIDs));
+
+        val result = this.restUtils.getDeceasedStudentIDs(studentIDs, "abc");
+        assertThat(result).hasSize(2);
     }
 
     @Test

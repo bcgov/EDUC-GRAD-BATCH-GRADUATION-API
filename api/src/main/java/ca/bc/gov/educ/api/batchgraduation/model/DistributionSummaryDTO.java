@@ -13,6 +13,7 @@ public class DistributionSummaryDTO extends BaseDistributionSummaryDTO {
 
     private List<StudentCredentialDistribution> globalList = new ArrayList<>();
     private List<School> schools = new ArrayList<>();
+    private StudentSearchRequest studentSearchRequest;
 
     @Override
     public void initializeCredentialCountMap() {

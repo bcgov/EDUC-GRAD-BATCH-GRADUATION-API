@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+
 public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitionerBlankUserReq.class);
@@ -32,7 +34,7 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         JobParameters jobParameters = context.getJobParameters();
-        String searchRequest = jobParameters.getString("searchRequest" ,"{}");
+        String searchRequest = jobParameters.getString(SEARCH_REQUEST ,"{}");
         String credentialType = jobParameters.getString("credentialType");
         BlankCredentialRequest req = (BlankCredentialRequest)jsonTransformer.unmarshall(searchRequest, BlankCredentialRequest.class);
         List<BlankCredentialDistribution> credentialList = getRecordsForBlankUserReqDisRun(req);

@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,16 +43,16 @@ class CodeControllerTest {
 		obj.setDescription("Graduation Algorithm");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
-		obj.setCreateDate(new Date(System.currentTimeMillis()));
-		obj.setUpdateDate(new Date(System.currentTimeMillis()));
+		obj.setCreateDate(LocalDateTime.now());
+		obj.setUpdateDate(LocalDateTime.now());
 		batchJobTypes.add(obj);
 		obj = new BatchJobType();
 		obj.setCode("TVRRUN");
 		obj.setDescription("Student Achievement Report (TVR)");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
-		obj.setCreateDate(new Date(System.currentTimeMillis()));
-		obj.setUpdateDate(new Date(System.currentTimeMillis()));
+		obj.setCreateDate(LocalDateTime.now());
+		obj.setUpdateDate(LocalDateTime.now());
 		batchJobTypes.add(obj);
 		Mockito.when(codeService.getAllBatchJobTypeCodeList()).thenReturn(batchJobTypes);
 		codeController.getAllBatchJobTypeCodeList();
@@ -68,8 +68,8 @@ class CodeControllerTest {
 		obj.setDescription("Student Achievement Report (TVR)");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
-		obj.setCreateDate(new Date(System.currentTimeMillis()));
-		obj.setUpdateDate(new Date(System.currentTimeMillis()));
+		obj.setCreateDate(LocalDateTime.now());
+		obj.setUpdateDate(LocalDateTime.now());
 		Mockito.when(codeService.getSpecificBatchJobTypeCode(batchJobType)).thenReturn(obj);
 		codeController.getSpecificBatchJobTypeCode(batchJobType);
 		Mockito.verify(codeService).getSpecificBatchJobTypeCode(batchJobType);
@@ -90,8 +90,8 @@ class CodeControllerTest {
 		obj.setDescription("PSI Run FTP / Paper");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
-		obj.setCreateDate(new Date(System.currentTimeMillis()));
-		obj.setUpdateDate(new Date(System.currentTimeMillis()));
+		obj.setCreateDate(LocalDateTime.now());
+		obj.setUpdateDate(LocalDateTime.now());
 		Mockito.when(codeService.createBatchJobType(obj)).thenReturn(obj);
 		codeController.createBatchJobType(obj);
 		Mockito.verify(codeService).createBatchJobType(obj);
@@ -104,8 +104,8 @@ class CodeControllerTest {
 		obj.setDescription("Graduation Algorithm");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
-		obj.setCreateDate(new Date(System.currentTimeMillis()));
-		obj.setUpdateDate(new Date(System.currentTimeMillis()));
+		obj.setCreateDate(LocalDateTime.now());
+		obj.setUpdateDate(LocalDateTime.now());
 		Mockito.when(codeService.updateBatchJobType(obj)).thenReturn(obj);
 		codeController.updateBatchJobType(obj);
 		Mockito.verify(codeService).updateBatchJobType(obj);

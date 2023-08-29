@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.COMPLETED;
 import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.STARTED;
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
 
@@ -46,7 +47,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 			Date startTime = jobExecution.getStartTime();
 			Date endTime = jobExecution.getEndTime();
 			String jobTrigger = jobParameters.getString("jobTrigger");
-			String searchRequest = jobParameters.getString("searchRequest");
+			String searchRequest = jobParameters.getString(SEARCH_REQUEST);
 
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {
@@ -56,7 +57,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 
 			String processGlobalListStatus = processGlobalList(summaryDTO, searchRequest, "YEARENDDIST") ? STARTED.name() : COMPLETED.name();
 
-			String studentSearchRequest = jobParameters.getString("searchRequest", "{}");
+			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 			// display Summary Details
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());

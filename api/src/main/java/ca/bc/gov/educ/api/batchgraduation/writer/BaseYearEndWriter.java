@@ -80,13 +80,4 @@ public abstract class BaseYearEndWriter {
             }
         }
     }
-
-    protected void updateBackStudentRecords(List<StudentCredentialDistribution> cList,Long batchId) {
-        cList.forEach(scd-> {
-            LOGGER.debug("Update back Student Record {}", scd.getStudentID());
-            String accessToken = restUtils.fetchAccessToken();
-            restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),"NONGRADYERUN",accessToken);
-            restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,"NONGRADYERUN",accessToken);
-        });
-    }
 }

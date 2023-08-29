@@ -3,9 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialRequest;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiDistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -16,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+
 public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitionerPsiUserReq.class);
@@ -24,18 +24,12 @@ public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
     JobExecution context;
 
     @Autowired
-    RestUtils restUtils;
-
-    @Autowired
-    JsonTransformer jsonTransformer;
-
-    @Autowired
     GraduationReportService graduationReportService;
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         JobParameters jobParameters = context.getJobParameters();
-        String searchRequest = jobParameters.getString("searchRequest", "{}");
+        String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
         String transmissionType = jobParameters.getString("transmissionType");
         PsiCredentialRequest req = (PsiCredentialRequest)jsonTransformer.unmarshall(searchRequest, PsiCredentialRequest.class);
         String accessToken = restUtils.getAccessToken();

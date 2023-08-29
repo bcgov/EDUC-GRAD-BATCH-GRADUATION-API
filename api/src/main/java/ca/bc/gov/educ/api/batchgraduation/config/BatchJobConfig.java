@@ -726,8 +726,8 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public DistributionRunPartitionerSupplemental partitionerDisRunSupplemental() {
-        return new DistributionRunPartitionerSupplemental();
+    public DistributionRunSupplementalPartitioner partitionerDisRunSupplemental() {
+        return new DistributionRunSupplementalPartitioner();
     }
 
     @Bean

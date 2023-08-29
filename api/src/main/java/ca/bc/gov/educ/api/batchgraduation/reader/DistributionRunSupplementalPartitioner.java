@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,15 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DistributionRunPartitionerSupplemental extends BasePartitioner {
+public class DistributionRunSupplementalPartitioner extends BasePartitioner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitionerSupplemental.class);
+    private static final Logger logger = LoggerFactory.getLogger(DistributionRunSupplementalPartitioner.class);
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;
-
-    @Autowired
-    RestUtils restUtils;
 
     @Autowired
     ParallelDataFetch parallelDataFetch;
@@ -33,23 +29,34 @@ public class DistributionRunPartitionerSupplemental extends BasePartitioner {
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
 
+        logger.debug("Delete School Reports for Supplemental Distribution");
+        long startTime = System.currentTimeMillis();
         String accessToken = restUtils.getAccessToken();
         // Clean up existing reports before running new one
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", accessToken);
         restUtils.deleteSchoolReportRecord("", "DISTREP_SC", accessToken);
+        long endTime = System.currentTimeMillis();
+        long diff = (endTime - startTime)/1000;
+        logger.debug("Old School Reports deleted in {} sec", diff);
 
+        startTime = System.currentTimeMillis();
+        logger.debug("Retrieve students for Supplemental Distribution");
         Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredDataYearly(accessToken);
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
-        List<StudentCredentialDistribution> credentialList = new ArrayList<>();
+        List<StudentCredentialDistribution> eligibleStudentSchoolDistricts = new ArrayList<>();
         if(parallelDTO != null) {
-            credentialList.addAll(parallelDTO.transcriptList());
-            credentialList.addAll(parallelDTO.certificateList());
+            eligibleStudentSchoolDistricts.addAll(parallelDTO.transcriptList());
+            eligibleStudentSchoolDistricts.addAll(parallelDTO.certificateList());
         }
-        if(!credentialList.isEmpty()) {
-            updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
-            return getStringExecutionContextMap(gridSize, credentialList, null, LOGGER);
+        endTime = System.currentTimeMillis();
+        diff = (endTime - startTime)/1000;
+        logger.debug("Total {} eligible StudentCredentialDistributions found in {} sec", eligibleStudentSchoolDistricts.size(), diff);
+        filterByStudentSearchRequest(eligibleStudentSchoolDistricts);
+        if(!eligibleStudentSchoolDistricts.isEmpty()) {
+            updateBatchJobHistory(createBatchJobHistory(), (long) eligibleStudentSchoolDistricts.size());
+            return getStringExecutionContextMap(gridSize, eligibleStudentSchoolDistricts, null, logger);
         }
-        LOGGER.info("No Credentials Found for Processing");
+        logger.info("No Credentials Found for Processing");
         return new HashMap<>();
     }
 
