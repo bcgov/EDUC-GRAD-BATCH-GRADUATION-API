@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +28,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 
     @Override
     public void afterJob(JobExecution jobExecution) {
-		long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
+		long elapsedTimeMillis = getElapsedTimeMillis(jobExecution);
 		LOGGER.info("=======================================================================================");
 		JobParameters jobParameters = jobExecution.getJobParameters();
 		ExecutionContext jobContext = jobExecution.getExecutionContext();

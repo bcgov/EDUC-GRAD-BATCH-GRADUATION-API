@@ -5,6 +5,8 @@ import ca.bc.gov.educ.api.batchgraduation.model.BatchJobType;
 import ca.bc.gov.educ.api.batchgraduation.model.transformer.BatchJobTypeTransformer;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchJobTypeRepository;
 import ca.bc.gov.educ.api.batchgraduation.util.GradValidation;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +14,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 

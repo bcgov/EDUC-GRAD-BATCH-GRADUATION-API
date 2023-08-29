@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
@@ -126,7 +127,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
         String username = jobParameters.getString(RUN_BY);
         String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST);
         String status = getJobExecution().getStatus().toString();
-        Date startTime = getJobExecution().getStartTime();
+        Date startTime = DateUtils.toDate(getJobExecution().getStartTime());
 
         BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
         ent.setActualStudentsProcessed(0L);

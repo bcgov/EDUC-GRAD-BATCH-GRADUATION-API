@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -35,8 +36,8 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
         ExecutionContext jobContext = jobExecution.getExecutionContext();
         Long jobExecutionId = jobExecution.getId();
         String status = jobExecution.getStatus().toString();
-        Date startTime = jobExecution.getStartTime();
-        Date endTime = jobExecution.getEndTime();
+        Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+        Date endTime = DateUtils.toDate(jobExecution.getEndTime());
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
 

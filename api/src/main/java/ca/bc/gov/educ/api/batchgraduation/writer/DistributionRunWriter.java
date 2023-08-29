@@ -7,11 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
-import java.util.List;
 
 public class DistributionRunWriter implements ItemWriter<StudentCredentialDistribution> {
 
@@ -28,9 +27,9 @@ public class DistributionRunWriter implements ItemWriter<StudentCredentialDistri
     JobExecution jobExecution;
     
     @Override
-    public void write(List<? extends StudentCredentialDistribution> list) throws Exception {
+    public void write(Chunk<? extends StudentCredentialDistribution> list) {
         if(!list.isEmpty()) {
-        	StudentCredentialDistribution cred = list.get(0);
+        	StudentCredentialDistribution cred = list.getItems().get(0);
 	        summaryDTO.increment(cred.getPaperType());
 
             // save StudentCredentialDistribution

@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistor
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -86,11 +88,11 @@ public class DistributionRunCompletionNotificationListenerTest {
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "TVRRUN");
 
-        JobExecution ex = new JobExecution(121L);
-        ex.setStatus(BatchStatus.COMPLETED);
-        ex.setStartTime(new Date());
-        ex.setEndTime(new Date());
-        ex.setId(121L);
+        JobExecution jobExecution = new JobExecution(121L);
+        jobExecution.setStatus(BatchStatus.COMPLETED);
+        jobExecution.setStartTime(LocalDateTime.now());
+        jobExecution.setEndTime(LocalDateTime.now());
+        jobExecution.setId(121L);
         ExecutionContext jobContext = new ExecutionContext();
 
 
@@ -114,13 +116,13 @@ public class DistributionRunCompletionNotificationListenerTest {
         summaryDTO.setGlobalList(scdList);
         jobContext.put("distributionSummaryDTO", summaryDTO);
 
-        JobParameters jobParameters = ex. getJobParameters();
+        JobParameters jobParameters = jobExecution. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
         Long processedStudents = summaryDTO.getProcessedCount();
         Long expectedStudents = summaryDTO.getReadCount();
-        String status = ex.getStatus().toString();
-        Date startTime = ex.getStartTime();
-        Date endTime = ex.getEndTime();
+        String status = jobExecution.getStatus().toString();
+        Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+        Date endTime = DateUtils.toDate(jobExecution.getEndTime());
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
 
@@ -135,7 +137,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
 
-        ex.setExecutionContext(jobContext);
+        jobExecution.setExecutionContext(jobContext);
 
         List<StudentCredentialDistribution> cList = new ArrayList<>();
         cList.add(scd);
@@ -209,7 +211,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         Mockito.when(parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredDataYearly(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
         Mockito.when(restUtils.mergeAndUpload(121L, distributionRequest,"YEARENDDIST",null)).thenReturn(new DistributionResponse());
-        distributionRunCompletionNotificationListener.afterJob(ex);
+        distributionRunCompletionNotificationListener.afterJob(jobExecution);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
     }

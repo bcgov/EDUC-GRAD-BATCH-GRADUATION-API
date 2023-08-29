@@ -1,9 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-import javax.persistence.*;
 
 @Data
 @Entity

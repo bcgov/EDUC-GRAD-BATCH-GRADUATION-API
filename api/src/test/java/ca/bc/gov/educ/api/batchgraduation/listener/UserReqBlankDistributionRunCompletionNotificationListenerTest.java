@@ -1,11 +1,15 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.BlankDistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.junit.After;
 import org.junit.Before;
@@ -26,13 +30,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 @RunWith(SpringRunner.class)
@@ -88,12 +92,12 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         builder.addString("credentialType","OT");
         builder.addString("userScheduled", UUID.randomUUID().toString());
 
-        JobExecution ex = new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), builder.toJobParameters(), null);
-        ex.setStatus(BatchStatus.COMPLETED);
-        ex.setStartTime(new Date());
-        ex.setEndTime(new Date());
-        ex.setId(121L);
-        ExecutionContext jobContext = ex.getExecutionContext();
+        JobExecution jobExecution = new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), 121L, builder.toJobParameters());
+        jobExecution.setStatus(BatchStatus.COMPLETED);
+        jobExecution.setStartTime(LocalDateTime.now());
+        jobExecution.setEndTime(LocalDateTime.now());
+        jobExecution.setId(121L);
+        ExecutionContext jobContext = jobExecution.getExecutionContext();
 
         List<BlankCredentialDistribution> scdList = new ArrayList<>();
         BlankCredentialDistribution scd = new BlankCredentialDistribution();
@@ -129,13 +133,13 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         summaryDTO.setGlobalList(scdList);
         jobContext.put("blankDistributionSummaryDTO", summaryDTO);
 
-        JobParameters jobParameters = ex. getJobParameters();
+        JobParameters jobParameters = jobExecution. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
         Long processedStudents = summaryDTO.getProcessedCount();
         Long expectedStudents = summaryDTO.getReadCount();
-        String status = ex.getStatus().toString();
-        Date startTime = ex.getStartTime();
-        Date endTime = ex.getEndTime();
+        String status = jobExecution.getStatus().toString();
+        Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+        Date endTime = DateUtils.toDate(jobExecution.getEndTime());
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
         String credentialType = jobParameters.getString("credentialType");
@@ -151,7 +155,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
 
-        ex.setExecutionContext(jobContext);
+        jobExecution.setExecutionContext(jobContext);
 
         List<BlankCredentialDistribution> cList = new ArrayList<>();
         cList.add(scd);
@@ -165,7 +169,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
         Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
-        userReqBlankDistributionRunCompletionNotificationListener.afterJob(ex);
+        userReqBlankDistributionRunCompletionNotificationListener.afterJob(jobExecution);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
     }
@@ -178,12 +182,12 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         builder.addString(JOB_TYPE, "TVRRUN");
         builder.addString("credentialType","OC");
 
-        JobExecution ex = new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), builder.toJobParameters(), null);
-        ex.setStatus(BatchStatus.COMPLETED);
-        ex.setStartTime(new Date());
-        ex.setEndTime(new Date());
-        ex.setId(121L);
-        ExecutionContext jobContext = ex.getExecutionContext();
+        JobExecution jobExecution = new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), 121L, builder.toJobParameters());
+        jobExecution.setStatus(BatchStatus.COMPLETED);
+        jobExecution.setStartTime(LocalDateTime.now());
+        jobExecution.setEndTime(LocalDateTime.now());
+        jobExecution.setId(121L);
+        ExecutionContext jobContext = jobExecution.getExecutionContext();
 
         List<BlankCredentialDistribution> scdList = new ArrayList<>();
         BlankCredentialDistribution scd = new BlankCredentialDistribution();
@@ -219,13 +223,13 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         summaryDTO.setGlobalList(scdList);
         jobContext.put("blankDistributionSummaryDTO", summaryDTO);
 
-        JobParameters jobParameters = ex. getJobParameters();
+        JobParameters jobParameters = jobExecution. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
         Long processedStudents = summaryDTO.getProcessedCount();
         Long expectedStudents = summaryDTO.getReadCount();
-        String status = ex.getStatus().toString();
-        Date startTime = ex.getStartTime();
-        Date endTime = ex.getEndTime();
+        String status = jobExecution.getStatus().toString();
+        Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+        Date endTime = DateUtils.toDate(jobExecution.getEndTime());
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
         String credentialType = jobParameters.getString("credentialType");
@@ -241,7 +245,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
 
-        ex.setExecutionContext(jobContext);
+        jobExecution.setExecutionContext(jobContext);
 
         List<BlankCredentialDistribution> cList = new ArrayList<>();
         cList.add(scd);
@@ -255,7 +259,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
         Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
-        userReqBlankDistributionRunCompletionNotificationListener.afterJob(ex);
+        userReqBlankDistributionRunCompletionNotificationListener.afterJob(jobExecution);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
     }

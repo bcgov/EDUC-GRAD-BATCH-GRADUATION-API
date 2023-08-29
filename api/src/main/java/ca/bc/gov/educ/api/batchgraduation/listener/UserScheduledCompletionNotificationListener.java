@@ -11,6 +11,7 @@ import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
 import java.util.Date;
 
 @Component
@@ -29,7 +30,7 @@ public class UserScheduledCompletionNotificationListener extends JobExecutionLis
     @Override
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
+	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 			LOGGER.info(LOG_SEPARATION);
 	    	LOGGER.info("User Scheduled Jobs Refresher completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
 			LOGGER.info(LOG_SEPARATION);

@@ -2,11 +2,11 @@ package ca.bc.gov.educ.api.batchgraduation.entity;
 
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
+import jakarta.persistence.*;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.*;
 import java.util.Date;
 
 @Data

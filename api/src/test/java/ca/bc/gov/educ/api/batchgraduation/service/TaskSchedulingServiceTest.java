@@ -7,14 +7,15 @@ import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
+import net.javacrumbs.shedlock.spring.LockableTaskScheduler;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -38,8 +39,9 @@ public class TaskSchedulingServiceTest {
     @Autowired
     TaskDefinition taskDefinition;
 
-    @Autowired
-    TaskScheduler taskScheduler;
+    @MockBean
+    @Qualifier("lockableTaskScheduler")
+    LockableTaskScheduler taskScheduler;
 
     @Autowired
     JsonTransformer jsonTransformer;

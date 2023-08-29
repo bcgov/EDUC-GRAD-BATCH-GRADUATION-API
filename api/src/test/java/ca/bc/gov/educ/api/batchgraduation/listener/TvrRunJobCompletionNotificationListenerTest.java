@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -63,11 +68,11 @@ public class TvrRunJobCompletionNotificationListenerTest {
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "TVRRUN");
 
-        JobExecution ex = new JobExecution(121L);
-        ex.setStatus(BatchStatus.COMPLETED);
-        ex.setStartTime(new Date());
-        ex.setEndTime(new Date());
-        ex.setId(121L);
+        JobExecution jobExecution = new JobExecution(121L);
+        jobExecution.setStatus(BatchStatus.COMPLETED);
+        jobExecution.setStartTime(LocalDateTime.now());
+        jobExecution.setEndTime(LocalDateTime.now());
+        jobExecution.setId(121L);
         ExecutionContext jobContext = new ExecutionContext();
 
 
@@ -78,13 +83,13 @@ public class TvrRunJobCompletionNotificationListenerTest {
         summaryDTO.setErrors(new HashMap<>());
         jobContext.put("summaryDTO", summaryDTO);
 
-        JobParameters jobParameters = ex. getJobParameters();
+        JobParameters jobParameters = jobExecution. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
         Long processedStudents = summaryDTO.getProcessedCount();
         Long expectedStudents = summaryDTO.getReadCount();
-        String status = ex.getStatus().toString();
-        Date startTime = ex.getStartTime();
-        Date endTime = ex.getEndTime();
+        String status = jobExecution.getStatus().toString();
+        Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+        Date endTime = DateUtils.toDate(jobExecution.getEndTime());
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
 
@@ -99,11 +104,11 @@ public class TvrRunJobCompletionNotificationListenerTest {
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
 
-        ex.setExecutionContext(jobContext);
+        jobExecution.setExecutionContext(jobContext);
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
         Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
-        tvrRunJobCompletionNotificationListener.afterJob(ex);
+        tvrRunJobCompletionNotificationListener.afterJob(jobExecution);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
     }
@@ -115,11 +120,11 @@ public class TvrRunJobCompletionNotificationListenerTest {
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "TVRRUN");
 
-        JobExecution ex = new JobExecution(121L);
-        ex.setStatus(BatchStatus.COMPLETED);
-        ex.setStartTime(new Date());
-        ex.setEndTime(new Date());
-        ex.setId(121L);
+        JobExecution jobExecution = new JobExecution(121L);
+        jobExecution.setStatus(BatchStatus.COMPLETED);
+        jobExecution.setStartTime(LocalDateTime.now());
+        jobExecution.setEndTime(LocalDateTime.now());
+        jobExecution.setId(121L);
         ExecutionContext jobContext = new ExecutionContext();
 
 
@@ -136,13 +141,13 @@ public class TvrRunJobCompletionNotificationListenerTest {
         summaryDTO.setErrors(mapP);
         jobContext.put("tvrRunSummaryDTO", summaryDTO);
 
-        JobParameters jobParameters = ex. getJobParameters();
+        JobParameters jobParameters = jobExecution. getJobParameters();
         int failedRecords = summaryDTO.getErrors().size();
         Long processedStudents = summaryDTO.getProcessedCount();
         Long expectedStudents = summaryDTO.getReadCount();
-        String status = ex.getStatus().toString();
-        Date startTime = ex.getStartTime();
-        Date endTime = ex.getEndTime();
+        String status = jobExecution.getStatus().toString();
+        Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+        Date endTime = DateUtils.toDate(jobExecution.getEndTime());
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
 
@@ -157,11 +162,11 @@ public class TvrRunJobCompletionNotificationListenerTest {
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
 
-        ex.setExecutionContext(jobContext);
+        jobExecution.setExecutionContext(jobContext);
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
         Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
-        tvrRunJobCompletionNotificationListener.afterJob(ex);
+        tvrRunJobCompletionNotificationListener.afterJob(jobExecution);
 
         assertThat(ent.getActualStudentsProcessed()).isEqualTo(10);
     }
