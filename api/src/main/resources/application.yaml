@@ -43,7 +43,7 @@ spring:
       isolation-level-for-create: READ_COMMITTED
   flyway:
     enabled: ${ENABLE_FLYWAY}
-    baseline-on-migrate: false
+    baseline-on-migrate: true
     table: FLYWAY_SCHEMA_HISTORY
     url: ${CONNECTION_STRING}
     schema: ${USERNAME}
