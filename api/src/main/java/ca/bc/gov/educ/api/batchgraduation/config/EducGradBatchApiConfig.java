@@ -40,7 +40,7 @@ public class EducGradBatchApiConfig {
         Converter<Date, LocalDateTime> toLocalDateTime = new AbstractConverter<>() {
             @Override
             protected LocalDateTime convert(Date date) {
-                return date.toInstant()
+                return (date == null) ? null : date.toInstant()
                         .atZone(ZoneId.systemDefault())
                         .toLocalDateTime();
             }
