@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -62,7 +63,8 @@ public class BatchDbConfig {
 
     @Primary
     @Bean
-    public DataSource batchDataSource() {
+    @Qualifier("datasource")
+    public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
 
         config.setDriverClassName(driverClassName);
@@ -88,14 +90,14 @@ public class BatchDbConfig {
     public LocalContainerEntityManagerFactoryBean batchEntityManager() {
         LocalContainerEntityManagerFactoryBean em
                 = new LocalContainerEntityManagerFactoryBean();
-        em.setDataSource(batchDataSource());
+        em.setDataSource(dataSource());
         em.setPackagesToScan("ca.bc.gov.educ.api.batchgraduation.entity");
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         HashMap<String, Object> properties = new HashMap<>();
         properties.put("hibernate.hbm2ddl.auto", "none");
-        properties.put("hibernate.dialect", "org.hibernate.dialect.Oracle12cDialect");
+        properties.put("hibernate.dialect", "org.hibernate.dialect.OracleDialect");
         properties.put("hibernate.format_sql", "true");
         properties.put("hibernate.show_sql", "false");
         em.setJpaPropertyMap(properties);
@@ -107,7 +109,8 @@ public class BatchDbConfig {
 
     @Primary
     @Bean
-    public PlatformTransactionManager batchTransactionManager() {
+    @Qualifier("transactionManager")
+    public PlatformTransactionManager transactionManager() {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(batchEntityManager().getObject());
         return transactionManager;
