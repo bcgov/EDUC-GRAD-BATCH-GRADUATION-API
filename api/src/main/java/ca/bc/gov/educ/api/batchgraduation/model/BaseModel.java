@@ -19,11 +19,4 @@ public class BaseModel {
 	@JsonDeserialize(using = GradLocalDateTimeDeserializer.class)
 	private LocalDateTime updateDate;
 
-	public LocalDateTime getUpdateDate() {
-		return updateDate == null ? LocalDateTime.now() : updateDate;
-	}
-
-	public LocalDateTime getCreateDate() {
-		return createDate == null ? LocalDateTime.now() : createDate;
-	}
 }
