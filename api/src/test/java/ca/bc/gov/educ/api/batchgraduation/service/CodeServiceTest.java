@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -73,8 +74,8 @@ class CodeServiceTest {
 		obj.setDescription("Student Achievement Report (TVR)");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
-		obj.setCreateDate(new Date(System.currentTimeMillis()));
-		obj.setUpdateDate(new Date(System.currentTimeMillis()));
+		obj.setCreateDate(LocalDateTime.now());
+		obj.setUpdateDate(LocalDateTime.now());
 		obj.toString();
 		BatchJobTypeEntity objEntity = new BatchJobTypeEntity();
 		objEntity.setCode("TVRRUN");
@@ -105,8 +106,8 @@ class CodeServiceTest {
 		obj.setDescription("PSI Run FTP / Paper");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
-		obj.setCreateDate(new Date(System.currentTimeMillis()));
-		obj.setUpdateDate(new Date(System.currentTimeMillis()));
+		obj.setCreateDate(LocalDateTime.now());
+		obj.setUpdateDate(LocalDateTime.now());
 		BatchJobTypeEntity objEntity = new BatchJobTypeEntity();
 		objEntity.setCode("PSIRUN");
 		objEntity.setDescription("PSI Run FTP / Paper");
@@ -128,8 +129,8 @@ class CodeServiceTest {
 		obj.setDescription("PSI Run FTP / Paper");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
-		obj.setCreateDate(new Date(System.currentTimeMillis()));
-		obj.setUpdateDate(new Date(System.currentTimeMillis()));
+		obj.setCreateDate(LocalDateTime.now());
+		obj.setUpdateDate(LocalDateTime.now());
 		BatchJobTypeEntity objEntity = new BatchJobTypeEntity();
 		objEntity.setCode("PSIRUN");
 		objEntity.setDescription("PSI Run FTP / Paper");
@@ -151,8 +152,8 @@ class CodeServiceTest {
 		obj.setDescription("Graduation Algorithm");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
-		obj.setCreateDate(new Date(System.currentTimeMillis()));
-		obj.setUpdateDate(new Date(System.currentTimeMillis()));
+		obj.setCreateDate(LocalDateTime.now());
+		obj.setUpdateDate(LocalDateTime.now());
 		BatchJobTypeEntity objEntity = new BatchJobTypeEntity();
 		objEntity.setCode("REGALG");
 		objEntity.setDescription("Graduation Algorithm");
@@ -174,8 +175,8 @@ class CodeServiceTest {
 		obj.setDescription("Graduation Algorithm");
 		obj.setCreateUser("GRADUATION");
 		obj.setUpdateUser("GRADUATION");
-		obj.setCreateDate(new Date(System.currentTimeMillis()));
-		obj.setUpdateDate(new Date(System.currentTimeMillis()));
+		obj.setCreateDate(LocalDateTime.now());
+		obj.setUpdateDate(LocalDateTime.now());
 		BatchJobTypeEntity objEntity = new BatchJobTypeEntity();
 		objEntity.setCode("REGALG");
 		objEntity.setDescription("Graduation Algorithm");

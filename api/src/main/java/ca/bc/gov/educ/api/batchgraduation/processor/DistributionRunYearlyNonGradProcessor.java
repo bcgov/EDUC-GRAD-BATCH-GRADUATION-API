@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.processor;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,10 @@ public class DistributionRunYearlyNonGradProcessor implements ItemProcessor<Stri
 		LOGGER.debug("Processing partitionData for district {} ", mincode);
 		summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
 		List<StudentCredentialDistribution> studentCredentials = restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
+		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
+		if(searchRequest != null && searchRequest.getPens() != null && !searchRequest.getPens().isEmpty()) {
+			studentCredentials.removeIf(scr->!searchRequest.getPens().contains(scr.getPen()));
+		}
 		LOGGER.debug("Completed partitionData for district {} with {} students", mincode, studentCredentials.size());
 		summaryDTO.getGlobalList().addAll(studentCredentials);
 		return studentCredentials;

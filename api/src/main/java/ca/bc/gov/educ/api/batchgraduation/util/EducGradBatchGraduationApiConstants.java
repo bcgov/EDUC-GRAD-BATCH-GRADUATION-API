@@ -190,7 +190,7 @@ public class EducGradBatchGraduationApiConstants {
     private String districtDataYearly;
 
     @Value("${endpoint.grad-graduation-api.student-data-yearly.url}")
-    private String studentReportDataEarly;
+    private String studentReportDataYearly;
 
     @Value("${endpoint.grad-graduation-report-api.user-req-dis-run.url}")
     private String studentDataForUserReqDisRun;
@@ -251,6 +251,9 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-trax-api.school-by-school-category.url}")
     private String traxSchoolBySchoolCategory;
+
+    @Value("${endpoint.grad-student-api.get-deceased-student-id-list}")
+    private String deceasedStudentIDList;
 
     // Splunk LogHelper Enabled
     @Value("${splunk.log-helper.enabled}")
