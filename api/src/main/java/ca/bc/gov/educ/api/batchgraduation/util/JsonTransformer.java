@@ -24,7 +24,8 @@ public class JsonTransformer implements Transformer {
     ObjectMapper objectMapper;
 
     @PostConstruct
-    void initMapper() {
+    public void initMapper() {
+        if(objectMapper == null) objectMapper = new ObjectMapper();
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addSerializer(LocalDate.class, new GradLocalDateSerializer());
         simpleModule.addSerializer(LocalDateTime.class, new GradLocalDateTimeSerializer());

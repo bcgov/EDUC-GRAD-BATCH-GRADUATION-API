@@ -177,7 +177,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
         LOGGER.debug("Total {} selected after filter", credentialList.size());
     }
 
-    Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
+    Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType) {
         filterStudentCredentialDistribution(credentialList);
         sortStudentCredentialDistributionByNames(credentialList);
         int partitionSize = credentialList.size()/gridSize + 1;
@@ -201,7 +201,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
             String key = "partition" + i;
             map.put(key, executionContext);
         }
-        logger.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
+        LOGGER.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
         return map;
     }
 

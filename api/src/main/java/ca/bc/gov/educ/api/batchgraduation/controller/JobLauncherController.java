@@ -453,6 +453,11 @@ public class JobLauncherController {
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            if(summaryDTO == null) {
+                summaryDTO = new DistributionSummaryDTO();
+                jobContext.put(DISDTO, summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
@@ -478,6 +483,11 @@ public class JobLauncherController {
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            if(summaryDTO == null) {
+                summaryDTO = new DistributionSummaryDTO();
+                jobContext.put(DISDTO, summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException |
                  JobParametersInvalidException | NoSuchJobException e) {
@@ -503,6 +513,11 @@ public class JobLauncherController {
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("SupplementalDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            if(summaryDTO == null) {
+                summaryDTO = new DistributionSummaryDTO();
+                jobContext.put(DISDTO, summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
@@ -528,6 +543,11 @@ public class JobLauncherController {
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("YearlyNonGradDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            if(summaryDTO == null) {
+                summaryDTO = new DistributionSummaryDTO();
+                jobContext.put(DISDTO, summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException |
                  JobParametersInvalidException | NoSuchJobException e) {
@@ -573,6 +593,11 @@ public class JobLauncherController {
             JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("UserReqDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            if(summaryDTO == null) {
+                summaryDTO = new DistributionSummaryDTO();
+                jobContext.put(DISDTO, summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
@@ -605,6 +630,11 @@ public class JobLauncherController {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
+            if(summaryDTO == null) {
+                summaryDTO = new BlankDistributionSummaryDTO();
+                jobContext.put("blankDistributionSummaryDTO", summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
@@ -639,6 +669,11 @@ public class JobLauncherController {
             JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob("psiDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
+            if(summaryDTO == null) {
+                summaryDTO = new PsiDistributionSummaryDTO();
+                jobContext.put("psiDistributionSummaryDTO", summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             PsiDistributionSummaryDTO summaryDTO = new PsiDistributionSummaryDTO();

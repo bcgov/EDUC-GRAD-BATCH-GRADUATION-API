@@ -33,7 +33,7 @@ public class DistributionRunPartitionerUserReq extends BasePartitioner {
         StudentSearchRequest req = getStudentSearchRequest();
         List<StudentCredentialDistribution> credentialList = restUtils.getStudentsForUserReqDisRun(credentialType,req,accessToken);
         if(!credentialList.isEmpty()) {
-            Map<String, ExecutionContext> map = getStringExecutionContextMap(gridSize, credentialList, credentialType, LOGGER);
+            Map<String, ExecutionContext> map = getStringExecutionContextMap(gridSize, credentialList, credentialType);
             LOGGER.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
             return map;
         }

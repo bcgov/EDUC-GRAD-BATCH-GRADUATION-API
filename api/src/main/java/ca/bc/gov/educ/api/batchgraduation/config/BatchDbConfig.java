@@ -109,7 +109,7 @@ public class BatchDbConfig {
 
     @Primary
     @Bean
-    @Qualifier("transactionManager")
+    @Qualifier("batchTransactionManager")
     public PlatformTransactionManager transactionManager() {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(batchEntityManager().getObject());
