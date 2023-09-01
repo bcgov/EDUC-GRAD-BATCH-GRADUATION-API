@@ -90,7 +90,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		sortSchoolBySchoolOfRecord(uniqueSchoolList);
-		LOGGER.info("unique schools =  {}", uniqueSchoolList.size());
+		LOGGER.info("Unique Schools =  {}", uniqueSchoolList.size());
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());
