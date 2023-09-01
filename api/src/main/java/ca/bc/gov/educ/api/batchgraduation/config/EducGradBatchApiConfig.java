@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import net.javacrumbs.shedlock.core.LockProvider;
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
-import org.modelmapper.ModelMapper;
+import org.modelmapper.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,13 +20,35 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 
 @Configuration
 public class EducGradBatchApiConfig {
 
     @Bean
     public ModelMapper modelMapper() {
-        return new ModelMapper();
+        ModelMapper modelMapper = new ModelMapper();
+
+        Provider<LocalDateTime> localDateTimeProvider = new AbstractProvider<>() {
+            @Override
+            protected LocalDateTime get() {
+                return LocalDateTime.now();
+            }
+        };
+
+        Converter<Date, LocalDateTime> toLocalDateTime = new AbstractConverter<>() {
+            @Override
+            protected LocalDateTime convert(Date date) {
+                return (date == null) ? null : date.toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime();
+            }
+        };
+        modelMapper.createTypeMap(Date.class, LocalDateTime.class);
+        modelMapper.addConverter(toLocalDateTime);
+        modelMapper.getTypeMap(Date.class, LocalDateTime.class).setProvider(localDateTimeProvider);
+        return modelMapper;
     }
 
     /**
