@@ -27,6 +27,7 @@
             src/main/java/ca/bc/gov/educ/api/batchgraduation/processor/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/reader/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/writer/**,
+            src/main/java/org/springframework/**,
             src/test/java/ca/bc/gov/educ/api/batchgraduation/**
         </sonar.exclusions>
         <sonar.coverage.exclusions>
@@ -41,6 +42,7 @@
             src/main/java/ca/bc/gov/educ/api/batchgraduation/processor/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/reader/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/writer/**,
+            src/main/java/org/springframework/**,
             src/test/java/ca/bc/gov/educ/api/batchgraduation/**
         </sonar.coverage.exclusions>
         <java.version>18</java.version>
