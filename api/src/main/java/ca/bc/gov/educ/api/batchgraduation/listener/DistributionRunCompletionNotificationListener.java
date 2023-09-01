@@ -71,7 +71,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		Long batchId = summaryDTO.getBatchId();
 		List<StudentCredentialDistribution> cList = distributionService.getStudentCredentialDistributions(batchId);
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
-		LOGGER.info("list size =  {}", cList.size());
+		LOGGER.info("Student Credentials list size =  {}", cList.size());
 		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = distributionService.getSchoolListForDistribution(batchId);
 		sortSchoolBySchoolOfRecord(uniqueSchoolList);

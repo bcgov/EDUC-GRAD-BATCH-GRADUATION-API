@@ -133,7 +133,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
             credentialList.removeIf(s->"1950".equalsIgnoreCase(s.getProgram()) && !"AD".equalsIgnoreCase(s.getStudentGrade()));
             credentialList.removeIf(s->!"1950".equalsIgnoreCase(s.getProgram()) && !"12".equalsIgnoreCase(s.getStudentGrade()));
         }
-        LOGGER.debug("Total {} selected after filter", credentialList.size());
+        LOGGER.debug("Total {} Student Credentials selected after filter", credentialList.size());
     }
 
     long getElapsedTimeMillis(JobExecution jobExecution) {

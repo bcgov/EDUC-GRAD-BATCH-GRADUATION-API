@@ -82,7 +82,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 		filterStudentCredentialDistribution(cList, activityCode);
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
 		summaryDTO.recalculateCredentialCounts();
-		LOGGER.info("list size =  {}", cList.size());
+		LOGGER.info("Student Credentials list size =  {}", cList.size());
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		sortSchoolBySchoolOfRecord(uniqueSchoolList);

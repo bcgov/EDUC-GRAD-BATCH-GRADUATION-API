@@ -174,7 +174,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
                 LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()));
             }
         }
-        LOGGER.debug("Total {} selected after filter", credentialList.size());
+        LOGGER.debug("Total {} Student Credentials selected after filter", credentialList.size());
     }
 
     Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType) {
