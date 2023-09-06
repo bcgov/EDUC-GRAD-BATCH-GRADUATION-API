@@ -7,7 +7,7 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @MappedSuperclass
@@ -18,7 +18,7 @@ public class BaseEntity {
 	@Column(name = "CREATE_DATE", columnDefinition="datetime",nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	@DateTimeFormat(pattern = "yyyy-mm-dd hh:mm:ss")
-    private Date createDate;
+    private LocalDateTime createDate;
 	
 	
 	@Column(name = "UPDATE_USER", nullable = false)
@@ -27,7 +27,7 @@ public class BaseEntity {
 	@Column(name = "UPDATE_DATE", columnDefinition="datetime")
 	@Temporal(TemporalType.TIMESTAMP)
 	@DateTimeFormat(pattern = "yyyy-mm-dd hh:mm:ss")
-	private Date updateDate;
+	private LocalDateTime updateDate;
 	
 	@PrePersist
 	protected void onCreate() {
@@ -43,14 +43,14 @@ public class BaseEntity {
 				this.updateUser = EducGradBatchGraduationApiConstants.DEFAULT_UPDATED_BY;
 			}
 		}		
-		this.createDate = new Date(System.currentTimeMillis());
-		this.updateDate = new Date(System.currentTimeMillis());
+		this.createDate = LocalDateTime.now();
+		this.updateDate = LocalDateTime.now();
 
 	}
 
 	@PreUpdate
 	protected void onPersist() {
-		this.updateDate = new Date();
+		this.updateDate = LocalDateTime.now();
 		if (StringUtils.isBlank(updateUser)) {
 			this.updateUser = ThreadLocalStateUtil.getCurrentUser();
 			if (StringUtils.isBlank(updateUser)) {
@@ -64,7 +64,7 @@ public class BaseEntity {
 			}
 		}
 		if (this.createDate == null) {
-			this.createDate = new Date();
+			this.createDate = LocalDateTime.now();
 		}
 	}
 }

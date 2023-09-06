@@ -98,8 +98,8 @@ public class SpecialRunCompletionNotificationListenerTest {
         ent.setExpectedStudentsProcessed(expectedStudents);
         ent.setFailedStudentsProcessed(failedRecords);
         ent.setJobExecutionId(121L);
-        ent.setStartTime(startTime);
-        ent.setEndTime(endTime);
+        ent.setStartTime(DateUtils.toLocalDateTime(startTime));
+        ent.setEndTime(DateUtils.toLocalDateTime(endTime));
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
@@ -158,8 +158,8 @@ public class SpecialRunCompletionNotificationListenerTest {
         ent.setExpectedStudentsProcessed(expectedStudents);
         ent.setFailedStudentsProcessed(failedRecords);
         ent.setJobExecutionId(121L);
-        ent.setStartTime(startTime);
-        ent.setEndTime(endTime);
+        ent.setStartTime(DateUtils.toLocalDateTime(startTime));
+        ent.setEndTime(DateUtils.toLocalDateTime(endTime));
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);

@@ -134,7 +134,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
         ent.setExpectedStudentsProcessed(0L);
         ent.setFailedStudentsProcessed(0);
         ent.setJobExecutionId(jobExecutionId);
-        ent.setStartTime(startTime);
+        ent.setStartTime(DateUtils.toLocalDateTime(startTime));
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);

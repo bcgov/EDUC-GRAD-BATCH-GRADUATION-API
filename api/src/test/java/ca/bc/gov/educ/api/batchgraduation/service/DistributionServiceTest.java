@@ -16,8 +16,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -140,7 +140,7 @@ public class DistributionServiceTest {
         BatchGradAlgorithmJobHistoryEntity batchGradAlgorithmJobHistoryEntity = new BatchGradAlgorithmJobHistoryEntity();
         batchGradAlgorithmJobHistoryEntity.setId(UUID.randomUUID());
         batchGradAlgorithmJobHistoryEntity.setJobExecutionId(batchId);
-        batchGradAlgorithmJobHistoryEntity.setStartTime(new Date(System.currentTimeMillis()));
+        batchGradAlgorithmJobHistoryEntity.setStartTime(LocalDateTime.now());
         batchGradAlgorithmJobHistoryEntity.setExpectedStudentsProcessed(1L);
         batchGradAlgorithmJobHistoryEntity.setActualStudentsProcessed(0L);
         batchGradAlgorithmJobHistoryEntity.setFailedStudentsProcessed(0);

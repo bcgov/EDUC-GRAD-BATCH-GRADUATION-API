@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
@@ -44,8 +45,8 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         ent.setExpectedStudentsProcessed(expectedStudents);
         ent.setFailedStudentsProcessed(failedRecords);
         ent.setJobExecutionId(jobExecutionId);
-        ent.setStartTime(startTime);
-        ent.setEndTime(endTime);
+        ent.setStartTime(DateUtils.toLocalDateTime(startTime));
+        ent.setEndTime(DateUtils.toLocalDateTime(endTime));
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);

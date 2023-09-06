@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -28,11 +28,11 @@ public class BatchGradAlgorithmJobHistoryEntity  extends BaseEntity {
 	
 	@Column(name = "START_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date startTime;
+	private LocalDateTime startTime;
 	
 	@Column(name = "END_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date endTime;
+	private LocalDateTime endTime;
 	
 	@Column(name = "EXPECTED_STUDENTS_PROCESSED", nullable = true)
     private Long expectedStudentsProcessed;

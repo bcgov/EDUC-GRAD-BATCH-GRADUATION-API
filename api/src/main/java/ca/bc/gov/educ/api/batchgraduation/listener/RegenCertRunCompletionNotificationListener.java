@@ -59,7 +59,7 @@ public class RegenCertRunCompletionNotificationListener extends JobExecutionList
 		if (ent != null) {
 			ent.setActualStudentsProcessed(summaryDTO.getProcessedCount());
 			ent.setFailedStudentsProcessed((int) summaryDTO.getErroredCount());
-			ent.setEndTime(endTime);
+			ent.setEndTime(DateUtils.toLocalDateTime(endTime));
 			ent.setStatus(status);
 
 			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);

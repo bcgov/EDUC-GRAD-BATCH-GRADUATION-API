@@ -1,21 +1,24 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import ca.bc.gov.educ.api.batchgraduation.entity.*;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.*;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchJobExecutionRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.transformer.BatchGradAlgorithmJobHistoryTransformer;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchProcessingTransformer;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import ca.bc.gov.educ.api.batchgraduation.transformer.BatchGradAlgorithmJobHistoryTransformer;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class GradDashboardService extends GradService {
@@ -54,9 +57,9 @@ public class GradDashboardService extends GradService {
 			gradDash.setLastActualStudentsProcessed(info.getActualStudentsProcessed());
 			gradDash.setLastExpectedStudentsProcessed(info.getExpectedStudentsProcessed());
 			gradDash.setLastFailedStudentsProcessed(info.getFailedStudentsProcessed());
-			gradDash.setLastJobendTime(info.getEndTime());
+			gradDash.setLastJobendTime(ca.bc.gov.educ.api.batchgraduation.util.DateUtils.toDate(info.getEndTime()));
 			gradDash.setLastJobExecutionId(info.getJobExecutionId());
-			gradDash.setLastJobstartTime(info.getStartTime());
+			gradDash.setLastJobstartTime(ca.bc.gov.educ.api.batchgraduation.util.DateUtils.toDate(info.getStartTime()));
 			gradDash.setLastStatus(info.getStatus());
 			gradDash.setTotalBatchRuns(infoDetailsList.size());
 			gradDash.setBatchInfoList(infoDetailsList);
@@ -148,9 +151,9 @@ public class GradDashboardService extends GradService {
 			Integer jobExecutionId = batchJobHistory.getJobExecutionId();
 
 			Date now = new Date(System.currentTimeMillis());
-			Date deadline = DateUtils.addDays(now, -3);
+			LocalDateTime deadline = ca.bc.gov.educ.api.batchgraduation.util.DateUtils.toLocalDateTime(DateUtils.addDays(now, -3));
 
-			if (batchJobHistory.getStartTime().before(deadline)) {
+			if (batchJobHistory.getStartTime().isBefore(deadline)) {
 				Optional<BatchJobExecutionEntity> optional = batchJobExecutionRepository.findById(jobExecutionId.longValue());
 				if (optional.isPresent()) {
 					BatchJobExecutionEntity batchJobExecution = optional.get();
