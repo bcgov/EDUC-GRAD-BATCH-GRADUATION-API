@@ -25,7 +25,6 @@ spring:
   jackson:
     deserialization:
       fail-on-unknown-properties: false
-    date-format: com.fasterxml.jackson.databind.util.ISO8601DateFormat
   #Keycloak/OAuth properties
   security:
     user:
