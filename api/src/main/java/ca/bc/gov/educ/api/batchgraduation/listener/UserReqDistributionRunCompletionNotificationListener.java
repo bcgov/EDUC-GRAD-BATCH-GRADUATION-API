@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
+import org.apache.commons.lang3.StringUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +78,10 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process " + LOG_SEPARATION_SINGLE);
+			if(StringUtils.isNotBlank(studentSearchRequest)) {
+				StudentSearchRequest payload = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+				summaryDTO.setStudentSearchRequest(payload);
+			}
 			processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,properName);
 
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
@@ -134,7 +139,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
 			}
 			if(!cList.isEmpty()) {
-				DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
+				DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(summaryDTO.getStudentSearchRequest()).build();
 				if (credentialType.equalsIgnoreCase("RC")) {
 					disres = restUtils.createReprintAndUpload(batchId, accessToken, distributionRequest, activityCode, localDownload);
 				} else {
