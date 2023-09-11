@@ -3,12 +3,12 @@ package ca.bc.gov.educ.api.batchgraduation.util;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -24,7 +24,8 @@ public class JsonTransformer implements Transformer {
     ObjectMapper objectMapper;
 
     @PostConstruct
-    void initMapper() {
+    public void initMapper() {
+        if(objectMapper == null) objectMapper = new ObjectMapper();
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addSerializer(LocalDate.class, new GradLocalDateSerializer());
         simpleModule.addSerializer(LocalDateTime.class, new GradLocalDateTimeSerializer());

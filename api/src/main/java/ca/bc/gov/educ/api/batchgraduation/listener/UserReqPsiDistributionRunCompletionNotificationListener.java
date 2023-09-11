@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
     
     @Override
     public void afterJob(JobExecution jobExecution) {
-		long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
+		long elapsedTimeMillis = getElapsedTimeMillis(jobExecution);
 		LOGGER.info(LOG_SEPARATION);
 		JobParameters jobParameters = jobExecution.getJobParameters();
 		ExecutionContext jobContext = jobExecution.getExecutionContext();
@@ -44,8 +45,8 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
 
 		String status = jobExecution.getStatus().toString();
-		Date startTime = jobExecution.getStartTime();
-		Date endTime = jobExecution.getEndTime();
+		Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+		Date endTime = DateUtils.toDate(jobExecution.getEndTime());
 		String jobTrigger = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TRIGGER);
 		String transmissionType = jobParameters.getString(EducGradBatchGraduationApiConstants.TRANSMISSION_TYPE);
 		String studentSearchRequest = jobParameters.getString(EducGradBatchGraduationApiConstants.SEARCH_REQUEST, "{}");

@@ -19,7 +19,7 @@ import java.util.*;
  */
 public class DistributionRunPartitioner extends BasePartitioner {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitioner.class);
+    private static final Logger logger = LoggerFactory.getLogger(DistributionRunPartitioner.class);
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;
@@ -36,8 +36,15 @@ public class DistributionRunPartitioner extends BasePartitioner {
         }
 
         // Clean up existing reports before running new one
+        logger.debug("Delete School Reports for Monthly Distribution");
+        long startTime = System.currentTimeMillis();
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
+        long endTime = System.currentTimeMillis();
+        long diff = (endTime - startTime)/1000;
+        logger.debug("Old School Reports deleted in {} sec", diff);
 
+        startTime = System.currentTimeMillis();
+        logger.debug("Retrieve students for Monthly Distribution");
         Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
@@ -45,12 +52,15 @@ public class DistributionRunPartitioner extends BasePartitioner {
             credentialList.addAll(parallelDTO.transcriptList());
             credentialList.addAll(parallelDTO.certificateList());
         }
+        endTime = System.currentTimeMillis();
+        diff = (endTime - startTime)/1000;
+        logger.debug("Total {} eligible StudentCredentialDistributions found in {} sec", credentialList.size(), diff);
         if(!credentialList.isEmpty()) {
             filterOutDeceasedStudents(credentialList);
             updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
-            return getStringExecutionContextMap(gridSize, credentialList, null, LOGGER);
+            return getStringExecutionContextMap(gridSize, credentialList, null);
         }
-        LOGGER.info("No Credentials Found for Processing");
+        logger.info("No Credentials Found for Processing");
         return new HashMap<>();
     }
 

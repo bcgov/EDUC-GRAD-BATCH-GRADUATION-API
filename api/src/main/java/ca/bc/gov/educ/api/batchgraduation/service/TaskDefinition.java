@@ -24,7 +24,7 @@ import java.util.UUID;
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
 @Service
-public class TaskDefinition implements Runnable{
+public class TaskDefinition implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskDefinition.class);
 

@@ -4,10 +4,9 @@ import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.BlankDistributionSummaryDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Value;
-
-import java.util.List;
 
 public class BlankDistributionRunWriter implements ItemWriter<BlankCredentialDistribution> {
 
@@ -17,9 +16,9 @@ public class BlankDistributionRunWriter implements ItemWriter<BlankCredentialDis
     BlankDistributionSummaryDTO summaryDTO;
     
     @Override
-    public void write(List<? extends BlankCredentialDistribution> list) throws Exception {
+    public void write(Chunk<? extends BlankCredentialDistribution> list) {
         if(!list.isEmpty()) {
-            BlankCredentialDistribution cred = list.get(0);
+            BlankCredentialDistribution cred = list.getItems().get(0);
 	        summaryDTO.increment(cred.getCredentialTypeCode());
             LOGGER.debug("Left : {}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }

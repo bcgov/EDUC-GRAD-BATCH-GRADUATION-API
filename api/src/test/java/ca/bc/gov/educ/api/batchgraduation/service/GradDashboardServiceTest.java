@@ -1,8 +1,14 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.*;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchJobExecutionEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.*;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchJobExecutionRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
@@ -19,6 +25,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,13 +62,13 @@ public class GradDashboardServiceTest {
 
         List<BatchGradAlgorithmJobHistoryEntity> list = new ArrayList<>();
         BatchGradAlgorithmJobHistoryEntity hist = new BatchGradAlgorithmJobHistoryEntity();
-        hist.setEndTime(new Date());
+        hist.setEndTime(LocalDateTime.now());
         hist.setActualStudentsProcessed(11L);
         hist.setId(new UUID(1,1));
         hist.setExpectedStudentsProcessed(20L);
         hist.setJobExecutionId(121L);
         hist.setFailedStudentsProcessed(4);
-        hist.setStartTime(new Date());
+        hist.setStartTime(LocalDateTime.now());
         list.add(hist);
         when(batchGradAlgorithmJobHistoryRepository.findAll()).thenReturn(list);
         GradDashboard dash = gradDashboardService.getDashboardInfo();
@@ -80,7 +87,7 @@ public class GradDashboardServiceTest {
         hist.setJobExecutionId(121L);
         Date today = new Date(System.currentTimeMillis());
         Date startedDateTime = DateUtils.addDays(today, -3);
-        hist.setStartTime(startedDateTime);
+        hist.setStartTime(ca.bc.gov.educ.api.batchgraduation.util.DateUtils.toLocalDateTime(startedDateTime));
         hist.setStatus("STARTED");
         list.add(hist);
 
@@ -170,9 +177,9 @@ public class GradDashboardServiceTest {
         Long batchId= 123123L;
         UUID studentId = UUID.randomUUID();
         BatchJobExecutionEntity ent = new BatchJobExecutionEntity();
-        ent.setEndTime(new Date());
+        ent.setEndTime(LocalDateTime.now());
         ent.setJobExecutionId(batchId);
-        ent.setStartTime(new Date());
+        ent.setStartTime(LocalDateTime.now());
         ent.setStatus("COMPLETED");
         Page<BatchJobExecutionEntity> pagedDate = new PageImpl(List.of(ent));
         Mockito.when(batchJobExecutionRepository.findAllByOrderByCreateTimeDesc(paging)).thenReturn(pagedDate);

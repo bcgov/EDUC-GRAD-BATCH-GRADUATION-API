@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import org.apache.commons.lang3.StringUtils;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -43,7 +44,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
     @Override
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
+			long elapsedTimeMillis = getElapsedTimeMillis(jobExecution);
 			LOGGER.info(LOG_SEPARATION);
 			JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
@@ -52,8 +53,8 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 	    	LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
 
 			String status = jobExecution.getStatus().toString();
-			Date startTime = jobExecution.getStartTime();
-			Date endTime = jobExecution.getEndTime();
+			Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+			Date endTime = DateUtils.toDate(jobExecution.getEndTime());
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String credentialType = jobParameters.getString("credentialType");

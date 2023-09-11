@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
@@ -75,7 +76,7 @@ public class RestUtils {
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
                     .body(BodyInserters.fromValue(body))
                     .retrieve()
-                    .onStatus(HttpStatus::is5xxServerError,
+                    .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, "5xx error."), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
                     .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
@@ -109,7 +110,7 @@ public class RestUtils {
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
                     .retrieve()
                     // if 5xx errors, throw Service error
-                    .onStatus(HttpStatus::is5xxServerError,
+                    .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, "5xx error."), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
                     // only does retry if initial error was 5xx as service may be temporarily down

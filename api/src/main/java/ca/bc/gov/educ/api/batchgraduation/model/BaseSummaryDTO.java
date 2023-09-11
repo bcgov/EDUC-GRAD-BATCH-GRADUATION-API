@@ -3,8 +3,10 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class BaseSummaryDTO {
+public class BaseSummaryDTO implements Serializable {
     private Long batchId;
 
     // partition

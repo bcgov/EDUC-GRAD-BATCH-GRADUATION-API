@@ -13,7 +13,7 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,10 +44,10 @@ public abstract class BaseYearEndWriter {
     JobParameters jobParameters;
 
     @Value("#{stepExecution.jobExecution.startTime}")
-    Date startTime;
+    LocalDateTime startTime;
 
     @Value("#{stepExecution.jobExecution.endTime}")
-    Date endTime;
+    LocalDateTime endTime;
 
     protected void processGlobalList(List<StudentCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String activityCode, String accessToken) {
         List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());

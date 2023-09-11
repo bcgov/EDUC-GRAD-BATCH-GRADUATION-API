@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
@@ -126,14 +127,14 @@ public abstract class BasePartitioner extends SimplePartitioner {
         String username = jobParameters.getString(RUN_BY);
         String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST);
         String status = getJobExecution().getStatus().toString();
-        Date startTime = getJobExecution().getStartTime();
+        Date startTime = DateUtils.toDate(getJobExecution().getStartTime());
 
         BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
         ent.setActualStudentsProcessed(0L);
         ent.setExpectedStudentsProcessed(0L);
         ent.setFailedStudentsProcessed(0);
         ent.setJobExecutionId(jobExecutionId);
-        ent.setStartTime(startTime);
+        ent.setStartTime(DateUtils.toLocalDateTime(startTime));
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
@@ -173,10 +174,10 @@ public abstract class BasePartitioner extends SimplePartitioner {
                 LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()));
             }
         }
-        LOGGER.debug("Total {} selected after filter", credentialList.size());
+        LOGGER.debug("Total {} Student Credentials selected after filter", credentialList.size());
     }
 
-    Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType, Logger logger) {
+    Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType) {
         filterStudentCredentialDistribution(credentialList);
         sortStudentCredentialDistributionByNames(credentialList);
         int partitionSize = credentialList.size()/gridSize + 1;
@@ -200,7 +201,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
             String key = "partition" + i;
             map.put(key, executionContext);
         }
-        logger.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
+        LOGGER.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
         return map;
     }
 

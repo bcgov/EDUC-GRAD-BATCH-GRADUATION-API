@@ -52,7 +52,7 @@ public class DistributionRunSupplementalPartitioner extends BasePartitioner {
         if(!eligibleStudentSchoolDistricts.isEmpty()) {
             filterOutDeceasedStudents(eligibleStudentSchoolDistricts);
             updateBatchJobHistory(createBatchJobHistory(), (long) eligibleStudentSchoolDistricts.size());
-            return getStringExecutionContextMap(gridSize, eligibleStudentSchoolDistricts, null, logger);
+            return getStringExecutionContextMap(gridSize, eligibleStudentSchoolDistricts, null);
         }
         logger.info("No Credentials Found for Processing");
         return new HashMap<>();
