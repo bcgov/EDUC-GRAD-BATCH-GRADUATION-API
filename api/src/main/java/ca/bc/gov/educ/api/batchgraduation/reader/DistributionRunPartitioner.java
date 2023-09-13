@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
@@ -12,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Monthly Distribution Partitioner
@@ -29,23 +31,18 @@ public class DistributionRunPartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        ResponseObj res = restUtils.getTokenResponseObject();
-        String accessToken = null;
-        if (res != null) {
-            accessToken = res.getAccess_token();
-        }
 
-        // Clean up existing reports before running new one
         logger.debug("Delete School Reports for Monthly Distribution");
         long startTime = System.currentTimeMillis();
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
+        restUtils.deleteSchoolReportRecord("", "DISTREP_SC", restUtils.getAccessToken());
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
         logger.debug("Old School Reports deleted in {} sec", diff);
 
         startTime = System.currentTimeMillis();
         logger.debug("Retrieve students for Monthly Distribution");
-        Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
+        Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(restUtils.getAccessToken());
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
         if(parallelDTO != null) {
