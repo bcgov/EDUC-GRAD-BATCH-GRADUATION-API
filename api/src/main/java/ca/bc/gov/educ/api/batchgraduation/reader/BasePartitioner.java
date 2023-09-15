@@ -238,14 +238,4 @@ public abstract class BasePartitioner extends SimplePartitioner {
             eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getPens().contains(scr.getPen()));
         }
     }
-
-    void filterOutDeceasedStudents(List<StudentCredentialDistribution> credentialList) {
-        LOGGER.debug("Total size of credential list: {}", credentialList.size());
-        List<UUID> deceasedIDs = restUtils.getDeceasedStudentIDs(credentialList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList(), restUtils.getAccessToken());
-        if (!deceasedIDs.isEmpty()) {
-            LOGGER.debug("Deceased students: {}", deceasedIDs.size());
-            credentialList.removeIf(cr -> deceasedIDs.contains(cr.getStudentID()));
-            LOGGER.debug("Revised size of credential list: {}", credentialList.size());
-        }
-    }
 }
