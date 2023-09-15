@@ -39,6 +39,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_RE_RUNS_ALL = "/rerun/all/{batchId}";
     public static final String EXECUTE_RE_RUNS_FAILED = "/rerun/failed/{batchId}";
     public static final String EXECUTE_REGEN_SCHOOL_REPORTS = "/regenerate/school-report/{batchId}";
+    public static final String EXECUTE_REGEN_SCHOOL_REPORTS_BY_REQUEST = "/regenerate/school-report";
 
     public static final String BATCH_JOB_TYPES_MAPPING = "/batchjobtype";
     public static final String BATCH_JOB_TYPE_MAPPING = "/batchjobtype/{batchJobTypeCode}";
@@ -196,7 +197,7 @@ public class EducGradBatchGraduationApiConstants {
     private String studentDataForUserReqDisRun;
 
     @Value("${endpoint.grad-graduation-api.schoolreport.url}")
-    private String createAndStore;
+    private String createAndStoreSchoolReports;
 
     @Value("${endpoint.grad-graduation-api.school_year_end_report.url}")
     private String schoolYearEndReport;

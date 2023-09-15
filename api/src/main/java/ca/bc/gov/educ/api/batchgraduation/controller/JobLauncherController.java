@@ -7,10 +7,7 @@ import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateP
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
-import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
+import ca.bc.gov.educ.api.batchgraduation.util.*;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
@@ -90,6 +87,9 @@ public class JobLauncherController {
 
     @Autowired
     JsonTransformer jsonTransformer;
+
+    @Autowired
+    GradSchoolOfRecordFilter gradSchoolOfRecordFilter;
 
     @Autowired
     public JobLauncherController(
@@ -428,6 +428,22 @@ public class JobLauncherController {
             }
         }
         return ResponseEntity.status(500).body(Boolean.FALSE);
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_REGEN_SCHOOL_REPORTS_BY_REQUEST)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "RRe-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<Boolean> launchRegenerateSchoolReports(@RequestBody StudentSearchRequest searchRequest, @RequestHeader(name="Authorization") String accessToken) {
+        logger.info(" Re-Generating School Reports by request for {} --------------------------------------------------------", REGALG);
+        try {
+            List<String> finalSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest).stream().sorted().toList();
+            logger.info(" Number of Schools [{}] ---------------------------------------------------------", finalSchoolDistricts.size());
+            restUtils.createAndStoreSchoolReports(accessToken.replace(BEARER, ""), finalSchoolDistricts, REGALG);
+            return ResponseEntity.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Boolean.FALSE);
+        }
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_MONTHLY_DIS_RUN_BATCH_JOB)

@@ -482,7 +482,7 @@ public class RestUtils {
     public void createAndStoreSchoolReports(String accessToken, List<String> uniqueSchools,String type) {
         UUID correlationID = UUID.randomUUID();
         Integer result = webClient.post()
-                .uri(String.format(constants.getCreateAndStore(),type))
+                .uri(String.format(constants.getCreateAndStoreSchoolReports(),type))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .body(BodyInserters.fromValue(uniqueSchools))
                 .retrieve()

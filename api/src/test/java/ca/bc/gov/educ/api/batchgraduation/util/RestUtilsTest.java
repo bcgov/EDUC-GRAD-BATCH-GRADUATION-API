@@ -814,7 +814,7 @@ public class RestUtilsTest {
         final String type = "NONGRADPRJ";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStore(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -831,7 +831,7 @@ public class RestUtilsTest {
         final String type = "NONGRADPRJ";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStore(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -847,7 +847,7 @@ public class RestUtilsTest {
         final String type = "NONGRADPRJ";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStore(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
