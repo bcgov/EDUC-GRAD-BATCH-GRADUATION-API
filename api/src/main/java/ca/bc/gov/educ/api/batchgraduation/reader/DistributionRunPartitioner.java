@@ -19,7 +19,7 @@ import java.util.*;
  */
 public class DistributionRunPartitioner extends BasePartitioner {
 
-    private static final Logger logger = LoggerFactory.getLogger(DistributionRunPartitioner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitioner.class);
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;
@@ -36,15 +36,15 @@ public class DistributionRunPartitioner extends BasePartitioner {
         }
 
         // Clean up existing reports before running new one
-        logger.debug("Delete School Reports for Monthly Distribution");
+        LOGGER.debug("Delete School Reports for Monthly Distribution");
         long startTime = System.currentTimeMillis();
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
-        logger.debug("Old School Reports deleted in {} sec", diff);
+        LOGGER.debug("Old School Reports deleted in {} sec", diff);
 
         startTime = System.currentTimeMillis();
-        logger.debug("Retrieve students for Monthly Distribution");
+        LOGGER.debug("Retrieve students for Monthly Distribution");
         Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
@@ -54,7 +54,7 @@ public class DistributionRunPartitioner extends BasePartitioner {
         }
         endTime = System.currentTimeMillis();
         diff = (endTime - startTime)/1000;
-        logger.debug("Total {} eligible StudentCredentialDistributions found in {} sec", credentialList.size(), diff);
+        LOGGER.debug("Total {} eligible StudentCredentialDistributions found in {} sec", credentialList.size(), diff);
         if(!credentialList.isEmpty()) {
             LOGGER.debug("Total size of credential list: {}", credentialList.size());
             // Filter deceased students out
@@ -67,7 +67,7 @@ public class DistributionRunPartitioner extends BasePartitioner {
             updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
             return getStringExecutionContextMap(gridSize, credentialList, null);
         }
-        logger.info("No Credentials Found for Processing");
+        LOGGER.info("No Credentials Found for Processing");
         return new HashMap<>();
     }
 
