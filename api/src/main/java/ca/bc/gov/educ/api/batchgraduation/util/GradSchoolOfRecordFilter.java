@@ -41,7 +41,14 @@ public class GradSchoolOfRecordFilter implements Serializable {
             if(!eligibleStudentSchoolDistricts.isEmpty()) {
                 eligibleStudentSchoolDistricts.removeIf(scr -> !searchRequest.getDistricts().contains(StringUtils.substring(scr, 0, 3)));
             } else {
-                eligibleStudentSchoolDistricts = searchRequest.getDistricts();
+                for(String district: searchRequest.getDistricts()) {
+                    logger.debug("Use district code {} to find list of schools", district);
+                    List<School> schools = restUtils.getSchoolByDistrictCode(district);
+                    for(School school: schools) {
+                        logger.debug("School {} found by district code {}", school.getMincode(), district);
+                        eligibleStudentSchoolDistricts.add(school.getMincode());
+                    }
+                }
             }
         }
         if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {

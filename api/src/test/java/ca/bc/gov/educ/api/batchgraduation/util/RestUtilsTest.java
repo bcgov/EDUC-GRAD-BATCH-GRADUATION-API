@@ -1281,6 +1281,24 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testGetSchoolByDistrictCode() {
+        School school = new School();
+        school.setMincode("1234567");
+
+        final ParameterizedTypeReference<List<School>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getTraxSchoolByDistrict(), "005"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(List.of(school)));
+
+        List<School> res = this.restUtils.getSchoolByDistrictCode("005");
+        assertThat(res).isNotNull();
+    }
+
+    @Test
     public void testExecutePostDistribution() {
         DistributionResponse distributionResponse = new DistributionResponse();
 

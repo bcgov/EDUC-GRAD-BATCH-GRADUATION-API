@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -434,15 +435,16 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "RRe-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<Boolean> launchRegenerateSchoolReports(@RequestBody StudentSearchRequest searchRequest, @RequestHeader(name="Authorization") String accessToken) {
-        logger.info(" Re-Generating School Reports by request for {} --------------------------------------------------------", REGALG);
+    public ResponseEntity<String> launchRegenerateSchoolReports(@RequestBody StudentSearchRequest searchRequest, @RequestHeader(name="Authorization") String accessToken, @RequestParam(required = false) String type) {
+        String schoolReportType = ObjectUtils.defaultIfNull(type, REGALG);
+        logger.info(" Re-Generating School Reports by request for {} --------------------------------------------------------", schoolReportType);
         try {
             List<String> finalSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest).stream().sorted().toList();
             logger.info(" Number of Schools [{}] ---------------------------------------------------------", finalSchoolDistricts.size());
-            restUtils.createAndStoreSchoolReports(accessToken.replace(BEARER, ""), finalSchoolDistricts, REGALG);
-            return ResponseEntity.ok(Boolean.TRUE);
+            int numberOfReports = restUtils.createAndStoreSchoolReports(accessToken.replace(BEARER, ""), finalSchoolDistricts, schoolReportType);
+            return ResponseEntity.ok(numberOfReports + " school reports " + schoolReportType + " created successfully");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(Boolean.FALSE);
+            return ResponseEntity.status(500).body(e.getLocalizedMessage());
         }
     }
 

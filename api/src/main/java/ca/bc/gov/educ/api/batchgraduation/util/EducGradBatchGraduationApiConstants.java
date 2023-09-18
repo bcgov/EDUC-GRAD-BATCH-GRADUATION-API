@@ -253,6 +253,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-trax-api.school-by-school-category.url}")
     private String traxSchoolBySchoolCategory;
 
+    @Value("${endpoint.grad-trax-api.school-by-district-code.url}")
+    private String traxSchoolByDistrict;
+
     @Value("${endpoint.grad-student-api.get-deceased-student-id-list}")
     private String deceasedStudentIDList;
 

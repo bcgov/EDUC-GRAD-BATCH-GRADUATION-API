@@ -479,7 +479,7 @@ public class RestUtils {
         return result;
     }
 
-    public void createAndStoreSchoolReports(String accessToken, List<String> uniqueSchools,String type) {
+    public Integer createAndStoreSchoolReports(String accessToken, List<String> uniqueSchools,String type) {
         UUID correlationID = UUID.randomUUID();
         Integer result = webClient.post()
                 .uri(String.format(constants.getCreateAndStoreSchoolReports(),type))
@@ -488,9 +488,8 @@ public class RestUtils {
                 .retrieve()
                 .bodyToMono(Integer.class)
                 .block();
-
-        if(result != null && result != 0)
-            LOGGER.info("Create and Store School Report Success {}",result);
+        LOGGER.info("Create and Store {} School Reports", result);
+        return result;
     }
 
     //Grad2-1931 sending transmissionType with the webclient.
@@ -663,6 +662,24 @@ public class RestUtils {
         };
         try {
             String url = String.format(constants.getTraxSchoolBySchoolCategory(), schoolCategoryCode);
+            return webClient.get().uri(url)
+                    .headers(h -> {
+                        h.setBearerAuth(getAccessToken());
+                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
+                    })
+                    .retrieve().bodyToMono(responseType)
+                    .block();
+        } catch (Exception e) {
+            LOGGER.error("Trax API is not available {}", e.getLocalizedMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<School> getSchoolByDistrictCode(String district) {
+        final ParameterizedTypeReference<List<School>> responseType = new ParameterizedTypeReference<>() {
+        };
+        try {
+            String url = String.format(constants.getTraxSchoolByDistrict(), district);
             return webClient.get().uri(url)
                     .headers(h -> {
                         h.setBearerAuth(getAccessToken());
