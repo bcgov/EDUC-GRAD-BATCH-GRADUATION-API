@@ -61,7 +61,14 @@ public class DistributionRunPartitioner extends BasePartitioner {
             List<UUID> deceasedIDs = restUtils.getDeceasedStudentIDs(credentialList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList(), restUtils.getAccessToken());
             if (!deceasedIDs.isEmpty()) {
                 LOGGER.debug("Deceased students: {}", deceasedIDs.size());
-                credentialList.removeIf(cr -> deceasedIDs.contains(cr.getStudentID()));
+                Iterator<StudentCredentialDistribution> it = credentialList.iterator();
+                while (it.hasNext()) {
+                    StudentCredentialDistribution cr = it.next();
+                    if(deceasedIDs.contains(cr.getStudentID())) {
+                        it.remove();
+                        LOGGER.debug("Credential {} removed from the StudentCredentialDistribution list as DECEASED", cr.getStudentID());
+                    }
+                }
                 LOGGER.debug("Revised size of credential list: {}", credentialList.size());
             }
             updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
