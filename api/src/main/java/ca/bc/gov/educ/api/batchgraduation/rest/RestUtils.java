@@ -37,6 +37,7 @@ public class RestUtils {
     private static final String STUDENT_READ = "R:{}";
     private static final String STUDENT_PROCESS = "P:{}";
     private static final String STUDENT_PROCESSED = "D:{} {} of {} batch {}";
+    private static final String TRAX_API_IS_DOWN = "Trax API is not available {}";
     private static final String MERGE_MSG="Merge and Upload Success {}";
     private static final String YEARENDDIST = "YEARENDDIST";
     private static final String SUPPDIST = "SUPPDIST";
@@ -652,7 +653,7 @@ public class RestUtils {
                     .retrieve().bodyToMono(responseType)
                     .block();
         } catch (Exception e) {
-            LOGGER.error("Trax API is not available {}", e.getLocalizedMessage());
+            LOGGER.error(TRAX_API_IS_DOWN, e.getLocalizedMessage());
             return new ArrayList<>();
         }
     }
@@ -670,7 +671,7 @@ public class RestUtils {
                     .retrieve().bodyToMono(responseType)
                     .block();
         } catch (Exception e) {
-            LOGGER.error("Trax API is not available {}", e.getLocalizedMessage());
+            LOGGER.error(TRAX_API_IS_DOWN, e.getLocalizedMessage());
             return new ArrayList<>();
         }
     }
@@ -688,7 +689,7 @@ public class RestUtils {
                     .retrieve().bodyToMono(responseType)
                     .block();
         } catch (Exception e) {
-            LOGGER.error("Trax API is not available {}", e.getLocalizedMessage());
+            LOGGER.error(TRAX_API_IS_DOWN, e.getLocalizedMessage());
             return new ArrayList<>();
         }
     }
