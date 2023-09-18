@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class DistributionRunSupplementalPartitioner extends BasePartitioner {
 
@@ -50,7 +53,6 @@ public class DistributionRunSupplementalPartitioner extends BasePartitioner {
         logger.debug("Total {} eligible StudentCredentialDistributions found in {} sec", eligibleStudentSchoolDistricts.size(), diff);
         filterByStudentSearchRequest(eligibleStudentSchoolDistricts);
         if(!eligibleStudentSchoolDistricts.isEmpty()) {
-            filterOutDeceasedStudents(eligibleStudentSchoolDistricts);
             updateBatchJobHistory(createBatchJobHistory(), (long) eligibleStudentSchoolDistricts.size());
             return getStringExecutionContextMap(gridSize, eligibleStudentSchoolDistricts, null);
         }
