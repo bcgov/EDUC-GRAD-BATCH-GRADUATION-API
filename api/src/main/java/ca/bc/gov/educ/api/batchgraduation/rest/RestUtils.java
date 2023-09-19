@@ -505,7 +505,7 @@ public class RestUtils {
                     .bodyToMono(Integer.class)
                     .block();
         }
-        LOGGER.info("Create and Store {} School Reports", result);
+        LOGGER.info("Created and Stored {} School Reports", result);
         return result;
     }
 
