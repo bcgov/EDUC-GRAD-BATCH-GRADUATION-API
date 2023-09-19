@@ -824,8 +824,9 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
+        var result = this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
+        assertNotNull(result);
     }
 
     @Test
@@ -842,8 +843,9 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
+        var result = this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
+        assertNotNull(result);
     }
 
     @Test
@@ -860,8 +862,9 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
+        var result = this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
+        assertNotNull(result);
     }
 
     @Test
