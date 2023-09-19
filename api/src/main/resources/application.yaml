@@ -243,6 +243,8 @@ endpoint:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
     school-by-min-code:
       url: ${GRAD_TRAX_API}api/v1/trax/school/%s
+    school-by-district-code:
+      url: ${GRAD_TRAX_API}api/v1/trax/school/search?district=%s
     district-by-school-category:
       url: ${GRAD_TRAX_API}api/v1/trax/district/schoolCategories?schoolCategory=%s
     school-by-school-category:
