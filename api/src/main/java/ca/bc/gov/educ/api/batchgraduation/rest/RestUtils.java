@@ -482,13 +482,25 @@ public class RestUtils {
 
     public Integer createAndStoreSchoolReports(String accessToken, List<String> uniqueSchools,String type) {
         UUID correlationID = UUID.randomUUID();
-        Integer result = webClient.post()
-                .uri(String.format(constants.getCreateAndStoreSchoolReports(),type))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .body(BodyInserters.fromValue(uniqueSchools))
-                .retrieve()
-                .bodyToMono(Integer.class)
-                .block();
+        Integer result = 0;
+        if(uniqueSchools == null || uniqueSchools.isEmpty()) {
+            LOGGER.info("{} Schools selected for School Reports", result);
+            return result;
+        }
+        int pageSize = 1000;
+        int pageNum = uniqueSchools.size() / pageSize + 1;
+        for (int i = 0; i < pageNum; i++) {
+            int startIndex = i * pageSize;
+            int endIndex = Math.min(startIndex + pageSize, uniqueSchools.size());
+            List<String> mincodes = uniqueSchools.subList(startIndex, endIndex);
+            result += webClient.post()
+                    .uri(String.format(constants.getCreateAndStoreSchoolReports(),type))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(mincodes))
+                    .retrieve()
+                    .bodyToMono(Integer.class)
+                    .block();
+        }
         LOGGER.info("Create and Store {} School Reports", result);
         return result;
     }
