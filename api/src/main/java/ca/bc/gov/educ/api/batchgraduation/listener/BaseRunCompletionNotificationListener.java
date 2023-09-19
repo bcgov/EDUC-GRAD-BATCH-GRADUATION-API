@@ -77,7 +77,7 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
         if (!isSpecialRun) {
             updateBackStudentFlagForErroredStudents(summaryDTO.getErrors(), jobType, obj.getAccess_token());
         }
-        processSchoolList(jobExecutionId, obj.getAccess_token(), jobType);
+        processSchoolList(jobExecutionId, jobType);
     }
 
     private void processBatchJobHistory(AlgorithmSummaryDTO summaryDTO, Long jobExecutionId, String status, String jobTrigger, String jobType, Date startTime, Date endTime) {
@@ -107,11 +107,11 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
         }
     }
 
-    private void processSchoolList(Long batchId, String accessToken, String jobType) {
+    private void processSchoolList(Long batchId, String jobType) {
         LOGGER.info(" Creating Reports for {}", jobType);
         List<String> uniqueSchoolList = gradBatchHistoryService.getSchoolListForReport(batchId);
         LOGGER.info(" Number of Schools [{}]", uniqueSchoolList.size());
-        restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList,jobType);
+        restUtils.createAndStoreSchoolReports(uniqueSchoolList,jobType);
     }
 
     private long getTotalReadCount(Long batchId) {

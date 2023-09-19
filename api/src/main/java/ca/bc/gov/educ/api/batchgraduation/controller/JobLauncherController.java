@@ -415,14 +415,14 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "RRe-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<Boolean> launchRegenerateSchoolReports(@PathVariable Long batchId, @RequestHeader(name="Authorization") String accessToken) {
+    public ResponseEntity<Boolean> launchRegenerateSchoolReports(@PathVariable Long batchId) {
         BatchGradAlgorithmJobHistoryEntity entity = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
         if (entity != null) {
             try {
                 logger.info(" Re-Generating School Reports for {} --------------------------------------------------------", entity.getJobType());
                 List<String> uniqueSchoolList = gradBatchHistoryService.getSchoolListForReport(batchId);
                 logger.info(" Number of Schools [{}] ---------------------------------------------------------", uniqueSchoolList.size());
-                restUtils.createAndStoreSchoolReports(accessToken.replace(BEARER, ""), uniqueSchoolList, entity.getJobType());
+                restUtils.createAndStoreSchoolReports(uniqueSchoolList, entity.getJobType());
                 return ResponseEntity.ok(Boolean.TRUE);
             } catch (Exception e) {
                 return ResponseEntity.status(500).body(Boolean.FALSE);
@@ -435,13 +435,13 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "RRe-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<String> launchRegenerateSchoolReports(@RequestBody StudentSearchRequest searchRequest, @RequestHeader(name="Authorization") String accessToken, @RequestParam(required = false) String type) {
+    public ResponseEntity<String> launchRegenerateSchoolReports(@RequestBody StudentSearchRequest searchRequest, @RequestParam(required = false) String type) {
         String schoolReportType = ObjectUtils.defaultIfNull(type, REGALG);
         logger.info(" Re-Generating School Reports by request for {} --------------------------------------------------------", schoolReportType);
         try {
             List<String> finalSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest).stream().sorted().toList();
             logger.info(" Number of Schools [{}] ---------------------------------------------------------", finalSchoolDistricts.size());
-            int numberOfReports = restUtils.createAndStoreSchoolReports(accessToken.replace(BEARER, ""), finalSchoolDistricts, schoolReportType);
+            int numberOfReports = restUtils.createAndStoreSchoolReports(finalSchoolDistricts, schoolReportType);
             return ResponseEntity.ok(numberOfReports + " school reports " + schoolReportType + " created successfully");
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getLocalizedMessage());

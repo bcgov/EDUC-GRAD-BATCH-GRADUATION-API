@@ -822,7 +822,9 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(inputResponseI);
         when(this.inputResponseI.block()).thenReturn(null);
 
-        this.restUtils.createAndStoreSchoolReports("Abc",new ArrayList<>(),type);
+        mockTokenResponseObject();
+
+        this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
     }
 
@@ -838,7 +840,9 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
-        this.restUtils.createAndStoreSchoolReports("Abc",new ArrayList<>(),type);
+        mockTokenResponseObject();
+
+        this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
     }
 
@@ -854,7 +858,9 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
 
-        this.restUtils.createAndStoreSchoolReports("Abc",new ArrayList<>(),type);
+        mockTokenResponseObject();
+
+        this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
     }
 

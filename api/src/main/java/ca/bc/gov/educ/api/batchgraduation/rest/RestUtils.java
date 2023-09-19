@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Component
 public class RestUtils {
@@ -480,22 +481,25 @@ public class RestUtils {
         return result;
     }
 
-    public Integer createAndStoreSchoolReports(String accessToken, List<String> uniqueSchools,String type) {
+    public Integer createAndStoreSchoolReports(List<String> uniqueSchools, String type) {
         UUID correlationID = UUID.randomUUID();
         Integer result = 0;
         if(uniqueSchools == null || uniqueSchools.isEmpty()) {
             LOGGER.info("{} Schools selected for School Reports", result);
             return result;
         }
-        int pageSize = 1000;
+        int pageSize = 10;
         int pageNum = uniqueSchools.size() / pageSize + 1;
         for (int i = 0; i < pageNum; i++) {
             int startIndex = i * pageSize;
             int endIndex = Math.min(startIndex + pageSize, uniqueSchools.size());
             List<String> mincodes = uniqueSchools.subList(startIndex, endIndex);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Creating School Reports for schools {}", mincodes.stream().collect(Collectors.joining(",", "{", "}")));
+            }
             result += webClient.post()
                     .uri(String.format(constants.getCreateAndStoreSchoolReports(),type))
-                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .headers(h -> { h.setBearerAuth(getAccessToken()); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                     .body(BodyInserters.fromValue(mincodes))
                     .retrieve()
                     .bodyToMono(Integer.class)
