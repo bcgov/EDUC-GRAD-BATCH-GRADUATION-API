@@ -7,16 +7,14 @@ import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateP
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
-import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
+import ca.bc.gov.educ.api.batchgraduation.util.*;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
@@ -92,6 +90,9 @@ public class JobLauncherController {
     JsonTransformer jsonTransformer;
 
     @Autowired
+    GradSchoolOfRecordFilter gradSchoolOfRecordFilter;
+
+    @Autowired
     public JobLauncherController(
             JobLauncher jobLauncher,
             @Qualifier("asyncJobLauncher")
@@ -124,7 +125,7 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE, REGALG);
         response.setJobType(REGALG);
         response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
+        response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
@@ -153,7 +154,7 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE, TVRRUN);
         response.setJobType(TVRRUN);
         response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
+        response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
@@ -222,7 +223,7 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE, REGALG);
         response.setJobType(REGALG);
         response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
+        response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
         validateInput(response, studentSearchRequest);
         if(response.getException() != null) {
@@ -280,7 +281,7 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE, TVRRUN);
         response.setJobType(TVRRUN);
         response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
+        response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
         validateInput(response, studentSearchRequest);
         if(response.getException() != null) {
@@ -313,7 +314,7 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE,  entity.getJobType());
         response.setJobType(entity.getJobType());
         response.setTriggerBy(entity.getTriggerBy());
-        response.setStartTime(new Date(System.currentTimeMillis()));
+        response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
@@ -369,7 +370,7 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE,  entity.getJobType());
         response.setJobType(entity.getJobType());
         response.setTriggerBy(entity.getTriggerBy());
-        response.setStartTime(new Date(System.currentTimeMillis()));
+        response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
@@ -414,20 +415,37 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "RRe-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<Boolean> launchRegenerateSchoolReports(@PathVariable Long batchId, @RequestHeader(name="Authorization") String accessToken) {
+    public ResponseEntity<Boolean> launchRegenerateSchoolReports(@PathVariable Long batchId) {
         BatchGradAlgorithmJobHistoryEntity entity = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
         if (entity != null) {
             try {
                 logger.info(" Re-Generating School Reports for {} --------------------------------------------------------", entity.getJobType());
                 List<String> uniqueSchoolList = gradBatchHistoryService.getSchoolListForReport(batchId);
                 logger.info(" Number of Schools [{}] ---------------------------------------------------------", uniqueSchoolList.size());
-                restUtils.createAndStoreSchoolReports(accessToken.replace(BEARER, ""), uniqueSchoolList, entity.getJobType());
+                restUtils.createAndStoreSchoolReports(uniqueSchoolList, entity.getJobType());
                 return ResponseEntity.ok(Boolean.TRUE);
             } catch (Exception e) {
                 return ResponseEntity.status(500).body(Boolean.FALSE);
             }
         }
         return ResponseEntity.status(500).body(Boolean.FALSE);
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_REGEN_SCHOOL_REPORTS_BY_REQUEST)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "RRe-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<String> launchRegenerateSchoolReports(@RequestBody StudentSearchRequest searchRequest, @RequestParam(required = false) String type) {
+        String schoolReportType = ObjectUtils.defaultIfNull(type, REGALG);
+        logger.info(" Re-Generating School Reports by request for {} --------------------------------------------------------", schoolReportType);
+        try {
+            List<String> finalSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest).stream().sorted().toList();
+            logger.info(" Number of Schools [{}] ---------------------------------------------------------", finalSchoolDistricts.size());
+            int numberOfReports = restUtils.createAndStoreSchoolReports(finalSchoolDistricts, schoolReportType);
+            return ResponseEntity.ok(numberOfReports + " school reports " + schoolReportType + " created successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getLocalizedMessage());
+        }
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_MONTHLY_DIS_RUN_BATCH_JOB)
@@ -453,6 +471,11 @@ public class JobLauncherController {
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("DistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            if(summaryDTO == null) {
+                summaryDTO = new DistributionSummaryDTO();
+                jobContext.put(DISDTO, summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
@@ -478,6 +501,11 @@ public class JobLauncherController {
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("YearlyDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            if(summaryDTO == null) {
+                summaryDTO = new DistributionSummaryDTO();
+                jobContext.put(DISDTO, summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException |
                  JobParametersInvalidException | NoSuchJobException e) {
@@ -503,6 +531,11 @@ public class JobLauncherController {
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("SupplementalDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            if(summaryDTO == null) {
+                summaryDTO = new DistributionSummaryDTO();
+                jobContext.put(DISDTO, summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | NoSuchJobException e) {
@@ -528,6 +561,11 @@ public class JobLauncherController {
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob("YearlyNonGradDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            if(summaryDTO == null) {
+                summaryDTO = new DistributionSummaryDTO();
+                jobContext.put(DISDTO, summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException |
                  JobParametersInvalidException | NoSuchJobException e) {
@@ -573,6 +611,11 @@ public class JobLauncherController {
             JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("UserReqDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
+            if(summaryDTO == null) {
+                summaryDTO = new DistributionSummaryDTO();
+                jobContext.put(DISDTO, summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
@@ -605,6 +648,11 @@ public class JobLauncherController {
             JobExecution jobExecution = jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
+            if(summaryDTO == null) {
+                summaryDTO = new BlankDistributionSummaryDTO();
+                jobContext.put("blankDistributionSummaryDTO", summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
@@ -639,6 +687,11 @@ public class JobLauncherController {
             JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob("psiDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
+            if(summaryDTO == null) {
+                summaryDTO = new PsiDistributionSummaryDTO();
+                jobContext.put("psiDistributionSummaryDTO", summaryDTO);
+            }
+            summaryDTO.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(summaryDTO);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
             PsiDistributionSummaryDTO summaryDTO = new PsiDistributionSummaryDTO();
@@ -671,7 +724,7 @@ public class JobLauncherController {
         builder.addString(SEARCH_REQUEST, "");
         response.setJobType(CERT_REGEN);
         response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
+        response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
@@ -699,7 +752,7 @@ public class JobLauncherController {
         builder.addString(JOB_TYPE, CERT_REGEN);
         response.setJobType(CERT_REGEN);
         response.setTriggerBy(MANUAL);
-        response.setStartTime(new Date(System.currentTimeMillis()));
+        response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {

@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -12,8 +12,8 @@ import java.util.Date;
 public class BatchJobExecution {
 
 	private Long jobExecutionId;
-	private Date createTime;
-	private Date startTime;
-	private Date endTime;
+	private LocalDateTime createTime;
+	private LocalDateTime startTime;
+	private LocalDateTime endTime;
 	private String status;
 }

@@ -1,11 +1,16 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import net.javacrumbs.shedlock.spring.LockableTaskScheduler;
 import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.batch.core.Job;
@@ -16,15 +21,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -61,6 +63,16 @@ public class TaskDefinitionTest {
 
     @MockBean
     UserScheduledJobsRepository userScheduledJobsRepository;
+
+    @BeforeEach
+    public void setup() {
+        taskScheduler.schedule(taskDefinition, new CronTrigger("0 12 23 5 7 *", TimeZone.getTimeZone(TimeZone.getDefault().getID())));
+    }
+
+    @AfterEach
+    public void close() {
+
+    }
 
     @Test
     public void testRun() {

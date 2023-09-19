@@ -4,9 +4,8 @@ import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.Chunk;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 public class TvrRunBatchPerformanceWriter extends BaseWriter {
 
@@ -17,9 +16,9 @@ public class TvrRunBatchPerformanceWriter extends BaseWriter {
     GradBatchHistoryService gradBatchHistoryService;
     
     @Override
-    public void write(List<? extends GraduationStudentRecord> list) throws Exception {
+    public void write(Chunk<? extends GraduationStudentRecord> list) throws Exception {
         if(!list.isEmpty()) {
-        	GraduationStudentRecord gradStatus = list.get(0);
+        	GraduationStudentRecord gradStatus = list.getItems().get(0);
             saveBatchStatus(gradStatus);
             LOGGER.debug("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }

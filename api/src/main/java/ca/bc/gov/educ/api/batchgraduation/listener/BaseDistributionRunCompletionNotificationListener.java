@@ -5,14 +5,17 @@ import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -42,8 +45,8 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
         ent.setExpectedStudentsProcessed(expectedStudents);
         ent.setFailedStudentsProcessed(failedRecords);
         ent.setJobExecutionId(jobExecutionId);
-        ent.setStartTime(startTime);
-        ent.setEndTime(endTime);
+        ent.setStartTime(DateUtils.toLocalDateTime(startTime));
+        ent.setEndTime(DateUtils.toLocalDateTime(endTime));
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
@@ -131,6 +134,10 @@ public abstract class BaseDistributionRunCompletionNotificationListener extends 
             credentialList.removeIf(s->"1950".equalsIgnoreCase(s.getProgram()) && !"AD".equalsIgnoreCase(s.getStudentGrade()));
             credentialList.removeIf(s->!"1950".equalsIgnoreCase(s.getProgram()) && !"12".equalsIgnoreCase(s.getStudentGrade()));
         }
-        LOGGER.debug("Total {} selected after filter", credentialList.size());
+        LOGGER.debug("Total {} Student Credentials selected after filter", credentialList.size());
+    }
+
+    long getElapsedTimeMillis(JobExecution jobExecution) {
+        return new Date().getTime() - jobExecution.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 }

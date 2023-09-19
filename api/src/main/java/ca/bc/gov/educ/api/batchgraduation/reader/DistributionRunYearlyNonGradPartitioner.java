@@ -1,10 +1,9 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.School;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
-import org.apache.commons.lang3.StringUtils;
+import ca.bc.gov.educ.api.batchgraduation.util.GradSchoolOfRecordFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -12,7 +11,10 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
@@ -23,6 +25,8 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
     @Autowired
     ParallelDataFetch parallelDataFetch;
+    @Autowired
+    GradSchoolOfRecordFilter gradSchoolOfRecordFilter;
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
@@ -40,24 +44,8 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
         startTime = System.currentTimeMillis();
         logger.debug("Retrieve schools for Non Grad Yearly Distribution");
-        List<String> eligibleStudentSchoolDistricts = new ArrayList<>();
         StudentSearchRequest searchRequest = getStudentSearchRequest();
-        if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
-            for(String schoolCategoryCode: searchRequest.getSchoolCategoryCodes()) {
-                logger.debug("Use schoolCategory code {} to find list of schools", schoolCategoryCode);
-                List<School> schools = restUtils.getSchoolBySchoolCategoryCode(schoolCategoryCode);
-                for(School school: schools) {
-                    logger.debug("School {} found by schoolCategory code {}", school.getMincode(), schoolCategoryCode);
-                    eligibleStudentSchoolDistricts.add(school.getMincode());
-                }
-            }
-        }
-        if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
-            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getDistricts().contains(StringUtils.substring(scr, 0, 3)));
-        }
-        if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
-            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getSchoolOfRecords().contains(scr));
-        }
+        List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
         endTime = System.currentTimeMillis();
         diff = (endTime - startTime)/1000;
         logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);

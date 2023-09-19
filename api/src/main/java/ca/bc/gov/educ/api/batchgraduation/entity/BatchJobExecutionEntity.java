@@ -1,11 +1,11 @@
 package ca.bc.gov.educ.api.batchgraduation.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.*;
 import java.time.Instant;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -22,15 +22,15 @@ public class BatchJobExecutionEntity {
 
 	@Column(name = "CREATE_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date createTime;
+	private LocalDateTime createTime;
 	
 	@Column(name = "START_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date startTime;
+	private LocalDateTime startTime;
 	
 	@Column(name = "END_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
-	private Date endTime;
+	private LocalDateTime endTime;
 	
 	@Column(name = "STATUS", nullable = true)
     private String status;

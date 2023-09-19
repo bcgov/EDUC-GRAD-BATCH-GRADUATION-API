@@ -36,8 +36,15 @@ public class DistributionRunPartitioner extends BasePartitioner {
         }
 
         // Clean up existing reports before running new one
+        LOGGER.debug("Delete School Reports for Monthly Distribution");
+        long startTime = System.currentTimeMillis();
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
+        long endTime = System.currentTimeMillis();
+        long diff = (endTime - startTime)/1000;
+        LOGGER.debug("Old School Reports deleted in {} sec", diff);
 
+        startTime = System.currentTimeMillis();
+        LOGGER.debug("Retrieve students for Monthly Distribution");
         Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
@@ -45,6 +52,9 @@ public class DistributionRunPartitioner extends BasePartitioner {
             credentialList.addAll(parallelDTO.transcriptList());
             credentialList.addAll(parallelDTO.certificateList());
         }
+        endTime = System.currentTimeMillis();
+        diff = (endTime - startTime)/1000;
+        LOGGER.debug("Total {} eligible StudentCredentialDistributions found in {} sec", credentialList.size(), diff);
         if(!credentialList.isEmpty()) {
             LOGGER.debug("Total size of credential list: {}", credentialList.size());
             // Filter deceased students out
@@ -55,7 +65,7 @@ public class DistributionRunPartitioner extends BasePartitioner {
                 LOGGER.debug("Revised size of credential list: {}", credentialList.size());
             }
             updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
-            return getStringExecutionContextMap(gridSize, credentialList, null, LOGGER);
+            return getStringExecutionContextMap(gridSize, credentialList, null);
         }
         LOGGER.info("No Credentials Found for Processing");
         return new HashMap<>();

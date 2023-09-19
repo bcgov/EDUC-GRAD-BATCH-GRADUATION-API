@@ -1,8 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
-
-import javax.persistence.*;
 
 @Data
 @Entity
@@ -13,7 +12,7 @@ public class BatchStepExecutionContextEntity {
     @Column(name = "STEP_EXECUTION_ID", nullable = false)
     private Long id;
 
-    @Column(name = "SHORT_CONTEXT", nullable = false, length = 2500)
+    @Column(name = "SHORT_CONTEXT", length = 2500)
     private String shortContext;
 
     @Lob

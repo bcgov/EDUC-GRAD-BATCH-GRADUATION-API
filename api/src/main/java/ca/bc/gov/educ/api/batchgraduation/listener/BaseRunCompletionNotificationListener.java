@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -35,8 +36,8 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
         ExecutionContext jobContext = jobExecution.getExecutionContext();
         Long jobExecutionId = jobExecution.getId();
         String status = jobExecution.getStatus().toString();
-        Date startTime = jobExecution.getStartTime();
-        Date endTime = jobExecution.getEndTime();
+        Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+        Date endTime = DateUtils.toDate(jobExecution.getEndTime());
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
 
@@ -76,7 +77,7 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
         if (!isSpecialRun) {
             updateBackStudentFlagForErroredStudents(summaryDTO.getErrors(), jobType, obj.getAccess_token());
         }
-        processSchoolList(jobExecutionId, obj.getAccess_token(), jobType);
+        processSchoolList(jobExecutionId, jobType);
     }
 
     private void processBatchJobHistory(AlgorithmSummaryDTO summaryDTO, Long jobExecutionId, String status, String jobTrigger, String jobType, Date startTime, Date endTime) {
@@ -89,8 +90,8 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
         ent.setExpectedStudentsProcessed(expectedStudents);
         ent.setFailedStudentsProcessed(failedRecords != null? failedRecords.intValue() : 0);
         ent.setJobExecutionId(jobExecutionId);
-        ent.setStartTime(startTime);
-        ent.setEndTime(endTime);
+        ent.setStartTime(DateUtils.toLocalDateTime(startTime));
+        ent.setEndTime(DateUtils.toLocalDateTime(endTime));
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
@@ -106,11 +107,11 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
         }
     }
 
-    private void processSchoolList(Long batchId, String accessToken, String jobType) {
+    private void processSchoolList(Long batchId, String jobType) {
         LOGGER.info(" Creating Reports for {}", jobType);
         List<String> uniqueSchoolList = gradBatchHistoryService.getSchoolListForReport(batchId);
         LOGGER.info(" Number of Schools [{}]", uniqueSchoolList.size());
-        restUtils.createAndStoreSchoolReports(accessToken,uniqueSchoolList,jobType);
+        restUtils.createAndStoreSchoolReports(uniqueSchoolList,jobType);
     }
 
     private long getTotalReadCount(Long batchId) {

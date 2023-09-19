@@ -2,11 +2,12 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
 @Data
-public class StudentCredentialDistribution {
+public class StudentCredentialDistribution implements Serializable {
 
 	private UUID id;
 	private String credentialTypeCode;
@@ -25,4 +26,5 @@ public class StudentCredentialDistribution {
 	private String program;
 	private String studentGrade;
 	private List<GradRequirement> nonGradReasons;
+
 }

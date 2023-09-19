@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,7 +28,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 
     @Override
     public void afterJob(JobExecution jobExecution) {
-		long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
+		long elapsedTimeMillis = getElapsedTimeMillis(jobExecution);
 		LOGGER.info("=======================================================================================");
 		JobParameters jobParameters = jobExecution.getJobParameters();
 		ExecutionContext jobContext = jobExecution.getExecutionContext();
@@ -72,11 +71,11 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 		Long batchId = summaryDTO.getBatchId();
 		List<StudentCredentialDistribution> cList = distributionService.getStudentCredentialDistributions(batchId);
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
-		LOGGER.info("list size =  {}", cList.size());
+		LOGGER.info("Student Credentials list size =  {}", cList.size());
 		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = distributionService.getSchoolListForDistribution(batchId);
 		sortSchoolBySchoolOfRecord(uniqueSchoolList);
-		LOGGER.info("unique schools =  {}", uniqueSchoolList.size());
+		LOGGER.info("Unique Schools =  {}", uniqueSchoolList.size());
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);

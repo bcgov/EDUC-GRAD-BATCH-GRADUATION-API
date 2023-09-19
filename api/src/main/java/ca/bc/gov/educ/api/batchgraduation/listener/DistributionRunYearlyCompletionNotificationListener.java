@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 	@Generated("default")
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
+			long elapsedTimeMillis = getElapsedTimeMillis(jobExecution);
 			LOGGER.info("=======================================================================================");
 			JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
@@ -44,8 +45,8 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 			LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
 
 			String status = jobExecution.getStatus().toString();
-			Date startTime = jobExecution.getStartTime();
-			Date endTime = jobExecution.getEndTime();
+			Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+			Date endTime = DateUtils.toDate(jobExecution.getEndTime());
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String searchRequest = jobParameters.getString(SEARCH_REQUEST);
 
@@ -81,11 +82,11 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 		filterStudentCredentialDistribution(cList, activityCode);
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
 		summaryDTO.recalculateCredentialCounts();
-		LOGGER.info("list size =  {}", cList.size());
+		LOGGER.info("Student Credentials list size =  {}", cList.size());
     	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		sortSchoolBySchoolOfRecord(uniqueSchoolList);
-		LOGGER.info("unique schools =  {}", uniqueSchoolList.size());
+		LOGGER.info("Unique Schools =  {}", uniqueSchoolList.size());
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);

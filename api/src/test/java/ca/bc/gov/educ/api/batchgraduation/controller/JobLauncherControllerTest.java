@@ -234,7 +234,7 @@ public class JobLauncherControllerTest {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
-        builder.addString("LocalDownload",null);
+        builder.addString("LocalDownload","Y");
         StudentSearchRequest req = new StudentSearchRequest();
         req.setPens(Arrays.asList("123213123"));
         try {
@@ -296,7 +296,7 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
         builder.addString(CREDENTIALTYPE,"OT");
-        builder.addString("LocalDownload",null);
+        builder.addString("LocalDownload","Y");
 
         BlankCredentialRequest req = new BlankCredentialRequest();
         req.setCredentialTypeCode(Arrays.asList("123213123"));
@@ -318,7 +318,7 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
         builder.addString(CREDENTIALTYPE,"OT");
-        builder.addString("LocalDownload",null);
+        builder.addString("LocalDownload","Y");
 
         BlankCredentialRequest req = new BlankCredentialRequest();
         req.setSchoolOfRecords(Arrays.asList("123213123"));
@@ -340,7 +340,7 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DISTRUNUSER);
         builder.addString(CREDENTIALTYPE,"OT");
-        builder.addString("LocalDownload",null);
+        builder.addString("LocalDownload","Y");
 
         BlankCredentialRequest req = new BlankCredentialRequest();
         req.setCredentialTypeCode(new ArrayList<>());

@@ -5,6 +5,8 @@ import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
+import org.apache.commons.lang3.StringUtils;
+import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -42,7 +44,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
     @Override
     public void afterJob(JobExecution jobExecution) {
     	if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-	    	long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().getTime();
+			long elapsedTimeMillis = getElapsedTimeMillis(jobExecution);
 			LOGGER.info(LOG_SEPARATION);
 			JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
@@ -51,8 +53,8 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 	    	LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
 
 			String status = jobExecution.getStatus().toString();
-			Date startTime = jobExecution.getStartTime();
-			Date endTime = jobExecution.getEndTime();
+			Date startTime = DateUtils.toDate(jobExecution.getStartTime());
+			Date endTime = DateUtils.toDate(jobExecution.getEndTime());
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String credentialType = jobParameters.getString("credentialType");
@@ -76,6 +78,10 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process " + LOG_SEPARATION_SINGLE);
+			if(StringUtils.isNotBlank(studentSearchRequest)) {
+				StudentSearchRequest payload = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+				summaryDTO.setStudentSearchRequest(payload);
+			}
 			processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,properName);
 
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
@@ -133,7 +139,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
 			}
 			if(!cList.isEmpty()) {
-				DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
+				DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(summaryDTO.getStudentSearchRequest()).build();
 				if (credentialType.equalsIgnoreCase("RC")) {
 					disres = restUtils.createReprintAndUpload(batchId, accessToken, distributionRequest, activityCode, localDownload);
 				} else {

@@ -2,12 +2,12 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 public class BatchJobResponse {
     private Long batchId;
-    private Date startTime;
+    private LocalDateTime startTime;
     private String status;
     private String jobType;
     private String triggerBy;
