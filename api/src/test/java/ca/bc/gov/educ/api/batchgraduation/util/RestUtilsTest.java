@@ -814,7 +814,7 @@ public class RestUtilsTest {
         final String type = "NONGRADPRJ";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStore(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -822,8 +822,11 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(inputResponseI);
         when(this.inputResponseI.block()).thenReturn(null);
 
-        this.restUtils.createAndStoreSchoolReports("Abc",new ArrayList<>(),type);
+        mockTokenResponseObject();
+
+        var result = this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
+        assertNotNull(result);
     }
 
     @Test
@@ -831,15 +834,18 @@ public class RestUtilsTest {
         final String type = "NONGRADPRJ";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStore(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
-        this.restUtils.createAndStoreSchoolReports("Abc",new ArrayList<>(),type);
+        mockTokenResponseObject();
+
+        var result = this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
+        assertNotNull(result);
     }
 
     @Test
@@ -847,15 +853,18 @@ public class RestUtilsTest {
         final String type = "NONGRADPRJ";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStore(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
 
-        this.restUtils.createAndStoreSchoolReports("Abc",new ArrayList<>(),type);
+        mockTokenResponseObject();
+
+        var result = this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
+        assertNotNull(result);
     }
 
     @Test
@@ -1277,6 +1286,24 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(List.of(school)));
 
         List<School> res = this.restUtils.getSchoolBySchoolCategoryCode("02");
+        assertThat(res).isNotNull();
+    }
+
+    @Test
+    public void testGetSchoolByDistrictCode() {
+        School school = new School();
+        school.setMincode("1234567");
+
+        final ParameterizedTypeReference<List<School>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getTraxSchoolByDistrict(), "005"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(List.of(school)));
+
+        List<School> res = this.restUtils.getSchoolByDistrictCode("005");
         assertThat(res).isNotNull();
     }
 
