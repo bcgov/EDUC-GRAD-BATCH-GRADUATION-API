@@ -166,12 +166,12 @@ public abstract class BasePartitioner extends SimplePartitioner {
             StudentCredentialDistribution scd = (StudentCredentialDistribution)scdIt.next();
             String districtCode = StringUtils.substring(scd.getSchoolOfRecord(), 0, 3);
             if (
-                    (StringUtils.isNotBlank(scd.getSchoolOfRecord()) && request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
+                    (StringUtils.isNotBlank(districtCode) && request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
                     ||
                     (StringUtils.isNotBlank(scd.getSchoolOfRecord()) && request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
             ) {
                 scdIt.remove();
-                LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getPen(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()));
+                LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getStudentID(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()));
             }
         }
         LOGGER.debug("Total {} Student Credentials selected after filter", credentialList.size());
