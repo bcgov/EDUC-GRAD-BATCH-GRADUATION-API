@@ -66,6 +66,7 @@ public class JobLauncherController {
     private static final String NONGRADRUN = "NONGRADRUN";
     private static final String DISTRUNUSER = "DISTRUNUSER";
     private static final String PSIDISTRUN = "PSIRUN";
+    private static final String ARC_STUDENTS = "ARC_STUDENTS";
     private static final String CREDENTIALTYPE = "credentialType";
     private static final String TRANMISSION_TYPE = "transmissionType";
     private static final String DISDTO = "distributionSummaryDTO";
@@ -75,8 +76,8 @@ public class JobLauncherController {
     private static final String TVR_BATCH_JOB = "tvrBatchJob";
     private static final String SPECIAL_GRADUATION_BATCH_JOB = "SpecialGraduationBatchJob";
     private static final String SPECIAL_TVR_RUN_BATCH_JOB = "SpecialTvrRunBatchJob";
-
     private static final String CERTIFICATE_REGENERATION_BATCH_JOB = "certRegenBatchJob";
+    private static final String YEARLY_ARCHIVE_STUDENTS_BATCH_JOB = "ArchiveStudentsBatchJob";
 
     private final JobLauncher jobLauncher;
     private final JobLauncher asyncJobLauncher;
@@ -786,6 +787,61 @@ public class JobLauncherController {
         distributionRunStatusUpdateProcessor.process(batchId, status);
         logger.debug("distributionRunStatusUpdateProcessor is invoked: batchId [{}], status = {}", batchId, status);
         return ResponseEntity.ok(null);
+    }
+
+    /*@PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_YEARLY_ARCHIVE_STUDENTS_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Yearly Archive for Students", description = "Run Yearly Archive for Students", tags = { "Archive" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<Void> executeYearlyArchiveStudentsBatchJob(
+            @RequestParam(name = "batchId", defaultValue = "0") Long batchId,
+            @RequestParam(name = "status", defaultValue = "success") String status,
+            @RequestBody DistributionResponse distributionResponse) {
+
+        logger.debug("notifyDistributionJobIsCompleted: batchId [{}], status = {}", batchId, status);
+        distributionRunStatusUpdateProcessor.process(batchId, status);
+        logger.debug("distributionRunStatusUpdateProcessor is invoked: batchId [{}], status = {}", batchId, status);
+        return ResponseEntity.ok(null);
+    }*/
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_YEARLY_ARCHIVE_STUDENTS_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run Yearly Archive for Students", description = "Run Yearly Archive for Students", tags = { "Archive" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<BatchJobResponse> executeYearlyArchiveStudentsBatchJob(@RequestBody StudentSearchRequest request) {
+        logger.debug("launchYearlyArchiveStudentsBatchJob");
+        BatchJobResponse response = new BatchJobResponse();
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, ARC_STUDENTS);
+        response.setJobType(ARC_STUDENTS);
+        response.setTriggerBy(MANUAL);
+        response.setStartTime(LocalDateTime.now());
+        response.setStatus(BatchStatusEnum.STARTED.name());
+        //validateInputArchiveStudents(response, request);
+        //if(response.getException() != null) {
+        //    return ResponseEntity.status(400).body(response);
+        //}
+        try {
+            String studentSearchData = jsonTransformer.marshall(request);
+            builder.addString(SEARCH_REQUEST, studentSearchData);
+            response.setJobParameters(studentSearchData);
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(YEARLY_ARCHIVE_STUDENTS_BATCH_JOB), builder.toJobParameters());
+            response.setBatchId(jobExecution.getId());
+            return ResponseEntity.ok(response);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException | JobParametersInvalidException | NoSuchJobException e) {
+            response.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    private void validateInputArchiveStudents(BatchJobResponse response, StudentSearchRequest studentSearchRequest) {
+        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
+            response.setException("Please provide at least 1 parameter");
+        }
+        response.setException(null);
     }
 
 }

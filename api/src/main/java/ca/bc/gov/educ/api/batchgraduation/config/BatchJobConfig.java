@@ -988,6 +988,74 @@ public class BatchJobConfig {
                 .build();
     }
 
+
+    /**
+     * Archive students batch Run
+     * ItemProcessor,ItemReader and ItemWriter
+     * Partitioner
+     */
+
+    @Bean
+    @StepScope
+    public ItemReader<UUID> itemReaderArchiveStudent() {
+        return new ArchiveStudentReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemProcessor<UUID,GraduationStudentRecord> itemProcessorArchiveStudent() {
+        return new ArchiveStudentProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<GraduationStudentRecord> itemWriterArchiveStudent() {
+        return new ArchiveStudentWriter();
+    }
+
+    @Bean
+    @StepScope
+    public ArchiveStudentsPartitioner getArchiveStudentsPartitioner() {
+        return new ArchiveStudentsPartitioner();
+    }
+
+    @Bean
+    public Step archiveStudentsJobStep(JobRepository jobRepository, SkipSQLTransactionExceptionsListener skipListener) {
+        return new StepBuilder("archiveStudentsJobStep", jobRepository)
+                .<UUID, GraduationStudentRecord>chunk(1)
+                .transactionManager(batchTransactionManager)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
+                .reader(itemReaderArchiveStudent())
+                .processor(itemProcessorArchiveStudent())
+                .writer(itemWriterArchiveStudent())
+                .transactionManager(batchTransactionManager)
+                .listener(skipListener)
+                .build();
+    }
+
+    @Bean
+    public Step masterStepArchiveStudents(JobRepository jobRepository, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
+        return new StepBuilder("masterStepArchiveStudents", jobRepository)
+                .partitioner(archiveStudentsJobStep(jobRepository, skipListener).getName(), getArchiveStudentsPartitioner())
+                .step(archiveStudentsJobStep(jobRepository, skipListener))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants))
+                .build();
+    }
+
+    @Bean(name="ArchiveStudentsBatchJob")
+    public Job archiveStudentsBatchJob(JobRepository jobRepository, ArchiveStudentsRunCompletionNotificationListener listener, SkipSQLTransactionExceptionsListener skipListener, EducGradBatchGraduationApiConstants constants) {
+        return new JobBuilder("ArchiveStudentsBatchJob", jobRepository)
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .start(masterStepArchiveStudents(jobRepository, constants, skipListener))
+                .on("*")
+                .end().build()
+                .build();
+    }
+
     /**
      * User Scheduled Jobs Refreshing Map on startup
      * ItemProcessor,ItemReader and ItemWriter

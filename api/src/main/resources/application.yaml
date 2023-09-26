@@ -159,9 +159,9 @@ endpoint:
   keycloak:
     getToken: ${KEYCLOAK_TOKEN_URL}auth/realms/master/protocol/openid-connect/token
   grad-graduation-api:
-    graduatestudent: 
+    graduatestudent:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/GS?batchId=%s
-    reportonlyrun: 
+    reportonlyrun:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/FMR?batchId=%s
     tvrrun:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/REGFM?batchId=%s
@@ -186,6 +186,7 @@ endpoint:
   grad-student-api:
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate
+    student-for-archive-list: ${GRAD_STUDENT_API}api/v1/student/archive
     student-for-projectedgrad-list: ${GRAD_STUDENT_API}api/v1/student/projected
     get-student-for-batch-input: ${GRAD_STUDENT_API}api/v1/student/batch/gradstudent/studentid/%s
     pen-student-by-pen: ${PEN_API}api/v1/student?pen=%s

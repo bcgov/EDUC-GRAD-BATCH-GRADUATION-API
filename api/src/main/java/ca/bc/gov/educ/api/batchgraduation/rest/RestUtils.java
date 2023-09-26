@@ -243,6 +243,16 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
+    public List<UUID> getStudentsForArchive(String accessToken) {
+        UUID correlationID = UUID.randomUUID();
+        final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
+        };
+        return this.webClient.get()
+                .uri(constants.getGradStudentApiStudentForArchiveListUrl())
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .retrieve().bodyToMono(responseType).block();
+    }
+
     public List<UUID> getStudentsForProjectedAlgorithm(String accessToken) {
         UUID correlationID = UUID.randomUUID();
         final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
