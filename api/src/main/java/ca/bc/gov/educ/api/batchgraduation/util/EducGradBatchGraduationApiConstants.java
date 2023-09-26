@@ -27,6 +27,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_SUPP_DIS_RUN_BATCH_JOB = "/executesuppdisrunbatchjob";
     public static final String EXECUTE_YEARLY_NON_GRAD_DIS_RUN_BATCH_JOB = "/executenongraddisrunbatchjob";
     public static final String EXECUTE_CERT_REGEN_BATCH_JOB = "/executecertregenbatchjob";
+    public static final String EXECUTE_YEARLY_ARCHIVE_STUDENTS_BATCH_JOB = "/executeyearlyarchivestudentsbatchjob";
 
     // Special Run
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
