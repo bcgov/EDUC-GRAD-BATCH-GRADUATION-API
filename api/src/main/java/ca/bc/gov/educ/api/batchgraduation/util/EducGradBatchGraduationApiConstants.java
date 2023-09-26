@@ -114,6 +114,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-student-api.student-for-grad-list}")
     private String gradStudentApiStudentForGradListUrl;
 
+    @Value("${endpoint.grad-student-api.student-for-archive-list}")
+    private String gradStudentApiStudentForArchiveListUrl;
+
     @Value("${endpoint.grad-student-api.student-for-projectedgrad-list}")
     private String gradStudentApiStudentForProjectedGradListUrl;
 

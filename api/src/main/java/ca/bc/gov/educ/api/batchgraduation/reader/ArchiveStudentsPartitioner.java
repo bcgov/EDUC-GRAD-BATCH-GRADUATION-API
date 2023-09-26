@@ -39,11 +39,11 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
             if (res != null) {
                 accessToken = res.getAccess_token();
             }
-            studentList = restUtils.getStudentsForAlgorithm(accessToken);
+            studentList = restUtils.getStudentsForArchive(accessToken);
         } else {
             studentList = getInputDataFromPreviousJob();
         }
-        createTotalSummaryDTO("regGradAlgSummaryDTO");
+        createTotalSummaryDTO("ArchiveStudentsJobSummaryDTO");
         updateBatchJobHistory(jobHistory, Long.valueOf(studentList.size()));
         if(!studentList.isEmpty()) {
             if (runType == RunTypeEnum.NORMAL_JOB_PROCESS) {
