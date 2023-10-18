@@ -39,6 +39,10 @@ public class RestUtils {
     private static final String STUDENT_PROCESS = "P:{}";
     private static final String STUDENT_PROCESSED = "D:{} {} of {} batch {}";
     private static final String TRAX_API_IS_DOWN = "Trax API is not available {}";
+    private static final String URL_FORMAT_STR = "url = {}";
+    private static final String GRADUATION_API_IS_DOWN = "GRAD-GRADUATION-API IS DOWN";
+    private static final String GRADUATION_API_DOWN_MSG = "Graduation API is unavailable at this moment";
+    private static final String FAILED_STUDENT_ERROR_MSG = "Failed STU-ID:{} Errors:{}";
     private static final String MERGE_MSG="Merge and Upload Success {}";
     private static final String YEARENDDIST = "YEARENDDIST";
     private static final String SUPPDIST = "SUPPDIST";
@@ -158,7 +162,7 @@ public class RestUtils {
     public List<Student> getStudentsByPen(String pen, String accessToken) {
         final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
         };
-        LOGGER.debug("url = {}",constants.getPenStudentApiByPenUrl());
+        LOGGER.debug(URL_FORMAT_STR,constants.getPenStudentApiByPenUrl());
         return this.webClient.get()
                 .uri(String.format(constants.getPenStudentApiByPenUrl(), pen))
                 .headers(h -> h.setBearerAuth(accessToken))
@@ -285,9 +289,9 @@ public class RestUtils {
                     item.getProgram(), item.getProgramCompletionDate(), summary.getBatchId());
             return processGraduationStudentRecord(item, summary, algorithmResponse);
         }catch(Exception e) {
-            summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
+            summary.updateError(item.getStudentID(),GRADUATION_API_IS_DOWN,GRADUATION_API_DOWN_MSG);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
+            LOGGER.info(FAILED_STUDENT_ERROR_MSG,item.getStudentID(),summary.getErrors().size());
             return null;
         }
     }
@@ -328,9 +332,9 @@ public class RestUtils {
             AlgorithmResponse algorithmResponse = this.runProjectedGradAlgorithm(item.getStudentID(), accessToken,summary.getBatchId());
             return processGraduationStudentRecord(item, summary, algorithmResponse);
         } catch(Exception e) {
-            summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
+            summary.updateError(item.getStudentID(),GRADUATION_API_IS_DOWN,GRADUATION_API_DOWN_MSG);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
+            LOGGER.info(FAILED_STUDENT_ERROR_MSG,item.getStudentID(),summary.getErrors().size());
             return null;
         }
     }
@@ -651,7 +655,7 @@ public class RestUtils {
         final ParameterizedTypeReference<List<String>> responseType = new ParameterizedTypeReference<>() {
         };
         String url = String.format(constants.getEdwSnapshotSchoolsUrl(), gradYear);
-        LOGGER.debug("url = {}",url);
+        LOGGER.debug(URL_FORMAT_STR,url);
         return this.webClient.get()
                 .uri(url)
                 .headers(h -> h.setBearerAuth(accessToken))
@@ -662,7 +666,7 @@ public class RestUtils {
         final ParameterizedTypeReference<List<SnapshotResponse>> responseType = new ParameterizedTypeReference<>() {
         };
         String url = String.format(constants.getEdwSnapshotStudentsByMincodeUrl(), gradYear, mincode);
-        LOGGER.debug("url = {}",url);
+        LOGGER.debug(URL_FORMAT_STR,url);
         return this.webClient.get()
                 .uri(url)
                 .headers(h -> h.setBearerAuth(accessToken))
@@ -771,9 +775,9 @@ public class RestUtils {
                     .body(BodyInserters.fromValue(item))
                     .retrieve().bodyToMono(EdwGraduationSnapshot.class).block();
         }catch(Exception e) {
-            summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
+            summary.updateError(item.getStudentID(),GRADUATION_API_IS_DOWN,GRADUATION_API_DOWN_MSG);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
+            LOGGER.info(FAILED_STUDENT_ERROR_MSG,item.getStudentID(),summary.getErrors().size());
             return null;
         }
     }
