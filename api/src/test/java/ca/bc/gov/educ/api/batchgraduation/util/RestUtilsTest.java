@@ -25,6 +25,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 import reactor.util.retry.RetryBackoffSpec;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -1558,6 +1559,76 @@ public class RestUtilsTest {
         val result = this.restUtils.fetchDistributionRequiredDataStudentsYearly();
         assertThat(result).isNotEmpty();
     }
+
+    @Test
+    public void testGetEDWSnapshotSchools() {
+        final Integer gradYear = Integer.parseInt("2023");
+
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getEdwSnapshotSchoolsUrl(), gradYear))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        final ParameterizedTypeReference<List<String>> responseType = new ParameterizedTypeReference<>() {
+        };
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(schools));
+
+        val result = this.restUtils.getEDWSnapshotSchools(gradYear, "abc");
+        assertThat(result).hasSize(2);
+    }
+
+    @Test
+    public void testGetEDWSnapshotStudents() {
+        final Integer gradYear = Integer.parseInt("2023");
+        final String mincode = "12345678";
+
+        SnapshotResponse snapshotResponse = new SnapshotResponse();
+        snapshotResponse.setPen("123456789");
+        snapshotResponse.setSchoolOfRecord(mincode);
+        snapshotResponse.setGraduatedDate("202306");
+        snapshotResponse.setGpa(BigDecimal.valueOf(3.75));
+        snapshotResponse.setHonourFlag("N");
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getEdwSnapshotStudentsByMincodeUrl(), gradYear, mincode))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        final ParameterizedTypeReference<List<SnapshotResponse>> responseType = new ParameterizedTypeReference<>() {
+        };
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(snapshotResponse)));
+
+        val result = this.restUtils.getEDWSnapshotStudents(gradYear, mincode, "abc");
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    public void testProcessSnapshot() {
+        final Integer gradYear = Integer.parseInt("2023");
+        final String mincode = "12345678";
+
+        EdwGraduationSnapshot snapshot = new EdwGraduationSnapshot();
+        snapshot.setStudentID(UUID.randomUUID());
+        snapshot.setPen("123456789");
+        snapshot.setGradYear(gradYear);
+        snapshot.setSchoolOfRecord(mincode);
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(constants.getSnapshotGraduationStatusForEdwUrl())).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
+        when(this.responseMock.bodyToMono(EdwGraduationSnapshot.class)).thenReturn(Mono.just(snapshot));
+
+        val result = this.restUtils.processSnapshot(snapshot, new EdwSnapshotSummaryDTO());
+        assertThat(result).isNotNull();
+        assertThat(result.getPen()).isEqualTo(snapshot.getPen());
+    }
+
 
     @Test
     public void testGetDeceasedStudentIDs() {

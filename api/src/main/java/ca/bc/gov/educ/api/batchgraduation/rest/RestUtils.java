@@ -647,6 +647,28 @@ public class RestUtils {
                 .retrieve().bodyToMono(Boolean.class).block();
     }
 
+    public List<String> getEDWSnapshotSchools(Integer gradYear, String accessToken) {
+        final ParameterizedTypeReference<List<String>> responseType = new ParameterizedTypeReference<>() {
+        };
+        String url = String.format(constants.getEdwSnapshotSchoolsUrl(), gradYear);
+        LOGGER.debug("url = {}",url);
+        return this.webClient.get()
+                .uri(url)
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve().bodyToMono(responseType).block();
+    }
+
+    public List<SnapshotResponse> getEDWSnapshotStudents(Integer gradYear, String mincode, String accessToken) {
+        final ParameterizedTypeReference<List<SnapshotResponse>> responseType = new ParameterizedTypeReference<>() {
+        };
+        String url = String.format(constants.getEdwSnapshotStudentsByMincodeUrl(), gradYear, mincode);
+        LOGGER.debug("url = {}",url);
+        return this.webClient.get()
+                .uri(url)
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve().bodyToMono(responseType).block();
+    }
+
     public String getAccessToken() {
         return this.fetchAccessToken();
     }
@@ -723,5 +745,36 @@ public class RestUtils {
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .body(BodyInserters.fromValue(studentIDs))
                 .retrieve().bodyToMono(responseType).block();
+    }
+
+    public UUID getStudentIDByPen(String pen, String accessToken) {
+        try {
+            List<Student>  stuDataList = this.getStudentsByPen(pen, accessToken);
+            if(!stuDataList.isEmpty()) {
+                return UUID.fromString(stuDataList.get(0).getStudentID());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error processing student with pen# {} due to {}", pen, e.getLocalizedMessage());
+        }
+        return null;
+    }
+
+    public EdwGraduationSnapshot processSnapshot(EdwGraduationSnapshot item, EdwSnapshotSummaryDTO summary) {
+        UUID correlationID = UUID.randomUUID();
+        LOGGER.debug(STUDENT_PROCESS,item.getStudentID());
+        summary.setProcessedCount(summary.getProcessedCount() + 1L);
+        try {
+            String accessToken = summary.getAccessToken();
+            return this.webClient.post()
+                    .uri(constants.getSnapshotGraduationStatusForEdwUrl())
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(item))
+                    .retrieve().bodyToMono(EdwGraduationSnapshot.class).block();
+        }catch(Exception e) {
+            summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
+            summary.setProcessedCount(summary.getProcessedCount() - 1L);
+            LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
+            return null;
+        }
     }
 }
