@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.BaseSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.EdwGraduationSnapshot;
 import ca.bc.gov.educ.api.batchgraduation.model.EdwSnapshotSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
@@ -52,7 +53,7 @@ public class EdwSnapshotCompletionNotificationListener extends JobExecutionListe
 			if (!summaryDTO.getErrors().isEmpty()) {
 				LOGGER.info(" --------------------------------------------------------------------------------------");
 				EdwSnapshotSummaryDTO finalSummaryDTO = summaryDTO;
-				summaryDTO.getErrors().forEach((key, value) -> LOGGER.info("  studentID [{}] - reason: {}", key, finalSummaryDTO.getErrors().get(key).getReason()));
+				summaryDTO.getErrors().forEach((key, value) -> LOGGER.info(" school [{}] | studentID [{}] - reason: {}", finalSummaryDTO.getErrors().get(key).getSchoolOfRecord(), key, finalSummaryDTO.getErrors().get(key).getReason()));
 			}
 			// save batch job & error history
 			saveBatchJobHistory(summaryDTO, jobExecutionId, status, endTime);
@@ -60,7 +61,7 @@ public class EdwSnapshotCompletionNotificationListener extends JobExecutionListe
 		}
     }
 
-	private void saveBatchJobHistory(AlgorithmSummaryDTO summaryDTO, Long jobExecutionId, String status, Date endTime) {
+	private void saveBatchJobHistory(BaseSummaryDTO summaryDTO, Long jobExecutionId, String status, Date endTime) {
 		BatchGradAlgorithmJobHistoryEntity ent = gradBatchHistoryService.getGradAlgorithmJobHistory(jobExecutionId);
 		if (ent != null) {
 			ent.setActualStudentsProcessed(summaryDTO.getProcessedCount());
