@@ -1,9 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.BaseSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.EdwGraduationSnapshot;
 import ca.bc.gov.educ.api.batchgraduation.model.EdwSnapshotSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
@@ -18,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.List;
 
 @Component
 public class EdwSnapshotCompletionNotificationListener extends JobExecutionListenerSupport {
