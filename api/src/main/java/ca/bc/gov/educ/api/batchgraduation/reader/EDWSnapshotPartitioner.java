@@ -4,13 +4,10 @@ import ca.bc.gov.educ.api.batchgraduation.model.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
-
-import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
 public class EDWSnapshotPartitioner extends BasePartitioner {
 
@@ -21,38 +18,25 @@ public class EDWSnapshotPartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        ResponseObj res = restUtils.getTokenResponseObject();
-        String accessToken = null;
-        if (res != null) {
-            accessToken = res.getAccess_token();
+        EdwSnapshotSchoolSummaryDTO totalSummaryDTO = (EdwSnapshotSchoolSummaryDTO)getJobExecution().getExecutionContext().get("edwSnapshotSchoolSummaryDTO");
+        if (totalSummaryDTO == null) {
+            totalSummaryDTO = new EdwSnapshotSchoolSummaryDTO();
+            getJobExecution().getExecutionContext().put("edwSnapshotSchoolSummaryDTO", totalSummaryDTO);
         }
-        long startTime = System.currentTimeMillis();
-        logger.debug("Retrieve schools for EDW Snapshot");
-        JobParameters jobParameters = context.getJobParameters();
-        String searchRequest = jobParameters.getString(SEARCH_REQUEST);
-        SnapshotRequest req = (SnapshotRequest) jsonTransformer.unmarshall(searchRequest, SnapshotRequest.class);
-        List<String> schools;
-        if (req.getSchoolOfRecords() != null && !req.getSchoolOfRecords().isEmpty()) {
-            schools = req.getSchoolOfRecords();
-        } else {
-            schools = restUtils.getEDWSnapshotSchools(req.getGradYear(), accessToken);
-        }
-        long endTime = System.currentTimeMillis();
-        long diff = (endTime - startTime)/1000;
-        logger.debug("Total {} schools in {} sec", schools.size(), diff);
-        if(!schools.isEmpty()) {
-            updateBatchJobHistory(createBatchJobHistory(), (long) schools.size());
-            int partitionSize = schools.size()/gridSize + 1;
-            List<List<String>> partitions = new LinkedList<>();
-            for (int i = 0; i < schools.size(); i += partitionSize) {
-                partitions.add(schools.subList(i, Math.min(i + partitionSize, schools.size())));
+        List<SnapshotResponse> snapshots = totalSummaryDTO.getGlobalList();
+        logger.debug("Total Students: {}", snapshots.size());
+        if(!snapshots.isEmpty()) {
+            int partitionSize = snapshots.size()/gridSize + 1;
+            List<List<SnapshotResponse>> partitions = new LinkedList<>();
+            for (int i = 0; i < snapshots.size(); i += partitionSize) {
+                partitions.add(snapshots.subList(i, Math.min(i + partitionSize, snapshots.size())));
             }
             Map<String, ExecutionContext> map = new HashMap<>(partitions.size());
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 EdwSnapshotSummaryDTO summaryDTO = new EdwSnapshotSummaryDTO();
-                summaryDTO.setGradYear(req.getGradYear());
-                List<String> data = partitions.get(i);
+                summaryDTO.setGradYear(totalSummaryDTO.getGradYear());
+                List<SnapshotResponse> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());
                 executionContext.put("summary", summaryDTO);
@@ -60,10 +44,10 @@ public class EDWSnapshotPartitioner extends BasePartitioner {
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }
-            logger.info("Found {} in total running on {} partitions",schools.size(),map.size());
+            logger.info("Found {} students in total running on {} partitions",snapshots.size(),map.size());
             return map;
         }
-        logger.info("No Schools Found from Snapshot for Processing");
+        logger.info("No Students Found from Snapshot to process.");
         return new HashMap<>();
     }
 

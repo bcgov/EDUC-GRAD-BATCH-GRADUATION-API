@@ -994,25 +994,75 @@ public class BatchJobConfig {
      */
     @Bean
     @StepScope
+    public EDWSnapshotSchoolPartitioner partitionerEDWSnapshotSchool() {
+        return new EDWSnapshotSchoolPartitioner();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<String> itemReaderEDWSnapshotSchool() {
+        return new EDWSnapshotSchoolReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<List<Pair<String, List<SnapshotResponse>>>> itemWriterEDWSnapshotSchool() {
+        return new EDWSnapshotSchoolWriter();
+    }
+
+    @Bean
+    @StepScope
+    public ItemProcessor<String,List<Pair<String, List<SnapshotResponse>>>> itemProcessorEDWSnapshotSchool() {
+        return new EDWSnapshotSchoolProcessor();
+    }
+
+    @Bean
+    public Step masterStepEdwSnapshotSchool(JobRepository jobRepository, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
+        return new StepBuilder("masterStepEdwSnapshotSchool", jobRepository)
+                .partitioner(edwSnapshotSchoolJobStep(jobRepository, skipListener).getName(), partitionerEDWSnapshotSchool())
+                .step(edwSnapshotSchoolJobStep(jobRepository, skipListener))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants))
+                .build();
+    }
+
+    @Bean
+    public Step edwSnapshotSchoolJobStep(JobRepository jobRepository, SkipSQLTransactionExceptionsListener skipListener) {
+        return new StepBuilder("edwSnapshotSchoolJobStep", jobRepository)
+                .<String, List<Pair<String, List<SnapshotResponse>>>>chunk(1)
+                .transactionManager(batchTransactionManager)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
+                .reader(itemReaderEDWSnapshotSchool())
+                .processor(itemProcessorEDWSnapshotSchool())
+                .writer(itemWriterEDWSnapshotSchool())
+                .transactionManager(batchTransactionManager)
+                .listener(skipListener)
+                .build();
+    }
+
+    @Bean
+    @StepScope
     public EDWSnapshotPartitioner partitionerEDWSnapshot() {
         return new EDWSnapshotPartitioner();
     }
 
     @Bean
     @StepScope
-    public ItemReader<String> itemReaderEDWSnapshot() {
+    public ItemReader<SnapshotResponse> itemReaderEDWSnapshot() {
         return new EDWSnapshotReader();
     }
 
     @Bean
     @StepScope
-    public ItemWriter<List<Pair<String, List<EdwGraduationSnapshot>>>> itemWriterEDWSnapshot() {
+    public ItemWriter<EdwGraduationSnapshot> itemWriterEDWSnapshot() {
         return new EDWSnapshotWriter();
     }
 
     @Bean
     @StepScope
-    public ItemProcessor<String,List<Pair<String, List<EdwGraduationSnapshot>>>> itemProcessorEDWSnapshot() {
+    public ItemProcessor<SnapshotResponse,EdwGraduationSnapshot> itemProcessorEDWSnapshot() {
         return new EDWSnapshotProcessor();
     }
 
@@ -1029,7 +1079,7 @@ public class BatchJobConfig {
     @Bean
     public Step edwSnapshotJobStep(JobRepository jobRepository, SkipSQLTransactionExceptionsListener skipListener) {
         return new StepBuilder("edwSnapshotJobStep", jobRepository)
-                .<String, List<Pair<String, List<EdwGraduationSnapshot>>>>chunk(1)
+                .<SnapshotResponse, EdwGraduationSnapshot>chunk(1)
                 .transactionManager(batchTransactionManager)
                 .faultTolerant()
                 .skip(SQLException.class)
@@ -1047,7 +1097,9 @@ public class BatchJobConfig {
         return new JobBuilder("edwSnapshotBatchJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .start(masterStepEdwSnapshot(jobRepository,constants, skipListener))
+                .start(masterStepEdwSnapshotSchool(jobRepository,constants, skipListener))
+                .on("*")
+                .to(masterStepEdwSnapshot(jobRepository,constants, skipListener))
                 .on("*")
                 .end().build()
                 .build();

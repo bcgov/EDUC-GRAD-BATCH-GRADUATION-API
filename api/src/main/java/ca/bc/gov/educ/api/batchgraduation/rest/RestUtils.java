@@ -765,7 +765,7 @@ public class RestUtils {
 
     public EdwGraduationSnapshot processSnapshot(EdwGraduationSnapshot item, EdwSnapshotSummaryDTO summary) {
         UUID correlationID = UUID.randomUUID();
-        LOGGER.debug(STUDENT_PROCESS,item.getStudentID());
+        LOGGER.debug(STUDENT_PROCESS,item.getPen());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         try {
             String accessToken = summary.getAccessToken();

@@ -1,26 +1,27 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.EdwSnapshotSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.SnapshotResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
 
-public class EDWSnapshotReader extends BaseSchoolReader implements ItemReader<String> {
+public class EDWSnapshotReader extends BaseSnapshotReader implements ItemReader<SnapshotResponse> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EDWSnapshotReader.class);
 
     @Override
-    public String read() throws Exception {
-        String nextSchool = null;
-        if (nextSchoolForProcessing < schools.size()) {
+    public SnapshotResponse read() throws Exception {
+        SnapshotResponse nextStudent = null;
+        if (nextSnapshotForProcessing < snapshots.size()) {
             fetchAccessToken();
-            nextSchool = schools.get(nextSchoolForProcessing);
-            LOGGER.info("School Code:{} - {} of {}", nextSchool, nextSchoolForProcessing + 1, summaryDTO.getReadCount());
-            nextSchoolForProcessing++;
+            nextStudent = snapshots.get(nextSnapshotForProcessing);
+            LOGGER.info("Snapshot: pen# {} - {} of {}", nextStudent.getPen(), nextSnapshotForProcessing + 1, summaryDTO.getReadCount());
+            nextSnapshotForProcessing++;
         } else {
             aggregate("edwSnapshotSummaryDTO");
         }
-        return nextSchool;
+        return nextStudent;
     }
 
     private void aggregate(String summaryContextName) {

@@ -40,8 +40,8 @@ public class EdwSnapshotCompletionNotificationListener extends JobExecutionListe
 				summaryDTO = new EdwSnapshotSummaryDTO();
 			}
 			// display Summary Details
-			LOGGER.info("Schools  read     : {}", summaryDTO.getReadCount());
-			LOGGER.info("Students processed: {}", summaryDTO.getProcessedCount());
+			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
+			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
 			for (String school : summaryDTO.getCountMap().keySet()) {
 				LOGGER.info(" school: {} => students: {}", school, summaryDTO.getCountMap().get(school));
 			}

@@ -10,7 +10,6 @@ import java.util.*;
 public class EdwSnapshotSummaryDTO extends BaseSummaryDTO {
     private Integer gradYear;
     private Map<String, Long> countMap = new HashMap<>();
-
     private Map<String,ProcessSnapshotError> errors = new HashMap<>();
 
     public void updateError(String pen, String schoolOfRecord, String errMsg, String errorDesc) {
@@ -22,5 +21,15 @@ public class EdwSnapshotSummaryDTO extends BaseSummaryDTO {
         obj.setReason(errMsg);
         obj.setDetail(errorDesc);
         errors.put(pen,obj);
+    }
+
+    public void increment(String schoolOfRecord) {
+        Long count = countMap.get(schoolOfRecord);
+        if (count != null) {
+            count++;
+            countMap.put(schoolOfRecord, count);
+        } else {
+            countMap.put(schoolOfRecord, 1L);
+        }
     }
 }
