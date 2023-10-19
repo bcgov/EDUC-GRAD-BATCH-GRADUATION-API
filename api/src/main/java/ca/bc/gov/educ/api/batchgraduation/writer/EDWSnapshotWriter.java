@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.EdwGraduationSnapshot;
 import ca.bc.gov.educ.api.batchgraduation.model.EdwSnapshotSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,12 +39,12 @@ public class EDWSnapshotWriter implements ItemWriter<List<Pair<String, List<EdwG
                 AtomicInteger cnt = new AtomicInteger();
                 snapshotList.forEach(item -> {
                     refreshToken();
-                    if (item.getStudentID() != null) {
+                    if (StringUtils.isNotBlank(item.getPen())) {
                         cnt.getAndIncrement();
-                        LOGGER.debug("  Process a student [{} / {}]: pen = {}, studentID = {}", cnt, totalSize, item.getPen(), item.getStudentID());
+                        LOGGER.debug("  Process a student [{} / {}]: pen = {}", cnt, totalSize, item.getPen());
                         restUtils.processSnapshot(item, summaryDTO);
                     } else {
-                        LOGGER.debug("  Skipped a student: pen = {} does not have a studentID", item.getPen());
+                        LOGGER.debug("  Skipped a student: pen# is not provided!");
                     }
                 });
                 summaryDTO.getCountMap().put(mincode, (long) snapshotList.size());

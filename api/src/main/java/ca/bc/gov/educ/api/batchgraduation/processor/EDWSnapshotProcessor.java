@@ -31,10 +31,10 @@ public class EDWSnapshotProcessor implements ItemProcessor<String, List<Pair<Str
 		LOGGER.debug("Processing partitionData for mincode {} ", mincode);
 		List<SnapshotResponse> edwStudents = restUtils.getEDWSnapshotStudents(summaryDTO.getGradYear(), mincode, summaryDTO.getAccessToken());
 		List<EdwGraduationSnapshot> results = edwStudents.stream().map(r -> {
-			refreshToken();
-			UUID studentID = this.restUtils.getStudentIDByPen(r.getPen(), summaryDTO.getAccessToken());
+//			refreshToken();
+//			UUID studentID = this.restUtils.getStudentIDByPen(r.getPen(), summaryDTO.getAccessToken());
 			EdwGraduationSnapshot m = new EdwGraduationSnapshot();
-			m.setStudentID(studentID);
+//			m.setStudentID(studentID);
 			m.setPen(r.getPen());
 			m.setSchoolOfRecord(r.getSchoolOfRecord());
 			m.setGraduatedDate(r.getGraduatedDate());
@@ -47,10 +47,10 @@ public class EDWSnapshotProcessor implements ItemProcessor<String, List<Pair<Str
 		return List.of(Pair.of(mincode, results));
 	}
 
-	private void refreshToken() {
-		ResponseObj res = restUtils.getTokenResponseObject();
-		if (res != null) {
-			summaryDTO.setAccessToken(res.getAccess_token());
-		}
-	}
+//	private void refreshToken() {
+//		ResponseObj res = restUtils.getTokenResponseObject();
+//		if (res != null) {
+//			summaryDTO.setAccessToken(res.getAccess_token());
+//		}
+//	}
 }

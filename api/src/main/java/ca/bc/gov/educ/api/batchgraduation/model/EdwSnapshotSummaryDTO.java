@@ -9,19 +9,18 @@ import java.util.*;
 @NoArgsConstructor
 public class EdwSnapshotSummaryDTO extends BaseSummaryDTO {
     private Integer gradYear;
-    private Set<String> schools = new HashSet<>();
     private Map<String, Long> countMap = new HashMap<>();
 
-    private Map<UUID,ProcessSnapshotError> errors = new HashMap<>();
+    private Map<String,ProcessSnapshotError> errors = new HashMap<>();
 
-    public void updateError(UUID studentID, String schoolOfRecord, String errMsg, String errorDesc) {
-        ProcessSnapshotError obj = errors.get(studentID);
+    public void updateError(String pen, String schoolOfRecord, String errMsg, String errorDesc) {
+        ProcessSnapshotError obj = errors.get(pen);
         if(obj == null) {
             obj = new ProcessSnapshotError();
         }
         obj.setSchoolOfRecord(schoolOfRecord);
         obj.setReason(errMsg);
         obj.setDetail(errorDesc);
-        errors.put(studentID,obj);
+        errors.put(pen,obj);
     }
 }

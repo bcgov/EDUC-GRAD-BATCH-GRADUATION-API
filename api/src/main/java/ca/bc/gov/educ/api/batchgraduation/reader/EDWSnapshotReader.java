@@ -34,7 +34,6 @@ public class EDWSnapshotReader extends BaseSchoolReader implements ItemReader<St
         totalSummaryDTO.setReadCount(totalSummaryDTO.getReadCount() + summaryDTO.getReadCount());
         totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());
         totalSummaryDTO.getErrors().putAll(summaryDTO.getErrors());
-        totalSummaryDTO.getSchools().addAll(summaryDTO.getSchools());
         mergeMapCounts(totalSummaryDTO.getCountMap(),summaryDTO.getCountMap());
     }
 

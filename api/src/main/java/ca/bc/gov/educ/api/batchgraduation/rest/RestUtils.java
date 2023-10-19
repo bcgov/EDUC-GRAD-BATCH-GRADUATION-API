@@ -775,7 +775,7 @@ public class RestUtils {
                     .body(BodyInserters.fromValue(item))
                     .retrieve().bodyToMono(EdwGraduationSnapshot.class).block();
         }catch(Exception e) {
-            summary.updateError(item.getStudentID(),item.getSchoolOfRecord(),GRADUATION_API_IS_DOWN,GRADUATION_API_DOWN_MSG);
+            summary.updateError(item.getPen(),item.getSchoolOfRecord(),GRADUATION_API_IS_DOWN,GRADUATION_API_DOWN_MSG);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info(FAILED_STUDENT_ERROR_MSG,item.getStudentID(),summary.getErrors().size());
             return null;
