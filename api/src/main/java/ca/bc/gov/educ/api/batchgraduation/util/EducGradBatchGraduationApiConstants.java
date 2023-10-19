@@ -27,6 +27,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_SUPP_DIS_RUN_BATCH_JOB = "/executesuppdisrunbatchjob";
     public static final String EXECUTE_YEARLY_NON_GRAD_DIS_RUN_BATCH_JOB = "/executenongraddisrunbatchjob";
     public static final String EXECUTE_CERT_REGEN_BATCH_JOB = "/executecertregenbatchjob";
+    public static final String EXECUTE_EDW_SNAPSHOT_BATCH_JOB = "/executeedwsnapshotbatchjob/{gradYear}";
 
     // Special Run
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
@@ -124,6 +125,15 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-report-api.check-sccp-certificate-exists}")
     private String checkSccpCertificateExists;
+
+    @Value("${endpoint.grad-trax-api.get-edw-snapshot-schools.url}")
+    private String edwSnapshotSchoolsUrl;
+
+    @Value("${endpoint.grad-trax-api.get-edw-snapshot-students-by-min-code.url}")
+    private String edwSnapshotStudentsByMincodeUrl;
+
+    @Value("${endpoint.grad-graduation-api.snapshot-graduation-status-for-edw.url}")
+    private String snapshotGraduationStatusForEdwUrl;
 
     // Number of Partitions
     @Value("${batch.partitions.number}")

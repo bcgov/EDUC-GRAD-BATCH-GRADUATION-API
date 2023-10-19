@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -36,6 +37,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.List;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
@@ -58,6 +60,8 @@ public class JobLauncherController {
     private static final String REGALG = "REGALG";
     private static final String CERT_REGEN = "CERT_REGEN";
 
+    private static final String EDW_SNAPSHOT = "EDW_SNAPSHOT";
+
     private static final String RERUN_ALL = "RERUN_ALL";
     private static final String RERUN_FAILED = "RERUN_FAILED";
     private static final String DISTRUN = "DISTRUN";
@@ -77,6 +81,8 @@ public class JobLauncherController {
     private static final String SPECIAL_TVR_RUN_BATCH_JOB = "SpecialTvrRunBatchJob";
 
     private static final String CERTIFICATE_REGENERATION_BATCH_JOB = "certRegenBatchJob";
+
+    private static final String EDW_SNAPSHOT_BATCH_JOB = "edwSnapshotBatchJob";
 
     private final JobLauncher jobLauncher;
     private final JobLauncher asyncJobLauncher;
@@ -760,6 +766,72 @@ public class JobLauncherController {
             builder.addString(SEARCH_REQUEST, searchData);
             response.setJobParameters(searchData);
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(CERTIFICATE_REGENERATION_BATCH_JOB), builder.toJobParameters());
+            response.setBatchId(jobExecution.getId());
+            return ResponseEntity.ok(response);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                 | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
+            response.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_EDW_SNAPSHOT_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run EDW Snapshot Job", description = "Run EDW Snapshot Job", tags = { "EDW Snapshot" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<BatchJobResponse> launchEdwSnapshotJob(@PathVariable String gradYear) {
+        logger.debug("launchEdwSnapshotJob");
+        BatchJobResponse response = new BatchJobResponse();
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, EDW_SNAPSHOT);
+
+        SnapshotRequest snapshotRequest = new SnapshotRequest();
+        snapshotRequest.setGradYear(StringUtils.isNotBlank(gradYear) && NumberUtils.isCreatable(gradYear)? Integer.parseInt(gradYear) : Year.now().getValue());
+        response.setJobType(EDW_SNAPSHOT);
+        response.setTriggerBy(MANUAL);
+        response.setStartTime(LocalDateTime.now());
+        response.setStatus(BatchStatusEnum.STARTED.name());
+
+        try {
+            String searchData = jsonTransformer.marshall(snapshotRequest);
+            builder.addString(SEARCH_REQUEST, searchData);
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(EDW_SNAPSHOT_BATCH_JOB), builder.toJobParameters());
+            response.setBatchId(jobExecution.getId());
+            return ResponseEntity.ok(response);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                 | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
+            response.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_EDW_SNAPSHOT_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run User Req EDW Snapshot Job", description = "Run User Req EDW Snapshot Job", tags = { "EDW Snapshot" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<BatchJobResponse> launchUserReqEdwSnapshotJob(@RequestBody SnapshotRequest snapshotRequest) {
+        logger.debug("launchUserReqEdwSnapshotJob");
+        BatchJobResponse response = new BatchJobResponse();
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, EDW_SNAPSHOT);
+        if (snapshotRequest != null && snapshotRequest.getGradYear() == null) {
+            snapshotRequest.setGradYear(Year.now().getValue());
+        }
+        response.setJobType(EDW_SNAPSHOT);
+        response.setTriggerBy(MANUAL);
+        response.setStartTime(LocalDateTime.now());
+        response.setStatus(BatchStatusEnum.STARTED.name());
+
+        try {
+            String searchData = jsonTransformer.marshall(snapshotRequest);
+            builder.addString(SEARCH_REQUEST, searchData);
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(EDW_SNAPSHOT_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException

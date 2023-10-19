@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.processor.*;
 import ca.bc.gov.educ.api.batchgraduation.reader.*;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.writer.*;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.JobRegistry;
@@ -983,6 +984,122 @@ public class BatchJobConfig {
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .start(masterStepCertRegen(jobRepository,constants, skipListener))
+                .on("*")
+                .end().build()
+                .build();
+    }
+
+    /**
+     * Create Graduation Status snapshot for EDW
+     */
+    @Bean
+    @StepScope
+    public EDWSnapshotSchoolPartitioner partitionerEDWSnapshotSchool() {
+        return new EDWSnapshotSchoolPartitioner();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<String> itemReaderEDWSnapshotSchool() {
+        return new EDWSnapshotSchoolReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<List<Pair<String, List<SnapshotResponse>>>> itemWriterEDWSnapshotSchool() {
+        return new EDWSnapshotSchoolWriter();
+    }
+
+    @Bean
+    @StepScope
+    public ItemProcessor<String,List<Pair<String, List<SnapshotResponse>>>> itemProcessorEDWSnapshotSchool() {
+        return new EDWSnapshotSchoolProcessor();
+    }
+
+    @Bean
+    public Step masterStepEdwSnapshotSchool(JobRepository jobRepository, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
+        return new StepBuilder("masterStepEdwSnapshotSchool", jobRepository)
+                .partitioner(edwSnapshotSchoolJobStep(jobRepository, skipListener).getName(), partitionerEDWSnapshotSchool())
+                .step(edwSnapshotSchoolJobStep(jobRepository, skipListener))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants))
+                .build();
+    }
+
+    @Bean
+    public Step edwSnapshotSchoolJobStep(JobRepository jobRepository, SkipSQLTransactionExceptionsListener skipListener) {
+        return new StepBuilder("edwSnapshotSchoolJobStep", jobRepository)
+                .<String, List<Pair<String, List<SnapshotResponse>>>>chunk(1)
+                .transactionManager(batchTransactionManager)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
+                .reader(itemReaderEDWSnapshotSchool())
+                .processor(itemProcessorEDWSnapshotSchool())
+                .writer(itemWriterEDWSnapshotSchool())
+                .transactionManager(batchTransactionManager)
+                .listener(skipListener)
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public EDWSnapshotPartitioner partitionerEDWSnapshot() {
+        return new EDWSnapshotPartitioner();
+    }
+
+    @Bean
+    @StepScope
+    public ItemReader<SnapshotResponse> itemReaderEDWSnapshot() {
+        return new EDWSnapshotReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<EdwGraduationSnapshot> itemWriterEDWSnapshot() {
+        return new EDWSnapshotWriter();
+    }
+
+    @Bean
+    @StepScope
+    public ItemProcessor<SnapshotResponse,EdwGraduationSnapshot> itemProcessorEDWSnapshot() {
+        return new EDWSnapshotProcessor();
+    }
+
+    @Bean
+    public Step masterStepEdwSnapshot(JobRepository jobRepository, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
+        return new StepBuilder("masterStepEdwSnapshot", jobRepository)
+                .partitioner(edwSnapshotJobStep(jobRepository, skipListener).getName(), partitionerEDWSnapshot())
+                .step(edwSnapshotJobStep(jobRepository, skipListener))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor(constants))
+                .build();
+    }
+
+    @Bean
+    public Step edwSnapshotJobStep(JobRepository jobRepository, SkipSQLTransactionExceptionsListener skipListener) {
+        return new StepBuilder("edwSnapshotJobStep", jobRepository)
+                .<SnapshotResponse, EdwGraduationSnapshot>chunk(1)
+                .transactionManager(batchTransactionManager)
+                .faultTolerant()
+                .skip(SQLException.class)
+                .skip(TransactionException.class)
+                .reader(itemReaderEDWSnapshot())
+                .processor(itemProcessorEDWSnapshot())
+                .writer(itemWriterEDWSnapshot())
+                .transactionManager(batchTransactionManager)
+                .listener(skipListener)
+                .build();
+    }
+
+    @Bean(name="edwSnapshotBatchJob")
+    public Job edwSnapshotBatchJob(JobRepository jobRepository, EdwSnapshotCompletionNotificationListener listener, SkipSQLTransactionExceptionsListener skipListener, EducGradBatchGraduationApiConstants constants) {
+        return new JobBuilder("edwSnapshotBatchJob", jobRepository)
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .start(masterStepEdwSnapshotSchool(jobRepository,constants, skipListener))
+                .on("*")
+                .to(masterStepEdwSnapshot(jobRepository,constants, skipListener))
                 .on("*")
                 .end().build()
                 .build();
