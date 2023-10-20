@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.processor;
 import ca.bc.gov.educ.api.batchgraduation.model.EdwSnapshotSchoolSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.SnapshotResponse;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EDWSnapshotSchoolProcessor implements ItemProcessor<String, List<Pair<String, List<SnapshotResponse>>>> {
 
@@ -30,6 +32,11 @@ public class EDWSnapshotSchoolProcessor implements ItemProcessor<String, List<Pa
 		summaryDTO.setBatchId(batchId);
 		LOGGER.debug("Processing partitionData for School: {} ", mincode);
 		List<SnapshotResponse> edwStudents = restUtils.getEDWSnapshotStudents(summaryDTO.getGradYear(), mincode, summaryDTO.getAccessToken());
+		if ("L".equals(summaryDTO.getOption())) {
+			List<SnapshotResponse> list = edwStudents.stream().filter(s -> StringUtils.isNotBlank(s.getGraduatedDate()) ||
+					("12".equals(s.getStudentGrade()) || "AD".equals(s.getStudentGrade()))).toList();
+			return List.of(Pair.of(mincode, list));
+		}
 		return List.of(Pair.of(mincode, edwStudents));
 	}
 }

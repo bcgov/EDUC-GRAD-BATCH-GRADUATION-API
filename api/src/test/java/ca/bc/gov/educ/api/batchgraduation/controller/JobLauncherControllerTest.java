@@ -579,24 +579,6 @@ public class JobLauncherControllerTest {
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, EDWSNAPSHOTRUN);
 
-        try {
-            org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob(EDWSNAPSHOTRUN), builder.toJobParameters())).thenReturn(new JobExecution(210L));
-            jobLauncherController.launchEdwSnapshotJob("2023");
-        } catch (Exception e) {
-            exceptionIsThrown = true;
-        }
-
-        assertThat(builder).isNotNull();
-    }
-
-    @Test
-    public void testLaunchUserReqEDWSnapshotJob() {
-        boolean exceptionIsThrown = false;
-        JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, MANUAL);
-        builder.addString(JOB_TYPE, EDWSNAPSHOTRUN);
-
         SnapshotRequest req = new SnapshotRequest();
         req.setGradYear(Integer.parseInt("2023"));
 

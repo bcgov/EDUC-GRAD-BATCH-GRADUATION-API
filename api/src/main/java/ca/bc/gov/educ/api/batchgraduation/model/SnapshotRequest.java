@@ -12,5 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 public class SnapshotRequest {
     private Integer gradYear;
+    private String option;  // A = All current students,  L = All grad students + nongrad students(12, AD)
     private List<String> schoolOfRecords;
 }
