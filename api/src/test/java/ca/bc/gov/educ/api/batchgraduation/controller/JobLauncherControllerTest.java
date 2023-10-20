@@ -584,7 +584,7 @@ public class JobLauncherControllerTest {
 
         try {
             org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob(EDWSNAPSHOTRUN), builder.toJobParameters())).thenReturn(new JobExecution(210L));
-            jobLauncherController.launchUserReqEdwSnapshotJob(req);
+            jobLauncherController.launchEdwSnapshotJob(req);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
