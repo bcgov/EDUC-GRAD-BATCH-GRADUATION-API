@@ -57,6 +57,7 @@ public class EDWSnapshotSchoolPartitioner extends BasePartitioner {
                 ExecutionContext executionContext = new ExecutionContext();
                 EdwSnapshotSchoolSummaryDTO summaryDTO = new EdwSnapshotSchoolSummaryDTO();
                 summaryDTO.setGradYear(req.getGradYear());
+                summaryDTO.setOption(req.getOption());
                 List<String> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());

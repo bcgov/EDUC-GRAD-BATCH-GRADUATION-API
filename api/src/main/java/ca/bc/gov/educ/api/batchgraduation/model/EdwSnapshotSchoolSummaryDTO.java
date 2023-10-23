@@ -10,5 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 public class EdwSnapshotSchoolSummaryDTO extends BaseSummaryDTO {
     private Integer gradYear;
+    private String option; // A = All current students,  L = All grad students + nongrad students(12, AD)
     private List<SnapshotResponse> globalList = new ArrayList<>();
 }
