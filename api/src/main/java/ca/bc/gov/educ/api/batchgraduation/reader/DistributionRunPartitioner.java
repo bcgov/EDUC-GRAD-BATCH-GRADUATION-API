@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
@@ -12,7 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Monthly Distribution Partitioner
@@ -52,6 +54,7 @@ public class DistributionRunPartitioner extends BasePartitioner {
         logger.debug("Total {} eligible StudentCredentialDistributions found in {} sec", credentialList.size(), diff);
         if(!credentialList.isEmpty()) {
             filterOutDeceasedStudents(credentialList);
+            filterByStudentSearchRequest(credentialList);
             updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
             return getStringExecutionContextMap(gridSize, credentialList, null);
         }

@@ -226,16 +226,19 @@ public abstract class BasePartitioner extends SimplePartitioner {
                     useFilterSchoolDistricts.add(school.getMincode());
                 }
             }
-            eligibleStudentSchoolDistricts.removeIf(scr->!useFilterSchoolDistricts.contains(scr.getSchoolOfRecord()));
+            eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !useFilterSchoolDistricts.contains(scr.getSchoolOfRecord()));
         }
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
-            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getDistricts().contains(StringUtils.substring(scr.getSchoolOfRecord(), 0, 3)));
+            eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !searchRequest.getDistricts().contains(StringUtils.substring(scr.getSchoolOfRecord(), 0, 3)));
         }
         if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
-            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getSchoolOfRecords().contains(scr.getSchoolOfRecord()));
+            eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !searchRequest.getSchoolOfRecords().contains(scr.getSchoolOfRecord()));
+        }
+        if(searchRequest != null && searchRequest.getStudentIDs() != null && !searchRequest.getStudentIDs().isEmpty()) {
+            eligibleStudentSchoolDistricts.removeIf(scr->scr.getStudentID() != null && !searchRequest.getStudentIDs().contains(scr.getStudentID()));
         }
         if(searchRequest != null && searchRequest.getPens() != null && !searchRequest.getPens().isEmpty()) {
-            eligibleStudentSchoolDistricts.removeIf(scr->!searchRequest.getPens().contains(scr.getPen()));
+            eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getPen()) && !searchRequest.getPens().contains(scr.getPen()));
         }
     }
 
