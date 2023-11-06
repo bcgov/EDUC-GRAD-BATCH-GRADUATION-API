@@ -5,8 +5,8 @@ import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
-import org.apache.commons.lang3.StringUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -158,7 +158,12 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			List<StudentCredentialDistribution> mergedCertificateList = distributionPrintRequest.getMergedListOfCertificates();
 			List<StudentCredentialDistribution> uniqueCertificateList = mergedCertificateList.stream().distinct().collect(Collectors.toList());
 			List<String> studentPens = uniqueCertificateList.stream().map(StudentCredentialDistribution::getPen).collect(Collectors.toList());
-			StudentSearchRequest searchRequest = StudentSearchRequest.builder().pens(studentPens).build();
+			List<UUID> studentIDs = uniqueCertificateList.stream().map(StudentCredentialDistribution::getStudentID).collect(Collectors.toList());
+			StudentSearchRequest searchRequest = StudentSearchRequest.builder().pens(studentPens).studentIDs(studentIDs).build();
+			if(LOGGER.isDebugEnabled()) {
+				String studentPensSearchRequest = jsonTransformer.marshall(searchRequest);
+				LOGGER.debug("Get {} students credentials for the pens: {}", "OT", studentPensSearchRequest);
+			}
 			List<StudentCredentialDistribution> transcriptDistributionList = restUtils.getStudentsForUserReqDisRun("OT",searchRequest,restUtils.getTokenResponseObject().getAccess_token());
 			for(StudentCredentialDistribution certScd: uniqueCertificateList) {
 				for(StudentCredentialDistribution trScd: transcriptDistributionList) {

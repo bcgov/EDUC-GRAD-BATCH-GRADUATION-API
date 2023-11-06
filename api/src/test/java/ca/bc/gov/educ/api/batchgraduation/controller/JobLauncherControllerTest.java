@@ -47,6 +47,7 @@ public class JobLauncherControllerTest {
     private static final String NONGRADRUN = "NONGRADRUN";
     private static final String DISTRUNUSER = "DISTRUNUSER";
     private static final String PSIDISTRUN = "PSIRUN";
+    private static final String EDWSNAPSHOTRUN = "EDW_SNAPSHOT";
     private static final String CREDENTIALTYPE = "credentialType";
     private static final String TRANMISSION_TYPE = "transmissionType";
     private static final String DISDTO = "distributionSummaryDTO";
@@ -563,6 +564,27 @@ public class JobLauncherControllerTest {
         try {
             org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob(CERT_REGEN), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchUserReqCertRegenJob(req);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(builder).isNotNull();
+    }
+
+    @Test
+    public void testLaunchEDWSnapshotJob() {
+        boolean exceptionIsThrown = false;
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, EDWSNAPSHOTRUN);
+
+        SnapshotRequest req = new SnapshotRequest();
+        req.setGradYear(Integer.parseInt("2023"));
+
+        try {
+            org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob(EDWSNAPSHOTRUN), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            jobLauncherController.launchEdwSnapshotJob(req);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }

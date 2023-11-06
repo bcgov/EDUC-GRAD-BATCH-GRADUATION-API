@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
+import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
@@ -8,10 +9,9 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DistributionRunSupplementalPartitioner extends BasePartitioner {
 
@@ -43,6 +43,7 @@ public class DistributionRunSupplementalPartitioner extends BasePartitioner {
         logger.debug("Total {} eligible StudentCredentialDistributions found in {} sec", eligibleStudentSchoolDistricts.size(), diff);
         filterByStudentSearchRequest(eligibleStudentSchoolDistricts);
         if(!eligibleStudentSchoolDistricts.isEmpty()) {
+            filterOutDeceasedStudents(eligibleStudentSchoolDistricts);
             updateBatchJobHistory(createBatchJobHistory(), (long) eligibleStudentSchoolDistricts.size());
             return getStringExecutionContextMap(gridSize, eligibleStudentSchoolDistricts, null);
         }

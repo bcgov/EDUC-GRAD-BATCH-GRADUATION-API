@@ -7,16 +7,14 @@ import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateP
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
-import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
-import ca.bc.gov.educ.api.batchgraduation.util.PermissionsConstants;
-import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
+import ca.bc.gov.educ.api.batchgraduation.util.*;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +36,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.util.List;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
@@ -60,6 +59,8 @@ public class JobLauncherController {
     private static final String REGALG = "REGALG";
     private static final String CERT_REGEN = "CERT_REGEN";
 
+    private static final String EDW_SNAPSHOT = "EDW_SNAPSHOT";
+
     private static final String RERUN_ALL = "RERUN_ALL";
     private static final String RERUN_FAILED = "RERUN_FAILED";
     private static final String DISTRUN = "DISTRUN";
@@ -80,6 +81,8 @@ public class JobLauncherController {
 
     private static final String CERTIFICATE_REGENERATION_BATCH_JOB = "certRegenBatchJob";
 
+    private static final String EDW_SNAPSHOT_BATCH_JOB = "edwSnapshotBatchJob";
+
     private final JobLauncher jobLauncher;
     private final JobLauncher asyncJobLauncher;
     private final JobRegistry jobRegistry;
@@ -90,6 +93,9 @@ public class JobLauncherController {
 
     @Autowired
     JsonTransformer jsonTransformer;
+
+    @Autowired
+    GradSchoolOfRecordFilter gradSchoolOfRecordFilter;
 
     @Autowired
     public JobLauncherController(
@@ -414,20 +420,37 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "RRe-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<Boolean> launchRegenerateSchoolReports(@PathVariable Long batchId, @RequestHeader(name="Authorization") String accessToken) {
+    public ResponseEntity<Boolean> launchRegenerateSchoolReports(@PathVariable Long batchId) {
         BatchGradAlgorithmJobHistoryEntity entity = gradBatchHistoryService.getGradAlgorithmJobHistory(batchId);
         if (entity != null) {
             try {
                 logger.info(" Re-Generating School Reports for {} --------------------------------------------------------", entity.getJobType());
                 List<String> uniqueSchoolList = gradBatchHistoryService.getSchoolListForReport(batchId);
                 logger.info(" Number of Schools [{}] ---------------------------------------------------------", uniqueSchoolList.size());
-                restUtils.createAndStoreSchoolReports(accessToken.replace(BEARER, ""), uniqueSchoolList, entity.getJobType());
+                restUtils.createAndStoreSchoolReports(uniqueSchoolList, entity.getJobType());
                 return ResponseEntity.ok(Boolean.TRUE);
             } catch (Exception e) {
                 return ResponseEntity.status(500).body(Boolean.FALSE);
             }
         }
         return ResponseEntity.status(500).body(Boolean.FALSE);
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_REGEN_SCHOOL_REPORTS_BY_REQUEST)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "RRe-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<String> launchRegenerateSchoolReports(@RequestBody StudentSearchRequest searchRequest, @RequestParam(required = false) String type) {
+        String schoolReportType = ObjectUtils.defaultIfNull(type, REGALG);
+        logger.info(" Re-Generating School Reports by request for {} --------------------------------------------------------", schoolReportType);
+        try {
+            List<String> finalSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest).stream().sorted().toList();
+            logger.info(" Number of Schools [{}] ---------------------------------------------------------", finalSchoolDistricts.size());
+            int numberOfReports = restUtils.createAndStoreSchoolReports(finalSchoolDistricts, schoolReportType);
+            return ResponseEntity.ok(numberOfReports + " school reports " + schoolReportType + " created successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getLocalizedMessage());
+        }
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_MONTHLY_DIS_RUN_BATCH_JOB)
@@ -742,6 +765,42 @@ public class JobLauncherController {
             builder.addString(SEARCH_REQUEST, searchData);
             response.setJobParameters(searchData);
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(CERTIFICATE_REGENERATION_BATCH_JOB), builder.toJobParameters());
+            response.setBatchId(jobExecution.getId());
+            return ResponseEntity.ok(response);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                 | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
+            response.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_EDW_SNAPSHOT_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Run User Req EDW Snapshot Job", description = "Run User Req EDW Snapshot Job", tags = { "EDW Snapshot" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<BatchJobResponse> launchEdwSnapshotJob(@RequestBody SnapshotRequest snapshotRequest) {
+        logger.debug("launchUserReqEdwSnapshotJob");
+        BatchJobResponse response = new BatchJobResponse();
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, EDW_SNAPSHOT);
+        if (snapshotRequest != null && snapshotRequest.getGradYear() == null) {
+            snapshotRequest.setGradYear(Year.now().getValue());
+        }
+        if (snapshotRequest != null && StringUtils.isBlank(snapshotRequest.getOption())) {
+            snapshotRequest.setOption("L");
+        }
+        response.setJobType(EDW_SNAPSHOT);
+        response.setTriggerBy(MANUAL);
+        response.setStartTime(LocalDateTime.now());
+        response.setStatus(BatchStatusEnum.STARTED.name());
+
+        try {
+            String searchData = jsonTransformer.marshall(snapshotRequest);
+            builder.addString(SEARCH_REQUEST, searchData);
+            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(EDW_SNAPSHOT_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException

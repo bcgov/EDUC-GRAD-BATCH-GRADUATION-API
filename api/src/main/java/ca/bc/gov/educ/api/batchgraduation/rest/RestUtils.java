@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Component
 public class RestUtils {
@@ -37,6 +38,11 @@ public class RestUtils {
     private static final String STUDENT_READ = "R:{}";
     private static final String STUDENT_PROCESS = "P:{}";
     private static final String STUDENT_PROCESSED = "D:{} {} of {} batch {}";
+    private static final String TRAX_API_IS_DOWN = "Trax API is not available {}";
+    private static final String URL_FORMAT_STR = "url = {}";
+    private static final String GRADUATION_API_IS_DOWN = "GRAD-GRADUATION-API IS DOWN";
+    private static final String GRADUATION_API_DOWN_MSG = "Graduation API is unavailable at this moment";
+    private static final String FAILED_STUDENT_ERROR_MSG = "Failed STU-ID:{} Errors:{}";
     private static final String MERGE_MSG="Merge and Upload Success {}";
     private static final String YEARENDDIST = "YEARENDDIST";
     private static final String SUPPDIST = "SUPPDIST";
@@ -156,7 +162,7 @@ public class RestUtils {
     public List<Student> getStudentsByPen(String pen, String accessToken) {
         final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
         };
-        LOGGER.debug("url = {}",constants.getPenStudentApiByPenUrl());
+        LOGGER.debug(URL_FORMAT_STR,constants.getPenStudentApiByPenUrl());
         return this.webClient.get()
                 .uri(String.format(constants.getPenStudentApiByPenUrl(), pen))
                 .headers(h -> h.setBearerAuth(accessToken))
@@ -283,9 +289,9 @@ public class RestUtils {
                     item.getProgram(), item.getProgramCompletionDate(), summary.getBatchId());
             return processGraduationStudentRecord(item, summary, algorithmResponse);
         }catch(Exception e) {
-            summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
+            summary.updateError(item.getStudentID(),GRADUATION_API_IS_DOWN,GRADUATION_API_DOWN_MSG);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
+            LOGGER.info(FAILED_STUDENT_ERROR_MSG,item.getStudentID(),summary.getErrors().size());
             return null;
         }
     }
@@ -326,9 +332,9 @@ public class RestUtils {
             AlgorithmResponse algorithmResponse = this.runProjectedGradAlgorithm(item.getStudentID(), accessToken,summary.getBatchId());
             return processGraduationStudentRecord(item, summary, algorithmResponse);
         } catch(Exception e) {
-            summary.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
+            summary.updateError(item.getStudentID(),GRADUATION_API_IS_DOWN,GRADUATION_API_DOWN_MSG);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
-            LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summary.getErrors().size());
+            LOGGER.info(FAILED_STUDENT_ERROR_MSG,item.getStudentID(),summary.getErrors().size());
             return null;
         }
     }
@@ -479,18 +485,32 @@ public class RestUtils {
         return result;
     }
 
-    public void createAndStoreSchoolReports(String accessToken, List<String> uniqueSchools,String type) {
+    public Integer createAndStoreSchoolReports(List<String> uniqueSchools, String type) {
         UUID correlationID = UUID.randomUUID();
-        Integer result = webClient.post()
-                .uri(String.format(constants.getCreateAndStore(),type))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .body(BodyInserters.fromValue(uniqueSchools))
-                .retrieve()
-                .bodyToMono(Integer.class)
-                .block();
-
-        if(result != null && result != 0)
-            LOGGER.info("Create and Store School Report Success {}",result);
+        Integer result = 0;
+        if(uniqueSchools == null || uniqueSchools.isEmpty()) {
+            LOGGER.info("{} Schools selected for School Reports", result);
+            return result;
+        }
+        int pageSize = 10;
+        int pageNum = uniqueSchools.size() / pageSize + 1;
+        for (int i = 0; i < pageNum; i++) {
+            int startIndex = i * pageSize;
+            int endIndex = Math.min(startIndex + pageSize, uniqueSchools.size());
+            List<String> mincodes = uniqueSchools.subList(startIndex, endIndex);
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Creating School Reports for schools {}", mincodes.stream().collect(Collectors.joining(",", "{", "}")));
+            }
+            result += webClient.post()
+                    .uri(String.format(constants.getCreateAndStoreSchoolReports(),type))
+                    .headers(h -> { h.setBearerAuth(getAccessToken()); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(mincodes))
+                    .retrieve()
+                    .bodyToMono(Integer.class)
+                    .block();
+        }
+        LOGGER.info("Created and Stored {} School Reports", result);
+        return result;
     }
 
     //Grad2-1931 sending transmissionType with the webclient.
@@ -631,6 +651,28 @@ public class RestUtils {
                 .retrieve().bodyToMono(Boolean.class).block();
     }
 
+    public List<String> getEDWSnapshotSchools(Integer gradYear, String accessToken) {
+        final ParameterizedTypeReference<List<String>> responseType = new ParameterizedTypeReference<>() {
+        };
+        String url = String.format(constants.getEdwSnapshotSchoolsUrl(), gradYear);
+        LOGGER.debug(URL_FORMAT_STR,url);
+        return this.webClient.get()
+                .uri(url)
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve().bodyToMono(responseType).block();
+    }
+
+    public List<SnapshotResponse> getEDWSnapshotStudents(Integer gradYear, String mincode, String accessToken) {
+        final ParameterizedTypeReference<List<SnapshotResponse>> responseType = new ParameterizedTypeReference<>() {
+        };
+        String url = String.format(constants.getEdwSnapshotStudentsByMincodeUrl(), gradYear, mincode);
+        LOGGER.debug(URL_FORMAT_STR,url);
+        return this.webClient.get()
+                .uri(url)
+                .headers(h -> h.setBearerAuth(accessToken))
+                .retrieve().bodyToMono(responseType).block();
+    }
+
     public String getAccessToken() {
         return this.fetchAccessToken();
     }
@@ -653,7 +695,7 @@ public class RestUtils {
                     .retrieve().bodyToMono(responseType)
                     .block();
         } catch (Exception e) {
-            LOGGER.error("Trax API is not available {}", e.getLocalizedMessage());
+            LOGGER.error(TRAX_API_IS_DOWN, e.getLocalizedMessage());
             return new ArrayList<>();
         }
     }
@@ -671,7 +713,25 @@ public class RestUtils {
                     .retrieve().bodyToMono(responseType)
                     .block();
         } catch (Exception e) {
-            LOGGER.error("Trax API is not available {}", e.getLocalizedMessage());
+            LOGGER.error(TRAX_API_IS_DOWN, e.getLocalizedMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<School> getSchoolByDistrictCode(String district) {
+        final ParameterizedTypeReference<List<School>> responseType = new ParameterizedTypeReference<>() {
+        };
+        try {
+            String url = String.format(constants.getTraxSchoolByDistrict(), district);
+            return webClient.get().uri(url)
+                    .headers(h -> {
+                        h.setBearerAuth(getAccessToken());
+                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
+                    })
+                    .retrieve().bodyToMono(responseType)
+                    .block();
+        } catch (Exception e) {
+            LOGGER.error(TRAX_API_IS_DOWN, e.getLocalizedMessage());
             return new ArrayList<>();
         }
     }
@@ -689,5 +749,36 @@ public class RestUtils {
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .body(BodyInserters.fromValue(studentIDs))
                 .retrieve().bodyToMono(responseType).block();
+    }
+
+    public UUID getStudentIDByPen(String pen, String accessToken) {
+        try {
+            List<Student>  stuDataList = this.getStudentsByPen(pen, accessToken);
+            if(!stuDataList.isEmpty()) {
+                return UUID.fromString(stuDataList.get(0).getStudentID());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error processing student with pen# {} due to {}", pen, e.getLocalizedMessage());
+        }
+        return null;
+    }
+
+    public EdwGraduationSnapshot processSnapshot(EdwGraduationSnapshot item, EdwSnapshotSummaryDTO summary) {
+        UUID correlationID = UUID.randomUUID();
+        LOGGER.debug(STUDENT_PROCESS,item.getPen());
+        summary.setProcessedCount(summary.getProcessedCount() + 1L);
+        try {
+            String accessToken = summary.getAccessToken();
+            return this.webClient.post()
+                    .uri(constants.getSnapshotGraduationStatusForEdwUrl())
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(item))
+                    .retrieve().bodyToMono(EdwGraduationSnapshot.class).block();
+        }catch(Exception e) {
+            summary.updateError(item.getPen(),item.getSchoolOfRecord(),GRADUATION_API_IS_DOWN,GRADUATION_API_DOWN_MSG);
+            summary.setProcessedCount(summary.getProcessedCount() - 1L);
+            LOGGER.info("Failed STU-PEN:{} Errors:{}",item.getPen(),summary.getErrors().size());
+            return null;
+        }
     }
 }
