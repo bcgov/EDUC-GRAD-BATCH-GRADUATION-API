@@ -52,9 +52,9 @@ public class DistributionRunPartitioner extends BasePartitioner {
         endTime = System.currentTimeMillis();
         diff = (endTime - startTime)/1000;
         logger.debug("Total {} eligible StudentCredentialDistributions found in {} sec", credentialList.size(), diff);
+        filterByStudentSearchRequest(credentialList);
         if(!credentialList.isEmpty()) {
             filterOutDeceasedStudents(credentialList);
-            filterByStudentSearchRequest(credentialList);
             updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
             return getStringExecutionContextMap(gridSize, credentialList, null);
         }
