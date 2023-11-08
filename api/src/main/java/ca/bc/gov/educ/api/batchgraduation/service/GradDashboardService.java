@@ -178,8 +178,7 @@ public class GradDashboardService extends GradService {
 	/**
 	 * If last updated time is frozen more than 5 hours for all of "STARTED" steps, then treat it as FAILED job
 	 */
-	@Transactional(readOnly = true)
-	public boolean isFrozen(Long jobExecutionId) {
+	private boolean isFrozen(Long jobExecutionId) {
 		List<BatchStepExecutionEntity> steps = batchStepExecutionRepository.findByJobExecutionIdOrderByEndTimeDesc(jobExecutionId);
 		LocalDateTime now = LocalDateTime.now();
 		boolean frozenStepFound = false;
@@ -193,8 +192,7 @@ public class GradDashboardService extends GradService {
 		return frozenStepFound;
 	}
 
-	@Transactional
-	public void updateBatchJobStatus(BatchGradAlgorithmJobHistory batchJobHistory, BatchStatusEnum batchStatus) {
+	private void updateBatchJobStatus(BatchGradAlgorithmJobHistory batchJobHistory, BatchStatusEnum batchStatus) {
 		BatchGradAlgorithmJobHistoryEntity entity = batchGradAlgorithmJobHistoryTransformer.transformToEntity(batchJobHistory);
 		entity.setStatus(batchStatus.toString());
 		batchGradAlgorithmJobHistoryRepository.save(entity);
