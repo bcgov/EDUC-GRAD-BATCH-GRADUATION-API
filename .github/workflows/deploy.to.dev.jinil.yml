@@ -27,7 +27,7 @@ env:
   MIN_CPU: "50m"
   MAX_CPU: "300m"
   MIN_MEM: "1024Mi"
-  MAX_MEM: "4Gi"
+  MAX_MEM: "4.5Gi"
   MIN_REPLICAS: "3"
   MAX_REPLICAS: "3"
 
@@ -50,7 +50,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
         with:
-          ref: develop/jinil
+          ref: feature/GRAD2-2395
 
       - name: Determine image tags
         if: env.TAG == ''
