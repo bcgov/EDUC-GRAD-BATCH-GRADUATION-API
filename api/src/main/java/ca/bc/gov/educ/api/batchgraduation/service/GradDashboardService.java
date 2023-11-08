@@ -2,20 +2,17 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.*;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchJobExecutionRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchGradAlgorithmJobHistoryTransformer;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchProcessingTransformer;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -23,10 +20,13 @@ import java.util.stream.Collectors;
 @Service
 public class GradDashboardService extends GradService {
 
+	private static final String JOB_STATUS_STARTED = BatchStatusEnum.STARTED.name();
+
 	private final BatchGradAlgorithmJobHistoryRepository  batchGradAlgorithmJobHistoryRepository;
 	private final BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository;
 	private final BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer;
 	private final BatchJobExecutionRepository batchJobExecutionRepository;
+	private final BatchStepExecutionRepository batchStepExecutionRepository;
 	private final BatchProcessingTransformer batchProcessingTransformer;
 	private final BatchProcessingRepository batchProcessingRepository;
 	private final RestUtils restUtils;
@@ -34,13 +34,16 @@ public class GradDashboardService extends GradService {
     public GradDashboardService(BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository,
 								BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer,
 								RestUtils restUtils,
-								BatchJobExecutionRepository batchJobExecutionRepository,BatchProcessingRepository batchProcessingRepository,BatchProcessingTransformer batchProcessingTransformer,
+								BatchJobExecutionRepository batchJobExecutionRepository,
+								BatchStepExecutionRepository batchStepExecutionRepository,
+								BatchProcessingRepository batchProcessingRepository,BatchProcessingTransformer batchProcessingTransformer,
 								BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository) {
 		this.batchGradAlgorithmJobHistoryRepository = batchGradAlgorithmJobHistoryRepository;
 		this.batchGradAlgorithmJobHistoryTransformer = batchGradAlgorithmJobHistoryTransformer;
 		this.batchProcessingTransformer = batchProcessingTransformer;
 		this.batchGradAlgorithmStudentRepository = batchGradAlgorithmStudentRepository;
 		this.batchJobExecutionRepository = batchJobExecutionRepository;
+		this.batchStepExecutionRepository = batchStepExecutionRepository;
 		this.batchProcessingRepository = batchProcessingRepository;
 		this.restUtils = restUtils;
 	}
@@ -50,7 +53,7 @@ public class GradDashboardService extends GradService {
 		start();
 		GradDashboard gradDash = new GradDashboard();
 		List<BatchGradAlgorithmJobHistory> infoDetailsList= batchGradAlgorithmJobHistoryTransformer.transformToDTO(batchGradAlgorithmJobHistoryRepository.findAll());
-		infoDetailsList = infoDetailsList.stream().map(this::handleDeadJob).collect(Collectors.toList());
+		infoDetailsList = infoDetailsList.stream().map(this::handleDeadJob).map(this::handleFrozenJob).collect(Collectors.toList());
 		infoDetailsList.sort(Comparator.comparing(BatchGradAlgorithmJobHistory::getStartTime).reversed());
 		if(!infoDetailsList.isEmpty()) {
 			BatchGradAlgorithmJobHistory info = infoDetailsList.get(0);
@@ -144,30 +147,57 @@ public class GradDashboardService extends GradService {
 		return batchProcessingRepository.findByJobType(jobType);
 	}
 
+	/**
+	 * If any batch jobs have "STARTED" status more than 3 days(72 hours), then treat it as FAILED job
+	 */
 	@Transactional
 	public BatchGradAlgorithmJobHistory handleDeadJob(BatchGradAlgorithmJobHistory batchJobHistory) {
-		if ("STARTED".equalsIgnoreCase(batchJobHistory.getStatus())
-			&& batchJobHistory.getEndTime() == null) {
-			Integer jobExecutionId = batchJobHistory.getJobExecutionId();
-
-			Date now = new Date(System.currentTimeMillis());
-			LocalDateTime deadline = ca.bc.gov.educ.api.batchgraduation.util.DateUtils.toLocalDateTime(DateUtils.addDays(now, -3));
-
-			if (batchJobHistory.getStartTime().isBefore(deadline)) {
-				Optional<BatchJobExecutionEntity> optional = batchJobExecutionRepository.findById(jobExecutionId.longValue());
-				if (optional.isPresent()) {
-					BatchJobExecutionEntity batchJobExecution = optional.get();
-					if ("UNKNOWN".equalsIgnoreCase(batchJobExecution.getExitCode())
-							|| BatchStatusEnum.FAILED.toString().equalsIgnoreCase(batchJobExecution.getExitCode()) ) {
-						BatchGradAlgorithmJobHistoryEntity entity = batchGradAlgorithmJobHistoryTransformer.transformToEntity(batchJobHistory);
-						entity.setStatus(BatchStatusEnum.FAILED.toString());
-						batchGradAlgorithmJobHistoryRepository.save(entity);
-						batchJobHistory.setStatus(BatchStatusEnum.FAILED.toString());
-					}
-				}
+		if (JOB_STATUS_STARTED.equalsIgnoreCase(batchJobHistory.getStatus()) && batchJobHistory.getEndTime() == null) {
+			LocalDateTime now = LocalDateTime.now();
+			Duration duration = Duration.between(batchJobHistory.getStartTime(), now);
+			long hours = duration.getSeconds() / 3600;
+			if (hours > 72) {
+				updateBatchJobStatus(batchJobHistory, BatchStatusEnum.FAILED);
 			}
 		}
 
 		return batchJobHistory;
+	}
+
+	@Transactional
+	public BatchGradAlgorithmJobHistory handleFrozenJob(BatchGradAlgorithmJobHistory batchJobHistory) {
+		if (JOB_STATUS_STARTED.equalsIgnoreCase(batchJobHistory.getStatus()) && batchJobHistory.getEndTime() == null) {
+			Integer jobExecutionId = batchJobHistory.getJobExecutionId();
+			if (isFrozen(jobExecutionId.longValue())) {
+				updateBatchJobStatus(batchJobHistory, BatchStatusEnum.FAILED);
+			}
+		}
+		return batchJobHistory;
+	}
+
+	/**
+	 * If last updated time is frozen more than 5 hours for all of "STARTED" steps, then treat it as FAILED job
+	 */
+	@Transactional(readOnly = true)
+	public boolean isFrozen(Long jobExecutionId) {
+		List<BatchStepExecutionEntity> steps = batchStepExecutionRepository.findByJobExecutionIdOrderByEndTimeDesc(jobExecutionId);
+		LocalDateTime now = LocalDateTime.now();
+		boolean frozenStepFound = false;
+		for (BatchStepExecutionEntity step : steps) {
+			if (step.getStepName().contains("partition") && JOB_STATUS_STARTED.equalsIgnoreCase(step.getStatus())) {
+				Duration duration = Duration.between(step.getLastUpdated(), now);
+				long hours = duration.getSeconds() / 3600;
+				frozenStepFound = hours > 5;
+			}
+		}
+		return frozenStepFound;
+	}
+
+	@Transactional
+	public void updateBatchJobStatus(BatchGradAlgorithmJobHistory batchJobHistory, BatchStatusEnum batchStatus) {
+		BatchGradAlgorithmJobHistoryEntity entity = batchGradAlgorithmJobHistoryTransformer.transformToEntity(batchJobHistory);
+		entity.setStatus(batchStatus.toString());
+		batchGradAlgorithmJobHistoryRepository.save(entity);
+		batchJobHistory.setStatus(BatchStatusEnum.FAILED.toString());
 	}
 }

@@ -29,7 +29,7 @@ public class BatchConfig {
     public JobLauncher asyncJobLauncher(JobRepository jobRepository) throws Exception {
         TaskExecutorJobLauncher jobLauncher = new TaskExecutorJobLauncher();
         jobLauncher.setJobRepository(jobRepository);
-        jobLauncher.setTaskExecutor(new SimpleAsyncTaskExecutor());
+        jobLauncher.setTaskExecutor(new SimpleAsyncTaskExecutor("asyncTask-"));
         jobLauncher.afterPropertiesSet();
         return jobLauncher;
     }

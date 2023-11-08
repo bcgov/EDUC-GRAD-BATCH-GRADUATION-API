@@ -46,6 +46,7 @@ public class BatchJobLauncher {
     private Job userScheduledBatchJobRefresher;
 
     @Autowired
+    @Qualifier("asyncJobLauncher")
     private JobLauncher jobLauncher;
 
     @Autowired
