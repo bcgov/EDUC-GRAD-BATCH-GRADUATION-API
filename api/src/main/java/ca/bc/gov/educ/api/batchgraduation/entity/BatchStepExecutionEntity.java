@@ -1,12 +1,9 @@
 package ca.bc.gov.educ.api.batchgraduation.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -27,10 +24,12 @@ public class BatchStepExecutionEntity {
     private String stepName;
 
     @Column(name = "START_TIME")
-    private Instant startTime = Instant.now();
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime startTime = LocalDateTime.now();
 
     @Column(name = "END_TIME")
-    private Instant endTime;
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime endTime;
 
     @Column(name = "STATUS", length = 10)
     private String status;
@@ -66,9 +65,11 @@ public class BatchStepExecutionEntity {
     private String exitMessage;
 
     @Column(name = "LAST_UPDATED")
-    private Instant lastUpdated = Instant.now();
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime lastUpdated = LocalDateTime.now();
 
     @Column(name = "CREATE_TIME")
-    private Instant createTime = Instant.now();
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime createTime = LocalDateTime.now();
 
 }

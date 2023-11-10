@@ -23,8 +23,8 @@ import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 
@@ -87,7 +87,7 @@ public class BatchJobConfig {
                 .partitioner(graduationJobStep(jobRepository, skipListener).getName(), partitionerRegGrad())
                 .step(graduationJobStep(jobRepository, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -97,7 +97,7 @@ public class BatchJobConfig {
                 .partitioner(graduationJobErrorStep(jobRepository, skipListener).getName(), partitionerRegGradRetry())
                 .step(graduationJobErrorStep(jobRepository, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -107,7 +107,7 @@ public class BatchJobConfig {
                 .partitioner(graduationJobErrorRetryStep(jobRepository, skipListener).getName(), partitionerRegGradRetry())
                 .step(graduationJobErrorRetryStep(jobRepository, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -230,7 +230,7 @@ public class BatchJobConfig {
                 .partitioner(tvrJobStep(jobRepository,skipListener).getName(), partitionerTvrRun())
                 .step(tvrJobStep(jobRepository,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -240,7 +240,7 @@ public class BatchJobConfig {
                 .partitioner(tvrJobErrorStep(jobRepository,skipListener).getName(), partitionerTvrRunRetry())
                 .step(tvrJobErrorStep(jobRepository,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -250,7 +250,7 @@ public class BatchJobConfig {
                 .partitioner(tvrJobErrorRetryStep(jobRepository,skipListener).getName(), partitionerTvrRunRetry())
                 .step(tvrJobErrorRetryStep(jobRepository,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -362,7 +362,7 @@ public class BatchJobConfig {
                 .partitioner(slaveSpcRegGradStep(jobRepository,skipListener).getName(), partitionerSpcRegGrad())
                 .step(slaveSpcRegGradStep(jobRepository,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -372,7 +372,7 @@ public class BatchJobConfig {
                 .partitioner(slaveSpcRegGradErrorStep(jobRepository,skipListener).getName(), partitionerSpcRegGradRetry())
                 .step(slaveSpcRegGradErrorStep(jobRepository,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -382,7 +382,7 @@ public class BatchJobConfig {
                 .partitioner(slaveSpcRegGradErrorRetryStep(jobRepository,skipListener).getName(), partitionerSpcRegGradRetry())
                 .step(slaveSpcRegGradErrorRetryStep(jobRepository,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -491,7 +491,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepSpcTvrRun(jobRepository,skipListener).getName(), partitionerSpcRegGrad())
                 .step(slaveStepSpcTvrRun(jobRepository,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -501,7 +501,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepSpcTvrRunError(jobRepository,skipListener).getName(), partitionerSpcRegGradRetry())
                 .step(slaveStepSpcTvrRunError(jobRepository,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -511,7 +511,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepSpcTvrRunErrorRetry(jobRepository,skipListener).getName(), partitionerSpcRegGradRetry())
                 .step(slaveStepSpcTvrRunErrorRetry(jobRepository,skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -669,7 +669,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepDisRun(jobRepository).getName(), partitionerDisRun())
                 .step(slaveStepDisRun(jobRepository))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -701,7 +701,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepDisRun(jobRepository).getName(), partitionerDisRunYearly())
                 .step(slaveStepDisRunYearly(jobRepository))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -727,7 +727,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepDisRunYearlyNonGradByMincode(jobRepository).getName(), partitionerDisRunYearlyNonGrad())
                 .step(slaveStepDisRunYearlyNonGradByMincode(jobRepository))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -753,7 +753,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepDisRun(jobRepository).getName(), partitionerDisRunSupplemental())
                 .step(slaveStepDisRun(jobRepository))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -785,7 +785,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepDisRun(jobRepository).getName(), partitionerDisRunUserReq())
                 .step(slaveStepDisRun(jobRepository))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -847,7 +847,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepBlankDisRun(jobRepository).getName(), partitionerDisRunBlankUserReq())
                 .step(slaveStepBlankDisRun(jobRepository))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -910,7 +910,7 @@ public class BatchJobConfig {
                 .partitioner(slaveStepPsiDisRun(jobRepository).getName(), partitionerDisRunPsiUserReq())
                 .step(slaveStepPsiDisRun(jobRepository))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -958,7 +958,7 @@ public class BatchJobConfig {
                 .partitioner(certRegenJobStep(jobRepository, skipListener).getName(), partitionerCertRegen())
                 .step(certRegenJobStep(jobRepository, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -1022,7 +1022,7 @@ public class BatchJobConfig {
                 .partitioner(edwSnapshotSchoolJobStep(jobRepository, skipListener).getName(), partitionerEDWSnapshotSchool())
                 .step(edwSnapshotSchoolJobStep(jobRepository, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -1072,7 +1072,7 @@ public class BatchJobConfig {
                 .partitioner(edwSnapshotJobStep(jobRepository, skipListener).getName(), partitionerEDWSnapshot())
                 .step(edwSnapshotJobStep(jobRepository, skipListener))
                 .gridSize(constants.getNumberOfPartitions())
-                .taskExecutor(taskExecutor(constants))
+                .taskExecutor(taskExecutor())
                 .build();
     }
 
@@ -1155,12 +1155,7 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public TaskExecutor taskExecutor(EducGradBatchGraduationApiConstants constants) {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(constants.getNumberOfPartitions());
-        executor.setMaxPoolSize(constants.getNumberOfPartitions());
-        executor.setThreadNamePrefix("partition-");
-        executor.initialize();
-        return executor;
+    public TaskExecutor taskExecutor() {
+        return new SimpleAsyncTaskExecutor("partition-");
     }
 }

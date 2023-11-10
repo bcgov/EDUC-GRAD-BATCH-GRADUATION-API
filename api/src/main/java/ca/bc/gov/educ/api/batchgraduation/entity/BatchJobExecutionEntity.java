@@ -44,8 +44,9 @@ public class BatchJobExecutionEntity {
 	@Column(name = "EXIT_MESSAGE", length = 2500)
 	private String exitMessage;
 
-	@Column(name = "LAST_UPDATED")
-	private Instant lastUpdated;
+	@Column(name = "LAST_UPDATED", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private LocalDateTime lastUpdated;
 
 	@Column(name = "JOB_CONFIGURATION_LOCATION", length = 2500)
 	private String jobConfigurationLocation;
