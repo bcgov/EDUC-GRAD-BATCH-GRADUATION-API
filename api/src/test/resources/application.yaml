@@ -82,6 +82,11 @@ batch:
       jobs:
         lockAtLeastFor: 10
         lockAtMostFor: 180
+  system:
+    scheduled:
+      routines:
+        lockAtLeastFor: PT1M
+        lockAtMostFor: PT600M
 
 #Endpoints
 endpoint:

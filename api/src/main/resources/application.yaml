@@ -153,6 +153,11 @@ batch:
       jobs:
         lockAtLeastFor: ${CRON_USER_SCHEDULED_JOBS_LOCK_AT_LEAST_FOR}
         lockAtMostFor: ${CRON_USER_SCHEDULED_JOBS_LOCK_AT_MOST_FOR}
+  system:
+    scheduled:
+      routines:
+        lockAtLeastFor: ${CRON_SYSTEM_SCHEDULED_ROUTINES_LOCK_AT_LEAST_FOR}
+        lockAtMostFor: ${CRON_SYSTEM_SCHEDULED_ROUTINES_LOCK_AT_MOST_FOR}
 
 #Endpoints
 endpoint:

@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.config;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
+import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,7 @@ public class BatchJobLauncher {
     private Job userScheduledBatchJobRefresher;
 
     @Autowired
+    @Qualifier("asyncJobLauncher")
     private JobLauncher jobLauncher;
 
     @Autowired
@@ -66,9 +68,10 @@ public class BatchJobLauncher {
     private static final String ERROR_MSG = "Error {}";
 
     @Scheduled(cron = "${batch.regalg.cron}")
-    @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "20s", lockAtMostFor = "1200m")
+    @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "${batch.system.scheduled.routines.lockAtLeastFor}", lockAtMostFor = "${batch.system.scheduled.routines.lockAtMostFor}")
     public void runRegularGradAlgorithm() {
         LOGGER.info(BATCH_STARTED);
+        LockAssert.assertLocked();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
@@ -86,9 +89,10 @@ public class BatchJobLauncher {
     }
 
     @Scheduled(cron = "${batch.tvrrun.cron}")
-    @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "20s", lockAtMostFor = "1200m")
+    @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "${batch.system.scheduled.routines.lockAtLeastFor}", lockAtMostFor = "${batch.system.scheduled.routines.lockAtMostFor}")
     public void runTranscriptVerificationReportProcess() {
         LOGGER.info(BATCH_STARTED);
+        LockAssert.assertLocked();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
@@ -106,9 +110,10 @@ public class BatchJobLauncher {
     }
 
     @Scheduled(cron = "${batch.distrun.cron}")
-    @SchedulerLock(name = "DistributionBatchJob", lockAtLeastFor = "10s", lockAtMostFor = "120m")
+    @SchedulerLock(name = "DistributionBatchJob", lockAtLeastFor = "PT10S", lockAtMostFor = "PT120M")
     public void runMonthlyDistributionProcess() {
         LOGGER.info(BATCH_STARTED);
+        LockAssert.assertLocked();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
@@ -126,9 +131,10 @@ public class BatchJobLauncher {
     }
 
     @Scheduled(fixedDelayString = "PT30M")
-    @SchedulerLock(name = "userScheduledBatchJobRefresher", lockAtLeastFor = "10s", lockAtMostFor = "5m")
+    @SchedulerLock(name = "userScheduledBatchJobRefresher", lockAtLeastFor = "PT10S", lockAtMostFor = "PT5M")
     public void refreshUserScheduledQueue() {
         LOGGER.info(BATCH_STARTED);
+        LockAssert.assertLocked();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         try {

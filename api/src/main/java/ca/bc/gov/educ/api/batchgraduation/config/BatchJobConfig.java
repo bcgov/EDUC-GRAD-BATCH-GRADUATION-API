@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Configuration
-@EnableBatchProcessing
+@EnableBatchProcessing(isolationLevelForCreate = "ISOLATION_READ_COMMITTED")
 public class BatchJobConfig {
 
     // Partitioning for Regular Grad Run updates
