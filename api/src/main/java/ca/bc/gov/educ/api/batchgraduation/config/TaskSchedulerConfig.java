@@ -36,6 +36,7 @@ public class TaskSchedulerConfig {
 
         LockManager lockManager = new DefaultLockManager(lockProvider, lockConfigurationExtractor);
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(30);
         scheduler.setThreadNamePrefix("UserScheduledTask-");
         scheduler.initialize();
         return new LockableTaskScheduler(scheduler, lockManager);
