@@ -75,6 +75,7 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
                     bcd.setQuantity(req.getQuantity());
                     bcd.setSchoolOfRecord(sch);
                     bcd.setCredentialTypeCode(ctc);
+                    bcd.setAddress(req.getAddress());
                     blankList.add(bcd);
                 }
             });
