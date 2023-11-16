@@ -26,6 +26,7 @@ public class StudentSearchRequest implements Serializable {
     private List<UUID> studentIDs;
 
     private String user;
+    private Address address;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date gradDateFrom;

@@ -1,14 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchJobExecutionEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.*;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchJobExecutionRepository;
-import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
+import ca.bc.gov.educ.api.batchgraduation.repository.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Test;
@@ -49,6 +43,9 @@ public class GradDashboardServiceTest {
     BatchJobExecutionRepository batchJobExecutionRepository;
 
     @MockBean
+    BatchStepExecutionRepository batchStepExecutionRepository;
+
+    @MockBean
     BatchProcessingRepository batchProcessingRepository;
 
     @MockBean
@@ -86,7 +83,7 @@ public class GradDashboardServiceTest {
         hist.setExpectedStudentsProcessed(20L);
         hist.setJobExecutionId(121L);
         Date today = new Date(System.currentTimeMillis());
-        Date startedDateTime = DateUtils.addDays(today, -3);
+        Date startedDateTime = DateUtils.addDays(today, -4);
         hist.setStartTime(ca.bc.gov.educ.api.batchgraduation.util.DateUtils.toLocalDateTime(startedDateTime));
         hist.setStatus("STARTED");
         list.add(hist);
@@ -100,6 +97,48 @@ public class GradDashboardServiceTest {
 
         when(batchGradAlgorithmJobHistoryRepository.findAll()).thenReturn(list);
         when(batchJobExecutionRepository.findById(hist.getJobExecutionId())).thenReturn(Optional.of(batchJobExecution));
+
+        GradDashboard dash = gradDashboardService.getDashboardInfo();
+        assertThat(dash).isNotNull();
+        assertThat(dash.getTotalBatchRuns()).isEqualTo(1);
+        assertThat(dash.getBatchInfoList()).isNotEmpty();
+        assertThat(dash.getBatchInfoList().get(0).getStatus()).isEqualTo("FAILED");
+
+    }
+
+    @Test
+    public void testGetDashboardInfo_whenLastUpdatedDate_isOlderThan5hours_thenUpdateStatusAsFailed() {
+
+        List<BatchGradAlgorithmJobHistoryEntity> list = new ArrayList<>();
+        BatchGradAlgorithmJobHistoryEntity hist = new BatchGradAlgorithmJobHistoryEntity();
+        hist.setId(new UUID(1,1));
+        hist.setExpectedStudentsProcessed(20L);
+        hist.setJobExecutionId(121L);
+        Date today = new Date(System.currentTimeMillis());
+        Date startedDateTime = DateUtils.addDays(today, -1);
+        hist.setStartTime(ca.bc.gov.educ.api.batchgraduation.util.DateUtils.toLocalDateTime(startedDateTime));
+        hist.setStatus("STARTED");
+        list.add(hist);
+
+        BatchJobExecutionEntity batchJobExecution = new BatchJobExecutionEntity();
+        batchJobExecution.setJobExecutionId(hist.getJobExecutionId());
+        batchJobExecution.setId(Long.valueOf("123"));
+        batchJobExecution.setStatus("STARTED");
+        batchJobExecution.setStartTime(hist.getStartTime());
+
+        BatchStepExecutionEntity step = new BatchStepExecutionEntity();
+        step.setStepName("test-partition12");
+        step.setJobExecutionId(hist.getJobExecutionId());
+        step.setId(Long.valueOf("123"));
+        step.setStatus("STARTED");
+        step.setStartTime(ca.bc.gov.educ.api.batchgraduation.util.DateUtils.toLocalDateTime(startedDateTime));
+        Date lastUpdatedDateTime = DateUtils.addHours(today, -6);
+        step.setLastUpdated(ca.bc.gov.educ.api.batchgraduation.util.DateUtils.toLocalDateTime(lastUpdatedDateTime));
+        batchJobExecution.setStartTime(hist.getStartTime());
+
+        when(batchGradAlgorithmJobHistoryRepository.findAll()).thenReturn(list);
+        when(batchJobExecutionRepository.findById(hist.getJobExecutionId())).thenReturn(Optional.of(batchJobExecution));
+        when(batchStepExecutionRepository.findByJobExecutionIdOrderByEndTimeDesc(hist.getJobExecutionId())).thenReturn(List.of(step));
 
         GradDashboard dash = gradDashboardService.getDashboardInfo();
         assertThat(dash).isNotNull();

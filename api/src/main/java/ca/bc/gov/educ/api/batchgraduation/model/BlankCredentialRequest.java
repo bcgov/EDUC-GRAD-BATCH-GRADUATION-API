@@ -17,6 +17,8 @@ import java.util.List;
 public class BlankCredentialRequest implements Serializable {
     private List<String> schoolOfRecords;
     private List<String> credentialTypeCode;
+    private String user;
+    private Address address;
     private int quantity;
     String localDownload;
 }

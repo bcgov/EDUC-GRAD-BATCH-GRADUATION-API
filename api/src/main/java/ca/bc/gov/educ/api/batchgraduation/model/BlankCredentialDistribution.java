@@ -9,6 +9,6 @@ public class BlankCredentialDistribution {
 	private String schoolOfRecord;
 	private int quantity;
 	private String paperType;
-
+	private Address address;
 
 }

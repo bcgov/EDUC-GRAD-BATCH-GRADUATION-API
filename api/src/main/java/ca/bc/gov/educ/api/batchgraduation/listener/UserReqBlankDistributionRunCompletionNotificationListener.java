@@ -77,14 +77,16 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			BlankDistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
+			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			processGlobalList(credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,properName);
+			processGlobalList(studentSearchRequestObject, credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,properName);
 			LOGGER.info(LOG_SEPARATION);
 		}
     }
 
-	private void processGlobalList(String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String localDownload,String properName) {
+	private void processGlobalList(StudentSearchRequest studentSearchRequest , String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String localDownload,String properName) {
 		List<String> uniqueSchoolList = cList.stream().map(BlankCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
 			List<BlankCredentialDistribution> yed4List = new ArrayList<>();
@@ -109,7 +111,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			supportListener.blankCertificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
 			supportListener.blankCertificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
 		});
-		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).build();
+		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).studentSearchRequest(studentSearchRequest).build();
 		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, distributionRequest,localDownload);
 	}
 
