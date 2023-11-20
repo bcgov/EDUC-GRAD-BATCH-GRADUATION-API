@@ -80,8 +80,8 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 
 			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
 			summaryDTO.setStudentSearchRequest(studentSearchRequestObject);
-
 			String properName = StringUtils.defaultIfBlank(jobParameters.getString("properName"), studentSearchRequestObject.getUser());
+
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
 			processGlobalList(summaryDTO, credentialType, jobExecutionId, obj.getAccess_token(), localDownLoad, properName);
