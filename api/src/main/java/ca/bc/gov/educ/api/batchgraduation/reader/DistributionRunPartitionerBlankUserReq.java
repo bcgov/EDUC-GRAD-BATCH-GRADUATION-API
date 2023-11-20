@@ -22,6 +22,8 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunPartitionerBlankUserReq.class);
 
+    public static final String MINISTRY_CODE = String.format("%09d" , 0);
+
     @Value("#{stepExecution.jobExecution}")
     JobExecution context;
 
@@ -68,6 +70,9 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
     private List<BlankCredentialDistribution> getRecordsForBlankUserReqDisRun(BlankCredentialRequest req) {
         if(req != null) {
             List<String> schoolList = req.getSchoolOfRecords();
+            if(schoolList == null || schoolList.isEmpty()) {
+                schoolList = List.of(MINISTRY_CODE);
+            }
             List<BlankCredentialDistribution> blankList = new ArrayList<>();
             schoolList.forEach(sch -> {
                 for (String ctc : req.getCredentialTypeCode()) {

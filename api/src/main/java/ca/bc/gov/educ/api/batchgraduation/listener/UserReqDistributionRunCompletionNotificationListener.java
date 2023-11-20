@@ -78,10 +78,11 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process " + LOG_SEPARATION_SINGLE);
-			if(StringUtils.isNotBlank(studentSearchRequest)) {
-				StudentSearchRequest payload = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
-				summaryDTO.setStudentSearchRequest(payload);
-			}
+
+			StudentSearchRequest payload = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+			summaryDTO.setStudentSearchRequest(payload);
+			properName = StringUtils.defaultIfBlank(jobParameters.getString("properName"), payload.getUser());
+
 			processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,properName);
 
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;

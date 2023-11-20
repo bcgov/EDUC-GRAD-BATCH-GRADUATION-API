@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortBlankCredentialDistributionBySchoolAndNames;
+import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
 
 @Component
 public class UserReqBlankDistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
@@ -51,7 +53,6 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String credentialType = jobParameters.getString("credentialType");
 			String localDownLoad = jobParameters.getString("LocalDownload");
-			String properName = jobParameters.getString("properName");
 			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
@@ -78,16 +79,23 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
 			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+			summaryDTO.setStudentSearchRequest(studentSearchRequestObject);
 
+			String properName = StringUtils.defaultIfBlank(jobParameters.getString("properName"), studentSearchRequestObject.getUser());
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			processGlobalList(studentSearchRequestObject, credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,properName);
+			processGlobalList(summaryDTO, credentialType, jobExecutionId, obj.getAccess_token(), localDownLoad, properName);
 			LOGGER.info(LOG_SEPARATION);
 		}
     }
 
-	private void processGlobalList(StudentSearchRequest studentSearchRequest , String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String localDownload,String properName) {
+	private void processGlobalList(BlankDistributionSummaryDTO summaryDTO , String credentialType, Long batchId, String accessToken,String localDownload,String properName) {
+		StudentSearchRequest studentSearchRequest = summaryDTO.getStudentSearchRequest();
+		List<BlankCredentialDistribution> cList = summaryDTO.getGlobalList();
+		sortBlankCredentialDistributionBySchoolAndNames(cList);
+		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		List<String> uniqueSchoolList = cList.stream().map(BlankCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
+		sortSchoolBySchoolOfRecord(uniqueSchoolList);
 		uniqueSchoolList.forEach(usl->{
 			List<BlankCredentialDistribution> yed4List = new ArrayList<>();
 			List<BlankCredentialDistribution> yed2List = new ArrayList<>();

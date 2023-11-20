@@ -11,6 +11,7 @@ import java.util.List;
 public class BlankDistributionSummaryDTO extends BaseDistributionSummaryDTO {
 
   private List<BlankCredentialDistribution> globalList = new ArrayList<>();
+  private StudentSearchRequest studentSearchRequest;
 
   @Override
   public void initializeCredentialCountMap() {

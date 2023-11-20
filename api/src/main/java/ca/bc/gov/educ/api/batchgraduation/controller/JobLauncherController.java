@@ -264,9 +264,9 @@ public class JobLauncherController {
     }
 
     private BlankDistributionSummaryDTO validateInputBlankDisRun(BlankCredentialRequest blankCredentialRequest) {
-        if(blankCredentialRequest.getSchoolOfRecords().isEmpty() || blankCredentialRequest.getCredentialTypeCode().isEmpty()) {
+        if(blankCredentialRequest.getCredentialTypeCode().isEmpty()) {
             BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
-            summaryDTO.setException("Please provide both parameters");
+            summaryDTO.setException("Please provide credentials type code parameter");
             return summaryDTO;
         }
         return null;

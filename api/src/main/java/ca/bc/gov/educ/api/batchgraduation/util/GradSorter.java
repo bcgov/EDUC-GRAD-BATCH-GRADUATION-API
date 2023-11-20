@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
+import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 
 import java.util.Comparator;
@@ -25,6 +26,11 @@ public class GradSorter {
                 .thenComparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(Comparator.naturalOrder()))
                 .thenComparing(StudentCredentialDistribution::getLegalFirstName, Comparator.nullsLast(Comparator.naturalOrder()))
                 .thenComparing(StudentCredentialDistribution::getLegalMiddleNames, Comparator.nullsLast(Comparator.naturalOrder())));
+    }
+
+    public static synchronized void sortBlankCredentialDistributionBySchoolAndNames(List<BlankCredentialDistribution> students) {
+        students.sort(Comparator
+                .comparing(BlankCredentialDistribution::getSchoolOfRecord, Comparator.nullsLast(Comparator.naturalOrder())));
     }
 
     public static synchronized void sortSchoolBySchoolOfRecord(List<String> schools) {
