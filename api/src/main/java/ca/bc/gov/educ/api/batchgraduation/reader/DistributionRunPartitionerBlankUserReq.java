@@ -69,6 +69,9 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
     private List<BlankCredentialDistribution> getRecordsForBlankUserReqDisRun(BlankCredentialRequest req) {
         if(req != null) {
             List<String> schoolList = ObjectUtils.defaultIfNull(req.getSchoolOfRecords(), new ArrayList<>());
+            if(schoolList.isEmpty()) {
+                schoolList.add("MoE");
+            }
             List<BlankCredentialDistribution> blankList = new ArrayList<>();
             schoolList.forEach(sch -> {
                 for (String ctc : req.getCredentialTypeCode()) {
