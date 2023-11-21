@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.BlankCredentialRequest;
 import ca.bc.gov.educ.api.batchgraduation.model.BlankDistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -69,9 +70,9 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
 
     private List<BlankCredentialDistribution> getRecordsForBlankUserReqDisRun(BlankCredentialRequest req) {
         if(req != null) {
-            List<String> schoolList = req.getSchoolOfRecords();
-            if(schoolList == null || schoolList.isEmpty()) {
-                schoolList = List.of(MINISTRY_CODE);
+            List<String> schoolList = ObjectUtils.defaultIfNull(req.getSchoolOfRecords(), new ArrayList<>());
+            if(schoolList.isEmpty() || req.getAddress() != null) {
+                schoolList.add(MINISTRY_CODE);
             }
             List<BlankCredentialDistribution> blankList = new ArrayList<>();
             schoolList.forEach(sch -> {
@@ -80,7 +81,10 @@ public class DistributionRunPartitionerBlankUserReq extends SimplePartitioner {
                     bcd.setQuantity(req.getQuantity());
                     bcd.setSchoolOfRecord(sch);
                     bcd.setCredentialTypeCode(ctc);
-                    bcd.setAddress(req.getAddress());
+                    if(MINISTRY_CODE.equalsIgnoreCase(sch)) {
+                        bcd.setAddress(req.getAddress());
+                        bcd.setUser(req.getUser());
+                    }
                     blankList.add(bcd);
                 }
             });

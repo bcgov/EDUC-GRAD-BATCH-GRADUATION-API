@@ -10,5 +10,6 @@ public class BlankCredentialDistribution {
 	private int quantity;
 	private String paperType;
 	private Address address;
+	private String user;
 
 }
