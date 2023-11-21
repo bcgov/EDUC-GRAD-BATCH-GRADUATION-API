@@ -53,7 +53,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			String jobTrigger = jobParameters.getString("jobTrigger");
 			String credentialType = jobParameters.getString("credentialType");
 			String localDownLoad = jobParameters.getString("LocalDownload");
-			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
+			String studentSearchRequestJson = jobParameters.getString(SEARCH_REQUEST, "{}");
 			String userScheduledId = jobParameters.getString("userScheduled");
 			if(userScheduledId != null) {
 				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
@@ -70,7 +70,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
-			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.BDBJ, credentialType);
+			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequestJson, TaskSelection.BDBJ, credentialType);
 
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
@@ -78,9 +78,9 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			BlankDistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
-			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
-			summaryDTO.setStudentSearchRequest(studentSearchRequestObject);
-			String properName = StringUtils.defaultIfBlank(jobParameters.getString("properName"), studentSearchRequestObject.getUser());
+			StudentSearchRequest studentSearchRequest = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequestJson, StudentSearchRequest.class);
+			summaryDTO.setStudentSearchRequest(studentSearchRequest);
+			String properName = jobParameters.getString("properName");
 
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
