@@ -228,4 +228,26 @@ public class GradDashboardServiceTest {
         assertThat(res.getBatchJobList()).hasSize(1);
     }
 
+    @Test
+    public void testPurgeOldBatchHistoryRecords() {
+        boolean isExceptionThrown = false;
+        try {
+            gradDashboardService.purgeOldBatchHistoryRecords();
+        } catch (Exception e) {
+            isExceptionThrown = true;
+        }
+        assertThat(isExceptionThrown).isFalse();
+    }
+
+    @Test
+    public void testPurgeOldSpringMetaDataRecords() {
+        boolean isExceptionThrown = false;
+        try {
+            gradDashboardService.purgeOldSpringMetaDataRecords();
+        } catch (Exception e) {
+            isExceptionThrown = true;
+        }
+        assertThat(isExceptionThrown).isFalse();
+    }
+
 }

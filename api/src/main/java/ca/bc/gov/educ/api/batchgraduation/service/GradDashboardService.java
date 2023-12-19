@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.repository.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchGradAlgorithmJobHistoryTransformer;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchProcessingTransformer;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +30,10 @@ public class GradDashboardService extends GradService {
 	private final BatchStepExecutionRepository batchStepExecutionRepository;
 	private final BatchProcessingTransformer batchProcessingTransformer;
 	private final BatchProcessingRepository batchProcessingRepository;
+	private final StudentCredentialDistributionRepository studentCredentialDistributionRepository;
 	private final RestUtils restUtils;
+
+	private final EducGradBatchGraduationApiConstants constants;
 
     public GradDashboardService(BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository,
 								BatchGradAlgorithmJobHistoryTransformer batchGradAlgorithmJobHistoryTransformer,
@@ -37,7 +41,9 @@ public class GradDashboardService extends GradService {
 								BatchJobExecutionRepository batchJobExecutionRepository,
 								BatchStepExecutionRepository batchStepExecutionRepository,
 								BatchProcessingRepository batchProcessingRepository,BatchProcessingTransformer batchProcessingTransformer,
-								BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository) {
+								BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository,
+								StudentCredentialDistributionRepository studentCredentialDistributionRepository,
+								EducGradBatchGraduationApiConstants constants) {
 		this.batchGradAlgorithmJobHistoryRepository = batchGradAlgorithmJobHistoryRepository;
 		this.batchGradAlgorithmJobHistoryTransformer = batchGradAlgorithmJobHistoryTransformer;
 		this.batchProcessingTransformer = batchProcessingTransformer;
@@ -45,7 +51,9 @@ public class GradDashboardService extends GradService {
 		this.batchJobExecutionRepository = batchJobExecutionRepository;
 		this.batchStepExecutionRepository = batchStepExecutionRepository;
 		this.batchProcessingRepository = batchProcessingRepository;
+		this.studentCredentialDistributionRepository = studentCredentialDistributionRepository;
 		this.restUtils = restUtils;
+		this.constants = constants;
 	}
 
     @Transactional(readOnly = true)
@@ -197,5 +205,31 @@ public class GradDashboardService extends GradService {
 		entity.setStatus(batchStatus.toString());
 		batchGradAlgorithmJobHistoryRepository.save(entity);
 		batchJobHistory.setStatus(BatchStatusEnum.FAILED.toString());
+	}
+
+	@Transactional
+	public void purgeOldBatchHistoryRecords() {
+		final LocalDateTime createDateToCompare = this.calculateCreateDateBasedOnStaleEventInDays();
+		this.batchGradAlgorithmStudentRepository.deleteByCreateDateBefore(createDateToCompare);
+		this.studentCredentialDistributionRepository.deleteByCreateDateBefore(createDateToCompare);
+		this.batchGradAlgorithmJobHistoryRepository.deleteByCreateDateBefore(createDateToCompare);
+	}
+
+	@Transactional
+	public void purgeOldSpringMetaDataRecords() {
+		final LocalDateTime createDateToCompare = this.calculateCreateDateBasedOnStaleEventInDays();
+		this.batchStepExecutionRepository.deleteBatchStepContextsByCreateTimeBefore(createDateToCompare);
+		this.batchStepExecutionRepository.deleteBatchStepsByCreateTimeBefore(createDateToCompare);
+
+		this.batchJobExecutionRepository.deleteBatchParamsByCreateTimeBefore(createDateToCompare);
+		this.batchJobExecutionRepository.deleteBatchContextsByCreateTimeBefore(createDateToCompare);
+		this.batchJobExecutionRepository.deleteBatchJobsByCreateTimeBefore(createDateToCompare);
+		this.batchJobExecutionRepository.deleteBatchInstancesNotInBatchJobs();
+	}
+
+
+	private LocalDateTime calculateCreateDateBasedOnStaleEventInDays() {
+		final LocalDateTime currentTime = LocalDateTime.now();
+		return currentTime.minusDays(this.constants.getRecordsStaleInDays());
 	}
 }
