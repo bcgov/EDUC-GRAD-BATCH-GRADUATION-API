@@ -87,6 +87,9 @@ batch:
       routines:
         lockAtLeastFor: PT1M
         lockAtMostFor: PT600M
+  purge-old-records:
+    cron: 0 30 0 * * *
+    staleInDays: 90
 
 #Endpoints
 endpoint:

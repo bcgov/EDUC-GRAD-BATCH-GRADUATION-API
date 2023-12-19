@@ -158,6 +158,9 @@ batch:
       routines:
         lockAtLeastFor: ${CRON_SYSTEM_SCHEDULED_ROUTINES_LOCK_AT_LEAST_FOR}
         lockAtMostFor: ${CRON_SYSTEM_SCHEDULED_ROUTINES_LOCK_AT_MOST_FOR}
+  purge-old-records:
+    cron: ${CRON_SCHEDULED_PURGE_OLD_RECORDS}
+    staleInDays: ${RECORDS_STALE_IN_DAYS}
 
 #Endpoints
 endpoint:

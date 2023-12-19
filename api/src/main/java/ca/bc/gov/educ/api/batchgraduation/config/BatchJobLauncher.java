@@ -146,4 +146,17 @@ public class BatchJobLauncher {
 
         LOGGER.info(BATCH_ENDED);
     }
+
+    @Scheduled(cron = "${batch.purge-old-records.cron}")
+    @SchedulerLock(name = "PurgeOldRecordsLock",
+            lockAtLeastFor = "PT1H", lockAtMostFor = "PT1H") //midnight job so lock for an hour
+    public void purgeOldRecords() {
+        LockAssert.assertLocked();
+        try {
+            this.gradDashboardService.purgeOldBatchHistoryRecords();
+            this.gradDashboardService.purgeOldSpringMetaDataRecords();
+        } catch (Exception e) {
+            LOGGER.error(ERROR_MSG, e.getLocalizedMessage());
+        }
+    }
 }
