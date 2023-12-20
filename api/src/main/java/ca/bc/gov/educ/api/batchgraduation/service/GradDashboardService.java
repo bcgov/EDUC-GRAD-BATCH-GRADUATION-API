@@ -6,7 +6,6 @@ import ca.bc.gov.educ.api.batchgraduation.repository.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchGradAlgorithmJobHistoryTransformer;
 import ca.bc.gov.educ.api.batchgraduation.transformer.BatchProcessingTransformer;
-import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
