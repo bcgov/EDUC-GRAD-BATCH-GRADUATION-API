@@ -129,7 +129,7 @@ public class GradDashboardServiceTest {
         BatchStepExecutionEntity step = new BatchStepExecutionEntity();
         step.setStepName("test-partition12");
         step.setJobExecutionId(hist.getJobExecutionId());
-        step.setId(Long.valueOf("123"));
+        step.setStepExecutionId(Long.valueOf("123"));
         step.setStatus("STARTED");
         step.setStartTime(ca.bc.gov.educ.api.batchgraduation.util.DateUtils.toLocalDateTime(startedDateTime));
         Date lastUpdatedDateTime = DateUtils.addHours(today, -6);

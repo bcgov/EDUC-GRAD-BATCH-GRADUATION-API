@@ -17,18 +17,15 @@ public interface BatchStepExecutionRepository extends JpaRepository<BatchStepExe
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM BATCH_STEP_EXECUTION_CONTEXT WHERE STEP_EXECUTION_ID IN (\n" +
-            "SELECT BATCH_STEP_EXECUTION.STEP_EXECUTION_ID FROM BATCH_STEP_EXECUTION WHERE JOB_EXECUTION_ID IN (\n" +
-            "    SELECT JOB_EXECUTION_ID FROM BATCH_JOB_EXECUTION WHERE CREATE_TIME <= :createDate\n" +
-            "));\n",
-            nativeQuery = true)
+    @Query(value = "DELETE FROM BatchStepExecutionContextEntity bsec WHERE bsec.stepExecutionId IN (\n" +
+            "SELECT bse.stepExecutionId FROM BatchStepExecutionEntity bse WHERE bse.jobExecutionId IN (\n" +
+            "    SELECT bje.jobExecutionId FROM BatchJobExecutionEntity bje WHERE bje.createTime <= :createDate))")
     void deleteBatchStepContextsByCreateTimeBefore(LocalDateTime createDate);
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM BATCH_STEP_EXECUTION WHERE JOB_EXECUTION_ID IN (\n" +
-            "    SELECT JOB_EXECUTION_ID FROM BATCH_JOB_EXECUTION WHERE CREATE_TIME <= :createDate);",
-            nativeQuery = true)
+    @Query(value = "DELETE FROM BatchStepExecutionEntity bse WHERE bse.jobExecutionId IN (\n" +
+            "    SELECT bje.jobExecutionId FROM BatchJobExecutionEntity bje WHERE bje.createTime <= :createDate)")
     void deleteBatchStepsByCreateTimeBefore(LocalDateTime createDate);
 
 }
