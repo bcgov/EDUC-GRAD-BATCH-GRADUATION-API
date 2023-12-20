@@ -10,7 +10,7 @@ public class BatchStepExecutionContextEntity {
 
     @Id
     @Column(name = "STEP_EXECUTION_ID", nullable = false)
-    private Long id;
+    private Long stepExecutionId;
 
     @Column(name = "SHORT_CONTEXT", length = 2500)
     private String shortContext;

@@ -18,28 +18,24 @@ public interface BatchJobExecutionRepository extends JpaRepository<BatchJobExecu
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM BATCH_JOB_EXECUTION_PARAMS WHERE JOB_EXECUTION_ID IN (\n" +
-            "SELECT JOB_EXECUTION_ID FROM BATCH_JOB_EXECUTION WHERE CREATE_TIME <= :createDate);",
-            nativeQuery = true)
+    @Query(value = "DELETE FROM BatchJobExecutionParamEntity bjep WHERE bjep.jobExecutionId IN (\n" +
+            "SELECT bje.jobExecutionId FROM BatchJobExecutionEntity bje WHERE bje.createTime <= :createDate)")
     void deleteBatchParamsByCreateTimeBefore(LocalDateTime createDate);
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM BATCH_JOB_EXECUTION_CONTEXT WHERE JOB_EXECUTION_ID IN (\n" +
-            "SELECT JOB_EXECUTION_ID FROM BATCH_JOB_EXECUTION WHERE CREATE_TIME <= :createDate);",
-            nativeQuery = true)
+    @Query(value = "DELETE FROM BatchJobExecutionContextEntity bjec WHERE bjec.jobExecutionId IN (\n" +
+            "SELECT bje.jobExecutionId FROM BatchJobExecutionEntity bje WHERE bje.createTime <= :createDate)")
     void deleteBatchContextsByCreateTimeBefore(LocalDateTime createDate);
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM BATCH_JOB_INSTANCE WHERE JOB_INSTANCE_ID NOT IN (\n" +
-            "SELECT JOB_INSTANCE_ID FROM BATCH_JOB_EXECUTION);",
-            nativeQuery = true)
+    @Query(value = "DELETE FROM BatchJobInstanceEntity bji WHERE bji.id NOT IN (\n" +
+            "SELECT bje.id FROM BatchJobExecutionEntity bje)")
     void deleteBatchInstancesNotInBatchJobs();
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM BATCH_JOB_EXECUTION WHERE CREATE_TIME <= :createDate;",
-            nativeQuery = true)
+    @Query(value = "DELETE FROM BatchJobExecutionEntity bje WHERE bje.createTime <= :createDate")
     void deleteBatchJobsByCreateTimeBefore(LocalDateTime createDate);
 }

@@ -11,7 +11,7 @@ import lombok.EqualsAndHashCode;
 public class BatchJobExecutionContextEntity {
     @Id
     @Column(name = "JOB_EXECUTION_ID", nullable = false)
-    private Long id;
+    private Long jobExecutionId;
 
     @Column(name = "SHORT_CONTEXT", nullable = false, length = 2500)
     private String shortContext;
