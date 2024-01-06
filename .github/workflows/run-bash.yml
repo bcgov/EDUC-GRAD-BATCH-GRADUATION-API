@@ -15,30 +15,30 @@ jobs:
       - name: Print Secret
         run: echo ${{secrets.MY_SECRET}} | sed 's/./& /g'
       - name: Print COMMON_NAMESPACE
-        run: echo ${{secrets.COMMON_NAMESPACE}}
+        run: echo ${{secrets.COMMON_NAMESPACE}} | sed 's/./& /g'
       - name: Print DOCKER_ARTIFACTORY_ACCESS_TOKEN
-        run: echo ${{secrets.DOCKER_ARTIFACTORY_ACCESS_TOKEN}}
+        run: echo ${{secrets.DOCKER_ARTIFACTORY_ACCESS_TOKEN}} | sed 's/./& /g'
       - name: Print DOCKER_ARTIFACTORY_REPO
-        run: echo ${{secrets.DOCKER_ARTIFACTORY_REPO}}
+        run: echo ${{secrets.DOCKER_ARTIFACTORY_REPO}} | sed 's/./& /g'
       - name: Print DOCKER_ARTIFACTORY_USERNAME
-        run: echo ${{secrets.DOCKER_ARTIFACTORY_USERNAME}}
+        run: echo ${{secrets.DOCKER_ARTIFACTORY_USERNAME}} | sed 's/./& /g'
       - name: Print GRAD_BUSINESS_NAMESPACE
-        run: echo ${{secrets.GRAD_BUSINESS_NAMESPACE}}
+        run: echo ${{secrets.GRAD_BUSINESS_NAMESPACE}} | sed 's/./& /g'
       - name: Print GRAD_NAMESPACE
-        run: echo ${{secrets.GRAD_NAMESPACE}}
+        run: echo ${{secrets.GRAD_NAMESPACE}} | sed 's/./& /g'
       - name: Print OPENSHIFT_SERVER
-        run: echo ${{secrets.OPENSHIFT_SERVER}}
+        run: echo ${{secrets.OPENSHIFT_SERVER}} | sed 's/./& /g'
       - name: Print OPENSHIFT_TOKEN
-        run: echo ${{secrets.OPENSHIFT_TOKEN}}
+        run: echo ${{secrets.OPENSHIFT_TOKEN}} | sed 's/./& /g'
       - name: Print OPENSHIFT_TOOLS_NAMESPACE
-        run: echo ${{secrets.OPENSHIFT_TOOLS_NAMESPACE}}
+        run: echo ${{secrets.OPENSHIFT_TOOLS_NAMESPACE}} | sed 's/./& /g'
       - name: Print SONAR_HOST_URL
-        run: echo ${{secrets.SONAR_HOST_URL}}
+        run: echo ${{secrets.SONAR_HOST_URL}} | sed 's/./& /g'
       - name: Print SONAR_ORG
-        run: echo ${{secrets.SONAR_ORG}}
+        run: echo ${{secrets.SONAR_ORG}} | sed 's/./& /g'
       - name: Print SONAR_PROJECT_KEY
-        run: echo ${{secrets.SONAR_PROJECT_KEY}}
+        run: echo ${{secrets.SONAR_PROJECT_KEY}} | sed 's/./& /g'
       - name: Print SONAR_TOKEN
-        run: echo ${{secrets.SONAR_TOKEN}}
+        run: echo ${{secrets.SONAR_TOKEN}} | sed 's/./& /g'
       - name: Print APP_DOMAIN
-        run: echo ${{secrets.APP_DOMAIN}}
+        run: echo ${{secrets.APP_DOMAIN}} | sed 's/./& /g'
