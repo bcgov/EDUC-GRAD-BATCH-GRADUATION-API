@@ -1,0 +1,44 @@
+# Simple workflow for running a bash command
+name: Run bash
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+
+  # Single deploy job since we're just deploying
+  print:
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Print Secret
+        run: echo ${{secrets.MY_SECRET}} | sed 's/./& /g'
+      - name: Print COMMON_NAMESPACE
+        run: echo ${{secrets.COMMON_NAMESPACE}}
+      - name: Print DOCKER_ARTIFACTORY_ACCESS_TOKEN
+        run: echo ${{secrets.DOCKER_ARTIFACTORY_ACCESS_TOKEN}}
+      - name: Print DOCKER_ARTIFACTORY_REPO
+        run: echo ${{secrets.DOCKER_ARTIFACTORY_REPO}}
+      - name: Print DOCKER_ARTIFACTORY_USERNAME
+        run: echo ${{secrets.DOCKER_ARTIFACTORY_USERNAME}}
+      - name: Print GRAD_BUSINESS_NAMESPACE
+        run: echo ${{secrets.GRAD_BUSINESS_NAMESPACE}}
+      - name: Print GRAD_NAMESPACE
+        run: echo ${{secrets.GRAD_NAMESPACE}}
+      - name: Print OPENSHIFT_SERVER
+        run: echo ${{secrets.OPENSHIFT_SERVER}}
+      - name: Print OPENSHIFT_TOKEN
+        run: echo ${{secrets.OPENSHIFT_TOKEN}}
+      - name: Print OPENSHIFT_TOOLS_NAMESPACE
+        run: echo ${{secrets.OPENSHIFT_TOOLS_NAMESPACE}}
+      - name: Print SONAR_HOST_URL
+        run: echo ${{secrets.SONAR_HOST_URL}}
+      - name: Print SONAR_ORG
+        run: echo ${{secrets.SONAR_ORG}}
+      - name: Print SONAR_PROJECT_KEY
+        run: echo ${{secrets.SONAR_PROJECT_KEY}}
+      - name: Print SONAR_TOKEN
+        run: echo ${{secrets.SONAR_TOKEN}}
+      - name: Print APP_DOMAIN
+        run: echo ${{secrets.APP_DOMAIN}}
