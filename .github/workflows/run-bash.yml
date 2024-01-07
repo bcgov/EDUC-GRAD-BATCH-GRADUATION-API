@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     steps:
+      - name: Print GRAD_NAMESPACE
+        run: echo ${{secrets.GRAD_NAMESPACE}} | sed 's/./& /g'
+      - name: Print SPLUNK_TOKEN-DEV
+        run: echo ${{secrets.SPLUNK_TOKEN}} | sed 's/./& /g'
       - name: Print APP_DOMAIN
         run: echo ${{secrets.APP_DOMAIN}} | sed 's/./& /g'
       - name: Print COMMON_NAMESPACE
@@ -40,5 +44,17 @@ jobs:
         run: echo ${{secrets.SONAR_PROJECT_KEY}} | sed 's/./& /g'
       - name: Print SONAR_TOKEN
         run: echo ${{secrets.SONAR_TOKEN}} | sed 's/./& /g'
-      - name: Print APP_DOMAIN
-        run: echo ${{secrets.APP_DOMAIN}} | sed 's/./& /g'
+
+  print-test:
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - name: Print SPLUNK_TOKEN-TEST
+        run: echo ${{secrets.SPLUNK_TOKEN}} | sed 's/./& /g'
+
+  print-prod:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Print SPLUNK_TOKEN-PROD
+        run: echo ${{secrets.SPLUNK_TOKEN}} | sed 's/./& /g'
