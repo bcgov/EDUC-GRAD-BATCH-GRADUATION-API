@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     steps:
-      - name: Print Secret
-        run: echo ${{secrets.MY_SECRET}} | sed 's/./& /g'
+      - name: Print APP_DOMAIN
+        run: echo ${{secrets.APP_DOMAIN}} | sed 's/./& /g'
       - name: Print COMMON_NAMESPACE
         run: echo ${{secrets.COMMON_NAMESPACE}} | sed 's/./& /g'
       - name: Print DOCKER_ARTIFACTORY_ACCESS_TOKEN
