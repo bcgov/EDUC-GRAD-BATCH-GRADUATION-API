@@ -39,7 +39,7 @@ public class RegGradAlgPartitioner extends BasePartitioner {
             if (res != null) {
                 accessToken = res.getAccess_token();
             }
-            studentList = restUtils.getStudentsForAlgorithm(accessToken);
+            studentList = restUtils.getStudentsForAlgorithm();
         } else {
             studentList = getInputDataFromPreviousJob();
         }

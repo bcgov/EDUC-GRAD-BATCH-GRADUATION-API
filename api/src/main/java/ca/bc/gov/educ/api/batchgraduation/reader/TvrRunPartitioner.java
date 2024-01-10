@@ -39,7 +39,7 @@ public class TvrRunPartitioner extends BasePartitioner {
             if (res != null) {
                 accessToken = res.getAccess_token();
             }
-            studentList = restUtils.getStudentsForProjectedAlgorithm(accessToken);
+            studentList = restUtils.getStudentsForProjectedAlgorithm();
         } else {
             studentList = getInputDataFromPreviousJob();
         }

@@ -40,7 +40,7 @@ public class EDWSnapshotSchoolPartitioner extends BasePartitioner {
         if (req.getSchoolOfRecords() != null && !req.getSchoolOfRecords().isEmpty()) {
             schools = req.getSchoolOfRecords();
         } else {
-            schools = restUtils.getEDWSnapshotSchools(req.getGradYear(), accessToken);
+            schools = restUtils.getEDWSnapshotSchools(req.getGradYear());
         }
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;

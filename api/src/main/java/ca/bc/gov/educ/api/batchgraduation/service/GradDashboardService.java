@@ -89,7 +89,7 @@ public class GradDashboardService extends GradService {
 		List<UUID> studentIds = list.stream().map(BatchGradAlgorithmStudentEntity::getStudentID).toList();
 		List<ErrorBoard> eList = new ArrayList<>();
 		if(!studentIds.isEmpty()) {
-			List<GraduationStudentRecord> studentList = restUtils.getStudentData(studentIds, accessToken);
+			List<GraduationStudentRecord> studentList = restUtils.getStudentData(studentIds);
 
 			for (GraduationStudentRecord gRec : studentList) {
 				ErrorBoard eD = new ErrorBoard();

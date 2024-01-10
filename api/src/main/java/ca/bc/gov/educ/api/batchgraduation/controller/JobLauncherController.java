@@ -180,7 +180,7 @@ public class JobLauncherController {
     public ResponseEntity<String> loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData,
                                                  @RequestHeader(name="Authorization") String accessToken) {
         logger.debug("Inside loadStudentIDs");
-        Integer recordsAdded = restUtils.getStudentByPenFromStudentAPI(loadStudentData, accessToken.replace(BEARER, ""));
+        Integer recordsAdded = restUtils.getStudentByPenFromStudentAPI(loadStudentData);
         if(recordsAdded != null)
             return ResponseEntity.ok("Record Added Successfully");
         return ResponseEntity.status(500).body("Student Record Could not be added");

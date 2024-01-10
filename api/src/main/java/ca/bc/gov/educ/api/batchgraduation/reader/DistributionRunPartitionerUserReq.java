@@ -31,7 +31,7 @@ public class DistributionRunPartitionerUserReq extends BasePartitioner {
         JobParameters jobParameters = context.getJobParameters();
         String credentialType = jobParameters.getString("credentialType");
         StudentSearchRequest req = getStudentSearchRequest();
-        List<StudentCredentialDistribution> credentialList = restUtils.getStudentsForUserReqDisRun(credentialType,req,accessToken);
+        List<StudentCredentialDistribution> credentialList = restUtils.getStudentsForUserReqDisRun(credentialType,req);
         if(!credentialList.isEmpty()) {
             Map<String, ExecutionContext> map = getStringExecutionContextMap(gridSize, credentialList, credentialType);
             LOGGER.info("Found {} in total running on {} partitions",credentialList.size(),map.size());

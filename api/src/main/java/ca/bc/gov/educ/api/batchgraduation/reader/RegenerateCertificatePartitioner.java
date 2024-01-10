@@ -40,7 +40,7 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
         JobParameters jobParameters = context.getJobParameters();
         String searchRequest = jobParameters.getString(SEARCH_REQUEST);
         if (StringUtils.isBlank(searchRequest)) {
-            Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
+            Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData();
             DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
             if(parallelDTO != null) {
                 credentialList.addAll(parallelDTO.certificateList());
@@ -84,7 +84,7 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
 
     private List<StudentCredentialDistribution> getStudentsForDistRun(String accessToken) {
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
-        Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
+        Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData();
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
         if(parallelDTO != null) {
             credentialList.addAll(parallelDTO.certificateList());
@@ -103,7 +103,7 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
         if (certRegenReq != null && "Y".equalsIgnoreCase(certRegenReq.getRunMode())) {
             StudentSearchRequest req = new StudentSearchRequest();
             req.setPens(certRegenReq.getPens());
-            return restUtils.getStudentsForUserReqDisRun("OC", req, accessToken);
+            return restUtils.getStudentsForUserReqDisRun("OC", req);
         } else {
             return getStudentsForDistRun(accessToken);
         }

@@ -103,7 +103,7 @@ public abstract class BaseRunCompletionNotificationListener extends JobExecution
         List<UUID> erroredStudentIDs = new ArrayList<>(errors.keySet());
         if (!erroredStudentIDs.isEmpty()) {
             LOGGER.info(" Update Student Flags: [{}] for {} errored students ----------------------------", jobType, erroredStudentIDs.size());
-            restUtils.updateStudentFlagReadyForBatch(erroredStudentIDs, jobType, accessToken);
+            restUtils.updateStudentFlagReadyForBatch(erroredStudentIDs, jobType);
         }
     }
 

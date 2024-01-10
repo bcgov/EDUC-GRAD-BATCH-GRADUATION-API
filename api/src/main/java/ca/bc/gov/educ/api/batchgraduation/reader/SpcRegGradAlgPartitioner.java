@@ -46,7 +46,7 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
             JobParameters jobParameters = jobExecution.getJobParameters();
             String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
             StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
-            studentList = restUtils.getStudentsForSpecialGradRun(req, accessToken);
+            studentList = restUtils.getStudentsForSpecialGradRun(req);
         } else {
             studentList = getInputDataFromPreviousJob();
         }
