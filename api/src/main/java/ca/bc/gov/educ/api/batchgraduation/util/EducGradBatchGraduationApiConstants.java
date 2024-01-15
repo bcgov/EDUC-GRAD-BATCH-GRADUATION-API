@@ -273,4 +273,7 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${splunk.log-helper.enabled}")
     private boolean splunkLogHelperEnabled;
 
+    @Value("${batch.purge-old-records.staleInDays}")
+    private int recordsStaleInDays;
+
 }

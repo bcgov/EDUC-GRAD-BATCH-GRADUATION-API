@@ -8,7 +8,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Repository
@@ -58,5 +60,10 @@ public interface BatchGradAlgorithmStudentRepository extends JpaRepository<Batch
             "and status = 'COMPLETED'\n" +
             "group by graduation_program_code\n" +
             "order by graduation_program_code desc", nativeQuery = true)
-    List<Object[]> getGraduationProgramCounts( @Param("batchId") Long batchId);
+    List<Object[]> getGraduationProgramCounts(@Param("batchId") Long batchId);
+
+    @Transactional
+    @Modifying
+    @Query("delete from BatchGradAlgorithmStudentEntity where createDate <= :createDate")
+    void deleteByCreateDateBefore(LocalDateTime createDate);
 }

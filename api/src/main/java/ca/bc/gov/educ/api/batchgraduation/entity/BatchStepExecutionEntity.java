@@ -12,7 +12,7 @@ public class BatchStepExecutionEntity {
 
     @Id
     @Column(name = "STEP_EXECUTION_ID", nullable = false)
-    private Long id;
+    private Long stepExecutionId;
 
     @Column(name = "JOB_EXECUTION_ID", nullable = false)
     private Long jobExecutionId;
