@@ -81,7 +81,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			processGlobalList(studentSearchRequestObject, credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,properName);
+			processGlobalList(studentSearchRequestObject, credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser()));
 			LOGGER.info(LOG_SEPARATION);
 		}
     }
