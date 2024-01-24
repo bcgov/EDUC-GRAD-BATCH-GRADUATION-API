@@ -18,13 +18,11 @@ env:
   IMAGE_REGISTRY_PASSWORD: ${{ github.token }}
 
   SPRING_BOOT_IMAGE_NAME: educ-grad-batch-graduation-api-dc
-  DOCKER_ARTIFACTORY_REPO: artifacts.developer.gov.bc.ca/docker-remote
 
   REPO_NAME: "educ-grad-batch-graduation-api"
   APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
   BRANCH: "main"
   TAG: "latest"
-  #GRAD2-1947 Resource optimization
   MIN_CPU: "50m"
   MAX_CPU: "300m"
   MIN_MEM: "1024Mi"
@@ -39,7 +37,6 @@ on:
 jobs:
   openshift-ci-cd:
     name: Build and deploy to OpenShift DEV
-    # ubuntu-20.04 can also be used.
     runs-on: ubuntu-20.04
     environment: dev
 
@@ -59,8 +56,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.DOCKER_ARTIFACTORY_REPO }}
-          username: ${{ secrets.DOCKER_ARTIFACTORY_USERNAME }}
+          registry: ${{ vars.DOCKER_ARTIFACTORY_REPO }}
+          username: ${{ vars.DOCKER_ARTIFACTORY_USERNAME }}
           password: ${{ secrets.DOCKER_ARTIFACTORY_ACCESS_TOKEN }}
 
       # https://github.com/redhat-actions/buildah-build#readme
