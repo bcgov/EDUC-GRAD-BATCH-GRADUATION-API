@@ -18,7 +18,6 @@ env:
   IMAGE_REGISTRY_PASSWORD: ${{ github.token }}
 
   SPRING_BOOT_IMAGE_NAME: educ-grad-batch-graduation-api-dc
-  DOCKER_ARTIFACTORY_REPO: artifacts.developer.gov.bc.ca/docker-remote
 
   REPO_NAME: "educ-grad-batch-graduation-api"
   APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
@@ -72,8 +71,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.DOCKER_ARTIFACTORY_REPO }}
-          username: ${{ secrets.DOCKER_ARTIFACTORY_USERNAME }}
+          registry: ${{ vars.DOCKER_ARTIFACTORY_REPO }}
+          username: ${{ vars.DOCKER_ARTIFACTORY_USERNAME }}
           password: ${{ secrets.DOCKER_ARTIFACTORY_ACCESS_TOKEN }}
 
       # https://github.com/redhat-actions/buildah-build#readme
