@@ -48,6 +48,8 @@ public class RestUtils {
     private static final String SUPPDIST = "SUPPDIST";
     private static final String NONGRADYERUN = "NONGRADYERUN";
     private final EducGradBatchGraduationApiConstants constants;
+    private static final String ERROR_MESSAGE1 = "Service failed to process after max retries.";
+    private static final String ERROR_MESSAGE2 = "5xx error.";
 
     private ResponseObjCache responseObjCache;
 
@@ -83,12 +85,12 @@ public class RestUtils {
                     .body(BodyInserters.fromValue(body))
                     .retrieve()
                     .onStatus(HttpStatusCode::is5xxServerError,
-                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, "5xx error."), clientResponse.statusCode().value())))
+                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
                     .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
                             .filter(ServiceException.class::isInstance)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
-                                throw new ServiceException(getErrorMessage(url, "Service failed to process after max retries."), HttpStatus.SERVICE_UNAVAILABLE.value());
+                                throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))
                     .block();
         } catch (Exception e) {
@@ -117,14 +119,14 @@ public class RestUtils {
                     .retrieve()
                     // if 5xx errors, throw Service error
                     .onStatus(HttpStatusCode::is5xxServerError,
-                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, "5xx error."), clientResponse.statusCode().value())))
+                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
                     // only does retry if initial error was 5xx as service may be temporarily down
                     // 4xx errors will always happen if 404, 401, 403 etc, so does not retry
                     .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
                             .filter(ServiceException.class::isInstance)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
-                                throw new ServiceException(getErrorMessage(url, "Service failed to process after max retries."), HttpStatus.SERVICE_UNAVAILABLE.value());
+                                throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))
                     .block();
         } catch (Exception e) {
@@ -143,12 +145,12 @@ public class RestUtils {
                     .body(BodyInserters.fromValue(body))
                     .retrieve()
                     .onStatus(HttpStatusCode::is5xxServerError,
-                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, "5xx error."), clientResponse.statusCode().value())))
+                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
                     .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
                             .filter(ServiceException.class::isInstance)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
-                                throw new ServiceException(getErrorMessage(url, "Service failed to process after max retries."), HttpStatus.SERVICE_UNAVAILABLE.value());
+                                throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))
                     .block();
         } catch (Exception e) {
