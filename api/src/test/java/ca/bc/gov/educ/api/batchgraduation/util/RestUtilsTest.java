@@ -1347,6 +1347,29 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testupdateStudentGradRecordHistory() {
+        final UUID studentID = UUID.randomUUID();
+        final String userName = "abc";
+        final String accessToken = "xyz";
+        final Long batchId = 4567L;
+
+        GraduationStudentRecord rec = new GraduationStudentRecord();
+        rec.setStudentID(studentID);
+        when(this.webClient.put()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentRecordHistory(),studentID, batchId, accessToken, userName))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.retrieve()).thenReturn(this.responseMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(rec));
+
+        this.restUtils.updateStudentGradRecordHistory(studentID,batchId,accessToken, userName);
+        assertNotNull(rec);
+
+    }
+
+    @Test
     public void testUpdateSchoolReportRecord() {
         final String mincode = "123213123";
         String reportTypeCode = "E";
