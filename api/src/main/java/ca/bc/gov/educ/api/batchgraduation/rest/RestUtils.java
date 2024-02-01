@@ -656,14 +656,14 @@ public class RestUtils {
         }
     }
 
-    public void updateStudentGradRecordHistory(UUID studentID, Long batchId, String accessToken, String userName) {
+    public void updateStudentGradRecordHistory(Long batchId, String accessToken, String userName) {
          try {
             if (batchId != null) {
                 String url = String.format(constants.getUpdateStudentRecordHistory(), batchId, userName);
                 this.put(url,"{}", GraduationStudentRecord.class, accessToken);
             }
         } catch (Exception e) {
-            LOGGER.error("Unable to update student record {}", studentID);
+            LOGGER.error("Unable to update student record");
         }
     }
 

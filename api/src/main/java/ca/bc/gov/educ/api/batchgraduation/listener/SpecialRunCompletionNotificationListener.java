@@ -48,21 +48,10 @@ public class SpecialRunCompletionNotificationListener extends BaseRunCompletionN
 
 		JobParameters jobParameters = jobExecution.getJobParameters();
 		Long batchId = jobExecution.getId();
-		String token = restUtils.fetchAccessToken();
+		String accessToken = restUtils.fetchAccessToken();
 		String userName = jobParameters.getString(RUN_BY);
-		List<UUID> studentList;
-		String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
-		StudentSearchRequest req = (StudentSearchRequest) jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
-		studentList = restUtils.getStudentsForSpecialGradRun(req, token);
 
-		if (!studentList.isEmpty()) {
-			studentList.forEach(studentID -> {
-				LOGGER.debug("Update back Student Record {}", studentID);
-				String accessToken = restUtils.fetchAccessToken();
-				restUtils.updateStudentGradRecordHistory(studentID, batchId, accessToken, userName);
-			});
-
-		}
+		restUtils.updateStudentGradRecordHistory(batchId, accessToken, userName);
 	}
 
 
