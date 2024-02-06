@@ -25,11 +25,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -92,6 +90,9 @@ public class SpecialRunCompletionNotificationListenerTest {
         Date endTime = DateUtils.toDate(jobExecution.getEndTime());
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
+        String userName = jobParameters.getString("RUN_BY_ABC");
+        UUID studentID = UUID.randomUUID();
+
 
         BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
         ent.setActualStudentsProcessed(processedStudents);
@@ -103,6 +104,8 @@ public class SpecialRunCompletionNotificationListenerTest {
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);
+        ent.setUpdateUser(userName);
+        ent.setId(studentID);
 
         jobExecution.setExecutionContext(jobContext);
         ResponseObj obj = new ResponseObj();

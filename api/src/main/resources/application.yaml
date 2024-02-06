@@ -203,6 +203,7 @@ endpoint:
     get-student-data-list: ${GRAD_STUDENT_API}api/v1/student/multistudentids
     get-student-record: ${GRAD_STUDENT_API}api/v1/student/grad/%s
     update-student-record: ${GRAD_STUDENT_API}api/v1/student/distribution/studentid/%s?batchId=%s&activityCode=%s
+    update-student-record-history: ${GRAD_STUDENT_API}api/v1/student/distribution/batchid/%s?userName=%s
     read-grad-student-record: ${GRAD_STUDENT_API}api/v1/student/studentid/%s/algorithm
     read-grad-student-record-batch: ${GRAD_STUDENT_API}api/v1/student/batch/%s
     update-flag-ready-for-batch: ${GRAD_STUDENT_API}api/v1/student/multistudentids/batchflag/jobtype/%s
