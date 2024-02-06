@@ -18,8 +18,7 @@ public class TvrRunBatchPerformanceWriter extends BaseWriter {
     @Override
     public void write(Chunk<? extends GraduationStudentRecord> list) throws Exception {
         if(!list.isEmpty()) {
-        	GraduationStudentRecord gradStatus = list.getItems().get(0);
-            saveBatchStatus(gradStatus);
+        	list.forEach(this::saveBatchStatus);
             LOGGER.debug("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }
     }
