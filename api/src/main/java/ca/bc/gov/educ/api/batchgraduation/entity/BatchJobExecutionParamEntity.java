@@ -19,14 +19,14 @@ public class BatchJobExecutionParamEntity implements Serializable {
     @Column(name = "JOB_EXECUTION_ID", nullable = false)
     private Long jobExecutionId;
 
-    @Column(name = "PARAMETER_TYPE", nullable = false, length = 32)
+    @Column(name = "PARAMETER_TYPE", nullable = false, length = 100)
     private String parameterType;
 
     @Id
     @Column(name = "PARAMETER_NAME", nullable = false, length = 100)
     private String parameterName;
 
-    @Column(name = "PARAMETER_VALUE", length = 1000)
+    @Column(name = "PARAMETER_VALUE", length = 2500)
     private String parameterValue;
 
     @Column(name = "IDENTIFYING", nullable = false)
