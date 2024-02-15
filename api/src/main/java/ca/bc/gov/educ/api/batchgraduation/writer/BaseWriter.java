@@ -22,12 +22,14 @@ public abstract class BaseWriter implements ItemWriter<GraduationStudentRecord> 
     AlgorithmSummaryDTO summaryDTO;
 
     protected void saveBatchStatus(GraduationStudentRecord item) {
-        if (summaryDTO.getErrors().containsKey(item.getStudentID())) {
-            ProcessError v = summaryDTO.getErrors().get(item.getStudentID());
-            gradBatchHistoryService.updateBatchStatusForStudent(batchId, item.getStudentID(), BatchStatusEnum.FAILED, v.getReason() + "-" + v.getDetail());
-            summaryDTO.getErrors().remove(item.getStudentID());
-        } else {
-            gradBatchHistoryService.updateBatchStatusForStudent(batchId, item.getStudentID(), BatchStatusEnum.COMPLETED, null);
+        if (item != null) {
+            if (summaryDTO.getErrors().containsKey(item.getStudentID())) {
+                ProcessError v = summaryDTO.getErrors().get(item.getStudentID());
+                gradBatchHistoryService.updateBatchStatusForStudent(batchId, item.getStudentID(), BatchStatusEnum.FAILED, v.getReason() + "-" + v.getDetail());
+                summaryDTO.getErrors().remove(item.getStudentID());
+            } else {
+                gradBatchHistoryService.updateBatchStatusForStudent(batchId, item.getStudentID(), BatchStatusEnum.COMPLETED, null);
+            }
         }
     }
 }

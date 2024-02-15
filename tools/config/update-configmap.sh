@@ -51,9 +51,9 @@ PARSER_CONFIG="
 ###########################################################
 echo Creating config map "$APP_NAME"-config-map
 oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map \
- --from-literal=CONNECTION_TIMEOUT="60000" \
+ --from-literal=CONNECTION_TIMEOUT="30000" \
  --from-literal=GRAD_TRAX_API="http://educ-grad-trax-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
- --from-literal=MAX_LIFETIME="590000" \
+ --from-literal=MAX_LIFETIME="420000" \
  --from-literal=GRAD_STUDENT_API="http://educ-grad-student-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=MAXIMUM_POOL_SIZE="25" \
  --from-literal=APP_LOG_LEVEL="$APP_LOG_LEVEL" \

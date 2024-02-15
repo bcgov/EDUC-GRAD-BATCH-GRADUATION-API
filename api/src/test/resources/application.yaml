@@ -67,6 +67,8 @@ authorization:
   password: abc
 
 batch:
+  transaction:
+    chunk-size: 1
   partitions:
     number: 10
   regalg:
