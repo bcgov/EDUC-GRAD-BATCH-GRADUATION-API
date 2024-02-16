@@ -12,8 +12,7 @@ public class RegGradAlgBatchPerformanceWriter extends BaseWriter {
     @Override
     public void write(Chunk<? extends GraduationStudentRecord> list) {
         if(!list.isEmpty()) {
-        	GraduationStudentRecord gradStatus = list.getItems().get(0);
-            saveBatchStatus(gradStatus);
+            list.forEach(this::saveBatchStatus);
             LOGGER.debug("Left:{}\n",summaryDTO.getReadCount()-summaryDTO.getProcessedCount());
         }
     }

@@ -12,14 +12,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.listener.JobExecutionListenerSupport;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
-public abstract class BaseDistributionRunCompletionNotificationListener extends JobExecutionListenerSupport {
+public abstract class BaseDistributionRunCompletionNotificationListener implements JobExecutionListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseDistributionRunCompletionNotificationListener.class);
 

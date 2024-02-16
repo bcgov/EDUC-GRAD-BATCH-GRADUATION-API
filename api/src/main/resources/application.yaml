@@ -2,19 +2,18 @@
 spring:
   jmx:
     enabled: false
-  db-connection:
+  datasource:
     hikari:
       pool-name: educ-grad-batch-graduation-api-cp
       maximum-pool-size: ${MAXIMUM_POOL_SIZE}
       connection-timeout: ${CONNECTION_TIMEOUT}
       max-lifetime: ${MAX_LIFETIME}
       minimum-idle: ${MIN_IDLE}
-      keepalive-time: ${KEEP_ALIVE_TIME}
       idle-timeout: ${IDLE_TIMEOUT}
     url: ${CONNECTION_STRING}
     username: ${USERNAME}
     password: ${PASSWORD}
-    driver-class: oracle.jdbc.driver.OracleDriver
+    driver-class-name: oracle.jdbc.driver.OracleDriver
   jpa:
     show-sql: true
     database-platform: org.hibernate.dialect.OracleDialect
@@ -138,6 +137,8 @@ authorization:
   password: ${GRAD_CLIENT_SECRET}
 
 batch:
+  transaction:
+    chunk-size: ${TRANSACTION_CHUNK_SIZE}
   partitions:
     number: ${NUMBER_OF_PARTITIONS}
   regalg:
@@ -167,9 +168,9 @@ endpoint:
   keycloak:
     getToken: ${KEYCLOAK_TOKEN_URL}auth/realms/master/protocol/openid-connect/token
   grad-graduation-api:
-    graduatestudent: 
+    graduatestudent:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/GS?batchId=%s
-    reportonlyrun: 
+    reportonlyrun:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/FMR?batchId=%s
     tvrrun:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/REGFM?batchId=%s

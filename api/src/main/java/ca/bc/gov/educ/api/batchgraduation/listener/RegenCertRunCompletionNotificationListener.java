@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.listener.JobExecutionListenerSupport;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import java.time.ZoneId;
 import java.util.Date;
 
 @Component
-public class RegenCertRunCompletionNotificationListener extends JobExecutionListenerSupport {
+public class RegenCertRunCompletionNotificationListener implements JobExecutionListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegenCertRunCompletionNotificationListener.class);
 
