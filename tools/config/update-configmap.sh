@@ -55,7 +55,7 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
  --from-literal=GRAD_TRAX_API="http://educ-grad-trax-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=MAX_LIFETIME="600000" \
  --from-literal=GRAD_STUDENT_API="http://educ-grad-student-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
- --from-literal=MAXIMUM_POOL_SIZE="25" \
+ --from-literal=MAXIMUM_POOL_SIZE="08" \
  --from-literal=APP_LOG_LEVEL="$APP_LOG_LEVEL" \
  --from-literal=GRAD_GRADUATION_REPORT_API="http://educ-grad-graduation-report-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=GRAD_DISTRIBUTION_API="http://educ-grad-distribution-api.$BUSINESS_NAMESPACE-$envValue.svc.cluster.local:8080/" \
