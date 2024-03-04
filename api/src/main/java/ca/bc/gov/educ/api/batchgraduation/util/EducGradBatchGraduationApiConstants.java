@@ -139,6 +139,10 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${batch.partitions.number}")
     private int numberOfPartitions;
 
+    // Spring Batch Transaction Chunk Size
+    @Value("${batch.transaction.chunk-size}")
+    private int transactionChunkSize;
+
     // Token expiry offset (seconds)
     @Value("${batch.token-expiry.offset}")
     private int tokenExpiryOffset;
