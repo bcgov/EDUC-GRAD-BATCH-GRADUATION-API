@@ -71,6 +71,7 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
  --from-literal=NUMBER_OF_PARTITIONS="10" \
  --from-literal=KEYCLOAK_TOKEN_URL="https://soam-$envValue.apps.silver.devops.gov.bc.ca/" \
  --from-literal=REG_ALG_CRON="0 30 18 * * *" \
+ --from-literal=RECORDS_STALE_IN_DAYS="1095" \
  --dry-run=client -o yaml | oc apply -f -
 
 echo Creating config map "$APP_NAME"-flb-sc-config-map
