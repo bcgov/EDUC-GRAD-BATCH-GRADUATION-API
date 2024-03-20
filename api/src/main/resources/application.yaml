@@ -15,7 +15,7 @@ spring:
     password: ${PASSWORD}
     driver-class-name: oracle.jdbc.driver.OracleDriver
   jpa:
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.OracleDialect
     hibernate:
       ddl-auto: none
