@@ -27,7 +27,7 @@ env:
   MAX_CPU: "300m"
   MIN_MEM: "1024Mi"
   MAX_MEM: "4Gi"
-  MIN_REPLICAS: "3"
+  MIN_REPLICAS: "2"
   MAX_REPLICAS: "3"
 
 on:
