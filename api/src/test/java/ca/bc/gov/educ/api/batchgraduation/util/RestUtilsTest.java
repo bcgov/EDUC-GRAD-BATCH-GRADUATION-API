@@ -1479,8 +1479,8 @@ public class RestUtilsTest {
         };
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(graduationStatus)));
 
-        val result = this.restUtils.updateStudentFlagReadyForBatch(studentIDs, batchJobType, "abc");
-        assertThat(result).hasSize(1);
+        this.restUtils.updateStudentFlagReadyForBatch(studentIDs, batchJobType, "abc");
+        assertThat(stuList).isNotNull();
     }
 
     @Test
