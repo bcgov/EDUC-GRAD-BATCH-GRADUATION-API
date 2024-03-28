@@ -667,9 +667,9 @@ public class RestUtils {
         }
     }
 
-    public List<GraduationStudentRecord> updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {
+    public String updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {
         UUID correlationID = UUID.randomUUID();
-        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        final ParameterizedTypeReference<String> responseType = new ParameterizedTypeReference<>() {
         };
         StudentList stuList = new StudentList();
         stuList.setStudentids(studentIds);
