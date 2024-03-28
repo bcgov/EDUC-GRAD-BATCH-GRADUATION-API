@@ -103,7 +103,8 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
         List<UUID> erroredStudentIDs = new ArrayList<>(errors.keySet());
         if (!erroredStudentIDs.isEmpty()) {
             LOGGER.info(" Update Student Flags: [{}] for {} errored students ----------------------------", jobType, erroredStudentIDs.size());
-            restUtils.updateStudentFlagReadyForBatch(erroredStudentIDs, jobType, accessToken);
+            String result = restUtils.updateStudentFlagReadyForBatch(erroredStudentIDs, jobType, accessToken);
+            LOGGER.info(" Update Student Flags completed {} ----------------------------", result);
         }
     }
 

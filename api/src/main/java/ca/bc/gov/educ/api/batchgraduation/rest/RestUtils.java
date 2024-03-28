@@ -667,13 +667,13 @@ public class RestUtils {
         }
     }
 
-    public void updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {
+    public String updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {
         UUID correlationID = UUID.randomUUID();
-        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        final ParameterizedTypeReference<String> responseType = new ParameterizedTypeReference<>() {
         };
         StudentList stuList = new StudentList();
         stuList.setStudentids(studentIds);
-        this.webClient.post()
+        return this.webClient.post()
                 .uri(String.format(constants.getUpdateStudentFlagReadyForBatchByStudentIDs(), batchJobType))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .body(BodyInserters.fromValue(stuList))

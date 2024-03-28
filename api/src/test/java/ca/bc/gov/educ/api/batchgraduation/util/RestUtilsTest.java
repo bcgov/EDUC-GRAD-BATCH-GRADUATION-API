@@ -1475,12 +1475,13 @@ public class RestUtilsTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
+        final ParameterizedTypeReference<String> responseType = new ParameterizedTypeReference<>() {
         };
-        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(graduationStatus)));
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just("SUCCESS"));
 
-        this.restUtils.updateStudentFlagReadyForBatch(studentIDs, batchJobType, "abc");
+        var result = this.restUtils.updateStudentFlagReadyForBatch(studentIDs, batchJobType, "abc");
         assertThat(stuList).isNotNull();
+        assertThat(result).isEqualTo("SUCCESS");
     }
 
     @Test
