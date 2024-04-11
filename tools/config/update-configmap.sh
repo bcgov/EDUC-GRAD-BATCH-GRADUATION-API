@@ -7,6 +7,7 @@ OPENSHIFT_NAMESPACE=$3
 COMMON_NAMESPACE=$4
 BUSINESS_NAMESPACE=$5
 SPLUNK_TOKEN=$6
+APP_LOG_LEVEL=$7
 
 SPLUNK_URL="gww.splunk.educ.gov.bc.ca"
 FLB_CONFIG="[SERVICE]
@@ -50,12 +51,12 @@ PARSER_CONFIG="
 ###########################################################
 echo Creating config map "$APP_NAME"-config-map
 oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map \
- --from-literal=CONNECTION_TIMEOUT="60000" \
+ --from-literal=CONNECTION_TIMEOUT="30000" \
  --from-literal=GRAD_TRAX_API="http://educ-grad-trax-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
- --from-literal=MAX_LIFETIME="600000" \
+ --from-literal=MAX_LIFETIME="420000" \
  --from-literal=GRAD_STUDENT_API="http://educ-grad-student-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=MAXIMUM_POOL_SIZE="25" \
- --from-literal=APP_LOG_LEVEL="INFO" \
+ --from-literal=APP_LOG_LEVEL="$APP_LOG_LEVEL" \
  --from-literal=GRAD_GRADUATION_REPORT_API="http://educ-grad-graduation-report-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=GRAD_DISTRIBUTION_API="http://educ-grad-distribution-api.$BUSINESS_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=TVR_RUN_CRON="0 0 02 * * *" \
@@ -63,13 +64,14 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
  --from-literal=IDLE_TIMEOUT="300000" \
  --from-literal=MAX_RETRY_ATTEMPTS="5" \
  --from-literal=ENABLE_FLYWAY="true" \
- --from-literal=KEEP_ALIVE_TIME="150000" \
  --from-literal=TOKEN_EXPIRY_OFFSET="30" \
  --from-literal=GRAD_GRADUATION_API="http://educ-grad-graduation-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=DIST_RUN_CRON="0 0 02 1 * *" \
+ --from-literal=TRANSACTION_CHUNK_SIZE="1" \
  --from-literal=NUMBER_OF_PARTITIONS="10" \
  --from-literal=KEYCLOAK_TOKEN_URL="https://soam-$envValue.apps.silver.devops.gov.bc.ca/" \
  --from-literal=REG_ALG_CRON="0 30 18 * * *" \
+ --from-literal=RECORDS_STALE_IN_DAYS="1095" \
  --dry-run=client -o yaml | oc apply -f -
 
 echo Creating config map "$APP_NAME"-flb-sc-config-map

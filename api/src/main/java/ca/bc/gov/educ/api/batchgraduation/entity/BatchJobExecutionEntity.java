@@ -20,19 +20,19 @@ public class BatchJobExecutionEntity {
 	@Column(name = "JOB_INSTANCE_ID", nullable = false)
 	private Long id;
 
-	@Column(name = "CREATE_TIME", nullable = true)
+	@Column(name = "CREATE_TIME", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
-	private LocalDateTime createTime;
+	private LocalDateTime createTime = LocalDateTime.now();
 	
-	@Column(name = "START_TIME", nullable = true)
+	@Column(name = "START_TIME")
 	@Temporal(TemporalType.TIMESTAMP)
 	private LocalDateTime startTime;
 	
-	@Column(name = "END_TIME", nullable = true)
+	@Column(name = "END_TIME")
 	@Temporal(TemporalType.TIMESTAMP)
 	private LocalDateTime endTime;
 	
-	@Column(name = "STATUS", nullable = true)
+	@Column(name = "STATUS", length = 10)
     private String status;
 
 	@Column(name = "VERSION")
@@ -44,11 +44,8 @@ public class BatchJobExecutionEntity {
 	@Column(name = "EXIT_MESSAGE", length = 2500)
 	private String exitMessage;
 
-	@Column(name = "LAST_UPDATED", nullable = true)
+	@Column(name = "LAST_UPDATED")
 	@Temporal(TemporalType.TIMESTAMP)
 	private LocalDateTime lastUpdated;
-
-	@Column(name = "JOB_CONFIGURATION_LOCATION", length = 2500)
-	private String jobConfigurationLocation;
 
 }

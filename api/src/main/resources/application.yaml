@@ -2,21 +2,20 @@
 spring:
   jmx:
     enabled: false
-  db-connection:
+  datasource:
     hikari:
       pool-name: educ-grad-batch-graduation-api-cp
       maximum-pool-size: ${MAXIMUM_POOL_SIZE}
       connection-timeout: ${CONNECTION_TIMEOUT}
       max-lifetime: ${MAX_LIFETIME}
       minimum-idle: ${MIN_IDLE}
-      keepalive-time: ${KEEP_ALIVE_TIME}
       idle-timeout: ${IDLE_TIMEOUT}
     url: ${CONNECTION_STRING}
     username: ${USERNAME}
     password: ${PASSWORD}
-    driver-class: oracle.jdbc.driver.OracleDriver
+    driver-class-name: oracle.jdbc.driver.OracleDriver
   jpa:
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.OracleDialect
     hibernate:
       ddl-auto: none
@@ -138,6 +137,8 @@ authorization:
   password: ${GRAD_CLIENT_SECRET}
 
 batch:
+  transaction:
+    chunk-size: ${TRANSACTION_CHUNK_SIZE}
   partitions:
     number: ${NUMBER_OF_PARTITIONS}
   regalg:
@@ -167,9 +168,9 @@ endpoint:
   keycloak:
     getToken: ${KEYCLOAK_TOKEN_URL}auth/realms/master/protocol/openid-connect/token
   grad-graduation-api:
-    graduatestudent: 
+    graduatestudent:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/GS?batchId=%s
-    reportonlyrun: 
+    reportonlyrun:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/FMR?batchId=%s
     tvrrun:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/studentid/%s/run/REGFM?batchId=%s
@@ -203,6 +204,7 @@ endpoint:
     get-student-data-list: ${GRAD_STUDENT_API}api/v1/student/multistudentids
     get-student-record: ${GRAD_STUDENT_API}api/v1/student/grad/%s
     update-student-record: ${GRAD_STUDENT_API}api/v1/student/distribution/studentid/%s?batchId=%s&activityCode=%s
+    update-student-record-history: ${GRAD_STUDENT_API}api/v1/student/distribution/batchid/%s?userName=%s
     read-grad-student-record: ${GRAD_STUDENT_API}api/v1/student/studentid/%s/algorithm
     read-grad-student-record-batch: ${GRAD_STUDENT_API}api/v1/student/batch/%s
     update-flag-ready-for-batch: ${GRAD_STUDENT_API}api/v1/student/multistudentids/batchflag/jobtype/%s

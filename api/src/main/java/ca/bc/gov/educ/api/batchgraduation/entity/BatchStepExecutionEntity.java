@@ -68,7 +68,7 @@ public class BatchStepExecutionEntity {
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime lastUpdated = LocalDateTime.now();
 
-    @Column(name = "CREATE_TIME")
+    @Column(name = "CREATE_TIME", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createTime = LocalDateTime.now();
 

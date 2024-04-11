@@ -91,11 +91,9 @@ public class JobLauncherController {
     private final GradBatchHistoryService gradBatchHistoryService;
     private final DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor;
 
-    @Autowired
-    JsonTransformer jsonTransformer;
+    private final JsonTransformer jsonTransformer;
 
-    @Autowired
-    GradSchoolOfRecordFilter gradSchoolOfRecordFilter;
+    private final GradSchoolOfRecordFilter gradSchoolOfRecordFilter;
 
     @Autowired
     public JobLauncherController(
@@ -106,7 +104,9 @@ public class JobLauncherController {
             RestUtils restUtils,
             GradDashboardService gradDashboardService,
             GradBatchHistoryService gradBatchHistoryService,
-            DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor) {
+            DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor,
+            JsonTransformer jsonTransformer,
+            GradSchoolOfRecordFilter gradSchoolOfRecordFilter) {
         this.jobLauncher = jobLauncher;
         this.asyncJobLauncher = asyncJobLauncher;
         this.jobRegistry = jobRegistry;
@@ -114,6 +114,8 @@ public class JobLauncherController {
         this.gradDashboardService = gradDashboardService;
         this.gradBatchHistoryService = gradBatchHistoryService;
         this.distributionRunStatusUpdateProcessor = distributionRunStatusUpdateProcessor;
+        this.jsonTransformer = jsonTransformer;
+        this.gradSchoolOfRecordFilter = gradSchoolOfRecordFilter;
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_REG_GRAD_BATCH_JOB)
@@ -606,7 +608,7 @@ public class JobLauncherController {
 
     @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_USER_REQ_RUNS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
-    @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
+    @Operation(summary = "Run Specialized TVR Runs", description = "Run specialized Distribution runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<DistributionSummaryDTO> launchUserReqDisRunSpecialJob(@PathVariable String credentialType, @RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchUserReqDisRunSpecialJob");
@@ -643,7 +645,7 @@ public class JobLauncherController {
 
     @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_SPECIALIZED_BLANK_USER_REQ_RUNS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
-    @Operation(summary = "Run Specialized User Req Runs", description = "Run specialized Distribution runs", tags = { "DISTRIBUTION" })
+    @Operation(summary = "Run Specialized User Req Runs", description = "Run specialized Distribution runs", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<BlankDistributionSummaryDTO> launchUserReqBlankDisRunSpecialJob(@RequestBody BlankCredentialRequest blankCredentialRequest, @PathVariable String credentialType) {
         logger.debug("launchUserReqDisRunSpecialJob");

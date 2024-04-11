@@ -139,6 +139,10 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${batch.partitions.number}")
     private int numberOfPartitions;
 
+    // Spring Batch Transaction Chunk Size
+    @Value("${batch.transaction.chunk-size}")
+    private int transactionChunkSize;
+
     // Token expiry offset (seconds)
     @Value("${batch.token-expiry.offset}")
     private int tokenExpiryOffset;
@@ -184,6 +188,9 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-student-api.update-student-record}")
     private String updateStudentRecord;
+
+    @Value("${endpoint.grad-student-api.update-student-record-history}")
+    private String updateStudentRecordHistory;
 
     @Value("${endpoint.grad-student-api.get-student-data-nongrad-yearly}")
     private String studentDataNonGradEarlyByMincode;
