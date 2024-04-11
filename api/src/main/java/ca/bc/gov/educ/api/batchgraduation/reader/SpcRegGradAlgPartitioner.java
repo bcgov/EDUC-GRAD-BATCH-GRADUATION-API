@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import org.slf4j.Logger;
@@ -38,11 +37,6 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
         BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         List<UUID> studentList;
         if (runType == RunTypeEnum.NORMAL_JOB_PROCESS) {
-            ResponseObj res = restUtils.getTokenResponseObject();
-            String accessToken = null;
-            if (res != null) {
-                accessToken = res.getAccess_token();
-            }
             JobParameters jobParameters = jobExecution.getJobParameters();
             String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
             StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
