@@ -196,7 +196,6 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		});
 		List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().collect(Collectors.toList());
 		studentIDs.forEach(sid-> {
-			String accessToken = restUtils.fetchAccessToken();
 			restUtils.updateStudentGradRecord(sid,batchId,activityCode);
 		});
 	}
