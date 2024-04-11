@@ -369,10 +369,9 @@ public class RestUtils {
         }
     }
 
-    public Integer getStudentByPenFromStudentAPI(List<LoadStudentData> loadStudentData) {
+    public Integer getStudentByPenFromStudentAPI(List<LoadStudentData> loadStudentData, String accessToken) {
        AtomicReference<Integer> recordsAdded = new AtomicReference<>(0);
         loadStudentData.forEach(student -> {
-            String accessToken = getAccessToken();
             List<Student> stuDataList = this.getStudentsByPen(student.getPen(), accessToken);
             stuDataList.forEach(st-> {
                 GraduationStudentRecord gradStu = new GraduationStudentRecord();
@@ -382,7 +381,7 @@ public class RestUtils {
                 gradStu.setRecalculateGradStatus("Y");
                 gradStu.setStudentStatus(student.getStudentStatus());
                 gradStu.setStudentID(UUID.fromString(st.getStudentID()));
-                this.saveGraduationStudentRecord(gradStu, accessToken);
+                saveGraduationStudentRecord(gradStu, accessToken);
                 recordsAdded.getAndSet(recordsAdded.get() + 1);
             });
         });

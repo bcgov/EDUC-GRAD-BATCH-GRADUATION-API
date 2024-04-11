@@ -1473,7 +1473,7 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(graduationStatus));
 
 
-        Integer res = this.restUtils.getStudentByPenFromStudentAPI(loadStudentData);
+        Integer res = this.restUtils.getStudentByPenFromStudentAPI(loadStudentData, "accessToken");
         assertThat(res).isEqualTo(1);
 
     }
