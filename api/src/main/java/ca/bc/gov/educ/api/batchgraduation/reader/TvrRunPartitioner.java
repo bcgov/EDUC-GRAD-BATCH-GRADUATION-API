@@ -2,7 +2,6 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +33,7 @@ public class TvrRunPartitioner extends BasePartitioner {
         BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         List<UUID> studentList;
         if (runType == RunTypeEnum.NORMAL_JOB_PROCESS) {
-            ResponseObj res = restUtils.getTokenResponseObject();
-            String accessToken = null;
-            if (res != null) {
-                accessToken = res.getAccess_token();
-            }
-            studentList = restUtils.getStudentsForProjectedAlgorithm(accessToken);
+            studentList = restUtils.getStudentsForProjectedAlgorithm();
         } else {
             studentList = getInputDataFromPreviousJob();
         }

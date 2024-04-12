@@ -244,7 +244,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     void filterOutDeceasedStudents(List<StudentCredentialDistribution> credentialList) {
         LOGGER.debug("Total size of credential list: {}", credentialList.size());
-        List<UUID> deceasedIDs = restUtils.getDeceasedStudentIDs(credentialList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList(), restUtils.getAccessToken());
+        List<UUID> deceasedIDs = restUtils.getDeceasedStudentIDs(credentialList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList());
         if (!deceasedIDs.isEmpty()) {
             LOGGER.debug("Deceased students: {}", deceasedIDs.size());
             credentialList.removeIf(cr -> deceasedIDs.contains(cr.getStudentID()));
