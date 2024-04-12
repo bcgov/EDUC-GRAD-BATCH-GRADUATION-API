@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -43,7 +42,7 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
         String searchRequest = jobParameters.getString(SEARCH_REQUEST);
         CertificateRegenerationRequest certificateRegenerationRequest = (CertificateRegenerationRequest)jsonTransformer.unmarshall(searchRequest, CertificateRegenerationRequest.class);
         if (certificateRegenerationRequest.runForAll()) {
-            Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
+            Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData();
             DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
             if(parallelDTO != null) {
                 credentialList.addAll(parallelDTO.certificateList());
@@ -88,7 +87,7 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
     // retrieve students based on the search criteria requested by user
     private List<StudentCredentialDistribution> getStudentsForUserReqRun(CertificateRegenerationRequest certificateRegenerationRequest, String accessToken) {
         if(certificateRegenerationRequest != null && "Y".equalsIgnoreCase(certificateRegenerationRequest.getRunMode())) {
-            return restUtils.getStudentsForUserReqDisRun("OC", certificateRegenerationRequest, accessToken);
+            return restUtils.getStudentsForUserReqDisRun("OC", certificateRegenerationRequest);
         } else {
             return new ArrayList<>();
         }
