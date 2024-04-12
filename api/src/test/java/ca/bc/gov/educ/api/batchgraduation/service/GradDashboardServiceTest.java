@@ -201,7 +201,7 @@ public class GradDashboardServiceTest {
         rec.setPen("673213121");
 
         Mockito.when(batchGradAlgorithmStudentRepository.findByJobExecutionIdAndStatusIn(batchId,Arrays.asList("STARTED", "FAILED"), paging)).thenReturn(pagedData);
-        Mockito.when(restUtils.getStudentData(List.of(studentId), "accessToken")).thenReturn(List.of(rec));
+        Mockito.when(restUtils.getStudentData(List.of(studentId))).thenReturn(List.of(rec));
         Mockito.when(batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(rec.getStudentID(),batchId)).thenReturn(Optional.of(ent));
 
         ErrorDashBoard res = gradDashboardService.getErrorInfo(batchId,0,10,"accessToken");

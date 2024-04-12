@@ -92,7 +92,7 @@ public class ParallelDataFetchTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<String>>(){})).thenReturn(Mono.just(List.of("1234567")));
 
-        List<String> result = parallelDataFetch.fetchDistributionRequiredDataSchoolsNonGradYearly("accessToken");
+        List<String> result = parallelDataFetch.fetchDistributionRequiredDataSchoolsNonGradYearly();
         assertThat(result).isNotEmpty();
 
     }
@@ -108,7 +108,7 @@ public class ParallelDataFetchTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<String>>(){})).thenReturn(Mono.just(List.of("123")));
 
-        List<String> result = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly("accessToken");
+        List<String> result = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly();
         assertThat(result).isNotEmpty();
 
     }

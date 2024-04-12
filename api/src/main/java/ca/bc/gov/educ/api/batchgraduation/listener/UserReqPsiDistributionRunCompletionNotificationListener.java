@@ -110,7 +110,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		cList.forEach(scd->	{
 			LOGGER.debug("Update back Student Record {}", scd.getStudentID());
 			String accessToken = restUtils.fetchAccessToken();
-			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode,accessToken);
+			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode);
 		});
 	}
 }
