@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import org.slf4j.Logger;
@@ -23,15 +22,10 @@ public class DistributionRunPartitionerUserReq extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        ResponseObj res = restUtils.getTokenResponseObject();
-        String accessToken = null;
-        if (res != null) {
-            accessToken = res.getAccess_token();
-        }
         JobParameters jobParameters = context.getJobParameters();
         String credentialType = jobParameters.getString("credentialType");
         StudentSearchRequest req = getStudentSearchRequest();
-        List<StudentCredentialDistribution> credentialList = restUtils.getStudentsForUserReqDisRun(credentialType,req,accessToken);
+        List<StudentCredentialDistribution> credentialList = restUtils.getStudentsForUserReqDisRun(credentialType,req);
         if(!credentialList.isEmpty()) {
             Map<String, ExecutionContext> map = getStringExecutionContextMap(gridSize, credentialList, credentialType);
             LOGGER.info("Found {} in total running on {} partitions",credentialList.size(),map.size());

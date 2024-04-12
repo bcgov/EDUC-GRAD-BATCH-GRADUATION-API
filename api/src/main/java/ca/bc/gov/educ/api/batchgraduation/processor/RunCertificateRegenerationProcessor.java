@@ -26,15 +26,15 @@ public class RunCertificateRegenerationProcessor implements ItemProcessor<UUID, 
 
 	@Override
 	public Integer process(UUID key) throws Exception {
-		GraduationStudentRecordDistribution stuRec = restUtils.getStudentData(key.toString(), summaryDTO.getAccessToken());
+		GraduationStudentRecordDistribution stuRec = restUtils.getStudentData(key.toString());
 		if (stuRec != null) {
 			LOGGER.info("Processing partitionData: studentID = {}", stuRec.getStudentID());
 			summaryDTO.setBatchId(batchId);
 			try {
 				summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
-				Integer count = restUtils.runRegenerateStudentCertificate(stuRec.getPen(), summaryDTO.getAccessToken());
+				Integer count = restUtils.runRegenerateStudentCertificate(stuRec.getPen());
 				if (count > 0) {
-					restUtils.updateStudentGradRecord(key, batchId, "CERTREGEN", summaryDTO.getAccessToken());
+					restUtils.updateStudentGradRecord(key, batchId, "CERTREGEN");
 				}
 				return count;
 			} catch(Exception e) {

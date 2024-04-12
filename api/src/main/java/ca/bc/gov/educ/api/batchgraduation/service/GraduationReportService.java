@@ -98,7 +98,7 @@ public class GraduationReportService {
 		}
 		dist.setStudentID(data.getGraduationStudentRecordId());
 		dist.setPaperType(paperType);
-		dist.setSchoolOfRecord(data.getMincode());
+		dist.setSchoolOfRecord(StringUtils.isBlank(data.getMincodeAtGrad()) ? data.getMincode() : data.getMincodeAtGrad());
 		dist.setDocumentStatusCode("COMPL");
 		dist.setPen(data.getPen());
 		dist.setLegalFirstName(data.getFirstName());
