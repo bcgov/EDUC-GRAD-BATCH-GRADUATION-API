@@ -9,7 +9,8 @@ public enum JobProperName {
     NDBJ("Non-Grad Distribution Batch Job"),
 	URDBJ ("User Req Distribution Batch Job"),
     URPDBJ("PSI Distribution Batch Job"),
-    BDBJ ("Blank Distribution Batch Job");
+    BDBJ ("Blank Distribution Batch Job"),
+    RCBJ ("Regenerate Certificates Batch Job");
 
     private final String value;
 

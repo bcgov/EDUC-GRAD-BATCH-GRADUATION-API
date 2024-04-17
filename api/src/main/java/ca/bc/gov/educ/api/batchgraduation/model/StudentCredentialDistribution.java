@@ -28,7 +28,6 @@ public class StudentCredentialDistribution implements Serializable {
 	private String studentGrade;
 	private List<GradRequirement> nonGradReasons;
 
-	//For debug purpose only
 	@JsonIgnore
 	private String schoolAtGrad;
 	@JsonIgnore

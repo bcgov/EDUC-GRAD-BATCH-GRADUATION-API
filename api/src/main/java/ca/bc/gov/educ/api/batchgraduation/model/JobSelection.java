@@ -9,7 +9,8 @@ public enum JobSelection {
     NDBJ("NONGRADRUN"),
 	URDBJ ("DISTRUNUSER"),
     URPDBJ ("PSIRUN"),
-    BDBJ ("DISTRUNUSER");
+    BDBJ ("DISTRUNUSER"),
+    RCBJ ("CERT_REGEN");
 
     private final String value;
 
