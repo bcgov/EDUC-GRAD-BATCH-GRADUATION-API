@@ -9,7 +9,8 @@ public enum TaskSelection {
     NDBJ ("YearlyNonGradDistributionBatchJob"),
 	URDBJ ("UserReqDistributionBatchJob"),
     URPDBJ("psiDistributionBatchJob"),
-    BDBJ ("blankDistributionBatchJob");
+    BDBJ ("blankDistributionBatchJob"),
+    RCBJ ("certRegenBatchJob");
 
     private final String value;
 
