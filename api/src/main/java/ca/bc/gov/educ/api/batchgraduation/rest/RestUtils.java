@@ -259,7 +259,7 @@ public class RestUtils {
         String accessToken = getAccessToken();
         return this.webClient.get()
                 .uri(String.format(constants.getStudentCertificateRegeneration(), pen),
-                        uri -> uri.queryParam("isOverwrite", "Y").build())
+                        uri -> uri.queryParam("isOverwrite", "N").build())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(Integer.class).block();
     }

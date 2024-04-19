@@ -21,7 +21,6 @@ public class RegenerateCertificateReader extends BaseReader {
             nextStudent = studentList.get(nxtStudentForProcessing);
             LOGGER.info("StudID:{} - {} of {}", nextStudent, nxtStudentForProcessing + 1, summaryDTO.getReadCount());
             nxtStudentForProcessing++;
-            summaryDTO.setProcessedCount(nxtStudentForProcessing);
         } else {
             aggregate("regenCertSummaryDTO");
         }
