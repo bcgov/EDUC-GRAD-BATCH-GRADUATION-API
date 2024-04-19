@@ -26,7 +26,7 @@ public class DistributionRunYearlyProcessor implements ItemProcessor<StudentCred
 	public StudentCredentialDistribution process(StudentCredentialDistribution item) throws Exception {
 		LOGGER.info("Processing partitionData = {}", item.getCredentialTypeCode());
 		summaryDTO.setBatchId(batchId);
-		return restUtils.processDistribution(item, summaryDTO);
+		return restUtils.processDistribution(item, summaryDTO, true);
 
 	}
 }

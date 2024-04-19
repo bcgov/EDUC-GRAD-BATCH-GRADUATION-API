@@ -444,7 +444,7 @@ public class RestUtilsTest {
         summary.setBatchId(batchId);
         summary.setGlobalList(globalList);
 
-        StudentCredentialDistribution res = this.restUtils.processDistribution(scd,summary);
+        StudentCredentialDistribution res = this.restUtils.processDistribution(scd,summary, false);
         assertNotNull(res);
     }
 
@@ -491,7 +491,7 @@ public class RestUtilsTest {
         summary.setBatchId(batchId);
         summary.setGlobalList(globalList);
 
-        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary);
+        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary, false);
         assertNotNull(res);
     }
 
@@ -538,7 +538,7 @@ public class RestUtilsTest {
         summary.setBatchId(batchId);
         summary.setGlobalList(globalList);
 
-        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary);
+        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary, false);
         assertNotNull(res);
     }
 

@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstan
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import io.github.resilience4j.retry.annotation.Retry;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -402,24 +403,32 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
-    public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary) {
+    public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary, boolean useSchoolAtGrad) {
         LOGGER.info(STUDENT_PROCESS,item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         StudentCredentialDistribution scObj = summary.getGlobalList().stream().filter(pr -> pr.getStudentID().compareTo(item.getStudentID()) == 0)
                 .findAny()
                 .orElse(null);
         if(scObj != null) {
-            item.setSchoolOfRecord(scObj.getSchoolOfRecord());
+            if(useSchoolAtGrad) {
+                item.setSchoolOfRecord(StringUtils.isBlank(scObj.getSchoolAtGrad()) ? scObj.getSchoolOfRecord() : scObj.getSchoolAtGrad());
+            } else {
+                item.setSchoolOfRecord(scObj.getSchoolOfRecord());
+            }
             item.setPen(scObj.getPen());
             item.setLegalLastName(scObj.getLegalLastName());
             item.setLegalFirstName(scObj.getLegalFirstName());
             item.setLegalMiddleNames(scObj.getLegalMiddleNames());
         } else {
-            GraduationStudentRecordDistribution stuRec =this.getStudentData(item.getStudentID().toString());
+            GraduationStudentRecordDistribution stuRec = getStudentData(item.getStudentID().toString());
             if (stuRec != null) {
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
-                item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
+                if(useSchoolAtGrad) {
+                    item.setSchoolOfRecord(StringUtils.isBlank(stuRec.getSchoolAtGrad()) ? stuRec.getSchoolOfRecord() : stuRec.getSchoolAtGrad());
+                } else {
+                    item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
+                }
                 item.setProgramCompletionDate(stuRec.getProgramCompletionDate());
                 item.setStudentID(stuRec.getStudentID());
                 item.setPen(stuRec.getPen());
