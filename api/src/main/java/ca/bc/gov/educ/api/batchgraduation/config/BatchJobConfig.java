@@ -521,6 +521,12 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
+    public DistributionRunYearlyProcessor itemProcessorYearlyDisRun() {
+        return new DistributionRunYearlyProcessor();
+    }
+
+    @Bean
+    @StepScope
     public DistributionRunYearlyNonGradProcessor itemProcessorDisRunYearlyNonGradByMincode() {
         return new DistributionRunYearlyNonGradProcessor();
     }
@@ -571,7 +577,7 @@ public class BatchJobConfig {
         return new StepBuilder("slaveStepDisRun", jobRepository)
                 .<StudentCredentialDistribution, StudentCredentialDistribution>chunk(1, transactionManager)
                 .reader(itemReaderDisRun())
-                .processor(itemProcessorDisRun())
+                .processor(itemProcessorYearlyDisRun())
                 .writer(itemWriterDisRun())
                 .build();
     }
