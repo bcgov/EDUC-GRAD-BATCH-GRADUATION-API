@@ -75,7 +75,7 @@ public class DistributionRunStatusUpdateProcessor {
                 restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),
                         "NONGRADYERUN".equalsIgnoreCase(activityCode)? "IP" : scd.getDocumentStatusCode(),activityCode,token);
                 LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student credential record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0] + 1, totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
-                if(!StringUtils.equalsAnyIgnoreCase(jobType, "DISTRUN_YE", "NONGRADRUN", "REGALG", "TVRRUN")) {
+                if(!StringUtils.equalsAnyIgnoreCase(jobType, "NONGRADRUN", "REGALG", "TVRRUN")) {
                     restUtils.updateStudentGradRecord(scd.getStudentID(), batchId, activityCode);
                     LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student grad record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0] + 1, totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
                 }
