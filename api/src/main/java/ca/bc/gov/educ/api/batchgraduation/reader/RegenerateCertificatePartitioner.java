@@ -32,23 +32,18 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        ResponseObj res = restUtils.getTokenResponseObject();
-        String accessToken = null;
-        if (res != null) {
-            accessToken = res.getAccess_token();
-        }
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
         JobParameters jobParameters = context.getJobParameters();
         String searchRequest = jobParameters.getString(SEARCH_REQUEST);
         CertificateRegenerationRequest certificateRegenerationRequest = (CertificateRegenerationRequest)jsonTransformer.unmarshall(searchRequest, CertificateRegenerationRequest.class);
-        if (certificateRegenerationRequest.runForAll()) {
+        if (certificateRegenerationRequest == null || certificateRegenerationRequest.runForAll()) {
             Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData();
             DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
             if(parallelDTO != null) {
                 credentialList.addAll(parallelDTO.certificateList());
             }
         } else {
-            credentialList.addAll(getStudentsForUserReqRun(certificateRegenerationRequest, accessToken));
+            credentialList.addAll(getStudentsForUserReqRun(certificateRegenerationRequest));
         }
 
         Set<UUID> studentSet = new HashSet<>();
@@ -85,9 +80,9 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
     }
 
     // retrieve students based on the search criteria requested by user
-    private List<StudentCredentialDistribution> getStudentsForUserReqRun(CertificateRegenerationRequest certificateRegenerationRequest, String accessToken) {
+    private List<StudentCredentialDistribution> getStudentsForUserReqRun(CertificateRegenerationRequest certificateRegenerationRequest) {
         if(certificateRegenerationRequest != null && "Y".equalsIgnoreCase(certificateRegenerationRequest.getRunMode())) {
-            return restUtils.getStudentsForUserReqDisRun("OC", certificateRegenerationRequest);
+            return restUtils.getStudentsForUserReqDisRunWithNullDistributionDate("OC", certificateRegenerationRequest);
         } else {
             return new ArrayList<>();
         }

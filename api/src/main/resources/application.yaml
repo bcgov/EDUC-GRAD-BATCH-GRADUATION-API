@@ -224,6 +224,8 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s&activityCode=%s
     user-req-dis-run:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/userrequest/%s
+    user-req-dis-run-for-not-yet-distributed:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/userrequest/notyetdistributed/%s
     get-district-data-yearly:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/districtdataearly
     get-certificate-types:

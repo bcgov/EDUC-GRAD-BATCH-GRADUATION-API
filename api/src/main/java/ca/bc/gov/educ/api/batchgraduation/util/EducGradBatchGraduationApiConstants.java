@@ -213,6 +213,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-report-api.user-req-dis-run.url}")
     private String studentDataForUserReqDisRun;
 
+    @Value("${endpoint.grad-graduation-report-api.user-req-dis-run-for-not-yet-distributed.url}")
+    private String studentDataForUserReqDisRunWithNullDistributionDate;
+
     @Value("${endpoint.grad-graduation-api.schoolreport.url}")
     private String createAndStoreSchoolReports;
 

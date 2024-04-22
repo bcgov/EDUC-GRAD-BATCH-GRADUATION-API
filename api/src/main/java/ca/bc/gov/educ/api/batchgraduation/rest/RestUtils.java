@@ -659,6 +659,20 @@ public class RestUtils {
                 .block();
     }
 
+    public List<StudentCredentialDistribution> getStudentsForUserReqDisRunWithNullDistributionDate(String credentialType, StudentSearchRequest req) {
+        UUID correlationID = UUID.randomUUID();
+        String accessToken = getAccessToken();
+        final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
+        };
+        return this.webClient.post()
+                .uri(String.format(constants.getStudentDataForUserReqDisRunWithNullDistributionDate(),credentialType))
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .body(BodyInserters.fromValue(req))
+                .retrieve()
+                .bodyToMono(responseType)
+                .block();
+    }
+
     public void updateStudentGradRecord(UUID studentID, Long batchId,String activityCode) {
         //Grad2-1931 not updating the school record if student id does not exist.
         try {
