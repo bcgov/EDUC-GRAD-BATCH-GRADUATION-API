@@ -71,11 +71,11 @@ public class DistributionRunStatusUpdateProcessor {
         final int[] processedCount = {0};
         cList.forEach(scd-> {
             try {
-                final String token = restUtils.getAccessToken();
+                final String accessToken = restUtils.getAccessToken();
                 restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),
-                        "NONGRADYERUN".equalsIgnoreCase(activityCode)? "IP" : scd.getDocumentStatusCode(),activityCode,token);
+                        "NONGRADYERUN".equalsIgnoreCase(activityCode)? "IP" : scd.getDocumentStatusCode(),activityCode,accessToken);
                 LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student credential record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0] + 1, totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
-                if(!StringUtils.equalsAnyIgnoreCase(jobType, "NONGRADRUN", "REGALG", "TVRRUN")) {
+                if(!StringUtils.equalsAnyIgnoreCase(jobType, "REGALG", "TVRRUN")) {
                     restUtils.updateStudentGradRecord(scd.getStudentID(), batchId, activityCode);
                     LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student grad record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0] + 1, totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
                 }
