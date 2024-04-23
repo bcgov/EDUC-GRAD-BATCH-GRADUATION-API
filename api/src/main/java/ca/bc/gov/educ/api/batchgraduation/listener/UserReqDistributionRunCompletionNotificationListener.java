@@ -128,7 +128,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		DistributionResponse disres = null;
 		String activityCode = null;
 		if(credentialType != null) {
-			if(credentialType.equalsIgnoreCase("OC")) {
+			if("OC".equalsIgnoreCase(credentialType)) {
 				activityCode = "USERDISTOC";
 				/** GRADT-553
 				 *  User Request Distribution Run - Original Certificate OC
@@ -136,7 +136,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				 */
 				addTranscriptsToDistributionRequest(cList,summaryDTO,batchId,properName);
 			} else {
-				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
+				activityCode = "OT".equalsIgnoreCase(credentialType) ? "USERDISTOT" : "USERDISTRC";
 			}
 			if(!cList.isEmpty()) {
 				DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(summaryDTO.getStudentSearchRequest()).build();
