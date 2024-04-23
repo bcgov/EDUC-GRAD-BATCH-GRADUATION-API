@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Component
 public class DistributionRunStatusUpdateProcessor {
@@ -69,19 +70,27 @@ public class DistributionRunStatusUpdateProcessor {
         String activityCode = getActivitCode(jobType);
         final int totalCount = cList.size();
         final int[] processedCount = {0};
+        List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).toList();
         cList.forEach(scd-> {
             try {
                 final String accessToken = restUtils.getAccessToken();
                 restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),
                         "NONGRADYERUN".equalsIgnoreCase(activityCode)? "IP" : scd.getDocumentStatusCode(),activityCode,accessToken);
                 LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student credential record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0] + 1, totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
-                if(!StringUtils.equalsAnyIgnoreCase(jobType, "REGALG", "TVRRUN")) {
-                    restUtils.updateStudentGradRecord(scd.getStudentID(), batchId, activityCode);
-                    LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student grad record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0] + 1, totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
-                }
                 processedCount[0]++;
             } catch (Exception e) {
                 unprocessedStudents.put(scd.getStudentID().toString(), new ServiceException(e));
+            }
+        });
+        studentIDs.forEach(uuid-> {
+            try {
+                if(!StringUtils.equalsAnyIgnoreCase(jobType, "REGALG", "TVRRUN")) {
+                    restUtils.updateStudentGradRecord(uuid, batchId, activityCode);
+                    LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student grad record: studentID [{}]", batchId, activityCode, processedCount[0] + 1, totalCount, uuid);
+                }
+                processedCount[0]++;
+            } catch (Exception e) {
+                unprocessedStudents.put(uuid.toString(), new ServiceException(e));
             }
         });
         return unprocessedStudents;
