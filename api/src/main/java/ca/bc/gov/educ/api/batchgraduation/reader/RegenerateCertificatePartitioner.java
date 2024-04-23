@@ -32,6 +32,7 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
+        createBatchJobHistory();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
         JobParameters jobParameters = context.getJobParameters();
         String searchRequest = jobParameters.getString(SEARCH_REQUEST);
