@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EDWSnapshotSchoolProcessor implements ItemProcessor<String, List<Pair<String, List<SnapshotResponse>>>> {
 
@@ -31,7 +30,7 @@ public class EDWSnapshotSchoolProcessor implements ItemProcessor<String, List<Pa
 	public List<Pair<String, List<SnapshotResponse>>> process(String mincode) throws Exception {
 		summaryDTO.setBatchId(batchId);
 		LOGGER.debug("Processing partitionData for School: {} ", mincode);
-		List<SnapshotResponse> edwStudents = restUtils.getEDWSnapshotStudents(summaryDTO.getGradYear(), mincode, summaryDTO.getAccessToken());
+		List<SnapshotResponse> edwStudents = restUtils.getEDWSnapshotStudents(summaryDTO.getGradYear(), mincode);
 		if ("L".equals(summaryDTO.getOption())) {
 			List<SnapshotResponse> list = edwStudents.stream().filter(s -> StringUtils.isNotBlank(s.getGraduatedDate()) ||
 					("12".equals(s.getStudentGrade()) || "AD".equals(s.getStudentGrade()))).toList();

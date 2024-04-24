@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -26,5 +27,10 @@ public class StudentCredentialDistribution implements Serializable {
 	private String program;
 	private String studentGrade;
 	private List<GradRequirement> nonGradReasons;
+
+	@JsonIgnore
+	private String schoolAtGrad;
+	@JsonIgnore
+	private String schoolOfRecordOrigin;
 
 }

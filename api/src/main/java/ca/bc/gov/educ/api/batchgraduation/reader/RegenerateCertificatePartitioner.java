@@ -2,9 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -29,24 +27,24 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
     @Autowired
     ParallelDataFetch parallelDataFetch;
 
+    @Autowired
+    JsonTransformer jsonTransformer;
+
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        ResponseObj res = restUtils.getTokenResponseObject();
-        String accessToken = null;
-        if (res != null) {
-            accessToken = res.getAccess_token();
-        }
+        createBatchJobHistory();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
         JobParameters jobParameters = context.getJobParameters();
         String searchRequest = jobParameters.getString(SEARCH_REQUEST);
-        if (StringUtils.isBlank(searchRequest)) {
-            Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
+        CertificateRegenerationRequest certificateRegenerationRequest = (CertificateRegenerationRequest)jsonTransformer.unmarshall(searchRequest, CertificateRegenerationRequest.class);
+        if (certificateRegenerationRequest == null || certificateRegenerationRequest.runForAll()) {
+            Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData();
             DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
             if(parallelDTO != null) {
                 credentialList.addAll(parallelDTO.certificateList());
             }
         } else {
-            credentialList.addAll(getStudentsForUserReqRun(searchRequest, accessToken));
+            credentialList.addAll(getStudentsForUserReqRun(certificateRegenerationRequest));
         }
 
         Set<UUID> studentSet = new HashSet<>();
@@ -82,30 +80,12 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
         return new HashMap<>();
     }
 
-    private List<StudentCredentialDistribution> getStudentsForDistRun(String accessToken) {
-        List<StudentCredentialDistribution> credentialList = new ArrayList<>();
-        Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(accessToken);
-        DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
-        if(parallelDTO != null) {
-            credentialList.addAll(parallelDTO.certificateList());
-        }
-        return credentialList;
-    }
-
     // retrieve students based on the search criteria requested by user
-    private List<StudentCredentialDistribution> getStudentsForUserReqRun(String searchRequest, String accessToken) {
-        CertificateRegenerationRequest certRegenReq = null;
-        try {
-            certRegenReq = new ObjectMapper().readValue(searchRequest, CertificateRegenerationRequest.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        if (certRegenReq != null && "Y".equalsIgnoreCase(certRegenReq.getRunMode())) {
-            StudentSearchRequest req = new StudentSearchRequest();
-            req.setPens(certRegenReq.getPens());
-            return restUtils.getStudentsForUserReqDisRun("OC", req, accessToken);
+    private List<StudentCredentialDistribution> getStudentsForUserReqRun(CertificateRegenerationRequest certificateRegenerationRequest) {
+        if(certificateRegenerationRequest != null && "Y".equalsIgnoreCase(certificateRegenerationRequest.getRunMode())) {
+            return restUtils.getStudentsForUserReqDisRunWithNullDistributionDate("OC", certificateRegenerationRequest);
         } else {
-            return getStudentsForDistRun(accessToken);
+            return new ArrayList<>();
         }
     }
 

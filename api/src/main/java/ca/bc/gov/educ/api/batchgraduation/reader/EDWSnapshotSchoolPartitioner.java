@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.EdwSnapshotSchoolSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.SnapshotRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +25,6 @@ public class EDWSnapshotSchoolPartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        ResponseObj res = restUtils.getTokenResponseObject();
-        String accessToken = null;
-        if (res != null) {
-            accessToken = res.getAccess_token();
-        }
         long startTime = System.currentTimeMillis();
         logger.debug("Retrieve schools for EDW Snapshot");
         JobParameters jobParameters = context.getJobParameters();
@@ -40,7 +34,7 @@ public class EDWSnapshotSchoolPartitioner extends BasePartitioner {
         if (req.getSchoolOfRecords() != null && !req.getSchoolOfRecords().isEmpty()) {
             schools = req.getSchoolOfRecords();
         } else {
-            schools = restUtils.getEDWSnapshotSchools(req.getGradYear(), accessToken);
+            schools = restUtils.getEDWSnapshotSchools(req.getGradYear());
         }
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;

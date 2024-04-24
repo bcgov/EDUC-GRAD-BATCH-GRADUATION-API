@@ -208,8 +208,8 @@ public class DistributionRunCompletionNotificationListenerTest {
         Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
         Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
         Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
-        Mockito.when(parallelDataFetch.fetchDistributionRequiredData(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
-        Mockito.when(parallelDataFetch.fetchDistributionRequiredDataYearly(summaryDTO.getAccessToken())).thenReturn(Mono.just(dp));
+        Mockito.when(parallelDataFetch.fetchDistributionRequiredData()).thenReturn(Mono.just(dp));
+        Mockito.when(parallelDataFetch.fetchDistributionRequiredDataYearly()).thenReturn(Mono.just(dp));
         Mockito.when(restUtils.mergeAndUpload(121L, distributionRequest,"YEARENDDIST",null)).thenReturn(new DistributionResponse());
         distributionRunCompletionNotificationListener.afterJob(jobExecution);
 

@@ -35,14 +35,14 @@ public class DistributionRunPartitioner extends BasePartitioner {
         // Clean up existing reports before running new one
         logger.debug("Delete School Reports for Monthly Distribution");
         long startTime = System.currentTimeMillis();
-        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL", restUtils.getAccessToken());
+        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL");
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
         logger.debug("Old School Reports deleted in {} sec", diff);
 
         startTime = System.currentTimeMillis();
         logger.debug("Retrieve students for Monthly Distribution");
-        Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData(restUtils.getAccessToken());
+        Mono<DistributionDataParallelDTO> parallelDTOMono = parallelDataFetch.fetchDistributionRequiredData();
         DistributionDataParallelDTO parallelDTO = parallelDTOMono.block();
         List<StudentCredentialDistribution> credentialList = new ArrayList<>();
         if(parallelDTO != null) {
@@ -61,7 +61,6 @@ public class DistributionRunPartitioner extends BasePartitioner {
         logger.info("No Credentials Found for Processing");
         return new HashMap<>();
     }
-
 
     @Override
     protected JobExecution getJobExecution() {

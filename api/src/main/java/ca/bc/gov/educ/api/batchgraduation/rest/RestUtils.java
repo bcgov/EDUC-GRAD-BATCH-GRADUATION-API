@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstan
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import io.github.resilience4j.retry.annotation.Retry;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -254,17 +255,19 @@ public class RestUtils {
     }
 
 
-    public Integer runRegenerateStudentCertificate(String pen, String accessToken) {
+    public Integer runRegenerateStudentCertificate(String pen) {
         UUID correlationID = UUID.randomUUID();
+        String accessToken = getAccessToken();
         return this.webClient.get()
                 .uri(String.format(constants.getStudentCertificateRegeneration(), pen),
-                        uri -> uri.queryParam("isOverwrite", "Y").build())
+                        uri -> uri.queryParam("isOverwrite", "N").build())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(Integer.class).block();
     }
 
-    public List<UUID> getStudentsForAlgorithm(String accessToken) {
+    public List<UUID> getStudentsForAlgorithm() {
         UUID correlationID = UUID.randomUUID();
+        String accessToken = getAccessToken();
         final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.get()
@@ -273,8 +276,9 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
-    public List<UUID> getStudentsForProjectedAlgorithm(String accessToken) {
+    public List<UUID> getStudentsForProjectedAlgorithm() {
         UUID correlationID = UUID.randomUUID();
+        String accessToken = getAccessToken();
         final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.get()
@@ -294,8 +298,9 @@ public class RestUtils {
                 .retrieve().bodyToMono(GraduationStudentRecord.class).block();
     }
 
-    public List<UUID> getStudentsForSpecialGradRun(StudentSearchRequest req,String accessToken) {
+    public List<UUID> getStudentsForSpecialGradRun(StudentSearchRequest req) {
         UUID correlationID = UUID.randomUUID();
+        String accessToken = getAccessToken();
         GraduationStudentRecordSearchResult res = this.webClient.post()
                 .uri(constants.getGradStudentApiStudentForSpcGradListUrl())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
@@ -377,19 +382,20 @@ public class RestUtils {
                 gradStu.setRecalculateGradStatus("Y");
                 gradStu.setStudentStatus(student.getStudentStatus());
                 gradStu.setStudentID(UUID.fromString(st.getStudentID()));
-                this.saveGraduationStudentRecord(gradStu, accessToken);
+                saveGraduationStudentRecord(gradStu, accessToken);
                 recordsAdded.getAndSet(recordsAdded.get() + 1);
             });
         });
         return recordsAdded.get();
     }
 
-    public List<GraduationStudentRecord> getStudentData(List<UUID> studentIds, String accessToken) {
+    public List<GraduationStudentRecord> getStudentData(List<UUID> studentIds) {
         UUID correlationID = UUID.randomUUID();
         final ParameterizedTypeReference<List<GraduationStudentRecord>> responseType = new ParameterizedTypeReference<>() {
         };
         StudentList stuList = new StudentList();
         stuList.setStudentids(studentIds);
+        String accessToken = getAccessToken();
         return this.webClient.post()
                 .uri(constants.getGradStudentApiStudentDataListUrl())
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
@@ -397,26 +403,32 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
-    public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary) {
+    public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary, boolean useSchoolAtGrad) {
         LOGGER.info(STUDENT_PROCESS,item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
-        String accessToken = summary.getAccessToken();
-
         StudentCredentialDistribution scObj = summary.getGlobalList().stream().filter(pr -> pr.getStudentID().compareTo(item.getStudentID()) == 0)
                 .findAny()
                 .orElse(null);
         if(scObj != null) {
-            item.setSchoolOfRecord(scObj.getSchoolOfRecord());
+            if(useSchoolAtGrad) {
+                item.setSchoolOfRecord(StringUtils.isBlank(scObj.getSchoolAtGrad()) ? scObj.getSchoolOfRecord() : scObj.getSchoolAtGrad());
+            } else {
+                item.setSchoolOfRecord(scObj.getSchoolOfRecord());
+            }
             item.setPen(scObj.getPen());
             item.setLegalLastName(scObj.getLegalLastName());
             item.setLegalFirstName(scObj.getLegalFirstName());
             item.setLegalMiddleNames(scObj.getLegalMiddleNames());
         } else {
-            GraduationStudentRecordDistribution stuRec =this.getStudentData(item.getStudentID().toString(),accessToken);
+            GraduationStudentRecordDistribution stuRec = getStudentData(item.getStudentID().toString());
             if (stuRec != null) {
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
-                item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
+                if(useSchoolAtGrad) {
+                    item.setSchoolOfRecord(StringUtils.isBlank(stuRec.getSchoolAtGrad()) ? stuRec.getSchoolOfRecord() : stuRec.getSchoolAtGrad());
+                } else {
+                    item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
+                }
                 item.setProgramCompletionDate(stuRec.getProgramCompletionDate());
                 item.setStudentID(stuRec.getStudentID());
                 item.setPen(stuRec.getPen());
@@ -496,8 +508,9 @@ public class RestUtils {
         return result;
     }
 
-    public GraduationStudentRecordDistribution getStudentData(String studentID, String accessToken) {
+    public GraduationStudentRecordDistribution getStudentData(String studentID) {
         UUID correlationID = UUID.randomUUID();
+        String accessToken = getAccessToken();
         GraduationStudentRecordDistribution result = webClient.get()
                 .uri(String.format(constants.getStudentInfo(),studentID))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
@@ -624,15 +637,17 @@ public class RestUtils {
                 .retrieve().bodyToMono(boolean.class).block();
     }
 
-    public void deleteSchoolReportRecord(String schoolOfRecord, String reportTypeCode, String accessToken) {
+    public void deleteSchoolReportRecord(String schoolOfRecord, String reportTypeCode) {
         UUID correlationID = UUID.randomUUID();
+        String accessToken = getAccessToken();
         webClient.delete().uri(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode))
                 .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .retrieve().bodyToMono(boolean.class).block();
     }
 
-    public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req, String accessToken) {
+    public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req) {
         UUID correlationID = UUID.randomUUID();
+        String accessToken = getAccessToken();
         final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.post()
@@ -644,10 +659,25 @@ public class RestUtils {
                 .block();
     }
 
-    public void updateStudentGradRecord(UUID studentID, Long batchId,String activityCode, String accessToken) {
+    public List<StudentCredentialDistribution> getStudentsForUserReqDisRunWithNullDistributionDate(String credentialType, StudentSearchRequest req) {
+        UUID correlationID = UUID.randomUUID();
+        String accessToken = getAccessToken();
+        final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
+        };
+        return this.webClient.post()
+                .uri(String.format(constants.getStudentDataForUserReqDisRunWithNullDistributionDate(),credentialType))
+                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .body(BodyInserters.fromValue(req))
+                .retrieve()
+                .bodyToMono(responseType)
+                .block();
+    }
+
+    public void updateStudentGradRecord(UUID studentID, Long batchId,String activityCode) {
         //Grad2-1931 not updating the school record if student id does not exist.
         try {
             if (studentID != null) {
+                String accessToken = getAccessToken();
                 String url = String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode);
                 this.post(url, "{}", GraduationStudentRecord.class, accessToken);
             }
@@ -688,7 +718,8 @@ public class RestUtils {
                 .retrieve().bodyToMono(Boolean.class).block();
     }
 
-    public List<String> getEDWSnapshotSchools(Integer gradYear, String accessToken) {
+    public List<String> getEDWSnapshotSchools(Integer gradYear) {
+        String accessToken = getAccessToken();
         final ParameterizedTypeReference<List<String>> responseType = new ParameterizedTypeReference<>() {
         };
         String url = String.format(constants.getEdwSnapshotSchoolsUrl(), gradYear);
@@ -699,7 +730,8 @@ public class RestUtils {
                 .retrieve().bodyToMono(responseType).block();
     }
 
-    public List<SnapshotResponse> getEDWSnapshotStudents(Integer gradYear, String mincode, String accessToken) {
+    public List<SnapshotResponse> getEDWSnapshotStudents(Integer gradYear, String mincode) {
+        String accessToken = getAccessToken();
         final ParameterizedTypeReference<List<SnapshotResponse>> responseType = new ParameterizedTypeReference<>() {
         };
         String url = String.format(constants.getEdwSnapshotStudentsByMincodeUrl(), gradYear, mincode);
@@ -777,8 +809,9 @@ public class RestUtils {
         return get(String.format(constants.getTraxSchoolByMincode(), mincode), TraxSchool.class, getAccessToken());
     }
 
-    public List<UUID> getDeceasedStudentIDs(List<UUID> studentIDs, String accessToken) {
+    public List<UUID> getDeceasedStudentIDs(List<UUID> studentIDs) {
         UUID correlationID = UUID.randomUUID();
+        String accessToken = getAccessToken();
         final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
         };
         return this.webClient.post()

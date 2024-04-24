@@ -227,24 +227,29 @@ public abstract class BasePartitioner extends SimplePartitioner {
                 }
             }
             eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !useFilterSchoolDistricts.contains(scr.getSchoolOfRecord()));
+            LOGGER.debug("Student Credential Distribution filtered by schoolCategory code {}: ", searchRequest.getSchoolCategoryCodes());
         }
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !searchRequest.getDistricts().contains(StringUtils.substring(scr.getSchoolOfRecord(), 0, 3)));
+            LOGGER.debug("Student Credential Distribution filtered by district code {}: ", searchRequest.getDistricts());
         }
         if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !searchRequest.getSchoolOfRecords().contains(scr.getSchoolOfRecord()));
+            LOGGER.debug("Student Credential Distribution filtered by schoolOfRecord code {}: ", searchRequest.getSchoolOfRecords());
         }
         if(searchRequest != null && searchRequest.getStudentIDs() != null && !searchRequest.getStudentIDs().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->scr.getStudentID() != null && !searchRequest.getStudentIDs().contains(scr.getStudentID()));
+            LOGGER.debug("Student Credential Distribution filtered by student ID {}: ", searchRequest.getStudentIDs());
         }
         if(searchRequest != null && searchRequest.getPens() != null && !searchRequest.getPens().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getPen()) && !searchRequest.getPens().contains(scr.getPen()));
+            LOGGER.debug("Student Credential Distribution filtered by pen {}: ", searchRequest.getPens());
         }
     }
 
     void filterOutDeceasedStudents(List<StudentCredentialDistribution> credentialList) {
         LOGGER.debug("Total size of credential list: {}", credentialList.size());
-        List<UUID> deceasedIDs = restUtils.getDeceasedStudentIDs(credentialList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList(), restUtils.getAccessToken());
+        List<UUID> deceasedIDs = restUtils.getDeceasedStudentIDs(credentialList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList());
         if (!deceasedIDs.isEmpty()) {
             LOGGER.debug("Deceased students: {}", deceasedIDs.size());
             credentialList.removeIf(cr -> deceasedIDs.contains(cr.getStudentID()));

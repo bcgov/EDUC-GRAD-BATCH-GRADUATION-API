@@ -5,6 +5,8 @@ import ca.bc.gov.educ.api.batchgraduation.model.ReportGradStudentData;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import java.util.UUID;
 
 @Service
 public class GraduationReportService {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(GraduationReportService.class);
 
 	@Autowired
     WebClient webClient;
@@ -98,7 +102,9 @@ public class GraduationReportService {
 		}
 		dist.setStudentID(data.getGraduationStudentRecordId());
 		dist.setPaperType(paperType);
-		dist.setSchoolOfRecord(data.getMincode());
+		dist.setSchoolOfRecord(StringUtils.isBlank(data.getMincodeAtGrad()) ? data.getMincode() : data.getMincodeAtGrad());
+		dist.setSchoolAtGrad(data.getMincodeAtGrad());
+		dist.setSchoolOfRecordOrigin(data.getMincode());
 		dist.setDocumentStatusCode("COMPL");
 		dist.setPen(data.getPen());
 		dist.setLegalFirstName(data.getFirstName());
@@ -110,6 +116,7 @@ public class GraduationReportService {
 		dist.setStudentGrade(data.getStudentGrade());
 		dist.setNonGradReasons(data.getNonGradReasons());
 		dist.setLastUpdateDate(data.lastUpdateDateAsString());
+		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOrigin(), dist.getSchoolAtGrad(), dist.getSchoolOfRecord());
 		return dist;
 	}
 }

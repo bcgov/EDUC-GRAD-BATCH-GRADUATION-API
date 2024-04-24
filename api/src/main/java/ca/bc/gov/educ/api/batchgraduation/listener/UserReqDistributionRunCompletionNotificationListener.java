@@ -128,7 +128,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		DistributionResponse disres = null;
 		String activityCode = null;
 		if(credentialType != null) {
-			if(credentialType.equalsIgnoreCase("OC")) {
+			if("OC".equalsIgnoreCase(credentialType)) {
 				activityCode = "USERDISTOC";
 				/** GRADT-553
 				 *  User Request Distribution Run - Original Certificate OC
@@ -136,7 +136,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				 */
 				addTranscriptsToDistributionRequest(cList,summaryDTO,batchId,properName);
 			} else {
-				activityCode = credentialType.equalsIgnoreCase("OT")?"USERDISTOT":"USERDISTRC";
+				activityCode = "OT".equalsIgnoreCase(credentialType) ? "USERDISTOT" : "USERDISTRC";
 			}
 			if(!cList.isEmpty()) {
 				DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(summaryDTO.getStudentSearchRequest()).build();
@@ -164,7 +164,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				String studentPensSearchRequest = jsonTransformer.marshall(searchRequest);
 				LOGGER.debug("Get {} students credentials for the pens: {}", "OT", studentPensSearchRequest);
 			}
-			List<StudentCredentialDistribution> transcriptDistributionList = restUtils.getStudentsForUserReqDisRun("OT",searchRequest,restUtils.getTokenResponseObject().getAccess_token());
+			List<StudentCredentialDistribution> transcriptDistributionList = restUtils.getStudentsForUserReqDisRun("OT",searchRequest);
 			for(StudentCredentialDistribution certScd: uniqueCertificateList) {
 				for(StudentCredentialDistribution trScd: transcriptDistributionList) {
 					if(certScd.getStudentID().equals(trScd.getStudentID())) {
@@ -196,8 +196,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		});
 		List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().collect(Collectors.toList());
 		studentIDs.forEach(sid-> {
-			String accessToken = restUtils.fetchAccessToken();
-			restUtils.updateStudentGradRecord(sid,batchId,activityCode,accessToken);
+			restUtils.updateStudentGradRecord(sid,batchId,activityCode);
 		});
 	}
 
