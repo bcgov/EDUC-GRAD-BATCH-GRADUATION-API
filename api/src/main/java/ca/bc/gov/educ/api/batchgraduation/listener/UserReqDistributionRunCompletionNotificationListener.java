@@ -168,8 +168,8 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			List<UUID> studentIDs = uniqueCertificateList.stream().map(StudentCredentialDistribution::getStudentID).collect(Collectors.toList());
 			StudentSearchRequest searchRequest = StudentSearchRequest.builder().pens(studentPens).studentIDs(studentIDs).build();
 			if(LOGGER.isDebugEnabled()) {
-				String studentPensSearchRequest = jsonTransformer.marshall(searchRequest);
-				LOGGER.debug("Get {} students credentials for the pens: {}", "OT", studentPensSearchRequest);
+				String studentSearchRequest = jsonTransformer.marshall(searchRequest);
+				LOGGER.debug("Get {} students credentials for the pens: {}", "OT", studentSearchRequest);
 			}
 			List<StudentCredentialDistribution> transcriptDistributionList = restUtils.getStudentsForUserReqDisRun("OT",searchRequest);
 			for(StudentCredentialDistribution certScd: uniqueCertificateList) {
