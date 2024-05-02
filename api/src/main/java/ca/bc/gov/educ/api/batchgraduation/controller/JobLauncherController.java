@@ -629,7 +629,7 @@ public class JobLauncherController {
             String studentSearchData = jsonTransformer.marshall(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, studentSearchData);
             builder.addString(CREDENTIALTYPE,credentialType);
-            JobExecution jobExecution =  jobLauncher.run(jobRegistry.getJob("UserReqDistributionBatchJob"), builder.toJobParameters());
+            JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob("UserReqDistributionBatchJob"), builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get(DISDTO);
             if(summaryDTO == null) {
