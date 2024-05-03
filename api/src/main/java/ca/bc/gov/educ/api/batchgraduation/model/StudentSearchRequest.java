@@ -34,5 +34,6 @@ public class StudentSearchRequest implements Serializable {
     LocalDate gradDateTo;
 
     Boolean validateInput;
+    String activityCode;
     String localDownload;
 }

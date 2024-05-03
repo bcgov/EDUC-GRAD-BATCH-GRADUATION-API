@@ -2,12 +2,14 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(of = {"studentID", "credentialTypeCode", "paperType", "documentStatusCode"})
 public class StudentCredentialDistribution implements Serializable {
 
 	private UUID id;
