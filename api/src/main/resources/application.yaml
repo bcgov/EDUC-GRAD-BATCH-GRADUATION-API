@@ -265,9 +265,9 @@ endpoint:
       url: ${GRAD_TRAX_API}api/v1/trax/edw/get-schools/snapshot/%s
     get-edw-snapshot-students-by-min-code:
       url: ${GRAD_TRAX_API}api/v1/trax/edw/get-students/snapshot/%s/%s
-  educ-school-api:
-    school-by-min-code:
-      url: ${EDUC_SCHOOL_API}api/v1/schools/%s
+    commonschool-by-mincode:
+        url: ${GRAD_TRAX_API}api/v1/trax/school/common/%s
+
 
 #Splunk LogHelper
 splunk:

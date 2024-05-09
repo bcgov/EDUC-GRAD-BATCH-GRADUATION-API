@@ -195,9 +195,8 @@ endpoint:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/edw/get-schools/snapshot/%s
     get-edw-snapshot-students-by-min-code:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/edw/get-students/snapshot/%s/%s
-  educ-school-api:
-    school-by-min-code:
-      url: https://educ-school-api-75e61b-dev.apps.silver.devops.gov.bc.ca/api/v1/schools/%s
+    commonschool-by-mincode:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/common/%s
 
 #Splunk LogHelper
 splunk:
