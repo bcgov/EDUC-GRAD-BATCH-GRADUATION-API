@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.processor;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -27,7 +28,12 @@ public class DistributionRunProcessor implements ItemProcessor<StudentCredential
 	public StudentCredentialDistribution process(StudentCredentialDistribution item) throws Exception {
 		LOGGER.info("Processing partitionData = {}", item.getCredentialTypeCode());
 		summaryDTO.setBatchId(batchId);
-		return restUtils.processDistribution(item, summaryDTO, false);
+		boolean useSchoolAtGrad = false;
+		String credentialType = summaryDTO.getCredentialType();
+		if (StringUtils.containsAnyIgnoreCase(credentialType, "OC", "RC")) {
+			useSchoolAtGrad = true;
+		}
+		return restUtils.processDistribution(item, summaryDTO, useSchoolAtGrad);
 		
 	}
 
