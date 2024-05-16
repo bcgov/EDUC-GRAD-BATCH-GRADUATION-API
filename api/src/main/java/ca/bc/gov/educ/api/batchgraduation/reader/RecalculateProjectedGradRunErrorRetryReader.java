@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-public class RecalculateProjectedGradRunErrorRetryReader extends BaseReader {
+public class RecalculateProjectedGradRunErrorRetryReader extends BaseStudentReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecalculateProjectedGradRunErrorRetryReader.class);
 
