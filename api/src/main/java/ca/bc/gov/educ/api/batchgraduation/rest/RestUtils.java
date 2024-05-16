@@ -509,18 +509,11 @@ public class RestUtils {
     }
 
     public GraduationStudentRecordDistribution getStudentData(String studentID) {
-        UUID correlationID = UUID.randomUUID();
         String accessToken = getAccessToken();
-        GraduationStudentRecordDistribution result = webClient.get()
-                .uri(String.format(constants.getStudentInfo(),studentID))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .retrieve()
-                .bodyToMono(GraduationStudentRecordDistribution.class)
-                .block();
-
+        String url = String.format(constants.getStudentInfo(),studentID);
+        GraduationStudentRecordDistribution result = this.get(url, GraduationStudentRecordDistribution.class, accessToken);
         if(result != null)
             LOGGER.info("Fetched {} Graduation Records",result.getStudentID());
-
         return result;
     }
 
@@ -693,7 +686,7 @@ public class RestUtils {
                 this.put(url,"{}", GraduationStudentRecord.class, accessToken);
             }
         } catch (Exception e) {
-            LOGGER.error("Unable to update student record");
+            LOGGER.error("Unable to update student record history");
         }
     }
 

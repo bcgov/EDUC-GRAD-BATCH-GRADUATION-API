@@ -53,7 +53,7 @@ public class RunCertificateRegenerationProcessor implements ItemProcessor<Studen
 				return null;
 			}
 		}
-		LOGGER.warn("Skipped STU-ID:{} Errors:{}", item != null? item.getStudentID() : "UNKNOWN STUDENT",summaryDTO.getErrors().size());
+		LOGGER.warn("Skipped STU-ID:null for pen# {},Errors:{}",item.getPen(),summaryDTO.getErrors().size());
 		return null;
 	}
 
