@@ -30,7 +30,7 @@ public class DistributionRunProcessor implements ItemProcessor<StudentCredential
 		summaryDTO.setBatchId(batchId);
 		boolean useSchoolAtGrad = false;
 		String credentialType = summaryDTO.getCredentialType();
-		if (StringUtils.containsAnyIgnoreCase(credentialType, "OC", "RC")) {
+		if (StringUtils.equalsAnyIgnoreCase(credentialType, "OC", "RC")) {
 			useSchoolAtGrad = true;
 		}
 		return restUtils.processDistribution(item, summaryDTO, useSchoolAtGrad);
