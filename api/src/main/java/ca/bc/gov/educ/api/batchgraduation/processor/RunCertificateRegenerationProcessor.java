@@ -4,7 +4,6 @@ import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecordDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import jakarta.validation.ValidationException;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.Nullable;
 
 import java.io.IOException;
-import java.net.UnknownServiceException;
 import java.util.UUID;
 
 public class RunCertificateRegenerationProcessor implements ItemProcessor<StudentCredentialDistribution, Integer> {
@@ -55,7 +53,7 @@ public class RunCertificateRegenerationProcessor implements ItemProcessor<Studen
 				return null;
 			}
 		}
-		LOGGER.warn("Skipped STU-ID:{} Errors:{}", item != null? item.getStudentID() : "UNKNOWN PEN#",summaryDTO.getErrors().size());
+		LOGGER.warn("Skipped STU-ID:{} Errors:{}", item != null? item.getStudentID() : "UNKNOWN STUDENT",summaryDTO.getErrors().size());
 		return null;
 	}
 
