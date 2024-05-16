@@ -3,15 +3,13 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+@Slf4j
 public abstract class BaseReader {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseReader.class);
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -36,7 +34,7 @@ public abstract class BaseReader {
     }
 
     protected void fetchAccessToken() {
-        LOGGER.info("Fetching the access token from KeyCloak API");
+        log.info("Fetching the access token from KeyCloak API");
         ResponseObj res = restUtils.getTokenResponseObject();
         if (res != null) {
             summaryDTO.setAccessToken(res.getAccess_token());
