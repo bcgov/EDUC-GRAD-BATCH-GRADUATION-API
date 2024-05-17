@@ -56,6 +56,7 @@ public class ParallelDataFetchTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getStudentReportDataYearly()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){})).thenReturn(Mono.just(List.of(reportGradStudentData)));
 
         List<StudentCredentialDistribution> result = parallelDataFetch.fetchStudentCredentialsDistributionDataYearly();
@@ -74,6 +75,7 @@ public class ParallelDataFetchTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getStudentDataNonGradEarly()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){})).thenReturn(Mono.just(List.of(reportGradStudentData)));
 
         List<StudentCredentialDistribution> result = parallelDataFetch.fetchStudentCredentialsDistributionDataYearlyNonGrad();
@@ -90,6 +92,7 @@ public class ParallelDataFetchTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolDataNonGradEarly()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<String>>(){})).thenReturn(Mono.just(List.of("1234567")));
 
         List<String> result = parallelDataFetch.fetchDistributionRequiredDataSchoolsNonGradYearly();
@@ -106,6 +109,7 @@ public class ParallelDataFetchTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getDistrictDataNonGradEarly()))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<String>>(){})).thenReturn(Mono.just(List.of("123")));
 
         List<String> result = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly();

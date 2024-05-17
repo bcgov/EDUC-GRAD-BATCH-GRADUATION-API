@@ -5,8 +5,9 @@ import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
-import io.github.resilience4j.retry.annotation.Retry;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -48,22 +48,25 @@ public class RestUtils {
     private static final String YEARENDDIST = "YEARENDDIST";
     private static final String SUPPDIST = "SUPPDIST";
     private static final String NONGRADYERUN = "NONGRADYERUN";
-    private final EducGradBatchGraduationApiConstants constants;
     private static final String ERROR_MESSAGE1 = "Service failed to process after max retries.";
     private static final String ERROR_MESSAGE2 = "5xx error.";
 
-    private ResponseObjCache responseObjCache;
+    final EducGradBatchGraduationApiConstants constants;
+    final ResponseObjCache responseObjCache;
 
-    private final WebClient webClient;
+    final WebClient webClient;
 
-    GraduationReportService graduationReportService;
+    final JsonTransformer jsonTransformer;
+
+    final GraduationReportService graduationReportService;
 
     @Autowired
-    public RestUtils(final GraduationReportService graduationReportService, final EducGradBatchGraduationApiConstants constants, final WebClient webClient, ResponseObjCache objCache) {
+    public RestUtils(final GraduationReportService graduationReportService, final EducGradBatchGraduationApiConstants constants, final WebClient webClient, final ResponseObjCache objCache, final JsonTransformer jsonTransformer) {
         this.graduationReportService = graduationReportService;
         this.constants = constants;
         this.webClient = webClient;
         this.responseObjCache = objCache;
+        this.jsonTransformer = jsonTransformer;
     }
 
     public ResponseObj getTokenResponseObject() {
@@ -77,27 +80,16 @@ public class RestUtils {
         return this.getTokenResponseObject().getAccess_token();
     }
 
+    public <T> T get(String url, Class<T> clazz, String accessToken) {
+        return this.get(url, clazz, accessToken, 3,2);
+    }
+
     public <T> T post(String url, Object body, Class<T> clazz, String accessToken) {
-        T obj;
-        try {
-            obj = this.webClient.post()
-                    .uri(url)
-                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
-                    .body(BodyInserters.fromValue(body))
-                    .retrieve()
-                    .onStatus(HttpStatusCode::is5xxServerError,
-                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
-                    .bodyToMono(clazz)
-                    .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
-                            .filter(ServiceException.class::isInstance)
-                            .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
-                                throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
-                            }))
-                    .block();
-        } catch (Exception e) {
-            throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
-        }
-        return obj;
+        return this.post(url, body, clazz, accessToken, 3,2);
+    }
+
+    public <T> T put(String url, Object body, Class<T> clazz, String accessToken) {
+        return this.put(url, body, clazz, accessToken, 3,2);
     }
 
     /**
@@ -107,10 +99,12 @@ public class RestUtils {
      * @param url the url you are calling
      * @param clazz the return type you are expecting
      * @param accessToken access token
+     * @param retryCount retry max attempts
+     * @param durationSeconds interval seconds in retry attempt
      * @return return type
      * @param <T> expected return type
      */
-    public <T> T get(String url, Class<T> clazz, String accessToken) {
+    public <T> T get(String url, Class<T> clazz, String accessToken, long retryCount, long durationSeconds) {
         T obj;
         try {
             obj = this.webClient
@@ -123,8 +117,8 @@ public class RestUtils {
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
                     // only does retry if initial error was 5xx as service may be temporarily down
-                    // 4xx errors will always happen if 404, 401, 403 etc, so does not retry
-                    .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
+                    // 4xx errors will always happen if 404, 401, 403 etc., so does not retry
+                    .retryWhen(reactor.util.retry.Retry.backoff(retryCount, Duration.ofSeconds(durationSeconds))
                             .filter(ServiceException.class::isInstance)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                                 throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -137,7 +131,56 @@ public class RestUtils {
         return obj;
     }
 
-    public <T> T put(String url, Object body, Class<T> clazz, String accessToken) {
+    /**
+     * Generic POST call out to services. Uses blocking webclient and will throw
+     * runtime exceptions. Will attempt retries if 5xx errors are encountered.
+     * You can catch Exception in calling method.
+     * @param url the url you are calling
+     * @param body the body you are requesting
+     * @param clazz the return type you are expecting
+     * @param accessToken access token
+     * @param retryCount retry max attempts
+     * @param durationSeconds interval seconds in retry attempt
+     * @return return type
+     * @param <T> expected return type
+     */
+    public <T> T post(String url, Object body, Class<T> clazz, String accessToken, long retryCount, long durationSeconds) {
+        T obj;
+        try {
+            obj = webClient.post()
+                    .uri(url)
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
+                    .body(BodyInserters.fromValue(body))
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is5xxServerError,
+                            clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
+                    .bodyToMono(clazz)
+                    .retryWhen(reactor.util.retry.Retry.backoff(retryCount, Duration.ofSeconds(durationSeconds))
+                            .filter(ServiceException.class::isInstance)
+                            .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                                throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
+                            }))
+                    .block();
+        } catch (Exception e) {
+            throw new ServiceException(getErrorMessage(url, e.getLocalizedMessage()), HttpStatus.SERVICE_UNAVAILABLE.value(), e);
+        }
+        return obj;
+    }
+
+    /**
+     * Generic PUT call out to services. Uses blocking webclient and will throw
+     * runtime exceptions. Will attempt retries if 5xx errors are encountered.
+     * You can catch Exception in calling method.
+     * @param url the url you are calling
+     * @param body the body you are requesting
+     * @param clazz the return type you are expecting
+     * @param accessToken access token
+     * @param retryCount retry max attempts
+     * @param durationSeconds interval seconds in retry attempt
+     * @return return type
+     * @param <T> expected return type
+     */
+    public <T> T put(String url, Object body, Class<T> clazz, String accessToken, long retryCount, long durationSeconds) {
         T obj;
         try {
             obj = this.webClient.put()
@@ -148,7 +191,7 @@ public class RestUtils {
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
-                    .retryWhen(reactor.util.retry.Retry.backoff(3, Duration.ofSeconds(2))
+                    .retryWhen(reactor.util.retry.Retry.backoff(retryCount, Duration.ofSeconds(durationSeconds))
                             .filter(ServiceException.class::isInstance)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                                 throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -165,7 +208,6 @@ public class RestUtils {
         return "Service failed to process at url: " + url + " due to: " + errorMessage;
     }
 
-    @Retry(name = "rt-getToken", fallbackMethod = "rtGetTokenFallback")
     private ResponseObj getResponseObj() {
         LOGGER.info("Fetch token");
         HttpHeaders httpHeadersKC = EducGradBatchGraduationApiUtils.getHeaders(
@@ -177,58 +219,44 @@ public class RestUtils {
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(map))
                 .retrieve()
-                .bodyToMono(ResponseObj.class).block();
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        clientResponse -> Mono.error(new ServiceException(getErrorMessage(constants.getTokenUrl(), ERROR_MESSAGE1), clientResponse.statusCode().value())))
+                .bodyToMono(ResponseObj.class)
+                .retryWhen(reactor.util.retry.Retry.backoff(35, Duration.ofSeconds(5))
+                        .filter(ServiceException.class::isInstance)
+                        .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
+                            throw new ServiceException(getErrorMessage(constants.getTokenUrl(), ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
+                        }))
+                .block();
     }
 
-    public ResponseObj rtGetTokenFallBack(HttpServerErrorException exception){
-        LOGGER.error("{} NOT REACHABLE after many attempts.", constants.getTokenUrl(), exception);
-        return null;
-    }
-
-    @Retry(name = "rt-getStudent")
+    @SuppressWarnings("rawtypes")
     public List<Student> getStudentsByPen(String pen, String accessToken) {
-        final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
-        };
-        LOGGER.debug(URL_FORMAT_STR,constants.getPenStudentApiByPenUrl());
-        return this.webClient.get()
-                .uri(String.format(constants.getPenStudentApiByPenUrl(), pen))
-                .headers(h -> h.setBearerAuth(accessToken))
-                .retrieve().bodyToMono(responseType).block();
-    }
-
-    @Retry(name = "reggradrun")
-    public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken, String gradProgram, String programCompleteDate,Long batchId) {
-        UUID correlationID = UUID.randomUUID();
-        if(isReportOnly(studentID, gradProgram, programCompleteDate, accessToken)) {
-            return this.webClient.get()
-            		.uri(String.format(constants.getGraduationApiReportOnlyUrl(), studentID,batchId))
-                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                    .retrieve().bodyToMono(AlgorithmResponse.class).block();
+        ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
+        String url = String.format(constants.getPenStudentApiByPenUrl(), pen);
+        LOGGER.debug(URL_FORMAT_STR, url);
+        List response = this.get(url, List.class, accessToken);
+        if (response != null && !response.isEmpty()) {
+            return jsonTransformer.convertValue(response, new TypeReference<>() {});
         }
-    	return this.webClient.get()
-        		.uri(String.format(constants.getGraduationApiUrl(), studentID,batchId))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .retrieve().bodyToMono(AlgorithmResponse.class).block();
+        return new ArrayList<>();
     }
 
-    @Retry(name = "tvrrun")
+    public AlgorithmResponse runGradAlgorithm(UUID studentID, String accessToken, String gradProgram, String programCompleteDate,Long batchId) {
+        ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
+        String url = isReportOnly(studentID, gradProgram, programCompleteDate, accessToken)?
+            String.format(constants.getGraduationApiReportOnlyUrl(), studentID, batchId) : String.format(constants.getGraduationApiUrl(), studentID, batchId);
+        return this.get(url, AlgorithmResponse.class, accessToken, 5, 2);
+    }
+
     public AlgorithmResponse runProjectedGradAlgorithm(UUID studentID, String accessToken,Long batchId) {
-        UUID correlationID = UUID.randomUUID();
-        return this.webClient.get()
-            .uri(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,batchId))
-            .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-            .retrieve().bodyToMono(AlgorithmResponse.class).block();
-
+        ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
+        return this.get(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,batchId), AlgorithmResponse.class, accessToken);
     }
 
-    @Retry(name = "rt-getStudent")
     public BatchGraduationStudentRecord runGetStudentForBatchInput(UUID studentID, String accessToken) {
-        UUID correlationID = UUID.randomUUID();
-        return this.webClient.get()
-                .uri(String.format(constants.getGradStudentApiGradStatusForBatchUrl(), studentID))
-                .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
-                .retrieve().bodyToMono(BatchGraduationStudentRecord.class).block();
-
+        ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
+        return this.get(String.format(constants.getGradStudentApiGradStatusForBatchUrl(), studentID), BatchGraduationStudentRecord.class, accessToken);
     }
 
     public BatchGraduationStudentRecord getStudentForBatchInput(UUID studentID, AlgorithmSummaryDTO summary) {

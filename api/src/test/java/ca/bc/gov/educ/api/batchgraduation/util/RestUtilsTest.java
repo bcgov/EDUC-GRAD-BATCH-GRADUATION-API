@@ -15,10 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -51,6 +49,9 @@ public class RestUtilsTest {
 
     @MockBean
     WebClient webClient;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     @Autowired
     private EducGradBatchGraduationApiConstants constants;
@@ -109,12 +110,6 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testFallBackMethod_givenExcpetion_shouldReturnNull(){
-        val result = this.restUtils.rtGetTokenFallBack(new HttpServerErrorException(HttpStatus.I_AM_A_TEAPOT));
-        assertThat(result).isNull();
-    }
-
-    @Test
     public void testGetStudentByPen_givenValues_returnsStudent_with_APICallSuccess() {
         final String studentID = UUID.randomUUID().toString();
         final Student student = new Student();
@@ -126,14 +121,14 @@ public class RestUtilsTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getPenStudentApiByPenUrl(), pen))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
         };
-        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(student)));
+        when(this.responseMock.bodyToMono(List.class)).thenReturn(Mono.just(Arrays.asList(student)));
 
         val result = this.restUtils.getStudentsByPen(pen, "abc");
         assertThat(result).isNotNull();
-        assertThat(result.size() > 0).isTrue();
+        assertThat(result.size()).isPositive();
         assertThat(result.get(0).getPen()).isEqualTo(pen);
     }
 
@@ -183,7 +178,7 @@ public class RestUtilsTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecordSearchResult.class)).thenReturn(Mono.just(res));
-
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         var result = this.restUtils.getStudentsForSpecialGradRun(req);
         assertThat(result).isNotNull();
@@ -214,6 +209,7 @@ public class RestUtilsTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecordSearchResult.class)).thenReturn(inputResponseSR);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.inputResponseSR.block()).thenReturn(null);
 
         var result = this.restUtils.getStudentsForSpecialGradRun(req);
@@ -242,6 +238,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(alres));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         GraduationStudentRecord response = this.restUtils.processStudent(graduationStatus,summary);
         assertThat(response.getStudentID()).isEqualTo(studentID);
@@ -326,6 +323,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(alres));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         GraduationStudentRecord response = this.restUtils.processProjectedGradStudent(graduationStatus,summary);
         assertThat(response.getStudentID()).isEqualTo(studentID);
@@ -414,6 +412,7 @@ public class RestUtilsTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(graduationStatus)));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         List<GraduationStudentRecord> resList =  this.restUtils.getStudentData(studentList);
         assertNotNull(resList);
@@ -486,6 +485,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecordDistribution.class)).thenReturn(Mono.just(grd));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         DistributionSummaryDTO summary = new DistributionSummaryDTO();
         summary.setBatchId(batchId);
@@ -531,7 +531,9 @@ public class RestUtilsTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getStudentInfo(),studentID2))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecordDistribution.class)).thenReturn(inputResponseGSR);
+        when(this.inputResponseGSR.retryWhen(any())).thenReturn(inputResponseGSR);
         when(this.inputResponseGSR.block()).thenReturn(null);
 
         DistributionSummaryDTO summary = new DistributionSummaryDTO();
@@ -689,9 +691,8 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
-        final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
-        };
-        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(student)));
+        when(this.responseMock.bodyToMono(List.class)).thenReturn(Mono.just(Arrays.asList(student)));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         PsiCredentialDistribution res = this.restUtils.processPsiDistribution(bcd,summary);
         assertNotNull(res);
@@ -720,18 +721,13 @@ public class RestUtilsTest {
         bcd.setPsiCode("001");
         bcd.setPsiYear("2021");
 
-        final Student student = new Student();
-        student.setStudentID(studentID.toString());
-        student.setPen(pen2);
-
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getPenStudentApiByPenUrl(), pen2))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
-        final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
-        };
-        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(new ArrayList<>()));
+        when(this.responseMock.bodyToMono(List.class)).thenReturn(Mono.just(new ArrayList<>()));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         PsiCredentialDistribution res = this.restUtils.processPsiDistribution(bcd,summary);
         assertNotNull(res);
@@ -896,6 +892,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(res));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.runGradAlgorithm(UUID.fromString(studentID), grd.getProgram(), "123",programCompletionDate,null);
         assertThat(result).isNotNull();
@@ -920,6 +917,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(res));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.runGradAlgorithm(UUID.fromString(studentID), grd.getProgram(), "123",null,null);
         assertThat(result).isNotNull();
@@ -938,7 +936,9 @@ public class RestUtilsTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,null))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
         when(this.responseMock.bodyToMono(AlgorithmResponse.class)).thenReturn(Mono.just(res));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.runProjectedGradAlgorithm(UUID.fromString(studentID), "123",null);
         assertThat(result).isNotNull();
@@ -961,10 +961,11 @@ public class RestUtilsTest {
         final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
         };
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(grd.getStudentID())));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.getStudentsForAlgorithm();
         assertThat(result).isNotNull();
-        assertThat(result.size() > 0).isTrue();
+        assertThat(result.size()).isPositive();
     }
 
     @Test
@@ -984,10 +985,11 @@ public class RestUtilsTest {
         final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
         };
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(grd.getStudentID())));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.getStudentsForProjectedAlgorithm();
         assertThat(result).isNotNull();
-        assertThat(result.size() > 0).isTrue();
+        assertThat(result.size()).isPositive();
     }
 
     @Test
@@ -1000,7 +1002,7 @@ public class RestUtilsTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getGradStudentApiGradStatusForBatchUrl(), studentID))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(BatchGraduationStudentRecord.class)).thenReturn(Mono.just(grd));
 
         AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
@@ -1021,6 +1023,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
         when(this.responseMock.bodyToMono(BatchGraduationStudentRecord.class)).thenReturn(Mono.just(grd));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         AlgorithmSummaryDTO summary = new AlgorithmSummaryDTO();
         summary.setAccessToken("123");
@@ -1098,11 +1101,11 @@ public class RestUtilsTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(scdList));
-
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.getStudentsForUserReqDisRun(credentialType,req);
         assertThat(result).isNotNull();
-        assertThat(result.size() > 0).isTrue();
+        assertThat(result.size()).isPositive();
     }
 
     @Test
@@ -1266,6 +1269,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecordDistribution.class)).thenReturn(Mono.just(grd));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         GraduationStudentRecordDistribution res = this.restUtils.getStudentData(studentID.toString());
         assertThat(res).isNotNull();
@@ -1409,6 +1413,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(boolean.class)).thenReturn(Mono.just(true));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         restUtils.deleteSchoolReportRecord(mincode,reportTypeCode);
         assertThat(reportTypeCode).isEqualTo("E");
@@ -1426,6 +1431,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(boolean.class)).thenReturn(Mono.just(true));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         this.restUtils.deleteSchoolReportRecord(mincode,reportTypeCode);
         assertThat(reportTypeCode).isEqualTo("E");
@@ -1453,10 +1459,9 @@ public class RestUtilsTest {
         when(this.requestHeadersUriMock.uri(String.format(constants.getPenStudentApiByPenUrl(), pen))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
-        final ParameterizedTypeReference<List<Student>> responseType = new ParameterizedTypeReference<>() {
-        };
-        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(student)));
+        when(this.responseMock.bodyToMono(List.class)).thenReturn(Mono.just(Arrays.asList(student)));
 
         mockTokenResponseObject();
 
@@ -1471,7 +1476,7 @@ public class RestUtilsTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(graduationStatus));
-
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         Integer res = this.restUtils.getStudentByPenFromStudentAPI(loadStudentData, "accessToken");
         assertThat(res).isEqualTo(1);
@@ -1556,6 +1561,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(Integer.valueOf(1)));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.runRegenerateStudentCertificate(pen);
         assertThat(result).isEqualTo(1);
@@ -1572,6 +1578,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){})).thenReturn(Mono.just(List.of(reportGradStudentData)));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.fetchDistributionRequiredDataStudentsNonGradYearly();
         assertThat(result).isNotEmpty();
@@ -1589,6 +1596,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){})).thenReturn(Mono.just(List.of(reportGradStudentData)));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
         assertThat(result).isNotEmpty();
@@ -1605,6 +1613,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(new ParameterizedTypeReference<List<ReportGradStudentData>>(){})).thenReturn(Mono.just(List.of(reportGradStudentData)));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.fetchDistributionRequiredDataStudentsYearly();
         assertThat(result).isNotEmpty();
@@ -1626,6 +1635,7 @@ public class RestUtilsTest {
         final ParameterizedTypeReference<List<String>> responseType = new ParameterizedTypeReference<>() {
         };
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(schools));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.getEDWSnapshotSchools(gradYear);
         assertThat(result).hasSize(2);
@@ -1653,6 +1663,7 @@ public class RestUtilsTest {
         final ParameterizedTypeReference<List<SnapshotResponse>> responseType = new ParameterizedTypeReference<>() {
         };
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(Arrays.asList(snapshotResponse)));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.getEDWSnapshotStudents(gradYear, mincode);
         assertThat(result).hasSize(1);
@@ -1699,9 +1710,11 @@ public class RestUtilsTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+
         final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
         };
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(studentIDs));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         val result = this.restUtils.getDeceasedStudentIDs(studentIDs);
         assertThat(result).hasSize(2);
@@ -1727,6 +1740,7 @@ public class RestUtilsTest {
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(ResponseObj.class)).thenReturn(Mono.just(tokenObject));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
 
         return mockToken;
     }
