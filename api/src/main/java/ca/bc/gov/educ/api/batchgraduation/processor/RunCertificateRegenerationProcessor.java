@@ -57,14 +57,16 @@ public class RunCertificateRegenerationProcessor implements ItemProcessor<Studen
 		return null;
 	}
 
-	private String getPenNumber(UUID studentID) throws Exception {
-		String pen = null;
-		GraduationStudentRecordDistribution stuRec = restUtils.getStudentData(studentID.toString());
-		if (stuRec != null) {
-			pen = stuRec.getPen();
-		} else {
-			throw new IOException("Exception occurred in PEN API.");
+	private String getPenNumber(UUID studentID) throws IOException {
+		GraduationStudentRecordDistribution stuRec = null;
+		try {
+			stuRec = restUtils.getStudentData(studentID.toString());
+		} catch (RuntimeException se) {
+			LOGGER.error("Unknown exception occurred in PEN API: {}", se.getLocalizedMessage());
 		}
-		return pen;
+		if (stuRec != null) {
+			return stuRec.getPen();
+		}
+		throw new IOException(String.format("Student not found in PEN API: STU-ID:%s", studentID));
 	}
 }

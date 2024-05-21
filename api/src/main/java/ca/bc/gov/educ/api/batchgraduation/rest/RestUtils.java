@@ -80,18 +80,6 @@ public class RestUtils {
         return this.getTokenResponseObject().getAccess_token();
     }
 
-    public <T> T get(String url, Class<T> clazz, String accessToken) {
-        return this.get(url, clazz, accessToken, 3,2);
-    }
-
-    public <T> T post(String url, Object body, Class<T> clazz, String accessToken) {
-        return this.post(url, body, clazz, accessToken, 3,2);
-    }
-
-    public <T> T put(String url, Object body, Class<T> clazz, String accessToken) {
-        return this.put(url, body, clazz, accessToken, 3,2);
-    }
-
     /**
      * Generic GET call out to services. Uses blocking webclient and will throw
      * runtime exceptions. Will attempt retries if 5xx errors are encountered.
@@ -99,12 +87,10 @@ public class RestUtils {
      * @param url the url you are calling
      * @param clazz the return type you are expecting
      * @param accessToken access token
-     * @param retryCount retry max attempts
-     * @param durationSeconds interval seconds in retry attempt
      * @return return type
      * @param <T> expected return type
      */
-    public <T> T get(String url, Class<T> clazz, String accessToken, long retryCount, long durationSeconds) {
+    public <T> T get(String url, Class<T> clazz, String accessToken) {
         T obj;
         try {
             obj = this.webClient
@@ -118,7 +104,7 @@ public class RestUtils {
                     .bodyToMono(clazz)
                     // only does retry if initial error was 5xx as service may be temporarily down
                     // 4xx errors will always happen if 404, 401, 403 etc., so does not retry
-                    .retryWhen(reactor.util.retry.Retry.backoff(retryCount, Duration.ofSeconds(durationSeconds))
+                    .retryWhen(reactor.util.retry.Retry.backoff(constants.getDefaultRetryMaxAttempts(), Duration.ofSeconds(constants.getDefaultRetryWaitDurationSeconds()))
                             .filter(ServiceException.class::isInstance)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                                 throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -139,12 +125,10 @@ public class RestUtils {
      * @param body the body you are requesting
      * @param clazz the return type you are expecting
      * @param accessToken access token
-     * @param retryCount retry max attempts
-     * @param durationSeconds interval seconds in retry attempt
      * @return return type
      * @param <T> expected return type
      */
-    public <T> T post(String url, Object body, Class<T> clazz, String accessToken, long retryCount, long durationSeconds) {
+    public <T> T post(String url, Object body, Class<T> clazz, String accessToken) {
         T obj;
         try {
             obj = webClient.post()
@@ -155,7 +139,7 @@ public class RestUtils {
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
-                    .retryWhen(reactor.util.retry.Retry.backoff(retryCount, Duration.ofSeconds(durationSeconds))
+                    .retryWhen(reactor.util.retry.Retry.backoff(constants.getDefaultRetryMaxAttempts(), Duration.ofSeconds(constants.getDefaultRetryWaitDurationSeconds()))
                             .filter(ServiceException.class::isInstance)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                                 throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -175,12 +159,10 @@ public class RestUtils {
      * @param body the body you are requesting
      * @param clazz the return type you are expecting
      * @param accessToken access token
-     * @param retryCount retry max attempts
-     * @param durationSeconds interval seconds in retry attempt
      * @return return type
      * @param <T> expected return type
      */
-    public <T> T put(String url, Object body, Class<T> clazz, String accessToken, long retryCount, long durationSeconds) {
+    public <T> T put(String url, Object body, Class<T> clazz, String accessToken) {
         T obj;
         try {
             obj = this.webClient.put()
@@ -191,7 +173,7 @@ public class RestUtils {
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
-                    .retryWhen(reactor.util.retry.Retry.backoff(retryCount, Duration.ofSeconds(durationSeconds))
+                    .retryWhen(reactor.util.retry.Retry.backoff(constants.getDefaultRetryMaxAttempts(), Duration.ofSeconds(constants.getDefaultRetryWaitDurationSeconds()))
                             .filter(ServiceException.class::isInstance)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                                 throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -222,7 +204,7 @@ public class RestUtils {
                 .onStatus(HttpStatusCode::is5xxServerError,
                         clientResponse -> Mono.error(new ServiceException(getErrorMessage(constants.getTokenUrl(), ERROR_MESSAGE1), clientResponse.statusCode().value())))
                 .bodyToMono(ResponseObj.class)
-                .retryWhen(reactor.util.retry.Retry.backoff(35, Duration.ofSeconds(5))
+                .retryWhen(reactor.util.retry.Retry.backoff(constants.getTokenRetryMaxAttempts(), Duration.ofSeconds(constants.getTokenRetryWaitDurationSeconds()))
                         .filter(ServiceException.class::isInstance)
                         .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                             throw new ServiceException(getErrorMessage(constants.getTokenUrl(), ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
@@ -246,7 +228,7 @@ public class RestUtils {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         String url = isReportOnly(studentID, gradProgram, programCompleteDate, accessToken)?
             String.format(constants.getGraduationApiReportOnlyUrl(), studentID, batchId) : String.format(constants.getGraduationApiUrl(), studentID, batchId);
-        return this.get(url, AlgorithmResponse.class, accessToken, 5, 2);
+        return this.get(url, AlgorithmResponse.class, accessToken);
     }
 
     public AlgorithmResponse runProjectedGradAlgorithm(UUID studentID, String accessToken,Long batchId) {

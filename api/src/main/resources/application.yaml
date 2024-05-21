@@ -127,6 +127,16 @@ batch:
     cron: ${CRON_SCHEDULED_PURGE_OLD_RECORDS}
     staleInDays: ${RECORDS_STALE_IN_DAYS}
 
+#Resilience
+resilience:
+  retry:
+    default:
+      maxAttempts: ${MAX_RETRY_ATTEMPTS}
+      waitDuration: 2
+    get-token:
+      maxAttempts: 35
+      waitDuration: 5
+
 #Endpoints
 endpoint:
   keycloak:
