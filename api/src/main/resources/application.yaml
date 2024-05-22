@@ -134,8 +134,8 @@ resilience:
       maxAttempts: ${MAX_RETRY_ATTEMPTS}
       waitDuration: 2
     get-token:
-      maxAttempts: 35
-      waitDuration: 5
+      maxAttempts: 5
+      waitDuration: 2
 
 #Endpoints
 endpoint:

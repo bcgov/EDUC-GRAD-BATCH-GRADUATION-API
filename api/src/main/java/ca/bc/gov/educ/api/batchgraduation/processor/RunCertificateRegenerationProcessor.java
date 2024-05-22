@@ -47,7 +47,7 @@ public class RunCertificateRegenerationProcessor implements ItemProcessor<Studen
 				return count;
 			} catch(Exception e) {
 				LOGGER.error("Unexpected Error: {}", e.getLocalizedMessage());
-				summaryDTO.updateError(item.getStudentID(),"GRAD-GRADUATION-API IS DOWN","Graduation API is unavailable at this moment");
+				summaryDTO.updateError(item.getStudentID(), "Unexpected Error in GRAD-GRADUATION-API", e.getLocalizedMessage());
 				summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() - 1L);
 				LOGGER.info("Failed STU-ID:{} Errors:{}",item.getStudentID(),summaryDTO.getErrors().size());
 				return null;
