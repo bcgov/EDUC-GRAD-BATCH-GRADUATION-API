@@ -96,42 +96,6 @@ springdoc:
     path: /api/v1/api-docs-ui.html
     operationsSorter: alpha
 
-#Resilience
-resilience4j:
-  retry:
-    instances:
-      defaultRetry:
-        maxAttempts: 3
-        waitDuration: 2s
-      rt-getToken:
-        maxAttempts: 35
-        waitDuration: 5s
-        retryExceptions:
-          - org.springframework.web.client.HttpServerErrorException
-        ignoreExceptions:
-          - java.lang.NullPointerException
-      reggradrun:
-        maxAttempts: ${MAX_RETRY_ATTEMPTS}
-        waitDuration: 2s
-        retryExceptions:
-          - org.springframework.web.client.HttpServerErrorException
-        ignoreExceptions:
-          - java.lang.NullPointerException
-      tvrrun:
-        maxAttempts: ${MAX_RETRY_ATTEMPTS}
-        waitDuration: 2s
-        retryExceptions:
-          - org.springframework.web.client.HttpServerErrorException
-        ignoreExceptions:
-          - java.lang.NullPointerException
-      rt-getStudent:
-        maxAttempts: ${MAX_RETRY_ATTEMPTS}
-        waitDuration: 2s
-        retryExceptions:
-          - org.springframework.web.client.HttpServerErrorException
-        ignoreExceptions:
-          - java.lang.NullPointerException
-
 authorization:
   user: ${GRAD_CLIENT_NAME}
   password: ${GRAD_CLIENT_SECRET}
@@ -162,6 +126,16 @@ batch:
   purge-old-records:
     cron: ${CRON_SCHEDULED_PURGE_OLD_RECORDS}
     staleInDays: ${RECORDS_STALE_IN_DAYS}
+
+#Resilience
+resilience:
+  retry:
+    default:
+      maxAttempts: ${MAX_RETRY_ATTEMPTS}
+      waitDuration: 2
+    get-token:
+      maxAttempts: 5
+      waitDuration: 2
 
 #Endpoints
 endpoint:

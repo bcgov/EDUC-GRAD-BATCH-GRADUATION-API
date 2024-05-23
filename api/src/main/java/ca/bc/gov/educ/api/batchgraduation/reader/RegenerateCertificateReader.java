@@ -1,41 +1,37 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
-import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.util.UUID;
+import java.util.List;
 
-public class RegenerateCertificateReader extends BaseReader {
+public class RegenerateCertificateReader extends BaseReader implements ItemReader<StudentCredentialDistribution> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RegenerateCertificateReader.class);
 
-    @Override
-    public UUID read() throws Exception {
-        fetchAccessToken();
-        summaryDTO.setReadCount(studentList.size());
+    @Value("#{stepExecutionContext['index']}")
+    private Integer nxtCredentialForProcessing;
 
-        UUID nextStudent = null;
+    @Value("#{stepExecutionContext['data']}")
+    List<StudentCredentialDistribution> credentialList;
+
+    @Override
+    public StudentCredentialDistribution read() throws Exception {
+        fetchAccessToken();
+        summaryDTO.setReadCount(credentialList.size());
+
+        StudentCredentialDistribution nextCredential = null;
         
-        if (nxtStudentForProcessing < studentList.size()) {
-            nextStudent = studentList.get(nxtStudentForProcessing);
-            LOGGER.info("StudID:{} - {} of {}", nextStudent, nxtStudentForProcessing + 1, summaryDTO.getReadCount());
-            nxtStudentForProcessing++;
+        if (nxtCredentialForProcessing < credentialList.size()) {
+            nextCredential = credentialList.get(nxtCredentialForProcessing);
+            LOGGER.info("StudID:{} - {} of {}", nextCredential, nxtCredentialForProcessing + 1, summaryDTO.getReadCount());
+            nxtCredentialForProcessing++;
         } else {
             aggregate("regenCertSummaryDTO");
         }
-        return nextStudent;
-    }
-
-    public void aggregate(String summaryContextName) {
-        AlgorithmSummaryDTO totalSummaryDTO = (AlgorithmSummaryDTO)jobExecution.getExecutionContext().get(summaryContextName);
-        if (totalSummaryDTO == null) {
-            totalSummaryDTO = new AlgorithmSummaryDTO();
-            jobExecution.getExecutionContext().put(summaryContextName, totalSummaryDTO);
-        }
-        totalSummaryDTO.setBatchId(summaryDTO.getBatchId());
-        totalSummaryDTO.setReadCount(totalSummaryDTO.getReadCount() + summaryDTO.getReadCount());
-        totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());
-        totalSummaryDTO.getErrors().putAll(summaryDTO.getErrors());
+        return nextCredential;
     }
 }
