@@ -581,7 +581,7 @@ public class RestUtils {
         } else {
             distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
-        LOGGER.debug("****** Call distribution API to process the merge request for {} *******", batchId);
+        LOGGER.debug("****** Call distribution API {} to process the merge request for {} *******", distributionUrl, batchId);
         return this.post(distributionUrl, distributionRequest, DistributionResponse.class, accessToken);
     }
 

@@ -104,6 +104,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
     	List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
 		sortSchoolBySchoolOfRecord(uniqueSchoolList);
+		List<StudentCredentialDistribution> studentCredentialDistributionControlList = new ArrayList<>();
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = new ArrayList<>();
 			List<StudentCredentialDistribution> yed2List = new ArrayList<>();
@@ -113,20 +114,26 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				if (credentialType.equalsIgnoreCase("OT") || credentialType.equalsIgnoreCase("RT")) {
 					yed4List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 				}
-
 				if (credentialType.equalsIgnoreCase("OC") || credentialType.equalsIgnoreCase("RC")) {
 					yed2List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YED2".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 					yedrList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YEDR".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YEDB".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 				}
 			}
+
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,properName);
 			supportListener.certificatePrintFile(yed2List,batchId,usl,mapDist,"YED2",properName);
 			supportListener.certificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
 			supportListener.certificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
+
+			studentCredentialDistributionControlList.addAll(yed4List);
+			studentCredentialDistributionControlList.addAll(yed2List);
+			studentCredentialDistributionControlList.addAll(yedrList);
+			studentCredentialDistributionControlList.addAll(yedbList);
+
 		});
-		DistributionResponse disres = null;
-		String activityCode = null;
+		DistributionResponse disres;
+		String activityCode;
 		if(credentialType != null) {
 			if("OC".equalsIgnoreCase(credentialType)) {
 				activityCode = "USERDISTOC";
@@ -134,11 +141,11 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				 *  User Request Distribution Run - Original Certificate OC
 				 ****  Also select the students’ transcript for print
 				 */
-				addTranscriptsToDistributionRequest(cList,summaryDTO,batchId,properName);
+				addTranscriptsToDistributionRequest(studentCredentialDistributionControlList, cList,summaryDTO,batchId,properName);
 			} else {
 				activityCode = "OT".equalsIgnoreCase(credentialType) ? "USERDISTOT" : "USERDISTRC";
 			}
-			if(!cList.isEmpty()) {
+			if(!studentCredentialDistributionControlList.isEmpty()) {
 				DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(summaryDTO.getStudentSearchRequest()).build();
 				if (credentialType.equalsIgnoreCase("RC")) {
 					disres = restUtils.createReprintAndUpload(batchId, accessToken, distributionRequest, activityCode, localDownload);
@@ -146,13 +153,13 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 					disres = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, localDownload);
 				}
 				if(disres != null) {
-					updateBackStudentRecords(cList,batchId,activityCode);
+					updateBackStudentRecords(studentCredentialDistributionControlList.stream().distinct().toList(),batchId,activityCode);
 				}
 			}
 		}
 	}
 
-	private void addTranscriptsToDistributionRequest(List<StudentCredentialDistribution> cList, DistributionSummaryDTO summaryDTO, Long batchId, String properName) {
+	private void addTranscriptsToDistributionRequest(List<StudentCredentialDistribution> controlList, List<StudentCredentialDistribution> cList, DistributionSummaryDTO summaryDTO, Long batchId, String properName) {
 		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		mapDist.forEach((schoolCode, distributionPrintRequest) -> {
 			List<StudentCredentialDistribution> mergedCertificateList = distributionPrintRequest.getMergedListOfCertificates();
@@ -161,8 +168,8 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			List<UUID> studentIDs = uniqueCertificateList.stream().map(StudentCredentialDistribution::getStudentID).collect(Collectors.toList());
 			StudentSearchRequest searchRequest = StudentSearchRequest.builder().pens(studentPens).studentIDs(studentIDs).build();
 			if(LOGGER.isDebugEnabled()) {
-				String studentPensSearchRequest = jsonTransformer.marshall(searchRequest);
-				LOGGER.debug("Get {} students credentials for the pens: {}", "OT", studentPensSearchRequest);
+				String studentSearchRequest = jsonTransformer.marshall(searchRequest);
+				LOGGER.debug("Get {} students credentials for the pens: {}", "OT", studentSearchRequest);
 			}
 			List<StudentCredentialDistribution> transcriptDistributionList = restUtils.getStudentsForUserReqDisRun("OT",searchRequest);
 			for(StudentCredentialDistribution certScd: uniqueCertificateList) {
@@ -184,17 +191,18 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				}
 			}
 			cList.addAll(transcriptDistributionList);
+			controlList.addAll(transcriptDistributionList);
 			supportListener.transcriptPrintFile(transcriptDistributionList, batchId, schoolCode, mapDist, properName);
 		});
 	}
 
-	private void updateBackStudentRecords(List<StudentCredentialDistribution> cList, Long batchId,String activityCode) {
+	private void updateBackStudentRecords(Collection<StudentCredentialDistribution> cList, Long batchId,String activityCode) {
 		cList.forEach(scd-> {
 			LOGGER.debug("Update back Student Record {}", scd.getStudentID());
 			String accessToken = restUtils.fetchAccessToken();
 			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
 		});
-		List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().collect(Collectors.toList());
+		List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList();
 		studentIDs.forEach(sid-> {
 			restUtils.updateStudentGradRecord(sid,batchId,activityCode);
 		});
