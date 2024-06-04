@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import jakarta.annotation.PostConstruct;
@@ -133,5 +134,9 @@ public class JsonTransformer implements Transformer {
     @Override
     public String getContentType() {
         return "application/json";
+    }
+
+    public <T> T convertValue(Object fromValue, TypeReference<T> toValueTypeRef) throws IllegalArgumentException {
+        return objectMapper.convertValue(fromValue, toValueTypeRef);
     }
 }

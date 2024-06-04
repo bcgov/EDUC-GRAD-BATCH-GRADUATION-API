@@ -279,6 +279,19 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-student-api.get-deceased-student-id-list}")
     private String deceasedStudentIDList;
 
+    // Resilience
+    @Value("${resilience.retry.default.maxAttempts}")
+    private int defaultRetryMaxAttempts;
+
+    @Value("${resilience.retry.default.waitDuration}")
+    private int defaultRetryWaitDurationSeconds;
+
+    @Value("${resilience.retry.get-token.maxAttempts}")
+    private int tokenRetryMaxAttempts;
+
+    @Value("${resilience.retry.get-token.waitDuration}")
+    private int tokenRetryWaitDurationSeconds;
+
     // Splunk LogHelper Enabled
     @Value("${splunk.log-helper.enabled}")
     private boolean splunkLogHelperEnabled;

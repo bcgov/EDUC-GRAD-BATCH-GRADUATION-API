@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
@@ -43,29 +42,31 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
             if(parallelDTO != null) {
                 credentialList.addAll(parallelDTO.certificateList());
             }
+        } else if (certificateRegenerationRequest.getPens() != null && !certificateRegenerationRequest.getPens().isEmpty()) {
+            certificateRegenerationRequest.getPens().forEach(p -> {
+                StudentCredentialDistribution scd = new StudentCredentialDistribution();
+                scd.setPen(p);
+                scd.setStudentID(getStudentIDByPen(p));
+                if (scd.getStudentID() != null)
+                    credentialList.add(scd);
+            });
         } else {
             credentialList.addAll(getStudentsForUserReqRun(certificateRegenerationRequest));
         }
 
-        Set<UUID> studentSet = new HashSet<>();
         if(!credentialList.isEmpty()) {
-            studentSet = credentialList.stream().map(StudentCredentialDistribution::getStudentID).collect(Collectors.toSet());
-        }
-
-        List<UUID> studentList = new ArrayList<>(studentSet);
-        if(!studentList.isEmpty()) {
             createTotalSummaryDTO("regenCertSummaryDTO");
-            updateBatchJobHistory(createBatchJobHistory(), (long) studentList.size());
-            int partitionSize = studentList.size()/gridSize + 1;
-            List<List<UUID>> partitions = new LinkedList<>();
-            for (int i = 0; i < studentList.size(); i += partitionSize) {
-                partitions.add(studentList.subList(i, Math.min(i + partitionSize, studentList.size())));
+            updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
+            int partitionSize = credentialList.size()/gridSize + 1;
+            List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
+            for (int i = 0; i < credentialList.size(); i += partitionSize) {
+                partitions.add(credentialList.subList(i, Math.min(i + partitionSize, credentialList.size())));
             }
             Map<String, ExecutionContext> map = new HashMap<>(partitions.size());
             for (int i = 0; i < partitions.size(); i++) {
                 ExecutionContext executionContext = new ExecutionContext();
                 AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
-                List<UUID> data = partitions.get(i);
+                List<StudentCredentialDistribution> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());
                 executionContext.put("summary", summaryDTO);
@@ -73,7 +74,7 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }
-            LOGGER.info("Found {} in total running on {} partitions",studentList.size(),map.size());
+            LOGGER.info("Found {} in total running on {} partitions",credentialList.size(),map.size());
             return map;
         }
         LOGGER.info("No Certificates are found to process them with null distribution date");
@@ -86,6 +87,15 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
             return restUtils.getStudentsForUserReqDisRunWithNullDistributionDate("OC", certificateRegenerationRequest);
         } else {
             return new ArrayList<>();
+        }
+    }
+
+    private UUID getStudentIDByPen(String pen) {
+        try {
+            String accessToken = restUtils.fetchAccessToken();
+            return restUtils.getStudentIDByPen(pen, accessToken);
+        } catch (Exception e) {
+            return null;
         }
     }
 

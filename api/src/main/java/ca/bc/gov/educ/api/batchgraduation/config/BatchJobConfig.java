@@ -892,7 +892,7 @@ public class BatchJobConfig {
     @Bean
     public Step certRegenJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, SkipSQLTransactionExceptionsListener skipListener) {
         return new StepBuilder("certRegenJobStep", jobRepository)
-                .<UUID, Integer>chunk(1, transactionManager)
+                .<StudentCredentialDistribution, Integer>chunk(1, transactionManager)
                 .reader(itemReaderCertRegen())
                 .processor(itemProcessorCertRegen())
                 .writer(itemWriterCertRegen())

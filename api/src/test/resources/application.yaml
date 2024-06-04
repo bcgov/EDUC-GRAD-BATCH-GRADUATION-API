@@ -93,6 +93,16 @@ batch:
     cron: 0 30 0 * * *
     staleInDays: 90
 
+#Resilience
+resilience:
+  retry:
+    default:
+      maxAttempts: 3
+      waitDuration: 2
+    get-token:
+      maxAttempts: 5
+      waitDuration: 2
+
 #Endpoints
 endpoint:
   keycloak:
