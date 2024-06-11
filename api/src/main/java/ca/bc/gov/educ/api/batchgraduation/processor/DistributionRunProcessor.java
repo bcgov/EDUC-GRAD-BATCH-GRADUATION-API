@@ -28,12 +28,13 @@ public class DistributionRunProcessor implements ItemProcessor<StudentCredential
 		LOGGER.info("Processing partitionData = {}", item.getCredentialTypeCode());
 		summaryDTO.setBatchId(batchId);
 		boolean useSchoolAtGrad = false;
-		// Revert code back to school of record GRAD2-2758
+		//--> Revert code back to school of record GRAD2-2758
 		/**
 		String credentialType = summaryDTO.getCredentialType();
 		if (StringUtils.equalsAnyIgnoreCase(credentialType, "OC", "RC")) {
 			useSchoolAtGrad = true;
 		} **/
+		//<--
 		return restUtils.processDistribution(item, summaryDTO, useSchoolAtGrad);
 		
 	}
