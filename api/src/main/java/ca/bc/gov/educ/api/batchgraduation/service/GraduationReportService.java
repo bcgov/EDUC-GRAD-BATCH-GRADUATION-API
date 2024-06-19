@@ -102,7 +102,10 @@ public class GraduationReportService {
 		}
 		dist.setStudentID(data.getGraduationStudentRecordId());
 		dist.setPaperType(paperType);
-		dist.setSchoolOfRecord(StringUtils.isBlank(data.getMincodeAtGrad()) ? data.getMincode() : data.getMincodeAtGrad());
+		//--> Revert code back to school of record GRAD2-2758
+		/** dist.setSchoolOfRecord(StringUtils.isBlank(data.getMincodeAtGrad()) ? data.getMincode() : data.getMincodeAtGrad()); **/
+		dist.setSchoolOfRecord(data.getMincode());
+		//<--
 		dist.setSchoolAtGrad(data.getMincodeAtGrad());
 		dist.setSchoolOfRecordOrigin(data.getMincode());
 		dist.setDocumentStatusCode("COMPL");
