@@ -35,6 +35,8 @@ public class DistributionRunYearlyNonGradProcessor implements ItemProcessor<Stri
 		if(searchRequest != null && searchRequest.getPens() != null && !searchRequest.getPens().isEmpty()) {
 			studentCredentials.removeIf(scr->!searchRequest.getPens().contains(scr.getPen()));
 		}
+		restUtils.deleteSchoolReportRecord(mincode, "NONGRADDISTREP_SC");
+		restUtils.deleteSchoolReportRecord(mincode, "NONGRADDISTREP_SD");
 		LOGGER.debug("Completed partitionData for district {} with {} students", mincode, studentCredentials.size());
 		summaryDTO.getGlobalList().addAll(studentCredentials);
 		return studentCredentials;

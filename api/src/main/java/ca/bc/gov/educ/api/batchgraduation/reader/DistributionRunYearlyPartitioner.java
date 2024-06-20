@@ -31,8 +31,6 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         long startTime = System.currentTimeMillis();
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL");
         restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_YE");
-        restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SC");
-        restUtils.deleteSchoolReportRecord("", "DISTREP_YE_SD");
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
         logger.debug("Old School Reports deleted in {} sec", diff);
@@ -46,6 +44,11 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         filterByStudentSearchRequest(eligibleStudentSchoolDistricts);
         if(!eligibleStudentSchoolDistricts.isEmpty()) {
             updateBatchJobHistory(createBatchJobHistory(), (long) eligibleStudentSchoolDistricts.size());
+            List<String> schoolOfRecords = eligibleStudentSchoolDistricts.stream().map(StudentCredentialDistribution::getSchoolOfRecord).toList();
+            for(String mincode: schoolOfRecords) {
+                restUtils.deleteSchoolReportRecord(mincode, "DISTREP_YE_SC");
+                restUtils.deleteSchoolReportRecord(mincode, "DISTREP_YE_SD");
+            }
             return getStringExecutionContextMap(gridSize, eligibleStudentSchoolDistricts, null);
         }
         logger.info("No Credentials Found for Processing");
