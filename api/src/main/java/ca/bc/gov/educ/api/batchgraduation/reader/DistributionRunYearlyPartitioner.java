@@ -44,7 +44,7 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         filterByStudentSearchRequest(eligibleStudentSchoolDistricts);
         if(!eligibleStudentSchoolDistricts.isEmpty()) {
             updateBatchJobHistory(createBatchJobHistory(), (long) eligibleStudentSchoolDistricts.size());
-            List<String> schoolOfRecords = eligibleStudentSchoolDistricts.stream().distinct().map(StudentCredentialDistribution::getSchoolOfRecord).toList();
+            List<String> schoolOfRecords = eligibleStudentSchoolDistricts.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().toList();
             for(String mincode: schoolOfRecords) {
                 restUtils.deleteSchoolReportRecord(mincode, "DISTREP_YE_SC");
                 restUtils.deleteSchoolReportRecord(mincode, "DISTREP_YE_SD");
