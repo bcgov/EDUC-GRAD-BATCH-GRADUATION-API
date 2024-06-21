@@ -82,6 +82,7 @@ public class DistributionRunStatusUpdateProcessor {
                 unprocessedStudents.put(scd.getStudentID().toString(), new ServiceException(e));
             }
         });
+        processedCount[0] = 0;
         studentIDs.forEach(uuid-> {
             try {
                 if(!StringUtils.equalsAnyIgnoreCase(jobType, "REGALG", "TVRRUN")) {
