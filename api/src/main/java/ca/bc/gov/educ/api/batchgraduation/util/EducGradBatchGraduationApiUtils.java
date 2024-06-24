@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
-import ca.bc.gov.educ.api.batchgraduation.service.GradService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Calendar;
 import java.util.Date;
 
 public class EducGradBatchGraduationApiUtils {
@@ -67,7 +67,10 @@ public class EducGradBatchGraduationApiUtils {
         } catch (ParseException pe) {
             logger.error(ERROR_MSG,pe.getMessage());
         }
-        return sDate;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(sDate);
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        return cal.getTime();
     }
 
     public static int getDifferenceInDays(String date1, String date2) {
