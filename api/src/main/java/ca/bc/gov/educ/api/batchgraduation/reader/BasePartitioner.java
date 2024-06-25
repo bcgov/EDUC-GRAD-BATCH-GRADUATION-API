@@ -227,23 +227,23 @@ public abstract class BasePartitioner extends SimplePartitioner {
                 }
             }
             eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !useFilterSchoolDistricts.contains(scr.getSchoolOfRecord()));
-            LOGGER.debug("Student Credential Distribution filtered by schoolCategory code {}: ", searchRequest.getSchoolCategoryCodes());
+            LOGGER.debug("Student Credential Distribution filtered by schoolCategory code {}: {}", searchRequest.getSchoolCategoryCodes(), eligibleStudentSchoolDistricts.size());
         }
         if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !searchRequest.getDistricts().contains(StringUtils.substring(scr.getSchoolOfRecord(), 0, 3)));
-            LOGGER.debug("Student Credential Distribution filtered by district code {}: ", searchRequest.getDistricts());
+            LOGGER.debug("Student Credential Distribution filtered by district code {}: {}", searchRequest.getDistricts(), eligibleStudentSchoolDistricts.size());
         }
         if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !searchRequest.getSchoolOfRecords().contains(scr.getSchoolOfRecord()));
-            LOGGER.debug("Student Credential Distribution filtered by schoolOfRecord code {}: ", searchRequest.getSchoolOfRecords());
+            LOGGER.debug("Student Credential Distribution filtered by schoolOfRecord code {}: {}", searchRequest.getSchoolOfRecords(), eligibleStudentSchoolDistricts.size());
         }
         if(searchRequest != null && searchRequest.getStudentIDs() != null && !searchRequest.getStudentIDs().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->scr.getStudentID() != null && !searchRequest.getStudentIDs().contains(scr.getStudentID()));
-            LOGGER.debug("Student Credential Distribution filtered by student ID {}: ", searchRequest.getStudentIDs());
+            LOGGER.debug("Student Credential Distribution filtered by student ID {}: {}", searchRequest.getStudentIDs(), eligibleStudentSchoolDistricts.size());
         }
         if(searchRequest != null && searchRequest.getPens() != null && !searchRequest.getPens().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getPen()) && !searchRequest.getPens().contains(scr.getPen()));
-            LOGGER.debug("Student Credential Distribution filtered by pen {}: ", searchRequest.getPens());
+            LOGGER.debug("Student Credential Distribution filtered by pen {}: {}", searchRequest.getPens(), eligibleStudentSchoolDistricts.size());
         }
     }
 
