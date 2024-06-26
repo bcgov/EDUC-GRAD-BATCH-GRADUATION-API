@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
-import ca.bc.gov.educ.api.batchgraduation.service.GradService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Calendar;
 import java.util.Date;
 
 public class EducGradBatchGraduationApiUtils {
@@ -63,7 +63,7 @@ public class EducGradBatchGraduationApiUtils {
         try {
             temp = EducGradBatchGraduationApiUtils.parseDate(actualSessionDate, EducGradBatchGraduationApiConstants.DATE_FORMAT);
             String sDates = EducGradBatchGraduationApiUtils.formatDate(temp, EducGradBatchGraduationApiConstants.DEFAULT_DATE_FORMAT);
-            sDate = EducGradBatchGraduationApiUtils.parseDate(sDates, EducGradBatchGraduationApiConstants.DEFAULT_DATE_FORMAT);
+            sDate = toLastDayOfMonth(EducGradBatchGraduationApiUtils.parseDate(sDates, EducGradBatchGraduationApiConstants.DEFAULT_DATE_FORMAT));
         } catch (ParseException pe) {
             logger.error(ERROR_MSG,pe.getMessage());
         }
@@ -87,6 +87,13 @@ public class EducGradBatchGraduationApiUtils {
     public static String getProgramCompletionDate(Date pcd) {
         DateFormat dateFormat = new SimpleDateFormat(EducGradBatchGraduationApiConstants.DEFAULT_DATE_FORMAT);
         return dateFormat.format(pcd);
+    }
+
+    private static Date toLastDayOfMonth(Date date) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        return cal.getTime();
     }
 	
 }
