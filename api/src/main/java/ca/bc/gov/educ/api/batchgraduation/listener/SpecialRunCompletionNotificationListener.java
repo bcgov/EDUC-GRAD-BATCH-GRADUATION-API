@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
+import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.slf4j.Logger;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
 import java.util.Date;
+
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
 @Component
 public class SpecialRunCompletionNotificationListener extends BaseRunCompletionNotificationListener {
@@ -45,7 +48,10 @@ public class SpecialRunCompletionNotificationListener extends BaseRunCompletionN
 		String accessToken = restUtils.fetchAccessToken();
 		String userName = jobParameters.getString(RUN_BY);
 
-		restUtils.updateStudentGradRecordHistory(batchId, accessToken, userName);
+		String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
+		StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
+
+		restUtils.updateStudentGradRecordHistory(batchId, accessToken, userName, req.getActivityCode());
 	}
 
 

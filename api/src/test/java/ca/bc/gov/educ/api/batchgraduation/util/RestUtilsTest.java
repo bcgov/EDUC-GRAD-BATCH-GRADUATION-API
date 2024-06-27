@@ -1387,7 +1387,7 @@ public class RestUtilsTest {
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(rec));
 
-        this.restUtils.updateStudentGradRecordHistory(batchId,accessToken, userName);
+        this.restUtils.updateStudentGradRecordHistory(batchId,accessToken, userName, null);
         assertNotNull(rec);
 
     }
