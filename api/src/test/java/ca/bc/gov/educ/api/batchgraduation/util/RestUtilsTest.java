@@ -855,6 +855,26 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testProcessStudentReports() {
+        final String studentReportType = "TVRRUN";
+        final String actionType = "tvrDelete";
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentReport(),studentReportType, actionType))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        mockTokenResponseObject();
+
+        var result = this.restUtils.processStudentReports(new ArrayList<>(),studentReportType,actionType);
+        assertNotNull(studentReportType);
+        assertNotNull(result);
+    }
+
+    @Test
     public void testcreateAndStoreSchoolReports_0() {
         final String type = "NONGRADPRJ";
 
