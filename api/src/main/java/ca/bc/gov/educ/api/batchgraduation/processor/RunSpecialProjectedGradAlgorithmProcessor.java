@@ -35,6 +35,7 @@ public class RunSpecialProjectedGradAlgorithmProcessor extends BaseProcessor {
 			summaryDTO.setBatchId(batchId);
 			if(StringUtils.equalsAnyIgnoreCase(req.getActivityCode(), TVRCREATE, TVRUPDATE, TVRDELETE)) {
 				restUtils.processStudentReports(List.of(key), "TVRRUN", req.getActivityCode());
+				restUtils.updateStudentGradRecord(key, jobExecution.getId(), StringUtils.upperCase(req.getActivityCode()));
 			} else {
 				return restUtils.processProjectedGradStudent(item, summaryDTO);
 			}
