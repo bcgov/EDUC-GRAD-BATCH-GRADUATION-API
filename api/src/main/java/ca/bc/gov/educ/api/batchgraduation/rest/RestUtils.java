@@ -854,4 +854,8 @@ public class RestUtils {
             return null;
         }
     }
+
+    public long getTotalStudentsForArchiving(List<String> finalSchoolDistricts) {
+        return 0;
+    }
 }
