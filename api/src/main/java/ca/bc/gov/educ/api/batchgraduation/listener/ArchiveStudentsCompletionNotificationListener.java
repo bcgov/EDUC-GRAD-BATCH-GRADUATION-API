@@ -1,24 +1,24 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.BaseSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.EdwSnapshotSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneId;
 import java.util.Date;
 
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.COMPLETED;
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+
 @Component
-public class ArchiveStudentsCompletionNotificationListener implements JobExecutionListener {
+public class ArchiveStudentsCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveStudentsCompletionNotificationListener.class);
 
@@ -28,45 +28,42 @@ public class ArchiveStudentsCompletionNotificationListener implements JobExecuti
     @Override
     public void afterJob(JobExecution jobExecution) {
 		if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-			long elapsedTimeMillis = new Date().getTime() - jobExecution.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+			long elapsedTimeMillis = getElapsedTimeMillis(jobExecution);
 			LOGGER.info("=======================================================================================");
-			LOGGER.info("EDW Snapshot Job completed in {} s with jobExecution status {}", elapsedTimeMillis/1000, jobExecution.getStatus());
+			JobParameters jobParameters = jobExecution.getJobParameters();
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
+			String jobType = jobParameters.getString("jobType");
+			LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis / 1000, jobExecution.getStatus());
+
 			String status = jobExecution.getStatus().toString();
+			Date startTime = DateUtils.toDate(jobExecution.getStartTime());
 			Date endTime = DateUtils.toDate(jobExecution.getEndTime());
-			EdwSnapshotSummaryDTO summaryDTO = (EdwSnapshotSummaryDTO)jobContext.get("edwSnapshotSummaryDTO");
-			if(summaryDTO == null) {
-				summaryDTO = new EdwSnapshotSummaryDTO();
+			String jobTrigger = jobParameters.getString("jobTrigger");
+
+			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO) jobContext.get("distributionSummaryDTO");
+			if (summaryDTO == null) {
+				summaryDTO = new DistributionSummaryDTO();
+				summaryDTO.initializeCredentialCountMap();
 			}
+
+			summaryDTO.setReadCount(summaryDTO.getGlobalList().size());
+			summaryDTO.setProcessedCount(0);
+
+			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 			// display Summary Details
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
 			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
-			for (String school : summaryDTO.getCountMap().keySet()) {
-				LOGGER.info(" school: {} => students: {}", school, summaryDTO.getCountMap().get(school));
-			}
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
-			if (!summaryDTO.getErrors().isEmpty()) {
-				LOGGER.info(" --------------------------------------------------------------------------------------");
-				EdwSnapshotSummaryDTO finalSummaryDTO = summaryDTO;
-				summaryDTO.getErrors().forEach((key, value) -> LOGGER.info(" school [{}] | studentID [{}] - reason: {}", finalSummaryDTO.getErrors().get(key).getSchoolOfRecord(), key, finalSummaryDTO.getErrors().get(key).getReason()));
-			}
+
+			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
 			// save batch job & error history
-			saveBatchJobHistory(summaryDTO, jobExecutionId, status, endTime);
-			LOGGER.info("=======================================================================================");
-		}
-    }
+			processBatchJobHistory(summaryDTO, jobExecutionId, COMPLETED.name(), jobTrigger, jobType, startTime, endTime, jobParametersDTO);
+			LOGGER.info(" --------------------------------------------------------------------------------------");
+			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
+			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
-	private void saveBatchJobHistory(BaseSummaryDTO summaryDTO, Long jobExecutionId, String status, Date endTime) {
-		BatchGradAlgorithmJobHistoryEntity ent = gradBatchHistoryService.getGradAlgorithmJobHistory(jobExecutionId);
-		if (ent != null) {
-			ent.setActualStudentsProcessed(summaryDTO.getProcessedCount());
-			ent.setFailedStudentsProcessed((int) summaryDTO.getErroredCount());
-			ent.setEndTime(DateUtils.toLocalDateTime(endTime));
-			ent.setStatus(status);
-
-			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
 		}
 	}
 }

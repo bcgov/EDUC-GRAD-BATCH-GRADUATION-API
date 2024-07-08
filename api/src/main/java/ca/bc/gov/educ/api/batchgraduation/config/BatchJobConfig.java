@@ -77,6 +77,18 @@ public class BatchJobConfig {
     }
 
     @Bean
+    @StepScope
+    public ArchiveStudentsReader archiveStudentsReader() {
+        return new ArchiveStudentsReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<? super List<String>> archiveStudentsWriter() {
+        return new ArchiveStudentsWriter();
+    }
+
+    @Bean
     public Step masterStepRegGrad(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constants) {
         Step step = graduationJobStep(jobRepository, transactionManager, constants);
         return new StepBuilder("masterStepRegGrad", jobRepository)
@@ -100,8 +112,10 @@ public class BatchJobConfig {
     @Bean
     public Step archiveStudentsJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constant) {
         return new StepBuilder("archiveStudentsJobStep", jobRepository)
-                .<UUID, GraduationStudentRecord>chunk(constant.getTransactionChunkSize(), transactionManager)
+                .<List<String>, List<String>>chunk(1, transactionManager)
                 .processor(archiveStudentsProcessor())
+                .reader(archiveStudentsReader())
+                .writer(archiveStudentsWriter())
                 .build();
     }
 

@@ -1,17 +1,22 @@
 package ca.bc.gov.educ.api.batchgraduation.processor;
 
-import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.item.ItemProcessor;
 
-import java.util.UUID;
+import java.util.List;
 
-public class ArchiveStudentsProcessor extends BaseProcessor {
+public class ArchiveStudentsProcessor implements ItemProcessor<List<String>, List<String>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveStudentsProcessor.class);
 
 	@Override
-	public GraduationStudentRecord process(UUID uuid) throws Exception {
-		return null;
+	public List<String> process(List<String> minCodes) throws Exception {
+		if(minCodes != null && !minCodes.isEmpty()) {
+			LOGGER.debug("Process Schools: {}", String.join(",", minCodes));
+		} else {
+			LOGGER.debug("Process All Students");
+		}
+		return minCodes;
 	}
 }

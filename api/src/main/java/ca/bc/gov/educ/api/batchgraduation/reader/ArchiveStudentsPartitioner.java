@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
+import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.util.GradSchoolOfRecordFilter;
 import org.slf4j.Logger;
@@ -43,17 +44,26 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
         logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
+
         List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {
             logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
         }
+
         long totalStudentsCount = restUtils.getTotalStudentsForArchiving(finalSchoolDistricts);
         updateBatchJobHistory(createBatchJobHistory(), totalStudentsCount);
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+        summaryDTO.setStudentSearchRequest(searchRequest);
+        summaryDTO.setReadCount(0);
+
         Map<String, ExecutionContext> map = new HashMap<>();
         ExecutionContext executionContext = new ExecutionContext();
         executionContext.put(SEARCH_REQUEST, searchRequest);
         executionContext.put("data", finalSchoolDistricts);
-        map.put("archiveStudentsContext", executionContext);
+        executionContext.put("summary", summaryDTO);
+        executionContext.put("readCount", summaryDTO.getReadCount());
+        map.put("partition0", executionContext);
+
         logger.info("Found {} in total running on 1 partitions", totalStudentsCount);
         return map;
     }

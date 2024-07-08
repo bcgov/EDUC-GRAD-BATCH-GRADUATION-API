@@ -61,7 +61,7 @@ public class JobLauncherController {
 
     private static final String EDW_SNAPSHOT = "EDW_SNAPSHOT";
 
-    private static final String ARCHIVE_STUDENTS = "ARCHIVE_STUDENTS";
+    private static final String ARCHIVE_STUDENTS = "ARC_STUDENTS";
 
     private static final String RERUN_ALL = "RERUN_ALL";
     private static final String RERUN_FAILED = "RERUN_FAILED";
