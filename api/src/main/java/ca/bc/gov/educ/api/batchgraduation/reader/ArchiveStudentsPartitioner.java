@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.School;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.util.GradSchoolOfRecordFilter;
 import org.slf4j.Logger;
@@ -41,27 +42,37 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         long startTime = System.currentTimeMillis();
         logger.debug("Filter Schools for archiving students");
         List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
-        long endTime = System.currentTimeMillis();
-        long diff = (endTime - startTime)/1000;
-        logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
-
         List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {
             logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
         }
 
-        long totalStudentsCount = restUtils.getTotalStudentsForArchiving(finalSchoolDistricts);
-        updateBatchJobHistory(createBatchJobHistory(), totalStudentsCount);
-        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+        DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobExecution.getExecutionContext().get("distributionSummaryDTO");
         summaryDTO.setStudentSearchRequest(searchRequest);
-        summaryDTO.setReadCount(0);
+        Long totalStudentsCount = 0L;
+        for(String schoolOfRecord: finalSchoolDistricts) {
+            Long schoolCount = restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), "CUR", summaryDTO);
+            schoolCount += restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), "TER", summaryDTO);
+            School school = new School(schoolOfRecord);
+            school.setNumberOfStudents(schoolCount);
+            summaryDTO.getSchools().add(school);
+            totalStudentsCount += schoolCount;
+        }
+        long endTime = System.currentTimeMillis();
+        long diff = (endTime - startTime)/1000;
+        logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
+
+        updateBatchJobHistory(createBatchJobHistory(), totalStudentsCount);
+        summaryDTO.setReadCount(totalStudentsCount);
+        summaryDTO.setProcessedCount(0);
 
         Map<String, ExecutionContext> map = new HashMap<>();
         ExecutionContext executionContext = new ExecutionContext();
         executionContext.put(SEARCH_REQUEST, searchRequest);
         executionContext.put("data", finalSchoolDistricts);
         executionContext.put("summary", summaryDTO);
-        executionContext.put("readCount", summaryDTO.getReadCount());
+        executionContext.put("readCount", 0);
+        executionContext.put("summary", summaryDTO);
         map.put("partition0", executionContext);
 
         logger.info("Found {} in total running on 1 partitions", totalStudentsCount);

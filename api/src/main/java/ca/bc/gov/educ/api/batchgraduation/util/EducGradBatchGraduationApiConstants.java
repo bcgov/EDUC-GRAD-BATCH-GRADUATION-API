@@ -124,6 +124,12 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-student-api.get-student-data-list}")
     private String gradStudentApiStudentDataListUrl;
 
+    @Value("${endpoint.grad-student-api.get-students-count}")
+    private String gradStudentCountUrl;
+
+    @Value("${endpoint.grad-student-api.archive-students}")
+    private String gradArchiveStudentsUrl;
+
     @Value("${endpoint.grad-graduation-report-api.check-sccp-certificate-exists}")
     private String checkSccpCertificateExists;
 

@@ -835,7 +835,7 @@ public class JobLauncherController {
     @Operation(summary = "Run Archive Students Batch Job", description = "Run Archive Students Batch Job", tags = { "Archive Students" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<BatchJobResponse> launchArchiveStudentsJob(@RequestBody StudentSearchRequest studentSearchRequest) {
-        logger.debug("launchUserReqEdwSnapshotJob");
+        logger.debug("launchArchiveStudentsJob");
         BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
@@ -851,6 +851,10 @@ public class JobLauncherController {
             String searchData = jsonTransformer.marshall(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, searchData);
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(ARCHIVE_STUDENTS_BATCH_JOB), builder.toJobParameters());
+            ExecutionContext jobContext = jobExecution.getExecutionContext();
+            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+            summaryDTO.setBatchId(jobExecution.getId());
+            jobContext.put(DISDTO, summaryDTO);
             response.setBatchId(jobExecution.getId());
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException

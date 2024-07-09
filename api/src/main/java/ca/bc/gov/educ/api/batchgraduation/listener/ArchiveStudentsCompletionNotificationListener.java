@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.COMPLETED;
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
 @Component
@@ -34,21 +33,14 @@ public class ArchiveStudentsCompletionNotificationListener extends BaseDistribut
 			ExecutionContext jobContext = jobExecution.getExecutionContext();
 			Long jobExecutionId = jobExecution.getId();
 			String jobType = jobParameters.getString("jobType");
-			LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis / 1000, jobExecution.getStatus());
+			LOGGER.info("{} Archive Students Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis / 1000, jobExecution.getStatus());
 
 			String status = jobExecution.getStatus().toString();
 			Date startTime = DateUtils.toDate(jobExecution.getStartTime());
 			Date endTime = DateUtils.toDate(jobExecution.getEndTime());
 			String jobTrigger = jobParameters.getString("jobTrigger");
 
-			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO) jobContext.get("distributionSummaryDTO");
-			if (summaryDTO == null) {
-				summaryDTO = new DistributionSummaryDTO();
-				summaryDTO.initializeCredentialCountMap();
-			}
-
-			summaryDTO.setReadCount(summaryDTO.getGlobalList().size());
-			summaryDTO.setProcessedCount(0);
+			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 
 			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 			// display Summary Details
@@ -59,10 +51,9 @@ public class ArchiveStudentsCompletionNotificationListener extends BaseDistribut
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
 			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, COMPLETED.name(), jobTrigger, jobType, startTime, endTime, jobParametersDTO);
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
-			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
-			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
+			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of archived Students : {}", value.getMincode(), value.getNumberOfStudents()));
 
 		}
 	}

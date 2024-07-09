@@ -24,10 +24,9 @@ public class ArchiveStudentsReader implements ItemReader<List<String>> {
     @Override
     public List<String> read() throws Exception {
         if(readCount > 0) return null;
-        summaryDTO.setReadCount(readCount++);
-        summaryDTO.setProcessedCount(schools.size());
+        readCount++;
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.info("Read schools Codes:{} - {} of {}", String.join(",", schools), readCount, summaryDTO.getProcessedCount());
+            LOGGER.info("Read schools Codes -> {} of {} schools", schools.size(), String.join(",", schools));
         }
         return schools;
     }
