@@ -6,15 +6,20 @@ import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
+import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -53,9 +58,13 @@ public class JobLauncherControllerTest {
     private static final String DISDTO = "distributionSummaryDTO";
     private static final String SCHREPORT = "SCHREP";
     private static final String ARCHIVE_STUDENTS = "ARC_STUDENTS";
+    private static final String RUN_BY = "runBy";
 
-    @Autowired
+    @Mock
     JsonTransformer jsonTransformer;
+
+    @Mock
+    ObjectMapper objectMapper;
 
     @Mock
     GradDashboardService gradDashboardService;
@@ -411,20 +420,62 @@ public class JobLauncherControllerTest {
 
     @Test
     public void testArchiveStudentsBatchJob() {
+        ThreadLocalStateUtil.setCurrentUser("Test");
         StudentSearchRequest request = new StudentSearchRequest();
         request.setSchoolOfRecords(List.of("12345678"));
+
+        String searchData = jsonTransformer.marshall(request);
+
         boolean exceptionIsThrown = false;
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, ARCHIVE_STUDENTS);
+        builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
+
+        ExecutionContext executionContext = new ExecutionContext();
+
+        JobExecution jobExecution = new JobExecution(210L);
+        jobExecution.setExecutionContext(executionContext);
+        JobFactory jobFactory = new JobFactory() {
+
+            String name = "archiveStudentsBatchJob";
+            @Override
+            public Job createJob() {
+                return new Job() {
+
+                    String name = "archiveStudentsBatchJob";
+
+                    @Override
+                    public String getName() {
+                        return name;
+                    }
+
+                    @Override
+                    public void execute(JobExecution jobExecution) {
+
+                    }
+                };
+            }
+
+            @Override
+            public String getJobName() {
+                return name;
+            }
+        };
+
+
         try {
-            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("archiveStudentsBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            Job job = jobFactory.createJob();
+            org.mockito.Mockito.when(jobRegistry.getJob("archiveStudentsBatchJob")).thenReturn(job);
+            org.mockito.Mockito.when(jobLauncher.run(job, builder.toJobParameters())).thenReturn(jobExecution);
             jobLauncherController.launchArchiveStudentsJob(request);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
         assertThat(builder).isNotNull();
+        assertThat(exceptionIsThrown).isFalse();
     }
 
     @Test

@@ -18,6 +18,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -842,6 +843,7 @@ public class JobLauncherController {
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, ARCHIVE_STUDENTS);
+
         response.setJobType(ARCHIVE_STUDENTS);
         response.setTriggerBy(MANUAL);
         response.setStartTime(LocalDateTime.now());
@@ -849,8 +851,9 @@ public class JobLauncherController {
 
         try {
             String searchData = jsonTransformer.marshall(studentSearchRequest);
-            builder.addString(SEARCH_REQUEST, searchData);
-            JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(ARCHIVE_STUDENTS_BATCH_JOB), builder.toJobParameters());
+            builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
+            Job job = jobRegistry.getJob(ARCHIVE_STUDENTS_BATCH_JOB);
+            JobExecution jobExecution = asyncJobLauncher.run(job, builder.toJobParameters());
             ExecutionContext jobContext = jobExecution.getExecutionContext();
             DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
             summaryDTO.setBatchId(jobExecution.getId());
