@@ -85,9 +85,9 @@ public class EducGradBatchGraduationApiConstants {
     public static final String TRANSMISSION_TYPE = "transmissionType";
     public static final String USER_SCHEDULED = "userScheduled";
 
-    public static final String TVRCREATE = "tvrCreate";
-    public static final String TVRUPDATE = "tvrUpdate";
-    public static final String TVRDELETE = "tvrDelete";
+    public static final String TVRCREATE = "tvrCreated";
+    public static final String TVRUPDATE = "tvrUpdated";
+    public static final String TVRDELETE = "tvrDeleted";
 
     @Value("${authorization.user}")
     private String userName;
