@@ -21,6 +21,9 @@ import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -440,11 +443,7 @@ public class JobLauncherControllerTest {
         builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
 
         try {
-            JobParameters jobParameters = builder.toJobParameters();
-            Pair<JobExecution, Job> jobExecutionJobPair = createJob(210L, "archiveStudentsBatchJob", jobParameters);
-            Job job = jobExecutionJobPair.getRight();
-            JobExecution jobExecution = jobExecutionJobPair.getLeft();
-            org.mockito.Mockito.when(asyncJobLauncher.run(job, jobParameters)).thenReturn(jobExecution);
+            createJob(210L, "archiveStudentsBatchJob", builder.toJobParameters());
             ResponseEntity<BatchJobResponse> result = jobLauncherController.launchArchiveStudentsJob(request);
             assertThat(result.getStatusCode().value()).isEqualTo(200);
         } catch (Exception e) {
@@ -637,7 +636,7 @@ public class JobLauncherControllerTest {
         assertThat(builder).isNotNull();
     }
 
-    Pair<JobExecution, Job> createJob(Long batchId, String jobName, JobParameters jobParameters) throws DuplicateJobException, NoSuchJobException {
+    Pair<JobExecution, Job> createJob(Long batchId, String jobName, JobParameters jobParameters) throws DuplicateJobException, NoSuchJobException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
         ExecutionContext executionContext = new ExecutionContext();
 
         JobExecution jobExecution = new JobExecution(batchId);
@@ -659,8 +658,8 @@ public class JobLauncherControllerTest {
                     }
 
                     @Override
-                    public void execute(JobExecution jobExecution) {
-
+                    public void execute(JobExecution jobExec) {
+                        jobExecution.setStatus(BatchStatus.COMPLETED);
                     }
 
                     @Override
@@ -679,9 +678,13 @@ public class JobLauncherControllerTest {
         };
 
         Job job = jobFactory.createJob();
+        jobExecution.setJobInstance(new JobInstance(batchId, job.getName()));
+        jobExecution.setStatus(BatchStatus.STARTED);
         jobRegistry.register(jobFactory);
-        org.mockito.Mockito.when(jobRegistry.getJob(jobName)).thenReturn(job);
         job.getJobParametersIncrementer().getNext(jobParameters);
+        org.mockito.Mockito.when(jobRegistry.getJob(jobName)).thenReturn(job);
+        org.mockito.Mockito.when(asyncJobLauncher.run(job, jobParameters)).thenReturn(jobExecution);
+        org.mockito.Mockito.when(jobLauncher.run(job, jobParameters)).thenReturn(jobExecution);
         return Pair.of(jobExecution, job);
     }
 }
