@@ -9,20 +9,23 @@ import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.configuration.DuplicateJobException;
 import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.NoSuchJobException;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -420,61 +423,33 @@ public class JobLauncherControllerTest {
 
     @Test
     public void testArchiveStudentsBatchJob() {
-        ThreadLocalStateUtil.setCurrentUser("Test");
+        ThreadLocalStateUtil.setCurrentUser("Batch Process");
         StudentSearchRequest request = new StudentSearchRequest();
         request.setSchoolOfRecords(List.of("12345678"));
 
         String searchData = jsonTransformer.marshall(request);
 
         boolean exceptionIsThrown = false;
+
         JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+
+        builder.addLong(TIME, System.currentTimeMillis());
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, ARCHIVE_STUDENTS);
         builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
 
-        ExecutionContext executionContext = new ExecutionContext();
-
-        JobExecution jobExecution = new JobExecution(210L);
-        jobExecution.setExecutionContext(executionContext);
-        JobFactory jobFactory = new JobFactory() {
-
-            String name = "archiveStudentsBatchJob";
-            @Override
-            public Job createJob() {
-                return new Job() {
-
-                    String name = "archiveStudentsBatchJob";
-
-                    @Override
-                    public String getName() {
-                        return name;
-                    }
-
-                    @Override
-                    public void execute(JobExecution jobExecution) {
-
-                    }
-                };
-            }
-
-            @Override
-            public String getJobName() {
-                return name;
-            }
-        };
-
-
         try {
-            Job job = jobFactory.createJob();
-            org.mockito.Mockito.when(jobRegistry.getJob("archiveStudentsBatchJob")).thenReturn(job);
-            org.mockito.Mockito.when(jobLauncher.run(job, builder.toJobParameters())).thenReturn(jobExecution);
-            jobLauncherController.launchArchiveStudentsJob(request);
+            JobParameters jobParameters = builder.toJobParameters();
+            Pair<JobExecution, Job> jobExecutionJobPair = createJob(210L, "archiveStudentsBatchJob", jobParameters);
+            Job job = jobExecutionJobPair.getRight();
+            JobExecution jobExecution = jobExecutionJobPair.getLeft();
+            org.mockito.Mockito.when(asyncJobLauncher.run(job, jobParameters)).thenReturn(jobExecution);
+            ResponseEntity<BatchJobResponse> result = jobLauncherController.launchArchiveStudentsJob(request);
+            assertThat(result.getStatusCode().value()).isEqualTo(200);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
-        assertThat(builder).isNotNull();
         assertThat(exceptionIsThrown).isFalse();
     }
 
@@ -660,5 +635,53 @@ public class JobLauncherControllerTest {
         }
 
         assertThat(builder).isNotNull();
+    }
+
+    Pair<JobExecution, Job> createJob(Long batchId, String jobName, JobParameters jobParameters) throws DuplicateJobException, NoSuchJobException {
+        ExecutionContext executionContext = new ExecutionContext();
+
+        JobExecution jobExecution = new JobExecution(batchId);
+        jobExecution.setExecutionContext(executionContext);
+        JobFactory jobFactory = new JobFactory() {
+
+            Job job;
+
+            JobParametersIncrementer jobParametersIncrementer;
+
+            @Override
+            public Job createJob() {
+                this.job = new Job() {
+                    String name = jobName;
+
+                    @Override
+                    public String getName() {
+                        return name;
+                    }
+
+                    @Override
+                    public void execute(JobExecution jobExecution) {
+
+                    }
+
+                    @Override
+                    public JobParametersIncrementer getJobParametersIncrementer() {
+                        jobParametersIncrementer = new RunIdIncrementer();
+                        return jobParametersIncrementer;
+                    }
+                };
+                return job;
+            }
+
+            @Override
+            public String getJobName() {
+                return job.getName();
+            }
+        };
+
+        Job job = jobFactory.createJob();
+        jobRegistry.register(jobFactory);
+        org.mockito.Mockito.when(jobRegistry.getJob(jobName)).thenReturn(job);
+        job.getJobParametersIncrementer().getNext(jobParameters);
+        return Pair.of(jobExecution, job);
     }
 }

@@ -18,10 +18,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -839,6 +836,7 @@ public class JobLauncherController {
         logger.debug("launchArchiveStudentsJob");
         BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
+
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
         builder.addString(JOB_TRIGGER, MANUAL);
@@ -853,12 +851,17 @@ public class JobLauncherController {
             String searchData = jsonTransformer.marshall(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
             Job job = jobRegistry.getJob(ARCHIVE_STUDENTS_BATCH_JOB);
-            JobExecution jobExecution = asyncJobLauncher.run(job, builder.toJobParameters());
-            ExecutionContext jobContext = jobExecution.getExecutionContext();
-            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
-            summaryDTO.setBatchId(jobExecution.getId());
-            jobContext.put(DISDTO, summaryDTO);
-            response.setBatchId(jobExecution.getId());
+            JobParameters jobParameters = job.getJobParametersIncrementer().getNext(builder.toJobParameters());
+            JobExecution jobExecution = asyncJobLauncher.run(job, jobParameters);
+            if(jobExecution != null) {
+                ExecutionContext jobContext = jobExecution.getExecutionContext();
+                DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+                summaryDTO.setBatchId(jobExecution.getId());
+                jobContext.put(DISDTO, summaryDTO);
+                response.setBatchId(jobExecution.getId());
+            } else {
+                response.setBatchId(jobParameters.getLong("run.id"));
+            }
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                  | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
