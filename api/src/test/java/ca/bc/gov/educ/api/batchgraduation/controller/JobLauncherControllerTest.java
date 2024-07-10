@@ -52,6 +52,7 @@ public class JobLauncherControllerTest {
     private static final String TRANMISSION_TYPE = "transmissionType";
     private static final String DISDTO = "distributionSummaryDTO";
     private static final String SCHREPORT = "SCHREP";
+    private static final String ARCHIVE_STUDENTS = "ARC_STUDENTS";
 
     @Autowired
     JsonTransformer jsonTransformer;
@@ -402,6 +403,24 @@ public class JobLauncherControllerTest {
         try {
             org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("YearlyNonGradDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchYearlyNonGradDistributionRunJob(request);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+        assertThat(builder).isNotNull();
+    }
+
+    @Test
+    public void testArchiveStudentsBatchJob() {
+        StudentSearchRequest request = new StudentSearchRequest();
+        request.setSchoolOfRecords(List.of("12345678"));
+        boolean exceptionIsThrown = false;
+        JobParametersBuilder builder = new JobParametersBuilder();
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, ARCHIVE_STUDENTS);
+        try {
+            org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("archiveStudentsBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
+            jobLauncherController.launchArchiveStudentsJob(request);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
