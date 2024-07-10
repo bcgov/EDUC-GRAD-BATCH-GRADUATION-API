@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class GradSchoolOfRecordFilter implements Serializable {
@@ -59,6 +60,12 @@ public class GradSchoolOfRecordFilter implements Serializable {
             }
         }
         return eligibleStudentSchoolDistricts;
+    }
+
+    public List<UUID> filterStudents(StudentSearchRequest searchRequest) {
+        List<UUID> eligibleStudentGuids = new ArrayList<>(searchRequest.getStudentIDs());
+        eligibleStudentGuids.addAll(restUtils.getStudentsForSpecialGradRun(searchRequest));
+        return eligibleStudentGuids;
     }
 
 }

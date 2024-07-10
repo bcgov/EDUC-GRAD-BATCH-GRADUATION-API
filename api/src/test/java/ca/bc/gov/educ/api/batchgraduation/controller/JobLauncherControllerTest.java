@@ -466,6 +466,34 @@ public class JobLauncherControllerTest {
     }
 
     @Test
+    public void testLaunchRegenerateSchoolReportsJob() {
+        boolean exceptionIsThrown = false;
+        StudentSearchRequest req = new StudentSearchRequest();
+        req.setPens(Arrays.asList("123213123"));
+        try {
+            jobLauncherController.launchRegenerateSchoolReports(req, null);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(exceptionIsThrown).isFalse();
+    }
+
+    @Test
+    public void testLaunchRegenerateStudentReportsJob() {
+        boolean exceptionIsThrown = false;
+        StudentSearchRequest req = new StudentSearchRequest();
+        req.setStudentIDs(Arrays.asList(UUID.randomUUID()));
+        try {
+            jobLauncherController.launchRegenerateStudentReports(req, null);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(exceptionIsThrown).isFalse();
+    }
+
+    @Test
     public void testLoadDashboard() {
         GradDashboard dash = new GradDashboard();
         dash.setBatchInfoList(new ArrayList<>());

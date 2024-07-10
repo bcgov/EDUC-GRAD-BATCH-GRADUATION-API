@@ -555,6 +555,19 @@ public class RestUtils {
         return result;
     }
 
+    public Integer processStudentReports(List<UUID> uuidList, String studentReportType, String actionType) {
+        UUID correlationID = UUID.randomUUID();
+        Integer result = webClient.post()
+                .uri(String.format(constants.getUpdateStudentReport(), studentReportType, actionType))
+                .headers(h -> { h.setBearerAuth(getAccessToken()); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                .body(BodyInserters.fromValue(uuidList))
+                .retrieve()
+                .bodyToMono(Integer.class)
+                .block();
+        LOGGER.info("{} {} Student {} Reports", actionType, result, studentReportType);
+        return result;
+    }
+
     //Grad2-1931 sending transmissionType with the webclient.
     public DistributionResponse mergePsiAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest,String localDownload, String transmissionType) {
         UUID correlationID = UUID.randomUUID();
@@ -689,10 +702,10 @@ public class RestUtils {
         }
     }
 
-    public void updateStudentGradRecordHistory(Long batchId, String accessToken, String userName) {
+    public void updateStudentGradRecordHistory(Long batchId, String accessToken, String userName, String activityCode) {
          try {
             if (batchId != null) {
-                String url = String.format(constants.getUpdateStudentRecordHistory(), batchId, userName);
+                String url = String.format(constants.getUpdateStudentRecordHistory(), batchId, userName, activityCode);
                 this.put(url,"{}", GraduationStudentRecord.class, accessToken);
             }
         } catch (Exception e) {

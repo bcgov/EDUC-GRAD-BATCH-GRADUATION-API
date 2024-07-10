@@ -4,10 +4,13 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
 import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -17,6 +20,8 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.*;
 
 public abstract class BaseRunCompletionNotificationListener implements JobExecutionListener {
 
@@ -31,6 +36,9 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
     @Autowired
     private RestUtils restUtils;
 
+    @Autowired
+    JsonTransformer jsonTransformer;
+
     protected void handleSummary(JobExecution jobExecution, String summaryDtoName, boolean isSpecialRun) {
         JobParameters jobParameters = jobExecution.getJobParameters();
         ExecutionContext jobContext = jobExecution.getExecutionContext();
@@ -40,6 +48,9 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
         Date endTime = DateUtils.toDate(jobExecution.getEndTime());
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
+
+        String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
+        StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
 
         AlgorithmSummaryDTO summaryDTO = (AlgorithmSummaryDTO)jobContext.get(summaryDtoName);
         if(summaryDTO == null) {
@@ -77,7 +88,9 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
         if (!isSpecialRun) {
             updateBackStudentFlagForErroredStudents(summaryDTO.getErrors(), jobType, obj.getAccess_token());
         }
-        processSchoolList(jobExecutionId, jobType);
+        if(!StringUtils.equalsAnyIgnoreCase(req.getActivityCode(), TVRCREATE, TVRUPDATE, TVRDELETE)) {
+            processSchoolList(jobExecutionId, jobType);
+        }
     }
 
     private void processBatchJobHistory(AlgorithmSummaryDTO summaryDTO, Long jobExecutionId, String status, String jobTrigger, String jobType, Date startTime, Date endTime) {
