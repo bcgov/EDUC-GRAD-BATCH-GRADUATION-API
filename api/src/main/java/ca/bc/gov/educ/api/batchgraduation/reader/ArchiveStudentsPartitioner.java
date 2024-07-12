@@ -51,12 +51,20 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         summaryDTO.setStudentSearchRequest(searchRequest);
         Long totalStudentsCount = 0L;
         for(String schoolOfRecord: finalSchoolDistricts) {
-            Long schoolCount = restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), "CUR", summaryDTO);
-            schoolCount += restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), "TER", summaryDTO);
+            Long schoolStudentCount = 0L;
+            List<String> studentStatusCodes = searchRequest.getStatuses();
+            if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
+                for(String studentStatusCode: studentStatusCodes) {
+                    schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), studentStatusCode, summaryDTO);
+                }
+            } else {
+                schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), "CUR", summaryDTO);
+                schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), "TER", summaryDTO);
+            }
             School school = new School(schoolOfRecord);
-            school.setNumberOfStudents(schoolCount);
+            school.setNumberOfStudents(schoolStudentCount);
             summaryDTO.getSchools().add(school);
-            totalStudentsCount += schoolCount;
+            totalStudentsCount += schoolStudentCount;
         }
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;

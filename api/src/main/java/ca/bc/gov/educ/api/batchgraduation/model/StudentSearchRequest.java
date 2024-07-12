@@ -24,6 +24,7 @@ public class StudentSearchRequest implements Serializable {
     private List<String> pens;
     private List<String> programs;
     private List<UUID> studentIDs;
+    private List<String> statuses;
 
     private String user;
     private Address address;

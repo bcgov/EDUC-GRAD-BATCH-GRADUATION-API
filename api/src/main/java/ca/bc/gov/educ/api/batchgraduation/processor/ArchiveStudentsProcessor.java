@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.processor;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,15 +24,29 @@ public class ArchiveStudentsProcessor implements ItemProcessor<List<String>, Lis
 	@Override
 	public List<String> process(List<String> minCodes) throws Exception {
 		Long batchId = summaryDTO.getBatchId();
+		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
 		long countArchivesStudents = 0l;
+		List<String> studentStatusCodes = searchRequest.getStatuses();
 		if(minCodes != null && !minCodes.isEmpty()) {
 			LOGGER.debug("Process Schools: {}", String.join(",", minCodes));
-			countArchivesStudents += restUtils.archiveStudents(batchId, minCodes, "CUR", summaryDTO);
-			countArchivesStudents += restUtils.archiveStudents(batchId, minCodes, "TER", summaryDTO);
+			if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
+				for (String studentStatusCode : studentStatusCodes) {
+					countArchivesStudents += restUtils.archiveStudents(batchId, minCodes, studentStatusCode, summaryDTO);
+				}
+			} else {
+				countArchivesStudents += restUtils.archiveStudents(batchId, minCodes, "CUR", summaryDTO);
+				countArchivesStudents += restUtils.archiveStudents(batchId, minCodes, "TER", summaryDTO);
+			}
 		} else {
 			LOGGER.debug("Process All Students");
-			countArchivesStudents += restUtils.archiveStudents(batchId, null, "CUR", summaryDTO);
-			countArchivesStudents += restUtils.archiveStudents(batchId, null, "TER", summaryDTO);
+			if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
+				for (String studentStatusCode : studentStatusCodes) {
+					countArchivesStudents += restUtils.archiveStudents(batchId, null, studentStatusCode, summaryDTO);
+				}
+			} else {
+				countArchivesStudents += restUtils.archiveStudents(batchId, null, "CUR", summaryDTO);
+				countArchivesStudents += restUtils.archiveStudents(batchId, null, "TER", summaryDTO);
+			}
 		}
 		summaryDTO.setProcessedCount(countArchivesStudents);
 		return minCodes;
