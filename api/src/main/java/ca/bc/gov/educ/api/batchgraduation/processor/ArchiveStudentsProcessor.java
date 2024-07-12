@@ -25,30 +25,30 @@ public class ArchiveStudentsProcessor implements ItemProcessor<List<String>, Lis
 	public List<String> process(List<String> minCodes) throws Exception {
 		Long batchId = summaryDTO.getBatchId();
 		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
-		long countArchivesStudents = 0l;
+		long countArchivedStudents = 0l;
 		List<String> studentStatusCodes = searchRequest.getStatuses();
 		if(minCodes != null && !minCodes.isEmpty()) {
 			LOGGER.debug("Process Schools: {}", String.join(",", minCodes));
 			if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
 				for (String studentStatusCode : studentStatusCodes) {
-					countArchivesStudents += restUtils.archiveStudents(batchId, minCodes, studentStatusCode, summaryDTO);
+					countArchivedStudents += restUtils.archiveStudents(batchId, minCodes, studentStatusCode, summaryDTO);
 				}
 			} else {
-				countArchivesStudents += restUtils.archiveStudents(batchId, minCodes, "CUR", summaryDTO);
-				countArchivesStudents += restUtils.archiveStudents(batchId, minCodes, "TER", summaryDTO);
+				countArchivedStudents += restUtils.archiveStudents(batchId, minCodes, "CUR", summaryDTO);
+				countArchivedStudents += restUtils.archiveStudents(batchId, minCodes, "TER", summaryDTO);
 			}
 		} else {
 			LOGGER.debug("Process All Students");
 			if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
 				for (String studentStatusCode : studentStatusCodes) {
-					countArchivesStudents += restUtils.archiveStudents(batchId, null, studentStatusCode, summaryDTO);
+					countArchivedStudents += restUtils.archiveStudents(batchId, null, studentStatusCode, summaryDTO);
 				}
 			} else {
-				countArchivesStudents += restUtils.archiveStudents(batchId, null, "CUR", summaryDTO);
-				countArchivesStudents += restUtils.archiveStudents(batchId, null, "TER", summaryDTO);
+				countArchivedStudents += restUtils.archiveStudents(batchId, null, "CUR", summaryDTO);
+				countArchivedStudents += restUtils.archiveStudents(batchId, null, "TER", summaryDTO);
 			}
 		}
-		summaryDTO.setProcessedCount(countArchivesStudents);
+		summaryDTO.setProcessedCount(countArchivedStudents);
 		return minCodes;
 	}
 }
