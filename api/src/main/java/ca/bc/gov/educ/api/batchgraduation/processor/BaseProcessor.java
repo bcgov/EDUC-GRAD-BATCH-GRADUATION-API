@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.BatchGraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.model.GraduationStudentRecord;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -23,6 +24,9 @@ public abstract class BaseProcessor implements ItemProcessor<UUID, GraduationStu
 
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
+
+    @Autowired
+    JsonTransformer jsonTransformer;
 
     @Value("#{stepExecutionContext['summary']}")
     AlgorithmSummaryDTO summaryDTO;

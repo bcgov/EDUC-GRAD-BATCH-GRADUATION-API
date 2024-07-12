@@ -36,10 +36,10 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
         initializeRunType();
         BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         List<UUID> studentList;
+        JobParameters jobParameters = jobExecution.getJobParameters();
+        String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
+        StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
         if (runType == RunTypeEnum.NORMAL_JOB_PROCESS) {
-            JobParameters jobParameters = jobExecution.getJobParameters();
-            String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
-            StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
             studentList = restUtils.getStudentsForSpecialGradRun(req);
         } else {
             studentList = getInputDataFromPreviousJob();

@@ -36,8 +36,10 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
+import java.util.UUID;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.TVRDELETE;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
@@ -255,7 +257,7 @@ public class JobLauncherController {
     }
 
     private void validateInput(BatchJobResponse response, StudentSearchRequest studentSearchRequest) {
-        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
+        if(studentSearchRequest.getStudentIDs().isEmpty() && studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
             response.setException("Please provide at least 1 parameter");
         }
         response.setException(null);
@@ -445,7 +447,7 @@ public class JobLauncherController {
 
     @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_REGEN_SCHOOL_REPORTS_BY_REQUEST)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
-    @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "RRe-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
+    @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "Re-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<String> launchRegenerateSchoolReports(@RequestBody StudentSearchRequest searchRequest, @RequestParam(required = false) String type) {
         String schoolReportType = ObjectUtils.defaultIfNull(type, REGALG);
@@ -455,6 +457,24 @@ public class JobLauncherController {
             logger.info(" Number of Schools [{}] ---------------------------------------------------------", finalSchoolDistricts.size());
             int numberOfReports = restUtils.createAndStoreSchoolReports(finalSchoolDistricts, schoolReportType);
             return ResponseEntity.ok(numberOfReports + " school reports " + schoolReportType + " created successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getLocalizedMessage());
+        }
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_REGEN_STUDENT_REPORTS_BY_REQUEST)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Re-Generate Student Reports for the given batchJobId", description = "Re-Generate Student Reports for the given batchJobId", tags = { "RE-RUN" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<String> launchRegenerateStudentReports(@RequestBody StudentSearchRequest searchRequest, @RequestParam String type) {
+        String studentReportType = ObjectUtils.defaultIfNull(type, TVRRUN);
+        String actionType = ObjectUtils.defaultIfNull(searchRequest.getActivityCode(), TVRDELETE);
+        logger.info(" Re-Generating Student Reports by request for {} --------------------------------------------------------", studentReportType);
+        try {
+            List<UUID> finalUUIDs = gradSchoolOfRecordFilter.filterStudents(searchRequest);
+            logger.info(" Number of Students [{}] ---------------------------------------------------------", finalUUIDs.size());
+            int numberOfReports = restUtils.processStudentReports(finalUUIDs, studentReportType, actionType);
+            return ResponseEntity.ok(numberOfReports + " student " + studentReportType + " reports " + actionType + " successfully");
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getLocalizedMessage());
         }

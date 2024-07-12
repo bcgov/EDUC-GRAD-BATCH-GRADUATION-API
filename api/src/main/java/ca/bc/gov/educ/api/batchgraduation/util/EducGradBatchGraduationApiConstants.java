@@ -42,6 +42,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_RE_RUNS_FAILED = "/rerun/failed/{batchId}";
     public static final String EXECUTE_REGEN_SCHOOL_REPORTS = "/regenerate/school-report/{batchId}";
     public static final String EXECUTE_REGEN_SCHOOL_REPORTS_BY_REQUEST = "/regenerate/school-report";
+    public static final String EXECUTE_REGEN_STUDENT_REPORTS_BY_REQUEST = "/regenerate/student-report";
 
     public static final String BATCH_JOB_TYPES_MAPPING = "/batchjobtype";
     public static final String BATCH_JOB_TYPE_MAPPING = "/batchjobtype/{batchJobTypeCode}";
@@ -84,6 +85,10 @@ public class EducGradBatchGraduationApiConstants {
     public static final String SEARCH_REQUEST = "searchRequest";
     public static final String TRANSMISSION_TYPE = "transmissionType";
     public static final String USER_SCHEDULED = "userScheduled";
+
+    public static final String TVRCREATE = "tvrCreated";
+    public static final String TVRUPDATE = "tvrUpdated";
+    public static final String TVRDELETE = "tvrDeleted";
 
     @Value("${authorization.user}")
     private String userName;
@@ -258,6 +263,9 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-report-api.update-school-report.url}")
     private String updateSchoolReport;
+
+    @Value("${endpoint.grad-graduation-report-api.update-student-report.url}")
+    private String updateStudentReport;
 
     @Value("${endpoint.grad-trax-api.get-psi-student-list.url}")
     private String psiStudentList;
