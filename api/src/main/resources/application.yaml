@@ -188,6 +188,10 @@ endpoint:
     get-district-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/districtnongradreportdata
     get-deceased-student-id-list: ${GRAD_STUDENT_API}api/v1/student/deceasedstudentid
   grad-graduation-report-api:
+    get-school-reports-count:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/count?reportType=%S
+    archive-school-reports:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/archive?batchId=%s&reportType=%S
     get-transcript-list:
       yearly:
         url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistributionyearly

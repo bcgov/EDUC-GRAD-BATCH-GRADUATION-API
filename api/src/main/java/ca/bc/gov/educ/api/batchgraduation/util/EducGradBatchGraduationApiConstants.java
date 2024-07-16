@@ -28,6 +28,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_YEARLY_NON_GRAD_DIS_RUN_BATCH_JOB = "/executenongraddisrunbatchjob";
     public static final String EXECUTE_CERT_REGEN_BATCH_JOB = "/executecertregenbatchjob";
     public static final String EXECUTE_EDW_SNAPSHOT_BATCH_JOB = "/executeedwsnapshotbatchjob";
+    public static final String EXECUTE_ARCHIVE_SCHOOL_REPORTS_RUN_BATCH_JOB = "/executearchivebatchjobschoolreports";
 
     // Special Run
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
@@ -127,6 +128,12 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-student-api.get-student-data-list}")
     private String gradStudentApiStudentDataListUrl;
+
+    @Value("${endpoint.grad-graduation-report-api.get-school-reports-count.url}")
+    private String gradSchoolReportsCountUrl;
+
+    @Value("${endpoint.grad-graduation-report-api.archive-school-reports.url}")
+    private String gradArchiveSchoolReportsUrl;
 
     @Value("${endpoint.grad-graduation-report-api.check-sccp-certificate-exists}")
     private String checkSccpCertificateExists;

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,6 +25,7 @@ public class StudentSearchRequest implements Serializable {
     private List<String> pens;
     private List<String> programs;
     private List<UUID> studentIDs;
+    private List<String> reportTypes = new ArrayList();
 
     private String user;
     private Address address;
