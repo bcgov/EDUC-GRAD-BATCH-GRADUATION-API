@@ -18,9 +18,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParametersBuilder;
-import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.NoSuchJobException;
@@ -63,6 +61,8 @@ public class JobLauncherController {
 
     private static final String EDW_SNAPSHOT = "EDW_SNAPSHOT";
 
+    private static final String ARCHIVE_STUDENTS = "ARC_STUDENTS";
+
     private static final String RERUN_ALL = "RERUN_ALL";
     private static final String RERUN_FAILED = "RERUN_FAILED";
     private static final String DISTRUN = "DISTRUN";
@@ -84,6 +84,8 @@ public class JobLauncherController {
     private static final String CERTIFICATE_REGENERATION_BATCH_JOB = "certRegenBatchJob";
 
     private static final String EDW_SNAPSHOT_BATCH_JOB = "edwSnapshotBatchJob";
+
+    private static final String ARCHIVE_STUDENTS_BATCH_JOB = "archiveStudentsBatchJob";
 
     private final JobLauncher jobLauncher;
     private final JobLauncher asyncJobLauncher;
@@ -838,6 +840,48 @@ public class JobLauncherController {
             builder.addString(SEARCH_REQUEST, searchData);
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(EDW_SNAPSHOT_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
+            return ResponseEntity.ok(response);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                 | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
+            response.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_YEARLY_ARCHIVE_STUDENTS_RUN_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_ARCHIVE_STUDENTS)
+    @Operation(summary = "Run Archive Students Batch Job", description = "Run Archive Students Batch Job", tags = { "Archive Students" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<BatchJobResponse> launchArchiveStudentsJob(@RequestBody StudentSearchRequest studentSearchRequest) {
+        logger.debug("launchArchiveStudentsJob");
+        BatchJobResponse response = new BatchJobResponse();
+        JobParametersBuilder builder = new JobParametersBuilder();
+
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, ARCHIVE_STUDENTS);
+
+        response.setJobType(ARCHIVE_STUDENTS);
+        response.setTriggerBy(MANUAL);
+        response.setStartTime(LocalDateTime.now());
+        response.setStatus(BatchStatusEnum.STARTED.name());
+
+        try {
+            String searchData = jsonTransformer.marshall(studentSearchRequest);
+            builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
+            Job job = jobRegistry.getJob(ARCHIVE_STUDENTS_BATCH_JOB);
+            JobParameters jobParameters = job.getJobParametersIncrementer().getNext(builder.toJobParameters());
+            JobExecution jobExecution = asyncJobLauncher.run(job, jobParameters);
+            if(jobExecution != null) {
+                ExecutionContext jobContext = jobExecution.getExecutionContext();
+                DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+                summaryDTO.setBatchId(jobExecution.getId());
+                jobContext.put(DISDTO, summaryDTO);
+                response.setBatchId(jobExecution.getId());
+            } else {
+                response.setBatchId(jobParameters.getLong("run.id"));
+            }
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                  | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
