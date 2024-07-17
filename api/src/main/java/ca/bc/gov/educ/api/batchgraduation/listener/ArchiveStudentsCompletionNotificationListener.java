@@ -54,7 +54,7 @@ public class ArchiveStudentsCompletionNotificationListener extends BaseDistribut
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of archived Students : {}", value.getMincode(), value.getNumberOfStudents()));
-
+			restUtils.updateStudentGradRecordHistory(jobExecutionId, "Batch Archive Process", "USERSTUDARC");
 		}
 	}
 }

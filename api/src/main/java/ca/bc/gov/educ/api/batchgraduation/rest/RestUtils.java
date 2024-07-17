@@ -713,6 +713,10 @@ public class RestUtils {
         }
     }
 
+    public void updateStudentGradRecordHistory(Long batchId, String userName, String activityCode) {
+        updateStudentGradRecordHistory(batchId, getAccessToken(), userName, activityCode);
+    }
+
     public String updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {
         UUID correlationID = UUID.randomUUID();
         final ParameterizedTypeReference<String> responseType = new ParameterizedTypeReference<>() {

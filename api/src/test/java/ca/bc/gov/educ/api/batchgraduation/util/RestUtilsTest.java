@@ -1407,9 +1407,20 @@ public class RestUtilsTest {
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(rec));
 
-        this.restUtils.updateStudentGradRecordHistory(batchId,accessToken, userName, null);
-        assertNotNull(rec);
+        this.restUtils.updateStudentGradRecordHistory(batchId, accessToken, userName, null);
 
+        when(this.webClient.put()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentRecordHistory(), batchId, userName, "USERSTUDARC"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.retrieve()).thenReturn(this.responseMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.empty());
+
+        mockTokenResponseObject();
+
+        this.restUtils.updateStudentGradRecordHistory(batchId, userName, "USERSTUDARC");
+        assertNotNull(rec);
     }
 
     @Test
