@@ -169,6 +169,8 @@ endpoint:
     snapshot-graduation-status-for-edw:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/edw/snapshot
   grad-student-api:
+    get-students-count: ${GRAD_STUDENT_API}api/v1/student/count?studentStatus=%S
+    archive-students: ${GRAD_STUDENT_API}api/v1/student/archive?batchId=%s&studentStatus=%S
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate
     student-for-projectedgrad-list: ${GRAD_STUDENT_API}api/v1/student/projected

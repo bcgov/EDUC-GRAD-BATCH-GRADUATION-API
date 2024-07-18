@@ -72,6 +72,24 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
+    public ArchiveStudentsProcessor archiveStudentsProcessor() {
+        return new ArchiveStudentsProcessor();
+    }
+
+    @Bean
+    @StepScope
+    public ArchiveStudentsReader archiveStudentsReader() {
+        return new ArchiveStudentsReader();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<? super List<String>> archiveStudentsWriter() {
+        return new ArchiveStudentsWriter();
+    }
+
+    @Bean
+    @StepScope
     public ArchiveSchoolReportsProcessor archiveSchoolReportsProcessor() {
         return new ArchiveSchoolReportsProcessor();
     }
@@ -96,6 +114,26 @@ public class BatchJobConfig {
                 .step(step)
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor())
+                .build();
+    }
+
+    @Bean
+    public Step masterStepArchiveStudents(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constants) {
+        return new StepBuilder("masterStepArchiveStudents", jobRepository)
+                .partitioner("archiveStudentsPartitioner", partitionerArchiveStudents())
+                .step(archiveStudentsJobStep(jobRepository, transactionManager, constants))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor())
+                .build();
+    }
+
+    @Bean
+    public Step archiveStudentsJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constant) {
+        return new StepBuilder("archiveStudentsJobStep", jobRepository)
+                .<List<String>, List<String>>chunk(1, transactionManager)
+                .processor(archiveStudentsProcessor())
+                .reader(archiveStudentsReader())
+                .writer(archiveStudentsWriter())
                 .build();
     }
 
@@ -152,6 +190,12 @@ public class BatchJobConfig {
     @StepScope
     public ArchiveSchoolReportsPartitioner partitionerArchiveStudents() {
         return new ArchiveSchoolReportsPartitioner();
+    }
+
+    @Bean
+    @StepScope
+    public ArchiveStudentsPartitioner partitionerArchiveStudents() {
+        return new ArchiveStudentsPartitioner();
     }
 
     @Bean
@@ -1070,6 +1114,17 @@ public class BatchJobConfig {
     @Bean(name="archiveSchoolReportsBatchJob")
     public Job archiveSchoolReportsBatchJob(JobRepository jobRepository, PlatformTransactionManager transactionManager, ArchiveSchoolReportsCompletionNotificationListener listener, EducGradBatchGraduationApiConstants constants) {
         return new JobBuilder("archiveSchoolReportsBatchJob", jobRepository)
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .start(masterStepArchiveStudents(jobRepository, transactionManager, constants))
+                .on("*")
+                .end().build()
+                .build();
+    }
+
+    @Bean(name="archiveStudentsBatchJob")
+    public Job archiveStudentsBatchJob(JobRepository jobRepository, PlatformTransactionManager transactionManager, ArchiveStudentsCompletionNotificationListener listener, EducGradBatchGraduationApiConstants constants) {
+        return new JobBuilder("archiveStudentsBatchJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .start(masterStepArchiveStudents(jobRepository, transactionManager, constants))

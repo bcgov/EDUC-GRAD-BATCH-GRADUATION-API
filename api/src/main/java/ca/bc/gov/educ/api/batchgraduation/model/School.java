@@ -21,7 +21,9 @@ public class School implements Serializable {
     private Address address;
     private String phoneNumber = "";
     private String dogwoodElig = "";
+    private long numberOfStudents = 0L;
     private long numberOfSchoolReports = 0L;
+
     private List<Student> students = new ArrayList<>();
 
     public School() {
@@ -130,6 +132,14 @@ public class School implements Serializable {
 
     public void setStudents(List<Student> students) {
         this.students = students;
+    }
+
+    public long getNumberOfStudents() {
+        return numberOfStudents;
+    }
+
+    public void setNumberOfStudents(long numberOfStudents) {
+        this.numberOfStudents = numberOfStudents;
     }
 
     public long getNumberOfSchoolReports() {
