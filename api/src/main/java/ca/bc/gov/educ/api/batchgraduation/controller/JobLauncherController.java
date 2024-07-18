@@ -850,10 +850,10 @@ public class JobLauncherController {
 
     @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_ARCHIVE_SCHOOL_REPORTS_RUN_BATCH_JOB)
     @PreAuthorize(PermissionsConstants.RUN_ARCHIVE_SCHOOL_REPORTS)
-    @Operation(summary = "Run Archive Students Batch Job", description = "Run Archive Students Batch Job", tags = { "Archive Students" })
+    @Operation(summary = "Run Archive School Reports Batch Job", description = "Run Archive School Reports Batch Job", tags = { "Archive School Reports" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<BatchJobResponse> launchArchiveSchoolReporsJob(@RequestBody StudentSearchRequest studentSearchRequest) {
-        logger.debug("launchArchiveStudentsJob");
+        logger.debug("launchArchiveSchoolReporsJob");
         BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
 
