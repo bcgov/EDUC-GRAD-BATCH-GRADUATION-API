@@ -138,9 +138,9 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step masterStepArchiveStudents(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constants) {
-        return new StepBuilder("masterStepArchiveStudents", jobRepository)
-                .partitioner("archiveSchoolReportsPartitioner", partitionerArchiveStudents())
+    public Step masterStepArchiveSchoolReports(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constants) {
+        return new StepBuilder("masterStepArchiveSchoolReports", jobRepository)
+                .partitioner("archiveSchoolReportsPartitioner", partitionerArchiveSchooReports())
                 .step(archiveSchoolReportsJobStep(jobRepository, transactionManager, constants))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor())
@@ -188,7 +188,7 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ArchiveSchoolReportsPartitioner partitionerArchiveStudents() {
+    public ArchiveSchoolReportsPartitioner partitionerArchiveSchooReports() {
         return new ArchiveSchoolReportsPartitioner();
     }
 
@@ -1116,7 +1116,7 @@ public class BatchJobConfig {
         return new JobBuilder("archiveSchoolReportsBatchJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .start(masterStepArchiveStudents(jobRepository, transactionManager, constants))
+                .start(masterStepArchiveSchoolReports(jobRepository, transactionManager, constants))
                 .on("*")
                 .end().build()
                 .build();

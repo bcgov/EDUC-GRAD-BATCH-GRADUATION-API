@@ -430,6 +430,7 @@ public class JobLauncherControllerTest {
         ThreadLocalStateUtil.setCurrentUser("Batch Process");
         StudentSearchRequest request = new StudentSearchRequest();
         request.setSchoolOfRecords(List.of("12345678"));
+        request.setReportTypes(List.of("NONGRADREG"));
 
         String searchData = jsonTransformer.marshall(request);
 

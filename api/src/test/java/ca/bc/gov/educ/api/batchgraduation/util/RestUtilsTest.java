@@ -1694,7 +1694,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetTotalStudentsForArchivingError() {
+    public void testGetTotalSchoolReportsForArchivingError() {
         List<String> schools = Arrays.asList("12345678","11223344");
 
         mockTokenResponseObject();
