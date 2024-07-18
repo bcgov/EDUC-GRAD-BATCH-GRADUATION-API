@@ -50,9 +50,9 @@ public class ArchiveSchoolReportsPartitioner extends BasePartitioner {
         DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobExecution.getExecutionContext().get("distributionSummaryDTO");
         summaryDTO.setStudentSearchRequest(searchRequest);
         Long totalSchoolReporsCount = 0L;
+        List<String> reportTypes = searchRequest.getReportTypes();
         for(String schoolOfRecord: finalSchoolDistricts) {
             Long schoolReportsCount = 0L;
-            List<String> reportTypes = searchRequest.getReportTypes();
             if(reportTypes != null && !reportTypes.isEmpty()) {
                 for(String reportType: reportTypes) {
                     schoolReportsCount += restUtils.getTotalSchoolsForArchiving(List.of(schoolOfRecord), reportType, summaryDTO);

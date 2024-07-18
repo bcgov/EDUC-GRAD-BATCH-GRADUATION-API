@@ -34,13 +34,6 @@ public class ArchiveSchoolReportsProcessor implements ItemProcessor<List<String>
 					countArchivedSchoolReports += restUtils.archiveSchoolReports(batchId, minCodes, reportTypeCode, summaryDTO);
 				}
 			}
-		} else {
-			LOGGER.debug("Process All Schools");
-			if(reportTypes != null && !reportTypes.isEmpty()) {
-				for (String reportTypeCode : reportTypes) {
-					countArchivedSchoolReports += restUtils.archiveSchoolReports(batchId, null, reportTypeCode, summaryDTO);
-				}
-			}
 		}
 		summaryDTO.setProcessedCount(countArchivedSchoolReports);
 		return minCodes;

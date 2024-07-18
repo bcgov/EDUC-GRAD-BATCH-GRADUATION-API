@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
+import ca.bc.gov.educ.api.batchgraduation.exception.GradBusinessRuleException;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateProcessor;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -61,7 +62,7 @@ public class JobLauncherController {
 
     private static final String EDW_SNAPSHOT = "EDW_SNAPSHOT";
 
-    private static final String ARCHIVE_SCHOOL_REPORTS = "ARC_SCHOOL_REPORTSS";
+    private static final String ARCHIVE_SCHOOL_REPORTS = "ARC_SCH_REPORTS";
 
     private static final String RERUN_ALL = "RERUN_ALL";
     private static final String RERUN_FAILED = "RERUN_FAILED";
@@ -94,10 +95,9 @@ public class JobLauncherController {
     private final GradDashboardService gradDashboardService;
     private final GradBatchHistoryService gradBatchHistoryService;
     private final DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor;
-
     private final JsonTransformer jsonTransformer;
-
     private final GradSchoolOfRecordFilter gradSchoolOfRecordFilter;
+    private final GradValidation gradValidation;
 
     @Autowired
     public JobLauncherController(
@@ -110,7 +110,8 @@ public class JobLauncherController {
             GradBatchHistoryService gradBatchHistoryService,
             DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor,
             JsonTransformer jsonTransformer,
-            GradSchoolOfRecordFilter gradSchoolOfRecordFilter) {
+            GradSchoolOfRecordFilter gradSchoolOfRecordFilter,
+            GradValidation gradValidation) {
         this.jobLauncher = jobLauncher;
         this.asyncJobLauncher = asyncJobLauncher;
         this.jobRegistry = jobRegistry;
@@ -120,6 +121,7 @@ public class JobLauncherController {
         this.distributionRunStatusUpdateProcessor = distributionRunStatusUpdateProcessor;
         this.jsonTransformer = jsonTransformer;
         this.gradSchoolOfRecordFilter = gradSchoolOfRecordFilter;
+        this.gradValidation = gradValidation;
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_REG_GRAD_BATCH_JOB)
@@ -270,6 +272,16 @@ public class JobLauncherController {
             return summaryDTO;
         }
         return null;
+    }
+
+    private void validateInputArchiveSchools(StudentSearchRequest studentSearchRequest) {
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+        if(studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
+            throw new GradBusinessRuleException("Please provide at least 1 school parameter (school category, district or school of record)");
+        }
+        if(studentSearchRequest.getReportTypes().isEmpty()) {
+            throw new GradBusinessRuleException("Please provide at least 1 report type parameter (GRADREG, NONGRADPRJ, NONGRADREG)");
+        }
     }
 
     private BlankDistributionSummaryDTO validateInputBlankDisRun(BlankCredentialRequest blankCredentialRequest) {
@@ -868,6 +880,7 @@ public class JobLauncherController {
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
+            validateInputArchiveSchools(studentSearchRequest);
             String searchData = jsonTransformer.marshall(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
             Job job = jobRegistry.getJob(ARCHIVE_SCHOOL_REPORTS_BATCH_JOB);
