@@ -156,6 +156,10 @@ endpoint:
     get-district-data-nongrad-yearly: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/districtnongradreportdata
     get-deceased-student-id-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/deceasedstudentid
   grad-graduation-report-api:
+    get-school-reports-count:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/count?reportType=%S
+    archive-school-reports:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/archive?batchId=%s&reportType=%S
     get-transcript-list:
       yearly:
         url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/gettranscriptsfordistributionyearly

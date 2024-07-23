@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
+import ca.bc.gov.educ.api.batchgraduation.exception.GradBusinessRuleException;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateProcessor;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
@@ -61,6 +62,8 @@ public class JobLauncherController {
 
     private static final String EDW_SNAPSHOT = "EDW_SNAPSHOT";
 
+    private static final String ARCHIVE_SCHOOL_REPORTS = "ARC_SCH_REPORTS";
+
     private static final String ARCHIVE_STUDENTS = "ARC_STUDENTS";
 
     private static final String RERUN_ALL = "RERUN_ALL";
@@ -85,6 +88,8 @@ public class JobLauncherController {
 
     private static final String EDW_SNAPSHOT_BATCH_JOB = "edwSnapshotBatchJob";
 
+    private static final String ARCHIVE_SCHOOL_REPORTS_BATCH_JOB = "archiveSchoolReportsBatchJob";
+
     private static final String ARCHIVE_STUDENTS_BATCH_JOB = "archiveStudentsBatchJob";
 
     private final JobLauncher jobLauncher;
@@ -94,10 +99,9 @@ public class JobLauncherController {
     private final GradDashboardService gradDashboardService;
     private final GradBatchHistoryService gradBatchHistoryService;
     private final DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor;
-
     private final JsonTransformer jsonTransformer;
-
     private final GradSchoolOfRecordFilter gradSchoolOfRecordFilter;
+    private final GradValidation gradValidation;
 
     @Autowired
     public JobLauncherController(
@@ -110,7 +114,8 @@ public class JobLauncherController {
             GradBatchHistoryService gradBatchHistoryService,
             DistributionRunStatusUpdateProcessor distributionRunStatusUpdateProcessor,
             JsonTransformer jsonTransformer,
-            GradSchoolOfRecordFilter gradSchoolOfRecordFilter) {
+            GradSchoolOfRecordFilter gradSchoolOfRecordFilter,
+            GradValidation gradValidation) {
         this.jobLauncher = jobLauncher;
         this.asyncJobLauncher = asyncJobLauncher;
         this.jobRegistry = jobRegistry;
@@ -120,6 +125,7 @@ public class JobLauncherController {
         this.distributionRunStatusUpdateProcessor = distributionRunStatusUpdateProcessor;
         this.jsonTransformer = jsonTransformer;
         this.gradSchoolOfRecordFilter = gradSchoolOfRecordFilter;
+        this.gradValidation = gradValidation;
     }
 
     @GetMapping(EducGradBatchGraduationApiConstants.EXECUTE_REG_GRAD_BATCH_JOB)
@@ -270,6 +276,16 @@ public class JobLauncherController {
             return summaryDTO;
         }
         return null;
+    }
+
+    private void validateInputArchiveSchools(StudentSearchRequest studentSearchRequest) {
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+        if(studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
+            throw new GradBusinessRuleException("Please provide at least 1 school parameter (school category, district or school of record)");
+        }
+        if(studentSearchRequest.getReportTypes().isEmpty()) {
+            throw new GradBusinessRuleException("Please provide at least 1 report type parameter (GRADREG, NONGRADPRJ, NONGRADREG)");
+        }
     }
 
     private BlankDistributionSummaryDTO validateInputBlankDisRun(BlankCredentialRequest blankCredentialRequest) {
@@ -840,6 +856,49 @@ public class JobLauncherController {
             builder.addString(SEARCH_REQUEST, searchData);
             JobExecution jobExecution = asyncJobLauncher.run(jobRegistry.getJob(EDW_SNAPSHOT_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
+            return ResponseEntity.ok(response);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                 | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
+            response.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_ARCHIVE_SCHOOL_REPORTS_RUN_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_ARCHIVE_SCHOOL_REPORTS)
+    @Operation(summary = "Run Archive School Reports Batch Job", description = "Run Archive School Reports Batch Job", tags = { "Archive School Reports" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<BatchJobResponse> launchArchiveSchoolReporsJob(@RequestBody StudentSearchRequest studentSearchRequest) {
+        logger.debug("launchArchiveSchoolReporsJob");
+        BatchJobResponse response = new BatchJobResponse();
+        JobParametersBuilder builder = new JobParametersBuilder();
+
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, ARCHIVE_SCHOOL_REPORTS);
+
+        response.setJobType(ARCHIVE_SCHOOL_REPORTS);
+        response.setTriggerBy(MANUAL);
+        response.setStartTime(LocalDateTime.now());
+        response.setStatus(BatchStatusEnum.STARTED.name());
+
+        try {
+            validateInputArchiveSchools(studentSearchRequest);
+            String searchData = jsonTransformer.marshall(studentSearchRequest);
+            builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
+            Job job = jobRegistry.getJob(ARCHIVE_SCHOOL_REPORTS_BATCH_JOB);
+            JobParameters jobParameters = job.getJobParametersIncrementer().getNext(builder.toJobParameters());
+            JobExecution jobExecution = asyncJobLauncher.run(job, jobParameters);
+            if(jobExecution != null) {
+                ExecutionContext jobContext = jobExecution.getExecutionContext();
+                DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+                summaryDTO.setBatchId(jobExecution.getId());
+                jobContext.put(DISDTO, summaryDTO);
+                response.setBatchId(jobExecution.getId());
+            } else {
+                response.setBatchId(jobParameters.getLong("run.id"));
+            }
             return ResponseEntity.ok(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                  | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {

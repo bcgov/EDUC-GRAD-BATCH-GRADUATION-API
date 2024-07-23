@@ -1421,6 +1421,7 @@ public class RestUtilsTest {
 
         this.restUtils.updateStudentGradRecordHistory(batchId, userName, "USERSTUDARC");
         assertNotNull(rec);
+
     }
 
     @Test
@@ -1670,6 +1671,88 @@ public class RestUtilsTest {
 
         val result = this.restUtils.getEDWSnapshotSchools(gradYear);
         assertThat(result).hasSize(2);
+    }
+
+    @Test
+    public void testGetTotalSchoolReportsForArchiving() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradSchoolReportsCountUrl(), "GRADREG"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Long.class)).thenReturn(Mono.just(1L));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getTotalSchoolsForArchiving(schools, "GRADREG", summaryDTO);
+        assertThat(result).isEqualTo(1);
+    }
+
+    @Test
+    public void testGetTotalSchoolReportsForArchivingError() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradSchoolReportsCountUrl(), "GRADREG"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException("Unable to retrieve school reports counts"));
+        when(this.responseMock.bodyToMono(Long.class)).thenReturn(Mono.just(1L));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getTotalSchoolsForArchiving(schools, "GRADREG", summaryDTO);
+        assertThat(result).isNotNull();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
+    }
+
+    @Test
+    public void testArchiveSchoolReports() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradArchiveSchoolReportsUrl(), 12345678L, "GRADREG"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.archiveSchoolReports(12345678L, schools,"GRADREG", summaryDTO);
+        assertThat(result).isEqualTo(1);
+    }
+
+    @Test
+    public void testArchiveSchoolReportsError() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradArchiveSchoolReportsUrl(), 12345678L, "GRADREG"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException("Unable to archive School Reports"));
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.archiveSchoolReports(12345678L, schools,"GRADREG", summaryDTO);
+        assertThat(result).isNotNull();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
     }
 
     @Test

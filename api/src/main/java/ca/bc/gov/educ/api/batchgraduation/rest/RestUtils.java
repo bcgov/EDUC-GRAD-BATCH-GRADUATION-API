@@ -872,6 +872,49 @@ public class RestUtils {
         }
     }
 
+    public Long getTotalSchoolsForArchiving(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
+        Long schoolReportsCount = 0L;
+        UUID correlationID = UUID.randomUUID();
+        try {
+            String accessToken = getAccessToken();
+            schoolReportsCount = this.webClient.post()
+                    .uri(String.format(constants.getGradSchoolReportsCountUrl(), reportType))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(finalSchoolDistricts))
+                    .retrieve().bodyToMono(Long.class).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to retrieve school reports counts", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to retrieve schools reports counts", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("{} of {} school reports for archiving of SoR: {}", schoolReportsCount, reportType, String.join(",", finalSchoolDistricts));
+        }
+        return schoolReportsCount;
+    }
+
+    public Integer archiveSchoolReports(Long batchId, List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
+        UUID correlationID = UUID.randomUUID();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Archive {} School Reports for Ministry Codes: {}", reportType, String.join(",", finalSchoolDistricts));
+        }
+        try {
+            String accessToken = getAccessToken();
+            return this.webClient.post()
+                    .uri(String.format(constants.getGradArchiveSchoolReportsUrl(), batchId, reportType))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(finalSchoolDistricts))
+                    .retrieve().bodyToMono(Integer.class).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to archive School Reports", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to archive School Reports", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+            return 0;
+        }
+    }
+
     public Long getTotalStudentsForArchiving(List<String> finalSchoolDistricts, String studentStatus, DistributionSummaryDTO summaryDTO) {
         Long studentsCount = 0L;
         UUID correlationID = UUID.randomUUID();

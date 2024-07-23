@@ -63,8 +63,9 @@ public class JobLauncherControllerTest {
     private static final String TRANMISSION_TYPE = "transmissionType";
     private static final String DISDTO = "distributionSummaryDTO";
     private static final String SCHREPORT = "SCHREP";
-    private static final String ARCHIVE_STUDENTS = "ARC_STUDENTS";
+    private static final String ARCHIVE_SCHOOL_REPORTS = "ARC_SCH_REPORTS";
     private static final String RUN_BY = "runBy";
+    private static final String ARCHIVE_STUDENTS = "ARC_STUDENTS";
 
     @Mock
     JsonTransformer jsonTransformer;
@@ -422,6 +423,35 @@ public class JobLauncherControllerTest {
             exceptionIsThrown = true;
         }
         assertThat(builder).isNotNull();
+    }
+
+    @Test
+    public void testArchiveSchoolReportsBatchJob() {
+        ThreadLocalStateUtil.setCurrentUser("Batch Process");
+        StudentSearchRequest request = new StudentSearchRequest();
+        request.setSchoolOfRecords(List.of("12345678"));
+        request.setReportTypes(List.of("NONGRADREG"));
+
+        String searchData = jsonTransformer.marshall(request);
+
+        boolean exceptionIsThrown = false;
+
+        JobParametersBuilder builder = new JobParametersBuilder();
+
+        builder.addLong(TIME, System.currentTimeMillis());
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, ARCHIVE_SCHOOL_REPORTS);
+        builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
+
+        try {
+            createJob(210L, "archiveSchoolReportsBatchJob", builder.toJobParameters());
+            ResponseEntity<BatchJobResponse> result = jobLauncherController.launchArchiveSchoolReporsJob(request);
+            assertThat(result.getStatusCode().value()).isEqualTo(200);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+        assertThat(exceptionIsThrown).isFalse();
     }
 
     @Test
