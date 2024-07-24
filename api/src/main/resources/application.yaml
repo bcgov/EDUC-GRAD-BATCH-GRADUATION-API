@@ -169,6 +169,8 @@ endpoint:
     snapshot-graduation-status-for-edw:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/edw/snapshot
   grad-student-api:
+    get-students-count: ${GRAD_STUDENT_API}api/v1/student/count?studentStatus=%S
+    archive-students: ${GRAD_STUDENT_API}api/v1/student/archive?batchId=%s&studentStatus=%S
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate
     student-for-projectedgrad-list: ${GRAD_STUDENT_API}api/v1/student/projected
@@ -188,6 +190,10 @@ endpoint:
     get-district-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/districtnongradreportdata
     get-deceased-student-id-list: ${GRAD_STUDENT_API}api/v1/student/deceasedstudentid
   grad-graduation-report-api:
+    get-school-reports-count:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/count?reportType=%S
+    archive-school-reports:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/archive?batchId=%s&reportType=%S
     get-transcript-list:
       yearly:
         url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistributionyearly

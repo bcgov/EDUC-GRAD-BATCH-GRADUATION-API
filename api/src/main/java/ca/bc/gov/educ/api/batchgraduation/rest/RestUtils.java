@@ -713,6 +713,10 @@ public class RestUtils {
         }
     }
 
+    public void updateStudentGradRecordHistory(Long batchId, String userName, String activityCode) {
+        updateStudentGradRecordHistory(batchId, getAccessToken(), userName, activityCode);
+    }
+
     public String updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {
         UUID correlationID = UUID.randomUUID();
         final ParameterizedTypeReference<String> responseType = new ParameterizedTypeReference<>() {
@@ -860,11 +864,97 @@ public class RestUtils {
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                     .body(BodyInserters.fromValue(item))
                     .retrieve().bodyToMono(EdwGraduationSnapshot.class).block();
-        }catch(Exception e) {
+        } catch(Exception e) {
             summary.updateError(item.getPen(),item.getSchoolOfRecord(),GRADUATION_API_IS_DOWN,GRADUATION_API_DOWN_MSG);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
             LOGGER.info("Failed STU-PEN:{} Errors:{}",item.getPen(),summary.getErrors().size());
             return null;
+        }
+    }
+
+    public Long getTotalSchoolsForArchiving(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
+        Long schoolReportsCount = 0L;
+        UUID correlationID = UUID.randomUUID();
+        try {
+            String accessToken = getAccessToken();
+            schoolReportsCount = this.webClient.post()
+                    .uri(String.format(constants.getGradSchoolReportsCountUrl(), reportType))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(finalSchoolDistricts))
+                    .retrieve().bodyToMono(Long.class).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to retrieve school reports counts", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to retrieve schools reports counts", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("{} of {} school reports for archiving of SoR: {}", schoolReportsCount, reportType, String.join(",", finalSchoolDistricts));
+        }
+        return schoolReportsCount;
+    }
+
+    public Integer archiveSchoolReports(Long batchId, List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
+        UUID correlationID = UUID.randomUUID();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Archive {} School Reports for Ministry Codes: {}", reportType, String.join(",", finalSchoolDistricts));
+        }
+        try {
+            String accessToken = getAccessToken();
+            return this.webClient.post()
+                    .uri(String.format(constants.getGradArchiveSchoolReportsUrl(), batchId, reportType))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(finalSchoolDistricts))
+                    .retrieve().bodyToMono(Integer.class).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to archive School Reports", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to archive School Reports", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+            return 0;
+        }
+    }
+
+    public Long getTotalStudentsForArchiving(List<String> finalSchoolDistricts, String studentStatus, DistributionSummaryDTO summaryDTO) {
+        Long studentsCount = 0L;
+        UUID correlationID = UUID.randomUUID();
+        try {
+            String accessToken = getAccessToken();
+            studentsCount = this.webClient.post()
+                    .uri(String.format(constants.getGradStudentCountUrl(), studentStatus))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(finalSchoolDistricts))
+                    .retrieve().bodyToMono(Long.class).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to retrieve student counts", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to retrieve student counts", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("{} of {} students for archiving of SoR: {}", studentsCount, studentStatus, String.join(",", finalSchoolDistricts));
+        }
+        return studentsCount;
+    }
+
+    public Integer archiveStudents(Long batchId, List<String> finalSchoolDistricts, String studentStatus, DistributionSummaryDTO summaryDTO) {
+        UUID correlationID = UUID.randomUUID();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Archive {} Students for Ministry Codes: {}", studentStatus, String.join(",", finalSchoolDistricts));
+        }
+        try {
+            String accessToken = getAccessToken();
+            return this.webClient.post()
+                    .uri(String.format(constants.getGradArchiveStudentsUrl(), batchId, studentStatus))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(finalSchoolDistricts))
+                    .retrieve().bodyToMono(Integer.class).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to archive Students", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to archive Students", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+            return 0;
         }
     }
 }
