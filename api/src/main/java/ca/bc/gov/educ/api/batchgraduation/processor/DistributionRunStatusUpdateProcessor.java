@@ -80,7 +80,8 @@ public class DistributionRunStatusUpdateProcessor {
                 processedCount[0]++;
             } catch (Exception e) {
                 unprocessedStudents.put(scd.getStudentID().toString(), new ServiceException(e));
-                LOGGER.error("Unexpected Error on update {} of {} student credential record: studentID [{}]", processedCount[0], totalCount, scd.getStudentID());
+                LOGGER.error("Unexpected Error on update {} of {} student credential record: studentID [{}] \n {}",
+                        processedCount[0], totalCount, scd.getStudentID(), e.getMessage());
             }
         });
         processedCount[0] = 1;
@@ -93,7 +94,8 @@ public class DistributionRunStatusUpdateProcessor {
                 processedCount[0]++;
             } catch (Exception e) {
                 unprocessedStudents.put(uuid.toString(), new ServiceException(e));
-                LOGGER.error("Unexpected Error on create {} of {} audit history: studentID [{}]", processedCount[0], totalCount, uuid);
+                LOGGER.error("Unexpected Error on create {} of {} audit history: studentID [{}] \n {}",
+                        processedCount[0], totalCount, uuid, e.getMessage());
             }
         });
         return unprocessedStudents;
