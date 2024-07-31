@@ -69,29 +69,31 @@ public class DistributionRunStatusUpdateProcessor {
         Map<String, ServiceException> unprocessedStudents = new HashMap<>();
         String activityCode = getActivitCode(jobType);
         final int totalCount = cList.size();
-        final int[] processedCount = {0};
+        final int[] processedCount = {1};
         List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).toList();
         cList.forEach(scd-> {
             try {
                 final String accessToken = restUtils.getAccessToken();
                 restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),
                         "NONGRADYERUN".equalsIgnoreCase(activityCode)? "IP" : scd.getDocumentStatusCode(),activityCode,accessToken);
-                LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student credential record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0] + 1, totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
+                LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student credential record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0], totalCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
                 processedCount[0]++;
             } catch (Exception e) {
                 unprocessedStudents.put(scd.getStudentID().toString(), new ServiceException(e));
+                LOGGER.error("Unexpected Error on update {} of {} student credential record: studentID [{}]", processedCount[0], totalCount, scd.getStudentID());
             }
         });
-        processedCount[0] = 0;
+        processedCount[0] = 1;
         studentIDs.forEach(uuid-> {
             try {
                 if(!StringUtils.equalsAnyIgnoreCase(jobType, "REGALG", "TVRRUN")) {
                     restUtils.updateStudentGradRecord(uuid, batchId, activityCode);
-                    LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student grad record: studentID [{}]", batchId, activityCode, processedCount[0] + 1, totalCount, uuid);
+                    LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student grad record: studentID [{}]", batchId, activityCode, processedCount[0], totalCount, uuid);
                 }
                 processedCount[0]++;
             } catch (Exception e) {
                 unprocessedStudents.put(uuid.toString(), new ServiceException(e));
+                LOGGER.error("Unexpected Error on create {} of {} audit history: studentID [{}]", processedCount[0], totalCount, uuid);
             }
         });
         return unprocessedStudents;
