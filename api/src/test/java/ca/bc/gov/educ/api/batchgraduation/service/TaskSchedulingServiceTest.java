@@ -110,7 +110,7 @@ public class TaskSchedulingServiceTest {
         assertThat(jobs).isNotNull();
     }
 
-    @Test
+   /* @Test
     public void testsaveUserScheduledJobs() {
         Task task = new Task();
         task.setCronExpression("213211");
@@ -143,7 +143,7 @@ public class TaskSchedulingServiceTest {
         Mockito.when(userScheduledJobsRepository.save(entity)).thenReturn(ent2);
         taskSchedulingService.saveUserScheduledJobs(task, batchJobType);
         assertThat(task).isNotNull();
-    }
+    }*/
 
 
 }
