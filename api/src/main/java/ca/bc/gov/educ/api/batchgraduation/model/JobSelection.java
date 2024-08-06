@@ -10,7 +10,9 @@ public enum JobSelection {
 	URDBJ ("DISTRUNUSER"),
     URPDBJ ("PSIRUN"),
     BDBJ ("DISTRUNUSER"),
-    RCBJ ("CERT_REGEN");
+    RCBJ ("CERT_REGEN"),
+    ASBJ("ARC_STUDENTS"),
+    ASRBJ("ARC_SCH_REPORTS");
 
     private final String value;
 
