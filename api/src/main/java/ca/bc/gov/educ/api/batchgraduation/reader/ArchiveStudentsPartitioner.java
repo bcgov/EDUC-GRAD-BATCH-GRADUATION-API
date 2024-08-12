@@ -48,6 +48,11 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         }
 
         DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobExecution.getExecutionContext().get("distributionSummaryDTO");
+        if(summaryDTO == null) {
+            summaryDTO = new DistributionSummaryDTO();
+            jobExecution.getExecutionContext().put("distributionSummaryDTO", summaryDTO);
+        }
+        summaryDTO.setBatchId(jobExecution.getId());
         summaryDTO.setStudentSearchRequest(searchRequest);
         Long totalStudentsCount = 0L;
         for(String schoolOfRecord: finalSchoolDistricts) {
@@ -80,7 +85,6 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         executionContext.put("data", finalSchoolDistricts);
         executionContext.put("summary", summaryDTO);
         executionContext.put("readCount", 0);
-        executionContext.put("summary", summaryDTO);
         map.put("partition0", executionContext);
 
         logger.info("Found {} in total running on 1 partitions", totalStudentsCount);
