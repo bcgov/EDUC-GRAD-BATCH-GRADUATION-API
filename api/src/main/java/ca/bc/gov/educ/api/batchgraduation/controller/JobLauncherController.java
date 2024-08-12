@@ -279,7 +279,6 @@ public class JobLauncherController {
     }
 
     private void validateInputArchiveSchools(StudentSearchRequest studentSearchRequest) {
-        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
         if(studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
             throw new GradBusinessRuleException("Please provide at least 1 school parameter (school category, district or school of record)");
         }
