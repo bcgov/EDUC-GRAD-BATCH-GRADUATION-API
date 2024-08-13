@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.GradSorter;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
@@ -13,11 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
+
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.USER_SCHEDULED;
 
 public abstract class BaseDistributionRunCompletionNotificationListener implements JobExecutionListener {
 
@@ -31,6 +35,9 @@ public abstract class BaseDistributionRunCompletionNotificationListener implemen
 
     @Autowired
     DistributionService distributionService;
+
+    @Autowired
+    private TaskSchedulingService taskSchedulingService;
 
     @Autowired
     RestUtils restUtils;
@@ -139,5 +146,12 @@ public abstract class BaseDistributionRunCompletionNotificationListener implemen
 
     long getElapsedTimeMillis(JobExecution jobExecution) {
         return new Date().getTime() - jobExecution.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    void updateUserSchedulingJobs(JobParameters jobParameters) {
+        String userScheduledId = jobParameters.getString(USER_SCHEDULED);
+        if (userScheduledId != null) {
+            taskSchedulingService.updateUserScheduledJobs(userScheduledId);
+        }
     }
 }

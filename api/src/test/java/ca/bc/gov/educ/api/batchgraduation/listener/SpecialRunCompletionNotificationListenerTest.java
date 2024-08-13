@@ -25,9 +25,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.USER_SCHEDULED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -122,7 +125,7 @@ public class SpecialRunCompletionNotificationListenerTest {
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "TVRRUN");
-        builder.addString("userScheduled", UUID.randomUUID().toString());
+        builder.addString(USER_SCHEDULED, UUID.randomUUID().toString());
 
         JobExecution jobExecution = new JobExecution(121L);
         jobExecution.setStatus(BatchStatus.COMPLETED);

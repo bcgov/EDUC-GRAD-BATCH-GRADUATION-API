@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.USER_SCHEDULED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -90,7 +91,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         builder.addString(JOB_TRIGGER, "MANUAL");
         builder.addString(JOB_TYPE, "TVRRUN");
         builder.addString("credentialType","OT");
-        builder.addString("userScheduled", UUID.randomUUID().toString());
+        builder.addString(USER_SCHEDULED, UUID.randomUUID().toString());
 
         JobExecution jobExecution = new JobExecution(new JobInstance(121L,"UserReqDistributionBatchJob"), 121L, builder.toJobParameters());
         jobExecution.setStatus(BatchStatus.COMPLETED);
