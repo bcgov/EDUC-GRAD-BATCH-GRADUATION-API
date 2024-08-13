@@ -58,7 +58,7 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
         }
 
         if (isSpecialRun) {
-            String userScheduledId = jobParameters.getString("userScheduled");
+            String userScheduledId = jobParameters.getString(USER_SCHEDULED);
             if (userScheduledId != null) {
                 taskSchedulingService.updateUserScheduledJobs(userScheduledId);
             }
