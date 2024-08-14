@@ -47,6 +47,7 @@ public class ArchiveStudentsProcessor implements ItemProcessor<List<String>, Lis
 				countArchivedStudents += restUtils.archiveStudents(batchId, null, "CUR", summaryDTO);
 				countArchivedStudents += restUtils.archiveStudents(batchId, null, "TER", summaryDTO);
 			}
+			summaryDTO.setReadCount(countArchivedStudents);
 		}
 		summaryDTO.setProcessedCount(countArchivedStudents);
 		return minCodes;
