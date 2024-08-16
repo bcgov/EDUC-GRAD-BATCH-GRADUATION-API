@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.processor;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.School;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ArchiveSchoolReportsProcessor implements ItemProcessor<List<String>, List<String>> {
 
@@ -27,12 +29,12 @@ public class ArchiveSchoolReportsProcessor implements ItemProcessor<List<String>
 		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
 		long countArchivedSchoolReports = 0l;
 		List<String> reportTypes = searchRequest.getReportTypes();
-		if(minCodes != null && !minCodes.isEmpty()) {
-			LOGGER.debug("Process Schools: {}", String.join(",", minCodes));
-			if(reportTypes != null && !reportTypes.isEmpty()) {
-				for (String reportTypeCode : reportTypes) {
-					countArchivedSchoolReports += restUtils.archiveSchoolReports(batchId, minCodes, reportTypeCode, summaryDTO);
-				}
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Process Schools: {}", !minCodes.isEmpty() ? String.join(",", minCodes) : summaryDTO.getSchools().stream().map(School::getMincode).collect(Collectors.joining(",")));
+		}
+		if(reportTypes != null && !reportTypes.isEmpty()) {
+			for (String reportTypeCode : reportTypes) {
+				countArchivedSchoolReports += restUtils.archiveSchoolReports(batchId, minCodes, reportTypeCode, summaryDTO);
 			}
 		}
 		summaryDTO.setProcessedCount(countArchivedSchoolReports);

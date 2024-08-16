@@ -56,14 +56,26 @@ public class ArchiveSchoolReportsPartitioner extends BasePartitioner {
         summaryDTO.setStudentSearchRequest(searchRequest);
         Long totalSchoolReporsCount = 0L;
         List<String> reportTypes = searchRequest.getReportTypes();
-        for(String schoolOfRecord: finalSchoolDistricts) {
-            Long schoolReportsCount = 0L;
-            if(reportTypes != null && !reportTypes.isEmpty()) {
-                for(String reportType: reportTypes) {
-                    schoolReportsCount += restUtils.getTotalSchoolsForArchiving(List.of(schoolOfRecord), reportType, summaryDTO);
+        Long schoolReportsCount = 0L;
+        if(!finalSchoolDistricts.isEmpty()) {
+            for (String schoolOfRecord : finalSchoolDistricts) {
+                if (reportTypes != null && !reportTypes.isEmpty()) {
+                    for (String reportType : reportTypes) {
+                        schoolReportsCount += restUtils.getTotalSchoolsForArchiving(List.of(schoolOfRecord), reportType, summaryDTO);
+                    }
+                }
+                School school = new School(schoolOfRecord);
+                school.setNumberOfSchoolReports(schoolReportsCount);
+                summaryDTO.getSchools().add(school);
+                totalSchoolReporsCount += schoolReportsCount;
+            }
+        } else {
+            if (reportTypes != null && !reportTypes.isEmpty()) {
+                for (String reportType : reportTypes) {
+                    schoolReportsCount += restUtils.getTotalSchoolsForArchiving(List.of(), reportType, summaryDTO);
                 }
             }
-            School school = new School(schoolOfRecord);
+            School school = new School("ALL_SCHOOLS");
             school.setNumberOfSchoolReports(schoolReportsCount);
             summaryDTO.getSchools().add(school);
             totalSchoolReporsCount += schoolReportsCount;
