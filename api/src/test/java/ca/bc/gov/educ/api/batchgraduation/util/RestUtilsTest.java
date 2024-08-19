@@ -857,10 +857,9 @@ public class RestUtilsTest {
     @Test
     public void testProcessStudentReports() {
         final String studentReportType = "TVRRUN";
-        final String actionType = "tvrDelete";
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentReport(),studentReportType, actionType))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentReport(),studentReportType))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -869,7 +868,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        var result = this.restUtils.processStudentReports(new ArrayList<>(),studentReportType,actionType);
+        var result = this.restUtils.processStudentReports(new ArrayList<>(),studentReportType);
         assertNotNull(studentReportType);
         assertNotNull(result);
     }

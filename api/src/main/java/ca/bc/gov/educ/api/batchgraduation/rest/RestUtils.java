@@ -555,16 +555,16 @@ public class RestUtils {
         return result;
     }
 
-    public Integer processStudentReports(List<UUID> uuidList, String studentReportType, String actionType) {
+    public Integer processStudentReports(List<UUID> uuidList, String studentReportType) {
         UUID correlationID = UUID.randomUUID();
         Integer result = webClient.post()
-                .uri(String.format(constants.getUpdateStudentReport(), studentReportType, actionType))
+                .uri(String.format(constants.getUpdateStudentReport(), studentReportType))
                 .headers(h -> { h.setBearerAuth(getAccessToken()); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                 .body(BodyInserters.fromValue(uuidList))
                 .retrieve()
                 .bodyToMono(Integer.class)
                 .block();
-        LOGGER.info("{} {} Student {} Reports", actionType, result, studentReportType);
+        LOGGER.info("{} Student {} Reports", result, studentReportType);
         return result;
     }
 

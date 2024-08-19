@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
-import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.TVRDELETE;
 
 @RestController
 @RequestMapping(EducGradBatchGraduationApiConstants.GRAD_BATCH_API_ROOT_MAPPING)
@@ -479,14 +478,13 @@ public class JobLauncherController {
     @Operation(summary = "Re-Generate Student Reports for the given batchJobId", description = "Re-Generate Student Reports for the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<String> launchRegenerateStudentReports(@RequestBody StudentSearchRequest searchRequest, @RequestParam String type) {
-        String studentReportType = ObjectUtils.defaultIfNull(type, TVRRUN);
-        String actionType = ObjectUtils.defaultIfNull(searchRequest.getActivityCode(), TVRDELETE);
+        String studentReportType = ObjectUtils.defaultIfNull(type, "ACHV");
         logger.info(" Re-Generating Student Reports by request for {} --------------------------------------------------------", studentReportType);
         try {
             List<UUID> finalUUIDs = gradSchoolOfRecordFilter.filterStudents(searchRequest);
             logger.info(" Number of Students [{}] ---------------------------------------------------------", finalUUIDs.size());
-            int numberOfReports = restUtils.processStudentReports(finalUUIDs, studentReportType, actionType);
-            return ResponseEntity.ok(numberOfReports + " student " + studentReportType + " reports " + actionType + " successfully");
+            int numberOfReports = restUtils.processStudentReports(finalUUIDs, studentReportType);
+            return ResponseEntity.ok(numberOfReports + " student " + studentReportType + " reports successfully");
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getLocalizedMessage());
         }

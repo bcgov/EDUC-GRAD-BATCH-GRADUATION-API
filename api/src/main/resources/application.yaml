@@ -213,7 +213,7 @@ endpoint:
     update-school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
     update-student-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreports?reportTypeCode=%s&actionType=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreports?reportTypeCode=%s
     get-school-report-list:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistribution
     check-sccp-certificate-exists: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/check-sccp-certificate-exists
