@@ -279,9 +279,6 @@ public class JobLauncherController {
     }
 
     private void validateInputArchiveSchools(StudentSearchRequest studentSearchRequest) {
-        if(studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
-            throw new GradBusinessRuleException("Please provide at least 1 school parameter (school category, district or school of record)");
-        }
         if(studentSearchRequest.getReportTypes().isEmpty()) {
             throw new GradBusinessRuleException("Please provide at least 1 report type parameter (GRADREG, NONGRADPRJ, NONGRADREG)");
         }
