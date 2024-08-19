@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.apache.commons.lang3.StringUtils;
@@ -25,12 +24,10 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
     private static final String LOG_SEPARATION = "=======================================================================================";
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
-	private TaskSchedulingService taskSchedulingService;
 	private SupportListener supportListener;
 
 	@Autowired
-	public UserReqPsiDistributionRunCompletionNotificationListener(TaskSchedulingService taskSchedulingService, SupportListener supportListener) {
-		this.taskSchedulingService = taskSchedulingService;
+	public UserReqPsiDistributionRunCompletionNotificationListener(SupportListener supportListener) {
 		this.supportListener = supportListener;
 	}
     
@@ -51,10 +48,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		String transmissionType = jobParameters.getString(EducGradBatchGraduationApiConstants.TRANSMISSION_TYPE);
 		String studentSearchRequest = jobParameters.getString(EducGradBatchGraduationApiConstants.SEARCH_REQUEST, "{}");
 
-		String userScheduledId = jobParameters.getString(EducGradBatchGraduationApiConstants.USER_SCHEDULED);
-		if(userScheduledId != null) {
-			taskSchedulingService.updateUserScheduledJobs(userScheduledId);
-		}
+		updateUserSchedulingJobs(jobParameters);
 
 		PsiDistributionSummaryDTO summaryDTO = (PsiDistributionSummaryDTO)jobContext.get("psiDistributionSummaryDTO");
 		if(summaryDTO == null) {

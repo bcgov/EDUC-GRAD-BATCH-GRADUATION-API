@@ -279,7 +279,6 @@ public class JobLauncherController {
     }
 
     private void validateInputArchiveSchools(StudentSearchRequest studentSearchRequest) {
-        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
         if(studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
             throw new GradBusinessRuleException("Please provide at least 1 school parameter (school category, district or school of record)");
         }
@@ -868,7 +867,7 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_ARCHIVE_SCHOOL_REPORTS)
     @Operation(summary = "Run Archive School Reports Batch Job", description = "Run Archive School Reports Batch Job", tags = { "Archive School Reports" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<BatchJobResponse> launchArchiveSchoolReporsJob(@RequestBody StudentSearchRequest studentSearchRequest) {
+    public ResponseEntity<BatchJobResponse> launchArchiveSchoolReportsJob(@RequestBody StudentSearchRequest studentSearchRequest) {
         logger.debug("launchArchiveSchoolReporsJob");
         BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();

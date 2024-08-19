@@ -446,7 +446,7 @@ public class JobLauncherControllerTest {
 
         try {
             createJob(210L, "archiveSchoolReportsBatchJob", builder.toJobParameters());
-            ResponseEntity<BatchJobResponse> result = jobLauncherController.launchArchiveSchoolReporsJob(request);
+            ResponseEntity<BatchJobResponse> result = jobLauncherController.launchArchiveSchoolReportsJob(request);
             assertThat(result.getStatusCode().value()).isEqualTo(200);
         } catch (Exception e) {
             exceptionIsThrown = true;

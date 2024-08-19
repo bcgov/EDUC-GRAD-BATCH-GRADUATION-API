@@ -48,11 +48,16 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         }
 
         DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobExecution.getExecutionContext().get("distributionSummaryDTO");
+        if(summaryDTO == null) {
+            summaryDTO = new DistributionSummaryDTO();
+            jobExecution.getExecutionContext().put("distributionSummaryDTO", summaryDTO);
+        }
+        summaryDTO.setBatchId(jobExecution.getId());
         summaryDTO.setStudentSearchRequest(searchRequest);
+        List<String> studentStatusCodes = searchRequest.getStatuses();
         Long totalStudentsCount = 0L;
         for(String schoolOfRecord: finalSchoolDistricts) {
             Long schoolStudentCount = 0L;
-            List<String> studentStatusCodes = searchRequest.getStatuses();
             if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
                 for(String studentStatusCode: studentStatusCodes) {
                     schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), studentStatusCode, summaryDTO);
@@ -70,6 +75,19 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         long diff = (endTime - startTime)/1000;
         logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
 
+        if(finalSchoolDistricts.isEmpty()) {
+            Long schoolStudentCount = 0L;
+            if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
+                for(String studentStatusCode: studentStatusCodes) {
+                    schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(), studentStatusCode, summaryDTO);
+                }
+            } else {
+                schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(), "CUR", summaryDTO);
+                schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(), "TER", summaryDTO);
+            }
+            totalStudentsCount = schoolStudentCount;
+        }
+
         updateBatchJobHistory(createBatchJobHistory(), totalStudentsCount);
         summaryDTO.setReadCount(totalStudentsCount);
         summaryDTO.setProcessedCount(0);
@@ -80,7 +98,6 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         executionContext.put("data", finalSchoolDistricts);
         executionContext.put("summary", summaryDTO);
         executionContext.put("readCount", 0);
-        executionContext.put("summary", summaryDTO);
         map.put("partition0", executionContext);
 
         logger.info("Found {} in total running on 1 partitions", totalStudentsCount);

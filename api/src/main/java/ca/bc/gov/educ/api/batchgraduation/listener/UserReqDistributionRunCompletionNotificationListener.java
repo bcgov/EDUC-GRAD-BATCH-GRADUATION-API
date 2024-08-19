@@ -3,8 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
-import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
-import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -31,15 +29,11 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
 	@Autowired
-	TaskSchedulingService taskSchedulingService;
-	@Autowired
 	GraduationReportService graduationReportService;
 	@Autowired
 	RestUtils restUtils;
 	@Autowired
 	SupportListener supportListener;
-
-	ParallelDataFetch parallelDataFetch;
 
     @Override
     public void afterJob(JobExecution jobExecution) {
@@ -60,10 +54,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			String credentialType = jobParameters.getString("credentialType");
 			String properName = jobParameters.getString("properName");
 			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
-			String userScheduledId = jobParameters.getString("userScheduled");
-			if(userScheduledId != null) {
-				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
-			}
+			updateUserSchedulingJobs(jobParameters);
 
 			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
 			if(summaryDTO == null) {

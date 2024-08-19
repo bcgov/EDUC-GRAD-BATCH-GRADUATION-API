@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +8,6 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -20,9 +18,6 @@ import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApi
 public class ArchiveStudentsCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveStudentsCompletionNotificationListener.class);
-
-	@Autowired
-	private GradBatchHistoryService gradBatchHistoryService;
     
     @Override
     public void afterJob(JobExecution jobExecution) {
@@ -48,6 +43,8 @@ public class ArchiveStudentsCompletionNotificationListener extends BaseDistribut
 			LOGGER.info("Processed count: {}", summaryDTO.getProcessedCount());
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
+
+			updateUserSchedulingJobs(jobParameters);
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
 			// save batch job & error history

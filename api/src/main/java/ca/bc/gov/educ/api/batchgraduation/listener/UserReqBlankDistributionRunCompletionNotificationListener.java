@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.model.*;
-import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -29,9 +28,6 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
     private static final String LOG_SEPARATION_SINGLE = " --------------------------------------------------------------------------------------";
 
 	@Autowired
-	private TaskSchedulingService taskSchedulingService;
-
-	@Autowired
 	SupportListener supportListener;
     
     @Override
@@ -53,10 +49,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			String localDownLoad = jobParameters.getString("LocalDownload");
 			String properName = jobParameters.getString("properName");
 			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
-			String userScheduledId = jobParameters.getString("userScheduled");
-			if(userScheduledId != null) {
-				taskSchedulingService.updateUserScheduledJobs(userScheduledId);
-			}
+			updateUserSchedulingJobs(jobParameters);
 			BlankDistributionSummaryDTO summaryDTO = (BlankDistributionSummaryDTO) jobContext.get("blankDistributionSummaryDTO");
 			if(summaryDTO == null) {
 				summaryDTO = new BlankDistributionSummaryDTO();
