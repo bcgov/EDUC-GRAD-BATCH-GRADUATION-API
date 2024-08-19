@@ -897,7 +897,7 @@ public class RestUtils {
     public Integer archiveSchoolReports(Long batchId, List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
         UUID correlationID = UUID.randomUUID();
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Archive {} School Reports for Ministry Codes: {}", reportType, String.join(",", finalSchoolDistricts));
+            LOGGER.debug("Archive {} School Reports for Ministry Codes: {}", reportType, !finalSchoolDistricts.isEmpty() ? String.join(",", finalSchoolDistricts) : summaryDTO.getSchools().stream().map(School::getMincode).collect(Collectors.joining(",")));
         }
         try {
             String accessToken = getAccessToken();
