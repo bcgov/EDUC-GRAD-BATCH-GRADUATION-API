@@ -1,7 +1,9 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -44,6 +46,9 @@ public class ArchiveStudentsCompletionNotificationListener extends BaseDistribut
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
+			StudentSearchRequest payload = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+			String userName = ObjectUtils.defaultIfNull(payload.getUser(), "Batch Archive Process");
+
 			updateUserSchedulingJobs(jobParameters);
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
@@ -51,7 +56,7 @@ public class ArchiveStudentsCompletionNotificationListener extends BaseDistribut
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of archived Students : {}", value.getMincode(), value.getNumberOfStudents()));
-			restUtils.updateStudentGradRecordHistory(jobExecutionId, "Batch Archive Process", "USERSTUDARC");
+			restUtils.updateStudentGradRecordHistory(jobExecutionId, userName, "USERSTUDARC");
 		}
 	}
 }
