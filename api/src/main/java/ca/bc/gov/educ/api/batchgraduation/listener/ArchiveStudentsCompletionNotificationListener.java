@@ -47,7 +47,7 @@ public class ArchiveStudentsCompletionNotificationListener extends BaseDistribut
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
 			StudentSearchRequest payload = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
-			String userName = ObjectUtils.defaultIfNull(payload.getUser(), "Batch Archive Process");
+			String userName = ObjectUtils.defaultIfNull(payload.getUser(), "Batch Student Archive Process");
 
 			updateUserSchedulingJobs(jobParameters);
 
