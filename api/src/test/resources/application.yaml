@@ -182,7 +182,7 @@ endpoint:
     update-school-report:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/updateschoolreports?mincode=%s&reportTypeCode=%s
     update-student-report:
-      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreports?reportTypeCode=%s&actionType=%s
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreports?reportTypeCode=%s
     delete-student-report:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/delete?batchId=%s&reportType=%s
     get-school-report-list:
