@@ -14,12 +14,13 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
-public class ArchiveStudentsPartitioner extends BasePartitioner {
+public class DeleteStudentReportsPartitioner extends BasePartitioner {
 
-    private static final Logger logger = LoggerFactory.getLogger(ArchiveStudentsPartitioner.class);
+    private static final Logger logger = LoggerFactory.getLogger(DeleteStudentReportsPartitioner.class);
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution jobExecution;
@@ -27,7 +28,7 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
     @Autowired
     GradSchoolOfRecordFilter gradSchoolOfRecordFilter;
 
-    public ArchiveStudentsPartitioner() {
+    public DeleteStudentReportsPartitioner() {
         super();
     }
 
@@ -40,67 +41,51 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
     public Map<String, ExecutionContext> partition(int gridSize) {
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         long startTime = System.currentTimeMillis();
-        logger.debug("Filter Schools for archiving students");
+        logger.debug("Filter Schools for deleting student reports");
         List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
         List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {
             logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
         }
-
         DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobExecution.getExecutionContext().get("distributionSummaryDTO");
         if(summaryDTO == null) {
             summaryDTO = new DistributionSummaryDTO();
             jobExecution.getExecutionContext().put("distributionSummaryDTO", summaryDTO);
         }
+        searchRequest.setSchoolOfRecords(finalSchoolDistricts);
+
+        List<UUID> studentGuidsBySearch = restUtils.getStudentIDsBySearchCriteria(searchRequest, summaryDTO);
+        List<UUID> finalStudentGuids = restUtils.getStudentIDsForReportProcessing(studentGuidsBySearch.stream().map(UUID::toString).toList(), "ACHV", summaryDTO);
+        if(!finalStudentGuids.isEmpty()) {
+            searchRequest.setStudentIDs(finalStudentGuids);
+        } else {
+            searchRequest.getStudentIDs().clear();
+        }
+
+        Integer totalStudentReportsCount = searchRequest.getStudentIDs().size();
+        School school = new School("ALL_STUDENTS");
+        school.setNumberOfStudents(totalStudentReportsCount);
+        summaryDTO.getSchools().add(school);
         summaryDTO.setBatchId(jobExecution.getId());
         summaryDTO.setStudentSearchRequest(searchRequest);
-        List<String> studentStatusCodes = searchRequest.getStatuses();
-        Long totalStudentsCount = 0L;
-        for(String schoolOfRecord: finalSchoolDistricts) {
-            Long schoolStudentCount = 0L;
-            if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
-                for(String studentStatusCode: studentStatusCodes) {
-                    schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(schoolOfRecord), studentStatusCode, summaryDTO);
-                }
-            } else {
-                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(schoolOfRecord), "CUR", summaryDTO);
-                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(schoolOfRecord), "TER", summaryDTO);
-            }
-            School school = new School(schoolOfRecord);
-            school.setNumberOfStudents(schoolStudentCount);
-            summaryDTO.getSchools().add(school);
-            totalStudentsCount += schoolStudentCount;
-        }
+
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
-        logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
+        logger.debug("Total {} student reports after filters in {} sec", totalStudentReportsCount, diff);
 
-        if(finalSchoolDistricts.isEmpty()) {
-            Long schoolStudentCount = 0L;
-            if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
-                for(String studentStatusCode: studentStatusCodes) {
-                    schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(), studentStatusCode, summaryDTO);
-                }
-            } else {
-                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(), "CUR", summaryDTO);
-                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(), "TER", summaryDTO);
-            }
-            totalStudentsCount = schoolStudentCount;
-        }
-
-        updateBatchJobHistory(createBatchJobHistory(), totalStudentsCount);
-        summaryDTO.setReadCount(totalStudentsCount);
+        updateBatchJobHistory(createBatchJobHistory(), totalStudentReportsCount.longValue());
+        summaryDTO.setReadCount(totalStudentReportsCount);
         summaryDTO.setProcessedCount(0);
 
         Map<String, ExecutionContext> map = new HashMap<>();
         ExecutionContext executionContext = new ExecutionContext();
         executionContext.put(SEARCH_REQUEST, searchRequest);
-        executionContext.put("data", finalSchoolDistricts);
+        executionContext.put("data", finalStudentGuids);
         executionContext.put("summary", summaryDTO);
         executionContext.put("readCount", 0);
         map.put("partition0", executionContext);
 
-        logger.info("Found {} in total running on 1 partitions", totalStudentsCount);
+        logger.info("Found {} in total running on 1 partitions", totalStudentReportsCount);
         return map;
     }
 }

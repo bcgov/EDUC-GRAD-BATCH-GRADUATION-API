@@ -29,6 +29,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_CERT_REGEN_BATCH_JOB = "/executecertregenbatchjob";
     public static final String EXECUTE_EDW_SNAPSHOT_BATCH_JOB = "/executeedwsnapshotbatchjob";
     public static final String EXECUTE_ARCHIVE_SCHOOL_REPORTS_RUN_BATCH_JOB = "/executearchivebatchjobschoolreports";
+    public static final String EXECUTE_DELETE_STUDENT_REPORTS_RUN_BATCH_JOB = "/executedeletebatchjobstudentreports";
     public static final String EXECUTE_YEARLY_ARCHIVE_STUDENTS_RUN_BATCH_JOB = "/executeyearlyarchivebatchjobstudents";
 
     // Special Run
@@ -133,6 +134,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-report-api.get-school-reports-count.url}")
     private String gradSchoolReportsCountUrl;
 
+    @Value("${endpoint.grad-graduation-report-api.get-student-reports-guid.url}")
+    private String gradStudentReportsGuidsUrl;
+
     @Value("${endpoint.grad-graduation-report-api.archive-school-reports.url}")
     private String gradArchiveSchoolReportsUrl;
 
@@ -141,6 +145,9 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-student-api.archive-students}")
     private String gradArchiveStudentsUrl;
+
+    @Value("${endpoint.grad-student-api.student-by-search-criteria}")
+    private String gradGetStudentsBySearchCriteriaUrl;
 
     @Value("${endpoint.grad-graduation-report-api.check-sccp-certificate-exists}")
     private String checkSccpCertificateExists;
@@ -273,6 +280,9 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-report-api.update-student-report.url}")
     private String updateStudentReport;
+
+    @Value("${endpoint.grad-graduation-report-api.delete-student-report.url}")
+    private String deleteStudentReportsUrl;
 
     @Value("${endpoint.grad-trax-api.get-psi-student-list.url}")
     private String psiStudentList;

@@ -1389,7 +1389,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testupdateStudentGradRecordHistory() {
+    public void testUpdateStudentGradRecordHistory() {
         final UUID studentID = UUID.randomUUID();
         final String userName = "abc";
         final String accessToken = "xyz";
@@ -1406,7 +1406,7 @@ public class RestUtilsTest {
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(rec));
 
-        this.restUtils.updateStudentGradRecordHistory(batchId, accessToken, userName, null);
+        this.restUtils.updateStudentGradRecordHistory(List.of(), batchId, accessToken, userName, null);
 
         when(this.webClient.put()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentRecordHistory(), batchId, userName, "USERSTUDARC"))).thenReturn(this.requestBodyUriMock);
@@ -1418,7 +1418,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        this.restUtils.updateStudentGradRecordHistory(batchId, userName, "USERSTUDARC");
+        this.restUtils.updateStudentGradRecordHistory(List.of(studentID), batchId, userName, "USERSTUDARC");
         assertNotNull(rec);
 
     }
@@ -1688,7 +1688,7 @@ public class RestUtilsTest {
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
-        val result = this.restUtils.getTotalSchoolsForArchiving(schools, "GRADREG", summaryDTO);
+        val result = this.restUtils.getTotalReportsForProcessing(schools, "GRADREG", summaryDTO);
         assertThat(result).isEqualTo(1);
     }
 
@@ -1708,7 +1708,7 @@ public class RestUtilsTest {
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
-        val result = this.restUtils.getTotalSchoolsForArchiving(schools, "GRADREG", summaryDTO);
+        val result = this.restUtils.getTotalReportsForProcessing(schools, "GRADREG", summaryDTO);
         assertThat(result).isNotNull();
         assertThat(summaryDTO.getErrors()).isNotEmpty();
     }
@@ -1770,7 +1770,7 @@ public class RestUtilsTest {
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
-        val result = this.restUtils.getTotalStudentsForArchiving(schools, "CUR", summaryDTO);
+        val result = this.restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(schools, "CUR", summaryDTO);
         assertThat(result).isEqualTo(1);
     }
 
@@ -1790,7 +1790,7 @@ public class RestUtilsTest {
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
-        val result = this.restUtils.getTotalStudentsForArchiving(schools, "CUR", summaryDTO);
+        val result = this.restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(schools, "CUR", summaryDTO);
         assertThat(result).isNotNull();
         assertThat(summaryDTO.getErrors()).isNotEmpty();
     }

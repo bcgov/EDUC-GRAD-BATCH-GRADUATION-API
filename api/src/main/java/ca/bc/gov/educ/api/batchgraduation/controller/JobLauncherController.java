@@ -62,6 +62,7 @@ public class JobLauncherController {
     private static final String EDW_SNAPSHOT = "EDW_SNAPSHOT";
 
     private static final String ARCHIVE_SCHOOL_REPORTS = "ARC_SCH_REPORTS";
+    private static final String DELETE_STUDENT_REPORTS = "TVR_DELETE";
 
     private static final String ARCHIVE_STUDENTS = "ARC_STUDENTS";
 
@@ -88,6 +89,8 @@ public class JobLauncherController {
     private static final String EDW_SNAPSHOT_BATCH_JOB = "edwSnapshotBatchJob";
 
     private static final String ARCHIVE_SCHOOL_REPORTS_BATCH_JOB = "archiveSchoolReportsBatchJob";
+
+    private static final String DELETE_STUDENT_REPORTS_BATCH_JOB = "deleteStudentReportsBatchJob";
 
     private static final String ARCHIVE_STUDENTS_BATCH_JOB = "archiveStudentsBatchJob";
 
@@ -277,9 +280,15 @@ public class JobLauncherController {
         return null;
     }
 
-    private void validateInputArchiveSchools(StudentSearchRequest studentSearchRequest) {
+    private void validateInputArchiveSchoolReports(StudentSearchRequest studentSearchRequest) {
         if(studentSearchRequest.getReportTypes().isEmpty()) {
             throw new GradBusinessRuleException("Please provide at least 1 report type parameter (GRADREG, NONGRADPRJ, NONGRADREG)");
+        }
+    }
+
+    private void validateInputDeleteStudentReports(StudentSearchRequest studentSearchRequest) {
+        if(studentSearchRequest == null) {
+            throw new GradBusinessRuleException("Please provide not null student search request");
         }
     }
 
@@ -878,10 +887,53 @@ public class JobLauncherController {
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
-            validateInputArchiveSchools(studentSearchRequest);
+            validateInputArchiveSchoolReports(studentSearchRequest);
             String searchData = jsonTransformer.marshall(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
             Job job = jobRegistry.getJob(ARCHIVE_SCHOOL_REPORTS_BATCH_JOB);
+            JobParameters jobParameters = job.getJobParametersIncrementer().getNext(builder.toJobParameters());
+            JobExecution jobExecution = asyncJobLauncher.run(job, jobParameters);
+            if(jobExecution != null) {
+                ExecutionContext jobContext = jobExecution.getExecutionContext();
+                DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+                summaryDTO.setBatchId(jobExecution.getId());
+                jobContext.put(DISDTO, summaryDTO);
+                response.setBatchId(jobExecution.getId());
+            } else {
+                response.setBatchId(jobParameters.getLong("run.id"));
+            }
+            return ResponseEntity.ok(response);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+                 | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
+            response.setException(e.getLocalizedMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    @PostMapping(EducGradBatchGraduationApiConstants.EXECUTE_DELETE_STUDENT_REPORTS_RUN_BATCH_JOB)
+    @PreAuthorize(PermissionsConstants.RUN_DELETE_STUDENT_REPORTS)
+    @Operation(summary = "Run Archive School Reports Batch Job", description = "Run Archive School Reports Batch Job", tags = { "Archive School Reports" })
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
+    public ResponseEntity<BatchJobResponse> launchDeleteStudentReportsJob(@RequestBody StudentSearchRequest studentSearchRequest) {
+        logger.debug("launchDeleteStudentReportsJob");
+        BatchJobResponse response = new BatchJobResponse();
+        JobParametersBuilder builder = new JobParametersBuilder();
+
+        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, DELETE_STUDENT_REPORTS);
+
+        response.setJobType(DELETE_STUDENT_REPORTS);
+        response.setTriggerBy(MANUAL);
+        response.setStartTime(LocalDateTime.now());
+        response.setStatus(BatchStatusEnum.STARTED.name());
+
+        try {
+            validateInputDeleteStudentReports(studentSearchRequest);
+            String searchData = jsonTransformer.marshall(studentSearchRequest);
+            builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
+            Job job = jobRegistry.getJob(DELETE_STUDENT_REPORTS_BATCH_JOB);
             JobParameters jobParameters = job.getJobParametersIncrementer().getNext(builder.toJobParameters());
             JobExecution jobExecution = asyncJobLauncher.run(job, jobParameters);
             if(jobExecution != null) {

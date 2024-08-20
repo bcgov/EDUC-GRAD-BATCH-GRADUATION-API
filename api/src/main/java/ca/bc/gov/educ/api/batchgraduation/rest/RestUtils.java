@@ -702,19 +702,19 @@ public class RestUtils {
         }
     }
 
-    public void updateStudentGradRecordHistory(Long batchId, String accessToken, String userName, String activityCode) {
+    public void updateStudentGradRecordHistory(List<UUID> studentIDs, Long batchId, String accessToken, String userName, String activityCode) {
          try {
             if (batchId != null) {
                 String url = String.format(constants.getUpdateStudentRecordHistory(), batchId, userName, activityCode);
-                this.put(url,"{}", GraduationStudentRecord.class, accessToken);
+                this.put(url,studentIDs, GraduationStudentRecord.class, accessToken);
             }
         } catch (Exception e) {
             LOGGER.error("Unable to update student record history");
         }
     }
 
-    public void updateStudentGradRecordHistory(Long batchId, String userName, String activityCode) {
-        updateStudentGradRecordHistory(batchId, getAccessToken(), userName, activityCode);
+    public void updateStudentGradRecordHistory(List<UUID> studentIDs, Long batchId, String userName, String activityCode) {
+        updateStudentGradRecordHistory(studentIDs, batchId, getAccessToken(), userName, activityCode);
     }
 
     public String updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType, String accessToken) {
@@ -872,7 +872,7 @@ public class RestUtils {
         }
     }
 
-    public Long getTotalSchoolsForArchiving(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
+    public Long getTotalReportsForProcessing(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
         Long schoolReportsCount = 0L;
         UUID correlationID = UUID.randomUUID();
         try {
@@ -892,6 +892,30 @@ public class RestUtils {
             LOGGER.debug("{} of {} school reports for archiving of SoR: {}", schoolReportsCount, reportType, String.join(",", finalSchoolDistricts));
         }
         return schoolReportsCount;
+    }
+
+    public List<UUID> getStudentIDsForReportProcessing(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
+        List<UUID> result = new ArrayList<>();
+        UUID correlationID = UUID.randomUUID();
+        try {
+            String accessToken = getAccessToken();
+            final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
+            };
+            result = this.webClient.post()
+                    .uri(String.format(constants.getGradStudentReportsGuidsUrl(), reportType))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(finalSchoolDistricts))
+                    .retrieve().bodyToMono(responseType).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to retrieve school reports counts", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to retrieve schools reports counts", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("{} of {} school reports for archiving of SoR: {}", result.size(), reportType, String.join(",", finalSchoolDistricts));
+        }
+        return result;
     }
 
     public Integer archiveSchoolReports(Long batchId, List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
@@ -915,7 +939,7 @@ public class RestUtils {
         }
     }
 
-    public Long getTotalStudentsForArchiving(List<String> finalSchoolDistricts, String studentStatus, DistributionSummaryDTO summaryDTO) {
+    public Long getTotalStudentsBySchoolOfRecordAndStudentStatus(List<String> finalSchoolDistricts, String studentStatus, DistributionSummaryDTO summaryDTO) {
         Long studentsCount = 0L;
         UUID correlationID = UUID.randomUUID();
         try {
@@ -956,5 +980,50 @@ public class RestUtils {
             summaryDTO.setException(e.getLocalizedMessage());
             return 0;
         }
+    }
+
+    public List<UUID> getStudentIDsBySearchCriteria(StudentSearchRequest searchRequest, DistributionSummaryDTO summaryDTO) {
+        UUID correlationID = UUID.randomUUID();
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Get Students for Ministry Codes: {}", String.join(",", searchRequest.getSchoolOfRecords()));
+        }
+        try {
+            String accessToken = getAccessToken();
+            final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
+            };
+            return this.webClient.post()
+                    .uri(constants.getGradGetStudentsBySearchCriteriaUrl())
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(searchRequest))
+                    .retrieve().bodyToMono(responseType).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to retrieve list of Students", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to retrieve list of Students", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public long deleteStudentReports(Long batchId, List<UUID> uuids, String studentStatus, DistributionSummaryDTO summaryDTO) {
+        Long studentsCount = 0L;
+        UUID correlationID = UUID.randomUUID();
+        try {
+            String accessToken = getAccessToken();
+            studentsCount = this.webClient.post()
+                    .uri(String.format(constants.getDeleteStudentReportsUrl(), batchId, studentStatus))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(uuids))
+                    .retrieve().bodyToMono(Long.class).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to delete student reports", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to delete student reports", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("{} of {} student reports for deleting", studentsCount, studentStatus);
+        }
+        return studentsCount;
     }
 }

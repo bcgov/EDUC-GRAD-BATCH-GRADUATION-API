@@ -11,6 +11,7 @@ public enum JobProperName {
     URPDBJ("PSI Distribution Batch Job"),
     BDBJ ("Blank Distribution Batch Job"),
     RCBJ ("Regenerate Certificates Batch Job"),
+    DSRBJ ("Delete Student Report Batch Job"),
     ASBJ("Archive Students Batch Job"),
     ASRBJ("Archive School Reports Batch Job");
     ;

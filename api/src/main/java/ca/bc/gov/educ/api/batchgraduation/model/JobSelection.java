@@ -11,6 +11,7 @@ public enum JobSelection {
     URPDBJ ("PSIRUN"),
     BDBJ ("DISTRUNUSER"),
     RCBJ ("CERT_REGEN"),
+    DSRBJ ("TVR_DELETE"),
     ASBJ("ARC_STUDENTS"),
     ASRBJ("ARC_SCH_REPORTS");
 

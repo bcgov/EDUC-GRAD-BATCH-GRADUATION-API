@@ -143,6 +143,7 @@ endpoint:
     get-student-for-batch-input: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/batch/gradstudent/studentid/%s
     pen-student-by-pen: https://student-api-75e61b-tools.apps.silver.devops.gov.bc.ca/api/v1/student?pen=%s
     student-for-special-grad-run-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/studentlistsearch
+    student-by-search-criteria: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/gradstudentbysearchcriteria
     get-student-data-list: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/multistudentids
     get-student-record: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/stdid/%s
     update-student-record: https://educ-grad-student-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/student/distribution/studentid/%s?batchId=%s&activityCode=%s
@@ -158,6 +159,8 @@ endpoint:
   grad-graduation-report-api:
     get-school-reports-count:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/count?reportType=%S
+    get-student-reports-guid:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreportsbystudentid?reportType=%S
     archive-school-reports:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/archive?batchId=%s&reportType=%S
     get-transcript-list:
@@ -180,6 +183,8 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/updateschoolreports?mincode=%s&reportTypeCode=%s
     update-student-report:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreports?reportTypeCode=%s&actionType=%s
+    delete-student-report:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/delete?batchId=%s&reportType=%s
     get-school-report-list:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreportdistributionrun
     check-sccp-certificate-exists: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/check-sccp-certificate-exists
