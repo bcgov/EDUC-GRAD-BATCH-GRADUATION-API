@@ -492,8 +492,8 @@ public class JobLauncherController {
         try {
             List<UUID> finalUUIDs = gradSchoolOfRecordFilter.filterStudents(searchRequest);
             logger.info(" Number of Students [{}] ---------------------------------------------------------", finalUUIDs.size());
-            int numberOfReports = restUtils.processStudentReports(finalUUIDs, reportType);
-            response.setMessage(numberOfReports + " student " + reportType + " reports successfully");
+            restUtils.processStudentReports(finalUUIDs, reportType);
+            response.setStatus(BatchStatusEnum.COMPLETED.name());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             response.setException(e.getLocalizedMessage());
