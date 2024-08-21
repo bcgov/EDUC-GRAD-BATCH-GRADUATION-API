@@ -486,14 +486,13 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Re-Generate Student Reports for the given batchJobId", description = "Re-Generate Student Reports for the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<String> launchRegenerateStudentReports(@RequestBody StudentSearchRequest searchRequest, @RequestParam String type) {
-        String studentReportType = ObjectUtils.defaultIfNull(type, "ACHV");
-        logger.info(" Re-Generating Student Reports by request for {} --------------------------------------------------------", studentReportType);
+    public ResponseEntity<String> launchRegenerateStudentReports(@RequestBody StudentSearchRequest searchRequest, @RequestParam String reportType) {
+        logger.info(" Re-Generating Student Reports by request for {} --------------------------------------------------------", reportType);
         try {
             List<UUID> finalUUIDs = gradSchoolOfRecordFilter.filterStudents(searchRequest);
             logger.info(" Number of Students [{}] ---------------------------------------------------------", finalUUIDs.size());
-            int numberOfReports = restUtils.processStudentReports(finalUUIDs, studentReportType);
-            return ResponseEntity.ok(numberOfReports + " student " + studentReportType + " reports successfully");
+            int numberOfReports = restUtils.processStudentReports(finalUUIDs, reportType);
+            return ResponseEntity.ok(numberOfReports + " student " + reportType + " reports successfully");
         } catch (Exception e) {
             return ResponseEntity.status(500).body(e.getLocalizedMessage());
         }
