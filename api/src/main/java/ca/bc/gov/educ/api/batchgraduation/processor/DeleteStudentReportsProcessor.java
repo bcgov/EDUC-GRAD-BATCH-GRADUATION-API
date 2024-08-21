@@ -27,7 +27,8 @@ public class DeleteStudentReportsProcessor implements ItemProcessor<List<UUID>, 
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Process Student Reports: {}", uuids.size());
 		}
-		long countDeletedStudentReports = restUtils.deleteStudentReports(batchId, uuids, "ACHV", summaryDTO);
+		long countDeletedStudentReports = summaryDTO.getProcessedCount();
+		countDeletedStudentReports += restUtils.deleteStudentReports(batchId, uuids, "ACHV", summaryDTO);
 		summaryDTO.setProcessedCount(countDeletedStudentReports);
 		return uuids;
 	}

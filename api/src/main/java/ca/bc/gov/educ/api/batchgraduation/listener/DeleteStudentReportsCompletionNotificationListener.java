@@ -55,7 +55,7 @@ public class DeleteStudentReportsCompletionNotificationListener extends BaseDist
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
-			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of Archived Student Reports : {}", value.getMincode(), value.getNumberOfStudents()));
+			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of Deleted Student Reports : {}", value.getMincode(), value.getNumberOfStudents()));
 			if(summaryDTO.getProcessedCount() > 0) {
 				restUtils.updateStudentGradRecordHistory(searchRequest.getStudentIDs(), jobExecutionId, userName, "TVRDELETED");
 			}

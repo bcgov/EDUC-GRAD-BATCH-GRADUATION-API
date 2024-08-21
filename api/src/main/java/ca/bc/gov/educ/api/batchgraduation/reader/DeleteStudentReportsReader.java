@@ -16,18 +16,25 @@ public class DeleteStudentReportsReader implements ItemReader<List<UUID>> {
     @Value("#{stepExecutionContext['data']}")
     List<UUID> guids;
 
-    @Value("#{stepExecutionContext['summary']}")
-    DistributionSummaryDTO summaryDTO;
-
     @Value("#{stepExecutionContext['readCount']}")
     Long readCount;
 
+    @Value("#{stepExecutionContext['summary']}")
+    DistributionSummaryDTO summaryDTO;
+
     @Override
     public List<UUID> read() throws Exception {
-        if(readCount > 0) return null;
-        readCount++;
+        if(readCount > 0) {
+            return null;
+        }
+        if(guids.isEmpty()) {
+            readCount = summaryDTO.getReadCount();
+        } else {
+            readCount += guids.size();
+        }
+        summaryDTO.setReadCount(readCount);
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.info("Read Student Guids -> {} students", guids.size());
+            LOGGER.info("Read Student Guids -> {} students", readCount);
         }
         return guids;
     }

@@ -873,11 +873,11 @@ public class RestUtils {
     }
 
     public Long getTotalReportsForProcessing(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
-        Long schoolReportsCount = 0L;
+        Long reportsCount = 0L;
         UUID correlationID = UUID.randomUUID();
         try {
             String accessToken = getAccessToken();
-            schoolReportsCount = this.webClient.post()
+            reportsCount = this.webClient.post()
                     .uri(String.format(constants.getGradSchoolReportsCountUrl(), reportType))
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                     .body(BodyInserters.fromValue(finalSchoolDistricts))
@@ -889,9 +889,9 @@ public class RestUtils {
             summaryDTO.setException(e.getLocalizedMessage());
         }
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} of {} school reports for archiving of SoR: {}", schoolReportsCount, reportType, String.join(",", finalSchoolDistricts));
+            LOGGER.debug("{} of {} reports for processing", reportsCount, reportType);
         }
-        return schoolReportsCount;
+        return reportsCount;
     }
 
     public List<UUID> getReportStudentIDsByStudentIDsAndReportType(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
@@ -913,7 +913,7 @@ public class RestUtils {
             summaryDTO.setException(e.getLocalizedMessage());
         }
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} of {} school reports for archiving of SoR: {}", result.size(), reportType, String.join(",", finalSchoolDistricts));
+            LOGGER.debug("{} of {} reports for processing", result.size(), reportType);
         }
         return result;
     }
