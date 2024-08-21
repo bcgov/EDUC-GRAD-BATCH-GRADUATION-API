@@ -8,6 +8,7 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -901,11 +902,12 @@ public class RestUtils {
             String accessToken = getAccessToken();
             final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
             };
-            result = this.webClient.post()
+            List<UUID> guids = this.webClient.post()
                     .uri(String.format(constants.getGradStudentReportsGuidsUrl(), reportType))
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                     .body(BodyInserters.fromValue(finalSchoolDistricts))
                     .retrieve().bodyToMono(responseType).block();
+            result.addAll(guids);
         } catch(Exception e) {
             LOGGER.error("Unable to retrieve report student guids", e);
             summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
@@ -1024,6 +1026,6 @@ public class RestUtils {
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("{} of {} student reports for deleting", studentsCount, reportType);
         }
-        return studentsCount;
+        return ObjectUtils.defaultIfNull(studentsCount, 0L);
     }
 }
