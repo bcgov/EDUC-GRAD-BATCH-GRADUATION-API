@@ -1848,7 +1848,7 @@ public class RestUtilsTest {
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
         val result = this.restUtils.deleteStudentReports(12345678L, studentIDs,"ACHV", summaryDTO);
-        assertThat(result).isEqualTo(0);
+        assertThat(result).isZero();
         assertThat(summaryDTO.getErrors()).isNotEmpty();
     }
 
