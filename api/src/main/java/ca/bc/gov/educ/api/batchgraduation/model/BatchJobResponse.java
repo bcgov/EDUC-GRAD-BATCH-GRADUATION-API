@@ -18,4 +18,5 @@ public class BatchJobResponse {
     private String localDownload;
 
     private String exception;
+    private String message;
 }
