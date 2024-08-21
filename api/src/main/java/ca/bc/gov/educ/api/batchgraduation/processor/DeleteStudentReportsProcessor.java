@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.processor;
 
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +24,10 @@ public class DeleteStudentReportsProcessor implements ItemProcessor<List<UUID>, 
 	@Override
 	public List<UUID> process(List<UUID> uuids) throws Exception {
 		Long batchId = summaryDTO.getBatchId();
-		long countDeletedStudentReports = 0l;
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Process Student Reports: {}", uuids.size());
 		}
-		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
-		if(!searchRequest.getStudentIDs().isEmpty()) {
-			countDeletedStudentReports = restUtils.deleteStudentReports(batchId, uuids, "ACHV", summaryDTO);
-		}
+		long countDeletedStudentReports = restUtils.deleteStudentReports(batchId, uuids, "ACHV", summaryDTO);
 		summaryDTO.setProcessedCount(countDeletedStudentReports);
 		return uuids;
 	}

@@ -894,7 +894,7 @@ public class RestUtils {
         return schoolReportsCount;
     }
 
-    public List<UUID> getStudentIDsForReportProcessing(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
+    public List<UUID> getReportStudentIDsByStudentIDsAndReportType(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
         List<UUID> result = new ArrayList<>();
         UUID correlationID = UUID.randomUUID();
         try {
@@ -907,7 +907,7 @@ public class RestUtils {
                     .body(BodyInserters.fromValue(finalSchoolDistricts))
                     .retrieve().bodyToMono(responseType).block();
         } catch(Exception e) {
-            LOGGER.error("Unable to retrieve school reports counts", e);
+            LOGGER.error("Unable to retrieve report student guids", e);
             summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
             summaryDTO.getErrors().add(new ProcessError(null,"Unable to retrieve schools reports counts", e.getLocalizedMessage()));
             summaryDTO.setException(e.getLocalizedMessage());
@@ -982,7 +982,7 @@ public class RestUtils {
         }
     }
 
-    public List<UUID> getStudentIDsBySearchCriteria(StudentSearchRequest searchRequest, DistributionSummaryDTO summaryDTO) {
+    public List<UUID> getStudentIDsBySearchCriteriaOrAll(StudentSearchRequest searchRequest, DistributionSummaryDTO summaryDTO) {
         UUID correlationID = UUID.randomUUID();
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Get Students for Ministry Codes: {}", String.join(",", searchRequest.getSchoolOfRecords()));
@@ -1005,13 +1005,13 @@ public class RestUtils {
         }
     }
 
-    public long deleteStudentReports(Long batchId, List<UUID> uuids, String studentStatus, DistributionSummaryDTO summaryDTO) {
+    public long deleteStudentReports(Long batchId, List<UUID> uuids, String reportType, DistributionSummaryDTO summaryDTO) {
         Long studentsCount = 0L;
         UUID correlationID = UUID.randomUUID();
         try {
             String accessToken = getAccessToken();
             studentsCount = this.webClient.post()
-                    .uri(String.format(constants.getDeleteStudentReportsUrl(), batchId, studentStatus))
+                    .uri(String.format(constants.getDeleteStudentReportsUrl(), batchId, reportType))
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                     .body(BodyInserters.fromValue(uuids))
                     .retrieve().bodyToMono(Long.class).block();
@@ -1022,7 +1022,7 @@ public class RestUtils {
             summaryDTO.setException(e.getLocalizedMessage());
         }
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} of {} student reports for deleting", studentsCount, studentStatus);
+            LOGGER.debug("{} of {} student reports for deleting", studentsCount, reportType);
         }
         return studentsCount;
     }
