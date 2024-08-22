@@ -11,6 +11,7 @@ public enum TaskSelection {
     URPDBJ("psiDistributionBatchJob"),
     BDBJ ("blankDistributionBatchJob"),
     RCBJ ("certRegenBatchJob"),
+    DSRBJ ("deleteStudentReportsBatchJob"),
     ASBJ("archiveStudentsBatchJob"),
     ASRBJ("archiveSchoolReportsBatchJob");
 

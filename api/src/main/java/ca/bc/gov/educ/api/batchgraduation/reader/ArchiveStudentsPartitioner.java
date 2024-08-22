@@ -41,6 +41,7 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         long startTime = System.currentTimeMillis();
         logger.debug("Filter Schools for archiving students");
+        boolean processAllStudents = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
         List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
         List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {
@@ -60,11 +61,11 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
             Long schoolStudentCount = 0L;
             if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
                 for(String studentStatusCode: studentStatusCodes) {
-                    schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), studentStatusCode, summaryDTO);
+                    schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(schoolOfRecord), studentStatusCode, summaryDTO);
                 }
             } else {
-                schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), "CUR", summaryDTO);
-                schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(schoolOfRecord), "TER", summaryDTO);
+                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(schoolOfRecord), "CUR", summaryDTO);
+                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(schoolOfRecord), "TER", summaryDTO);
             }
             School school = new School(schoolOfRecord);
             school.setNumberOfStudents(schoolStudentCount);
@@ -75,15 +76,15 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         long diff = (endTime - startTime)/1000;
         logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
 
-        if(finalSchoolDistricts.isEmpty()) {
+        if(processAllStudents && finalSchoolDistricts.isEmpty()) {
             Long schoolStudentCount = 0L;
             if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
                 for(String studentStatusCode: studentStatusCodes) {
-                    schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(), studentStatusCode, summaryDTO);
+                    schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(), studentStatusCode, summaryDTO);
                 }
             } else {
-                schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(), "CUR", summaryDTO);
-                schoolStudentCount += restUtils.getTotalStudentsForArchiving(List.of(), "TER", summaryDTO);
+                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(), "CUR", summaryDTO);
+                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(), "TER", summaryDTO);
             }
             totalStudentsCount = schoolStudentCount;
         }

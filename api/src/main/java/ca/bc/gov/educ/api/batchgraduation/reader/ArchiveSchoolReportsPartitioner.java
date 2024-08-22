@@ -61,7 +61,7 @@ public class ArchiveSchoolReportsPartitioner extends BasePartitioner {
             for (String schoolOfRecord : finalSchoolDistricts) {
                 if (reportTypes != null && !reportTypes.isEmpty()) {
                     for (String reportType : reportTypes) {
-                        schoolReportsCount += restUtils.getTotalSchoolsForArchiving(List.of(schoolOfRecord), reportType, summaryDTO);
+                        schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), reportType, summaryDTO);
                     }
                 }
                 School school = new School(schoolOfRecord);
@@ -72,7 +72,7 @@ public class ArchiveSchoolReportsPartitioner extends BasePartitioner {
         } else {
             if (reportTypes != null && !reportTypes.isEmpty()) {
                 for (String reportType : reportTypes) {
-                    schoolReportsCount += restUtils.getTotalSchoolsForArchiving(List.of(), reportType, summaryDTO);
+                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(), reportType, summaryDTO);
                 }
             }
             School school = new School("ALL_SCHOOLS");

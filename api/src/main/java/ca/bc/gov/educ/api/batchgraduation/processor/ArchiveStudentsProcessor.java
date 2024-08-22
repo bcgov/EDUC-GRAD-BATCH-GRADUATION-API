@@ -25,6 +25,7 @@ public class ArchiveStudentsProcessor implements ItemProcessor<List<String>, Lis
 	public List<String> process(List<String> minCodes) throws Exception {
 		Long batchId = summaryDTO.getBatchId();
 		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
+		boolean processAllStudents = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
 		long countArchivedStudents = 0l;
 		List<String> studentStatusCodes = searchRequest.getStatuses();
 		if(minCodes != null && !minCodes.isEmpty()) {
@@ -37,15 +38,15 @@ public class ArchiveStudentsProcessor implements ItemProcessor<List<String>, Lis
 				countArchivedStudents += restUtils.archiveStudents(batchId, minCodes, "CUR", summaryDTO);
 				countArchivedStudents += restUtils.archiveStudents(batchId, minCodes, "TER", summaryDTO);
 			}
-		} else {
+		} else if(processAllStudents) {
 			LOGGER.debug("Process All Students");
 			if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
 				for (String studentStatusCode : studentStatusCodes) {
-					countArchivedStudents += restUtils.archiveStudents(batchId, null, studentStatusCode, summaryDTO);
+					countArchivedStudents += restUtils.archiveStudents(batchId, List.of(), studentStatusCode, summaryDTO);
 				}
 			} else {
-				countArchivedStudents += restUtils.archiveStudents(batchId, null, "CUR", summaryDTO);
-				countArchivedStudents += restUtils.archiveStudents(batchId, null, "TER", summaryDTO);
+				countArchivedStudents += restUtils.archiveStudents(batchId, List.of(), "CUR", summaryDTO);
+				countArchivedStudents += restUtils.archiveStudents(batchId, List.of(), "TER", summaryDTO);
 			}
 		}
 		summaryDTO.setProcessedCount(countArchivedStudents);

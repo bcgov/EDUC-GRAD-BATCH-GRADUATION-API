@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
@@ -52,7 +53,7 @@ public class SpecialRunCompletionNotificationListener extends BaseRunCompletionN
 		String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 		StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
 
-		restUtils.updateStudentGradRecordHistory(batchId, accessToken, userName, StringUtils.upperCase(req.getActivityCode()));
+		restUtils.updateStudentGradRecordHistory(List.of(), batchId, accessToken, userName, StringUtils.upperCase(req.getActivityCode()));
 	}
 
 

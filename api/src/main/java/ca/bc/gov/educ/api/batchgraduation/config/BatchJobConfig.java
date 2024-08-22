@@ -96,14 +96,32 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
+    public DeleteStudentReportsProcessor deleteStudentReportsProcessor() {
+        return new DeleteStudentReportsProcessor();
+    }
+
+    @Bean
+    @StepScope
     public ArchiveSchoolReportsReader archiveSchoolReportsReader() {
         return new ArchiveSchoolReportsReader();
     }
 
     @Bean
     @StepScope
+    public DeleteStudentReportsReader deleteStudentReportsReader() {
+        return new DeleteStudentReportsReader();
+    }
+
+    @Bean
+    @StepScope
     public ItemWriter<? super List<String>> archiveSchoolReportsWriter() {
         return new ArchiveSchoolReportsWriter();
+    }
+
+    @Bean
+    @StepScope
+    public ItemWriter<? super List<UUID>> deleteStudentReportsWriter() {
+        return new DeleteStudentReportsWriter();
     }
 
     @Bean
@@ -140,8 +158,18 @@ public class BatchJobConfig {
     @Bean
     public Step masterStepArchiveSchoolReports(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constants) {
         return new StepBuilder("masterStepArchiveSchoolReports", jobRepository)
-                .partitioner("archiveSchoolReportsPartitioner", partitionerArchiveSchooReports())
+                .partitioner("archiveSchoolReportsPartitioner", partitionerArchiveSchoolReports())
                 .step(archiveSchoolReportsJobStep(jobRepository, transactionManager, constants))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor())
+                .build();
+    }
+
+    @Bean
+    public Step masterStepDeleteStudentReports(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constants) {
+        return new StepBuilder("masterStepDeleteStudentReports", jobRepository)
+                .partitioner("deleteStudentReportsPartitioner", partitionerDeleteStudentReports())
+                .step(deleteStudentReportsJobStep(jobRepository, transactionManager, constants))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor())
                 .build();
@@ -151,9 +179,19 @@ public class BatchJobConfig {
     public Step archiveSchoolReportsJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constant) {
         return new StepBuilder("archiveSchoolReportsJobStep", jobRepository)
                 .<List<String>, List<String>>chunk(1, transactionManager)
-                .processor(archiveSchoolReportsProcessor())
                 .reader(archiveSchoolReportsReader())
+                .processor(archiveSchoolReportsProcessor())
                 .writer(archiveSchoolReportsWriter())
+                .build();
+    }
+
+    @Bean
+    public Step deleteStudentReportsJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constant) {
+        return new StepBuilder("deleteStudentReportsJobStep", jobRepository)
+                .<List<UUID>, List<UUID>>chunk(constant.getTransactionChunkSize(), transactionManager)
+                .reader(deleteStudentReportsReader())
+                .processor(deleteStudentReportsProcessor())
+                .writer(deleteStudentReportsWriter())
                 .build();
     }
 
@@ -188,8 +226,14 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ArchiveSchoolReportsPartitioner partitionerArchiveSchooReports() {
+    public ArchiveSchoolReportsPartitioner partitionerArchiveSchoolReports() {
         return new ArchiveSchoolReportsPartitioner();
+    }
+
+    @Bean
+    @StepScope
+    public DeleteStudentReportsPartitioner partitionerDeleteStudentReports() {
+        return new DeleteStudentReportsPartitioner();
     }
 
     @Bean
@@ -1117,6 +1161,17 @@ public class BatchJobConfig {
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .start(masterStepArchiveSchoolReports(jobRepository, transactionManager, constants))
+                .on("*")
+                .end().build()
+                .build();
+    }
+
+    @Bean(name="deleteStudentReportsBatchJob")
+    public Job deleteStudentReportsBatchJob(JobRepository jobRepository, PlatformTransactionManager transactionManager, DeleteStudentReportsCompletionNotificationListener listener, EducGradBatchGraduationApiConstants constants) {
+        return new JobBuilder("deleteStudentReportsBatchJob", jobRepository)
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .start(masterStepDeleteStudentReports(jobRepository, transactionManager, constants))
                 .on("*")
                 .end().build()
                 .build();

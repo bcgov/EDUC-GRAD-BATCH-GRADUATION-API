@@ -177,6 +177,7 @@ endpoint:
     get-student-for-batch-input: ${GRAD_STUDENT_API}api/v1/student/batch/gradstudent/studentid/%s
     pen-student-by-pen: ${PEN_API}api/v1/student?pen=%s
     student-for-special-grad-run-list: ${GRAD_STUDENT_API}api/v1/student/studentlistsearch
+    student-by-search-criteria: ${GRAD_STUDENT_API}api/v1/student/gradstudentbysearchcriteria
     get-student-data-list: ${GRAD_STUDENT_API}api/v1/student/multistudentids
     get-student-record: ${GRAD_STUDENT_API}api/v1/student/grad/%s
     update-student-record: ${GRAD_STUDENT_API}api/v1/student/distribution/studentid/%s?batchId=%s&activityCode=%s
@@ -192,6 +193,8 @@ endpoint:
   grad-graduation-report-api:
     get-school-reports-count:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/count?reportType=%S
+    get-student-reports-guid:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreportsbystudentid?reportType=%S
     archive-school-reports:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/archive?batchId=%s&reportType=%S
     get-transcript-list:
@@ -213,7 +216,9 @@ endpoint:
     update-school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
     update-student-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreports?reportTypeCode=%s&actionType=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreports?reportTypeCode=%s
+    delete-student-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/delete?batchId=%s&reportType=%s
     get-school-report-list:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistribution
     check-sccp-certificate-exists: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/check-sccp-certificate-exists

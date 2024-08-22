@@ -64,6 +64,7 @@ public class JobLauncherControllerTest {
     private static final String DISDTO = "distributionSummaryDTO";
     private static final String SCHREPORT = "SCHREP";
     private static final String ARCHIVE_SCHOOL_REPORTS = "ARC_SCH_REPORTS";
+    private static final String DELETE_STUDENT_REPORTS = "TVR_DELETE";
     private static final String RUN_BY = "runBy";
     private static final String ARCHIVE_STUDENTS = "ARC_STUDENTS";
 
@@ -455,6 +456,34 @@ public class JobLauncherControllerTest {
     }
 
     @Test
+    public void testDeleteStudentReportsBatchJob() {
+        ThreadLocalStateUtil.setCurrentUser("Batch Process");
+        StudentSearchRequest request = new StudentSearchRequest();
+        request.setSchoolOfRecords(List.of("12345678"));
+
+        String searchData = jsonTransformer.marshall(request);
+
+        boolean exceptionIsThrown = false;
+
+        JobParametersBuilder builder = new JobParametersBuilder();
+
+        builder.addLong(TIME, System.currentTimeMillis());
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, DELETE_STUDENT_REPORTS);
+        builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
+
+        try {
+            createJob(210L, "deleteStudentReportsBatchJob", builder.toJobParameters());
+            ResponseEntity<BatchJobResponse> result = jobLauncherController.launchDeleteStudentReportsJob(request);
+            assertThat(result.getStatusCode().value()).isEqualTo(200);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+        assertThat(exceptionIsThrown).isFalse();
+    }
+
+    @Test
     public void testArchiveStudentsBatchJob() {
         ThreadLocalStateUtil.setCurrentUser("Batch Process");
         StudentSearchRequest request = new StudentSearchRequest();
@@ -563,7 +592,6 @@ public class JobLauncherControllerTest {
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
-
         assertThat(exceptionIsThrown).isFalse();
     }
 
