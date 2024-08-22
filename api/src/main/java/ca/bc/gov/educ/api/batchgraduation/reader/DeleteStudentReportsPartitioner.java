@@ -51,13 +51,22 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
             jobExecution.getExecutionContext().put("distributionSummaryDTO", distributionSummaryDTO);
         }
         searchRequest.setSchoolOfRecords(finalSchoolDistricts);
+        if(searchRequest.getReportTypes().isEmpty()) {
+            searchRequest.getReportTypes().add("ACHV");
+        }
 
-        List<UUID> finalStudentGuids;
+        List<UUID> finalStudentGuids = new ArrayList<>();
         if(processAllReports) {
-            finalStudentGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(List.of(), "ACHV", distributionSummaryDTO);
+            for(String reportType: searchRequest.getReportTypes()) {
+                List<UUID> reportTypeGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(List.of(), reportType, distributionSummaryDTO);
+                finalStudentGuids.addAll(reportTypeGuids);
+            }
         } else {
             List<UUID> studentGuidsBySearch = restUtils.getStudentIDsBySearchCriteriaOrAll(searchRequest, distributionSummaryDTO);
-            finalStudentGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(studentGuidsBySearch.stream().map(UUID::toString).toList(), "ACHV", distributionSummaryDTO);
+            for(String reportType: searchRequest.getReportTypes()) {
+                List<UUID> reportTypeGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(studentGuidsBySearch.stream().map(UUID::toString).toList(), reportType, distributionSummaryDTO);
+                finalStudentGuids.addAll(reportTypeGuids);
+            }
         }
         searchRequest.setStudentIDs(finalStudentGuids);
 
