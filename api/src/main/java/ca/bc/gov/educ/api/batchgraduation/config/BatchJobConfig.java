@@ -189,8 +189,8 @@ public class BatchJobConfig {
     public Step deleteStudentReportsJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constant) {
         return new StepBuilder("deleteStudentReportsJobStep", jobRepository)
                 .<List<UUID>, List<UUID>>chunk(constant.getTransactionChunkSize(), transactionManager)
-                .processor(deleteStudentReportsProcessor())
                 .reader(deleteStudentReportsReader())
+                .processor(deleteStudentReportsProcessor())
                 .writer(deleteStudentReportsWriter())
                 .build();
     }
