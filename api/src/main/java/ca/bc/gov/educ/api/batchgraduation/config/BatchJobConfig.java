@@ -179,8 +179,8 @@ public class BatchJobConfig {
     public Step archiveSchoolReportsJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constant) {
         return new StepBuilder("archiveSchoolReportsJobStep", jobRepository)
                 .<List<String>, List<String>>chunk(1, transactionManager)
-                .processor(archiveSchoolReportsProcessor())
                 .reader(archiveSchoolReportsReader())
+                .processor(archiveSchoolReportsProcessor())
                 .writer(archiveSchoolReportsWriter())
                 .build();
     }
