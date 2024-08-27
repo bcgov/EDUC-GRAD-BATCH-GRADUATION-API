@@ -52,10 +52,6 @@ public class DeleteStudentReportsCompletionNotificationListener extends BaseDist
 			StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
 			String userName = extractUserName(summaryDTO, jobParameters, searchRequest);
 
-			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
-			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
-			LOGGER.info(" --------------------------------------------------------------------------------------");
 			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of Deleted Student Reports : {}", value.getMincode(), value.getNumberOfStudents()));
 			if(summaryDTO.getProcessedCount() > 0) {
 				List<UUID> finalStudentGuids = searchRequest.getStudentIDs();
@@ -66,6 +62,11 @@ public class DeleteStudentReportsCompletionNotificationListener extends BaseDist
 					restUtils.updateStudentGradRecordHistory(studentGuidsSubList, jobExecutionId, userName, "TVRDELETED");
 				}
 			}
+			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
+			// save batch job & error history
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
+			LOGGER.info(" --------------------------------------------------------------------------------------");
+
 		}
 	}
 }
