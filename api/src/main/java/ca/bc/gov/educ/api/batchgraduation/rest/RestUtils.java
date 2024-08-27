@@ -710,7 +710,7 @@ public class RestUtils {
                 this.put(url,studentIDs, GraduationStudentRecord.class, accessToken);
             }
         } catch (Exception e) {
-            LOGGER.error("Unable to update student record history");
+            LOGGER.error("Unable to update student record history {}", e.getLocalizedMessage());
         }
     }
 
@@ -890,12 +890,12 @@ public class RestUtils {
             summaryDTO.setException(e.getLocalizedMessage());
         }
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} of {} reports for processing", reportsCount, reportType);
+            LOGGER.debug("Total {} of {} reports available", reportsCount, reportType);
         }
         return reportsCount;
     }
 
-    public List<UUID> getReportStudentIDsByStudentIDsAndReportType(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
+    public List<UUID> getReportStudentIDsByStudentIDsAndReportType(List<String> finalSchoolDistricts, String reportType, Integer rowCount, DistributionSummaryDTO summaryDTO) {
         List<UUID> result = new ArrayList<>();
         UUID correlationID = UUID.randomUUID();
         try {
@@ -903,7 +903,7 @@ public class RestUtils {
             final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
             };
             List<UUID> guids = this.webClient.post()
-                    .uri(String.format(constants.getGradStudentReportsGuidsUrl(), reportType))
+                    .uri(String.format(constants.getGradStudentReportsGuidsUrl(), reportType, rowCount))
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                     .body(BodyInserters.fromValue(finalSchoolDistricts))
                     .retrieve().bodyToMono(responseType).block();
@@ -915,7 +915,7 @@ public class RestUtils {
             summaryDTO.setException(e.getLocalizedMessage());
         }
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} of {} reports for processing", result.size(), reportType);
+            LOGGER.debug("Total {} of {} reports for processing", result.size(), reportType);
         }
         return result;
     }
@@ -958,7 +958,7 @@ public class RestUtils {
             summaryDTO.setException(e.getLocalizedMessage());
         }
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} of {} students for archiving of SoR: {}", studentsCount, studentStatus, String.join(",", finalSchoolDistricts));
+            LOGGER.debug("Total {} of {} students for archiving of SoR: {}", studentsCount, studentStatus, String.join(",", finalSchoolDistricts));
         }
         return studentsCount;
     }
@@ -970,8 +970,9 @@ public class RestUtils {
         }
         try {
             String accessToken = getAccessToken();
+            String userName = StringUtils.defaultString(summaryDTO.getUserName(), "Batch Archive Process");
             return this.webClient.post()
-                    .uri(String.format(constants.getGradArchiveStudentsUrl(), batchId, studentStatus))
+                    .uri(String.format(constants.getGradArchiveStudentsUrl(), batchId, studentStatus, userName))
                     .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
                     .body(BodyInserters.fromValue(finalSchoolDistricts))
                     .retrieve().bodyToMono(Integer.class).block();

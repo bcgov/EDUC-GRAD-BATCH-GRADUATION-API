@@ -154,4 +154,8 @@ public abstract class BaseDistributionRunCompletionNotificationListener implemen
             taskSchedulingService.updateUserScheduledJobs(userScheduledId);
         }
     }
+
+    String extractUserName(BaseSummaryDTO summaryDTO, JobParameters jobParameters, StudentSearchRequest searchRequest) {
+        return StringUtils.defaultString(StringUtils.defaultString(summaryDTO.getUserName(), jobParameters.getString("runBy")), StringUtils.defaultString(searchRequest.getUser(), "Batch Process"));
+    }
 }

@@ -1713,7 +1713,7 @@ public class RestUtilsTest {
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
-        val result = this.restUtils.getReportStudentIDsByStudentIDsAndReportType(studentIDsIn, "ACHV", summaryDTO);
+        val result = this.restUtils.getReportStudentIDsByStudentIDsAndReportType(studentIDsIn, "ACHV", 1, summaryDTO);
         assertThat(result).isNotEmpty();
     }
 
@@ -1738,7 +1738,7 @@ public class RestUtilsTest {
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
-        val result = this.restUtils.getReportStudentIDsByStudentIDsAndReportType(studentIDsIn, "ACHV", summaryDTO);
+        val result = this.restUtils.getReportStudentIDsByStudentIDsAndReportType(studentIDsIn, "ACHV", 1, summaryDTO);
         assertThat(result).isEmpty();
         assertThat(summaryDTO.getErrors()).isNotEmpty();
     }

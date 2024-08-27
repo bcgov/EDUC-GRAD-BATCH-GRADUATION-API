@@ -25,11 +25,11 @@ public class DeleteStudentReportsProcessor implements ItemProcessor<List<UUID>, 
 	@Override
 	public List<UUID> process(List<UUID> uuids) throws Exception {
 		Long batchId = summaryDTO.getBatchId();
+		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
 		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Process Student Reports: {}", uuids.size());
+			LOGGER.debug("Process Student Reports: {}", uuids.isEmpty() ? searchRequest.getActivityCode() : uuids.size());
 		}
 		long countDeletedStudentReports = summaryDTO.getProcessedCount();
-		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
 		for(String reportType: searchRequest.getReportTypes()) {
 			countDeletedStudentReports += restUtils.deleteStudentReports(batchId, uuids, reportType, summaryDTO);
 		}

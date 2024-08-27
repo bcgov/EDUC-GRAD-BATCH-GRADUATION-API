@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -13,6 +12,8 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
@@ -49,7 +50,7 @@ public class DeleteStudentReportsCompletionNotificationListener extends BaseDist
 			updateUserSchedulingJobs(jobParameters);
 
 			StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
-			String userName = StringUtils.defaultString(jobParameters.getString("runBy"), StringUtils.defaultString(searchRequest.getUser(), "Batch TVR Delete Process"));
+			String userName = extractUserName(summaryDTO, jobParameters, searchRequest);
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
 			// save batch job & error history
@@ -57,7 +58,13 @@ public class DeleteStudentReportsCompletionNotificationListener extends BaseDist
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of Deleted Student Reports : {}", value.getMincode(), value.getNumberOfStudents()));
 			if(summaryDTO.getProcessedCount() > 0) {
-				restUtils.updateStudentGradRecordHistory(searchRequest.getStudentIDs(), jobExecutionId, userName, "TVRDELETED");
+				List<UUID> finalStudentGuids = searchRequest.getStudentIDs();
+				int partitionSize = finalStudentGuids.size()/200;
+				partitionSize = partitionSize == 0 ? finalStudentGuids.size() : partitionSize;
+				for (int i = 0; i < finalStudentGuids.size(); i += partitionSize) {
+					List<UUID> studentGuidsSubList = finalStudentGuids.subList(i, Math.min(i + partitionSize, finalStudentGuids.size()));
+					restUtils.updateStudentGradRecordHistory(studentGuidsSubList, jobExecutionId, userName, "TVRDELETED");
+				}
 			}
 		}
 	}

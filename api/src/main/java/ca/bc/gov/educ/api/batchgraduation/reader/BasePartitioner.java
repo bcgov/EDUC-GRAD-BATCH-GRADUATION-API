@@ -121,17 +121,21 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     protected BatchGradAlgorithmJobHistoryEntity createBatchJobHistory() {
         Long jobExecutionId = getJobExecution().getId();
-        JobParameters jobParameters = getJobExecution().getJobParameters();
+        return createBatchJobHistory(jobExecutionId, getJobExecution(), 0);
+    }
+
+    protected BatchGradAlgorithmJobHistoryEntity createBatchJobHistory(Long jobExecutionId, JobExecution jobExecution, long expectedStudentsProcessed) {
+        JobParameters jobParameters = jobExecution.getJobParameters();
         String jobTrigger = jobParameters.getString("jobTrigger");
         String jobType = jobParameters.getString("jobType");
         String username = jobParameters.getString(RUN_BY);
         String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST);
-        String status = getJobExecution().getStatus().toString();
-        Date startTime = DateUtils.toDate(getJobExecution().getStartTime());
+        String status = jobExecution.getStatus().toString();
+        Date startTime = DateUtils.toDate(jobExecution.getStartTime());
 
         BatchGradAlgorithmJobHistoryEntity ent = new BatchGradAlgorithmJobHistoryEntity();
         ent.setActualStudentsProcessed(0L);
-        ent.setExpectedStudentsProcessed(0L);
+        ent.setExpectedStudentsProcessed(expectedStudentsProcessed);
         ent.setFailedStudentsProcessed(0);
         ent.setJobExecutionId(jobExecutionId);
         ent.setStartTime(DateUtils.toLocalDateTime(startTime));

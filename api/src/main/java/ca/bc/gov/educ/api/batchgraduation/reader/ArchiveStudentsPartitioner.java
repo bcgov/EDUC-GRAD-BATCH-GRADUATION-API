@@ -38,6 +38,12 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
+        DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobExecution.getExecutionContext().get("distributionSummaryDTO");
+        if(summaryDTO == null) {
+            summaryDTO = new DistributionSummaryDTO();
+            jobExecution.getExecutionContext().put("distributionSummaryDTO", summaryDTO);
+        }
+
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         long startTime = System.currentTimeMillis();
         logger.debug("Filter Schools for archiving students");
@@ -48,13 +54,9 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
             logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
         }
 
-        DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobExecution.getExecutionContext().get("distributionSummaryDTO");
-        if(summaryDTO == null) {
-            summaryDTO = new DistributionSummaryDTO();
-            jobExecution.getExecutionContext().put("distributionSummaryDTO", summaryDTO);
-        }
         summaryDTO.setBatchId(jobExecution.getId());
         summaryDTO.setStudentSearchRequest(searchRequest);
+
         List<String> studentStatusCodes = searchRequest.getStatuses();
         Long totalStudentsCount = 0L;
         for(String schoolOfRecord: finalSchoolDistricts) {
