@@ -18,4 +18,6 @@ public class BaseSummaryDTO implements Serializable {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String accessToken;
+
+    private String userName;
 }

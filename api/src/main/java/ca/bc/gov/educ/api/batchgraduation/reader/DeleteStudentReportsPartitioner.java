@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.reader;
 
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.School;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
@@ -13,11 +14,11 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
 
-import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
-
 public class DeleteStudentReportsPartitioner extends BasePartitioner {
 
     private static final Logger logger = LoggerFactory.getLogger(DeleteStudentReportsPartitioner.class);
+
+    public static final Integer DEFAULT_ROW_COUNT = 25000;
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution jobExecution;
@@ -36,74 +37,71 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        StudentSearchRequest searchRequest = getStudentSearchRequest();
-        long startTime = System.currentTimeMillis();
-        logger.debug("Filter Schools for deleting student reports");
-        boolean processAllReports = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
-        List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
-        List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
-        if(logger.isDebugEnabled()) {
-            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
-        }
         DistributionSummaryDTO distributionSummaryDTO = (DistributionSummaryDTO)jobExecution.getExecutionContext().get("distributionSummaryDTO");
         if(distributionSummaryDTO == null) {
             distributionSummaryDTO = new DistributionSummaryDTO();
             jobExecution.getExecutionContext().put("distributionSummaryDTO", distributionSummaryDTO);
         }
+
+        StudentSearchRequest searchRequest = getStudentSearchRequest();
+        long startTime = System.currentTimeMillis();
+        logger.debug("Filter Schools for deleting student reports");
+        boolean processAllReports = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
+        Long batchId = jobExecution.getId();;
+        List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
+        List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
+        if(logger.isDebugEnabled()) {
+            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
+        }
+
         searchRequest.setSchoolOfRecords(finalSchoolDistricts);
         if(searchRequest.getReportTypes().isEmpty()) {
             searchRequest.getReportTypes().add("ACHV");
         }
 
+        Long totalStudentReportsCount = 0L;
+
+        BatchGradAlgorithmJobHistoryEntity algorithmJobHistory = createBatchJobHistory();
+
         List<UUID> finalStudentGuids = new ArrayList<>();
         if(processAllReports) {
             for(String reportType: searchRequest.getReportTypes()) {
-                List<UUID> reportTypeGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(List.of(), reportType, distributionSummaryDTO);
+                Long studentReportsCount = restUtils.getTotalReportsForProcessing(List.of(), reportType, distributionSummaryDTO);
+                Integer guidsRowCount = Integer.min(studentReportsCount.intValue(), DEFAULT_ROW_COUNT);
+                totalStudentReportsCount += guidsRowCount;
+                List<UUID> reportTypeGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(List.of(), reportType, guidsRowCount, distributionSummaryDTO);
                 finalStudentGuids.addAll(reportTypeGuids);
             }
         } else {
             List<UUID> studentGuidsBySearch = restUtils.getStudentIDsBySearchCriteriaOrAll(searchRequest, distributionSummaryDTO);
+            List<String> studentGuidsBySearchString = studentGuidsBySearch.stream().map(UUID::toString).toList();
             for(String reportType: searchRequest.getReportTypes()) {
-                List<UUID> reportTypeGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(studentGuidsBySearch.stream().map(UUID::toString).toList(), reportType, distributionSummaryDTO);
+                Long studentReportsCount = restUtils.getTotalReportsForProcessing(studentGuidsBySearchString, reportType, distributionSummaryDTO);
+                Integer guidsRowCount = Integer.min(studentReportsCount.intValue(), DEFAULT_ROW_COUNT);
+                totalStudentReportsCount += guidsRowCount;
+                List<UUID> reportTypeGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(studentGuidsBySearchString, reportType, guidsRowCount, distributionSummaryDTO);
                 finalStudentGuids.addAll(reportTypeGuids);
             }
         }
-        searchRequest.setStudentIDs(finalStudentGuids);
 
-        Integer totalStudentReportsCount = finalStudentGuids.size();
-        distributionSummaryDTO.setBatchId(jobExecution.getId());
+        updateBatchJobHistory(algorithmJobHistory, totalStudentReportsCount);
+
+        searchRequest.setStudentIDs(finalStudentGuids);
+        distributionSummaryDTO.setBatchId(batchId);
         distributionSummaryDTO.setStudentSearchRequest(searchRequest);
 
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
         logger.debug("Total {} student reports after filters in {} sec", totalStudentReportsCount, diff);
 
-        updateBatchJobHistory(createBatchJobHistory(), totalStudentReportsCount.longValue());
         distributionSummaryDTO.setReadCount(0);
         distributionSummaryDTO.setProcessedCount(0);
 
         Map<String, ExecutionContext> map;
 
-        if(processAllReports && totalStudentReportsCount > 0) {
-            //proceed with all reports
-            finalStudentGuids.clear();
-            map = new HashMap<>();
-            ExecutionContext executionContext = new ExecutionContext();
-            DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
-            School school = new School("ALL_STUDENTS");
-            school.setNumberOfStudents(totalStudentReportsCount);
-            summaryDTO.getSchools().add(school);
-            summaryDTO.setBatchId(jobExecution.getId());
-            summaryDTO.setReadCount(totalStudentReportsCount);
-            summaryDTO.setStudentSearchRequest(searchRequest);
-            executionContext.put(SEARCH_REQUEST, searchRequest);
-            executionContext.put("data", finalStudentGuids);
-            executionContext.put("summary", summaryDTO);
-            executionContext.put("readCount", 0);
-            map.put("partition0", executionContext);
-        } else if (totalStudentReportsCount > 0) {
-            int partitionSize = finalStudentGuids.size()/gridSize + 1;
-            List<List<UUID>> partitions = new LinkedList<>();
+        List<List<UUID>> partitions = new LinkedList<>();
+        if(totalStudentReportsCount > 0) {
+            int partitionSize = Integer.min(finalStudentGuids.size()/gridSize + 1, 1000);
             for (int i = 0; i < finalStudentGuids.size(); i += partitionSize) {
                 partitions.add(finalStudentGuids.subList(i, Math.min(i + partitionSize, finalStudentGuids.size())));
             }
@@ -115,10 +113,10 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
                 School school = new School("" + i);
                 school.setNumberOfStudents(data.size());
                 summaryDTO.getSchools().add(school);
-                executionContext.put("data", data);
-                summaryDTO.setBatchId(jobExecution.getId());
+                summaryDTO.setBatchId(batchId);
                 summaryDTO.setReadCount(0);
                 summaryDTO.setStudentSearchRequest(searchRequest);
+                executionContext.put("data", data);
                 executionContext.put("summary", summaryDTO);
                 executionContext.put("readCount", 0);
                 executionContext.put("index",i);
@@ -128,7 +126,7 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
         } else {
             map = new HashMap<>();
         }
-        logger.info("Found {} in total running on 1 partitions", totalStudentReportsCount);
+        logger.info("Found {} in total running on {} partitions", totalStudentReportsCount, partitions.size());
         return map;
     }
 }

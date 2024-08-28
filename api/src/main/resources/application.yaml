@@ -170,7 +170,7 @@ endpoint:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/edw/snapshot
   grad-student-api:
     get-students-count: ${GRAD_STUDENT_API}api/v1/student/count?studentStatus=%S
-    archive-students: ${GRAD_STUDENT_API}api/v1/student/archive?batchId=%s&studentStatus=%S
+    archive-students: ${GRAD_STUDENT_API}api/v1/student/archive?batchId=%s&studentStatus=%S&userName=%s
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate
     student-for-projectedgrad-list: ${GRAD_STUDENT_API}api/v1/student/projected
@@ -192,11 +192,11 @@ endpoint:
     get-deceased-student-id-list: ${GRAD_STUDENT_API}api/v1/student/deceasedstudentid
   grad-graduation-report-api:
     get-school-reports-count:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/count?reportType=%S
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/count?reportType=%s
     get-student-reports-guid:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreportsbystudentid?reportType=%S
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreportsbystudentid?reportType=%s&rowCount=%s
     archive-school-reports:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/archive?batchId=%s&reportType=%S
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/archive?batchId=%s&reportType=%s
     get-transcript-list:
       yearly:
         url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistributionyearly

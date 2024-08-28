@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -49,8 +48,8 @@ public class ArchiveStudentsCompletionNotificationListener extends BaseDistribut
 
 			updateUserSchedulingJobs(jobParameters);
 
-			StudentSearchRequest searchRequest = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
-			String userName = StringUtils.defaultString(jobParameters.getString("runBy"), StringUtils.defaultString(searchRequest.getUser(), "Batch Archive Process"));
+			StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
+			String userName = extractUserName(summaryDTO, jobParameters, searchRequest);
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, null, null);
 			// save batch job & error history

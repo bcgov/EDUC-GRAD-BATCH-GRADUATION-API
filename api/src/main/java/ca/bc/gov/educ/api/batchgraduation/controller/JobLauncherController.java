@@ -290,6 +290,31 @@ public class JobLauncherController {
         if(studentSearchRequest == null) {
             throw new GradBusinessRuleException("Please provide not null student search request");
         }
+        StringBuilder errors = new StringBuilder();
+        if(studentSearchRequest.isEmpty() && StringUtils.isBlank(studentSearchRequest.getActivityCode())) {
+            errors.append("Please provide school of records or set activityCode to ALL to delete all reports").append('\n');
+        }
+        if(studentSearchRequest.getReportTypes().isEmpty()) {
+            errors.append("Please provide at least 1 report type code").append('\n');
+        }
+        String errorsAsString = errors.toString();
+        if(StringUtils.isNotBlank(errorsAsString)) {
+            throw new GradBusinessRuleException(errorsAsString);
+        }
+    }
+
+    private void validateInputArchiveStudents(StudentSearchRequest studentSearchRequest) {
+        if(studentSearchRequest == null) {
+            throw new GradBusinessRuleException("Please provide not null student search request");
+        }
+        StringBuilder errors = new StringBuilder();
+        if(studentSearchRequest.isEmpty() && StringUtils.isBlank(studentSearchRequest.getActivityCode())) {
+            errors.append("Please provide school of records or set activityCode to ALL to archive all students").append('\n');
+        }
+        String errorsAsString = errors.toString();
+        if(StringUtils.isNotBlank(errorsAsString)) {
+            throw new GradBusinessRuleException(errorsAsString);
+        }
     }
 
     private BlankDistributionSummaryDTO validateInputBlankDisRun(BlankCredentialRequest blankCredentialRequest) {
@@ -877,9 +902,9 @@ public class JobLauncherController {
         logger.debug("launchArchiveSchoolReporsJob");
         BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
-
+        String userName = ThreadLocalStateUtil.getCurrentUser();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(RUN_BY, userName);
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, ARCHIVE_SCHOOL_REPORTS);
 
@@ -899,12 +924,14 @@ public class JobLauncherController {
                 ExecutionContext jobContext = jobExecution.getExecutionContext();
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
                 summaryDTO.setBatchId(jobExecution.getId());
+                summaryDTO.setUserName(userName);
+                summaryDTO.setStudentSearchRequest(studentSearchRequest);
                 jobContext.put(DISDTO, summaryDTO);
                 response.setBatchId(jobExecution.getId());
             } else {
                 response.setBatchId(jobParameters.getLong("run.id"));
             }
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                  | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
             response.setException(e.getLocalizedMessage());
@@ -920,9 +947,9 @@ public class JobLauncherController {
         logger.debug("launchDeleteStudentReportsJob");
         BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
-
+        String userName = ThreadLocalStateUtil.getCurrentUser();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(RUN_BY, userName);
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, DELETE_STUDENT_REPORTS);
 
@@ -942,12 +969,14 @@ public class JobLauncherController {
                 ExecutionContext jobContext = jobExecution.getExecutionContext();
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
                 summaryDTO.setBatchId(jobExecution.getId());
+                summaryDTO.setUserName(userName);
+                summaryDTO.setStudentSearchRequest(studentSearchRequest);
                 jobContext.put(DISDTO, summaryDTO);
                 response.setBatchId(jobExecution.getId());
             } else {
                 response.setBatchId(jobParameters.getLong("run.id"));
             }
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                  | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
             response.setException(e.getLocalizedMessage());
@@ -963,9 +992,9 @@ public class JobLauncherController {
         logger.debug("launchArchiveStudentsJob");
         BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();
-
+        String userName = ThreadLocalStateUtil.getCurrentUser();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(RUN_BY, userName);
         builder.addString(JOB_TRIGGER, MANUAL);
         builder.addString(JOB_TYPE, ARCHIVE_STUDENTS);
 
@@ -975,6 +1004,7 @@ public class JobLauncherController {
         response.setStatus(BatchStatusEnum.STARTED.name());
 
         try {
+            validateInputArchiveStudents(studentSearchRequest);
             String searchData = jsonTransformer.marshall(studentSearchRequest);
             builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
             Job job = jobRegistry.getJob(ARCHIVE_STUDENTS_BATCH_JOB);
@@ -984,12 +1014,14 @@ public class JobLauncherController {
                 ExecutionContext jobContext = jobExecution.getExecutionContext();
                 DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
                 summaryDTO.setBatchId(jobExecution.getId());
+                summaryDTO.setUserName(userName);
+                summaryDTO.setStudentSearchRequest(studentSearchRequest);
                 jobContext.put(DISDTO, summaryDTO);
                 response.setBatchId(jobExecution.getId());
             } else {
                 response.setBatchId(jobParameters.getLong("run.id"));
             }
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                  | JobParametersInvalidException | NoSuchJobException | IllegalArgumentException e) {
             response.setException(e.getLocalizedMessage());

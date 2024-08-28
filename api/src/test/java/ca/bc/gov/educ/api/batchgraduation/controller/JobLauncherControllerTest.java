@@ -448,7 +448,7 @@ public class JobLauncherControllerTest {
         try {
             createJob(210L, "archiveSchoolReportsBatchJob", builder.toJobParameters());
             ResponseEntity<BatchJobResponse> result = jobLauncherController.launchArchiveSchoolReportsJob(request);
-            assertThat(result.getStatusCode().value()).isEqualTo(200);
+            assertThat(result.getStatusCode().value()).isEqualTo(201);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
@@ -460,6 +460,7 @@ public class JobLauncherControllerTest {
         ThreadLocalStateUtil.setCurrentUser("Batch Process");
         StudentSearchRequest request = new StudentSearchRequest();
         request.setSchoolOfRecords(List.of("12345678"));
+        request.setReportTypes(List.of("ACHV"));
 
         String searchData = jsonTransformer.marshall(request);
 
@@ -476,7 +477,7 @@ public class JobLauncherControllerTest {
         try {
             createJob(210L, "deleteStudentReportsBatchJob", builder.toJobParameters());
             ResponseEntity<BatchJobResponse> result = jobLauncherController.launchDeleteStudentReportsJob(request);
-            assertThat(result.getStatusCode().value()).isEqualTo(200);
+            assertThat(result.getStatusCode().value()).isEqualTo(201);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
@@ -504,7 +505,7 @@ public class JobLauncherControllerTest {
         try {
             createJob(210L, "archiveStudentsBatchJob", builder.toJobParameters());
             ResponseEntity<BatchJobResponse> result = jobLauncherController.launchArchiveStudentsJob(request);
-            assertThat(result.getStatusCode().value()).isEqualTo(200);
+            assertThat(result.getStatusCode().value()).isEqualTo(201);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }

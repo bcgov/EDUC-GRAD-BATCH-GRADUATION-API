@@ -88,7 +88,7 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
         if (!isSpecialRun) {
             updateBackStudentFlagForErroredStudents(summaryDTO.getErrors(), jobType, obj.getAccess_token());
         }
-        if(!StringUtils.equalsAnyIgnoreCase(req.getActivityCode(), TVRCREATE, TVRUPDATE, TVRDELETE)) {
+        if(!StringUtils.equalsAnyIgnoreCase(req.getActivityCode(), TVRCREATE, TVRUPDATE, TVRDELETE, ALL)) {
             processSchoolList(jobExecutionId, jobType);
         }
     }
