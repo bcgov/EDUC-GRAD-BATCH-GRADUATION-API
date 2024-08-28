@@ -922,9 +922,6 @@ public class RestUtils {
 
     public Integer archiveSchoolReports(Long batchId, List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
         UUID correlationID = UUID.randomUUID();
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Archive {} School Reports for Ministry Codes: {}", reportType, !finalSchoolDistricts.isEmpty() ? String.join(",", finalSchoolDistricts) : summaryDTO.getSchools().stream().map(School::getMincode).collect(Collectors.joining(",")));
-        }
         try {
             String accessToken = getAccessToken();
             return this.webClient.post()
@@ -965,9 +962,6 @@ public class RestUtils {
 
     public Integer archiveStudents(Long batchId, List<String> finalSchoolDistricts, String studentStatus, DistributionSummaryDTO summaryDTO) {
         UUID correlationID = UUID.randomUUID();
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Archive {} Students for Ministry Codes: {}", studentStatus, String.join(",", finalSchoolDistricts));
-        }
         try {
             String accessToken = getAccessToken();
             String userName = StringUtils.defaultString(summaryDTO.getUserName(), "Batch Archive Process");
@@ -987,9 +981,6 @@ public class RestUtils {
 
     public List<UUID> getStudentIDsBySearchCriteriaOrAll(StudentSearchRequest searchRequest, DistributionSummaryDTO summaryDTO) {
         UUID correlationID = UUID.randomUUID();
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Get Students for Ministry Codes: {}", String.join(",", searchRequest.getSchoolOfRecords()));
-        }
         try {
             String accessToken = getAccessToken();
             final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
