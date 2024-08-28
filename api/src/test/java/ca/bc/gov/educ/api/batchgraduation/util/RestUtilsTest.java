@@ -130,6 +130,10 @@ public class RestUtilsTest {
         assertThat(result).isNotNull();
         assertThat(result.size()).isPositive();
         assertThat(result.get(0).getPen()).isEqualTo(pen);
+
+        val result2 = this.restUtils.getStudentIDByPen(pen, "abc");
+        assertThat(result2).isNotNull();
+
     }
 
     @Test
@@ -1704,7 +1708,7 @@ public class RestUtilsTest {
         };
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentReportsGuidsUrl(), "ACHV"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentReportsGuidsUrl(), "ACHV", 1))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -1729,7 +1733,7 @@ public class RestUtilsTest {
         };
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentReportsGuidsUrl(), "ACHV"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentReportsGuidsUrl(), "ACHV", 1))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -1941,7 +1945,7 @@ public class RestUtilsTest {
         mockTokenResponseObject();
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getGradArchiveStudentsUrl(), 12345678L, "CUR"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradArchiveStudentsUrl(), 12345678L, "CUR", "USER"))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -1949,6 +1953,7 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+        summaryDTO.setUserName("USER");
 
         val result = this.restUtils.archiveStudents(12345678L, schools,"CUR", summaryDTO);
         assertThat(result).isEqualTo(1);
@@ -1961,7 +1966,7 @@ public class RestUtilsTest {
         mockTokenResponseObject();
 
         when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.requestBodyUriMock.uri(String.format(constants.getGradArchiveStudentsUrl(), 12345678L, "CUR"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradArchiveStudentsUrl(), 12345678L, "CUR", "USER"))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
@@ -1969,6 +1974,7 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+        summaryDTO.setUserName("USER");
 
         val result = this.restUtils.archiveStudents(12345678L, schools,"CUR", summaryDTO);
         assertThat(result).isNotNull();
