@@ -47,6 +47,7 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
         long startTime = System.currentTimeMillis();
         logger.debug("Filter Schools for deleting student reports");
         boolean processAllReports = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
+        int quantity = ((searchRequest.getQuantity() == null) || (searchRequest.getQuantity() == 0)) ? DEFAULT_ROW_COUNT : searchRequest.getQuantity();
         Long batchId = jobExecution.getId();;
         List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
         List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
@@ -67,8 +68,9 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
         if(processAllReports) {
             for(String reportType: searchRequest.getReportTypes()) {
                 Long studentReportsCount = restUtils.getTotalReportsForProcessing(List.of(), reportType, distributionSummaryDTO);
-                Integer guidsRowCount = Integer.min(studentReportsCount.intValue(), DEFAULT_ROW_COUNT);
+                Integer guidsRowCount = Integer.min(studentReportsCount.intValue(), quantity);
                 totalStudentReportsCount += guidsRowCount;
+                updateBatchJobHistory(algorithmJobHistory, totalStudentReportsCount);
                 List<UUID> reportTypeGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(List.of(), reportType, guidsRowCount, distributionSummaryDTO);
                 finalStudentGuids.addAll(reportTypeGuids);
             }
@@ -77,14 +79,13 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
             List<String> studentGuidsBySearchString = studentGuidsBySearch.stream().map(UUID::toString).toList();
             for(String reportType: searchRequest.getReportTypes()) {
                 Long studentReportsCount = restUtils.getTotalReportsForProcessing(studentGuidsBySearchString, reportType, distributionSummaryDTO);
-                Integer guidsRowCount = Integer.min(studentReportsCount.intValue(), DEFAULT_ROW_COUNT);
+                Integer guidsRowCount = Integer.min(studentReportsCount.intValue(), quantity);
                 totalStudentReportsCount += guidsRowCount;
+                updateBatchJobHistory(algorithmJobHistory, totalStudentReportsCount);
                 List<UUID> reportTypeGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(studentGuidsBySearchString, reportType, guidsRowCount, distributionSummaryDTO);
                 finalStudentGuids.addAll(reportTypeGuids);
             }
         }
-
-        updateBatchJobHistory(algorithmJobHistory, totalStudentReportsCount);
 
         searchRequest.setStudentIDs(finalStudentGuids);
         distributionSummaryDTO.setBatchId(batchId);
