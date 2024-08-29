@@ -39,6 +39,7 @@ public class StudentSearchRequest implements Serializable {
     Boolean validateInput;
     String activityCode;
     String localDownload;
+    Integer quantity;
 
     public boolean isEmpty() {
         return  schoolOfRecords.isEmpty() &&
