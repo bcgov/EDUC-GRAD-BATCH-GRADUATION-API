@@ -47,6 +47,8 @@ public class ArchiveSchoolReportsPartitioner extends BasePartitioner {
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         long startTime = System.currentTimeMillis();
         logger.debug("Filter Schools for archiving school reports");
+        boolean processAllReports = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
+
         List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
         List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {
@@ -59,7 +61,18 @@ public class ArchiveSchoolReportsPartitioner extends BasePartitioner {
         Long totalSchoolReporsCount = 0L;
         List<String> reportTypes = searchRequest.getReportTypes();
         Long schoolReportsCount = 0L;
-        if(!finalSchoolDistricts.isEmpty()) {
+
+        if(processAllReports) {
+            if (reportTypes != null && !reportTypes.isEmpty()) {
+                for (String reportType : reportTypes) {
+                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(), reportType, summaryDTO);
+                }
+            }
+            School school = new School("ALL_SCHOOLS");
+            school.setNumberOfSchoolReports(schoolReportsCount);
+            summaryDTO.getSchools().add(school);
+            totalSchoolReporsCount += schoolReportsCount;
+        } else {
             for (String schoolOfRecord : finalSchoolDistricts) {
                 if (reportTypes != null && !reportTypes.isEmpty()) {
                     for (String reportType : reportTypes) {
@@ -71,17 +84,8 @@ public class ArchiveSchoolReportsPartitioner extends BasePartitioner {
                 summaryDTO.getSchools().add(school);
                 totalSchoolReporsCount += schoolReportsCount;
             }
-        } else {
-            if (reportTypes != null && !reportTypes.isEmpty()) {
-                for (String reportType : reportTypes) {
-                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(), reportType, summaryDTO);
-                }
-            }
-            School school = new School("ALL_SCHOOLS");
-            school.setNumberOfSchoolReports(schoolReportsCount);
-            summaryDTO.getSchools().add(school);
-            totalSchoolReporsCount += schoolReportsCount;
         }
+
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
         logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
