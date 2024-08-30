@@ -1,7 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
 import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.rest.RESTGenerics;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -27,11 +28,11 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
-public class RestUtilsGenericPostTest {
+public class RestGenericsPostTest {
 
     @Autowired
     @InjectMocks
-    private RestUtils restUtils;
+    private RESTGenerics restGenerics;
     @Mock
     private WebClient.RequestHeadersSpec requestHeadersMock;
     @Mock
@@ -40,8 +41,14 @@ public class RestUtilsGenericPostTest {
     private WebClient.RequestBodyUriSpec requestBodyUriMock;
     @Mock
     private WebClient.ResponseSpec responseMock;
+
     @MockBean
+    @Qualifier("webClient")
     WebClient webClient;
+
+    @MockBean
+    @Qualifier("batchClient")
+    WebClient batchWebClient;
 
     private static final byte[] TEST_BYTES = "How much wood would a woodchuck chuck if a woodchuck could chuck wood?".getBytes();
 
@@ -56,7 +63,7 @@ public class RestUtilsGenericPostTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(TEST_BYTES));
-        byte[] response = this.restUtils.post("https://fake.url.com", testBody, byte[].class, "1234");
+        byte[] response = this.restGenerics.post("https://fake.url.com", testBody, byte[].class, "1234");
         Assert.assertArrayEquals(TEST_BYTES, response);
     }
 
@@ -71,7 +78,7 @@ public class RestUtilsGenericPostTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException(getErrorMessage(any(String.class), "5xx error.")));
         when(this.responseMock.bodyToMono(byte[].class)).thenReturn(Mono.just(TEST_BYTES));
-        this.restUtils.post("https://fake.url.com", testBody, byte[].class, "1234");
+        this.restGenerics.post("https://fake.url.com", testBody, byte[].class, "1234");
     }
 
     private String getErrorMessage(String url, String errorMessage) {

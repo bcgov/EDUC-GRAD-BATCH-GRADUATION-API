@@ -22,7 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -46,11 +45,9 @@ public class SpecialRunCompletionNotificationListenerTest {
     @Autowired
     private SpecialRunCompletionNotificationListener specialRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-    @MockBean
-    RestUtils restUtils;
 
     @MockBean
-    WebClient webClient;
+    RestUtils restUtils;
 
     @Before
     public void setUp() {

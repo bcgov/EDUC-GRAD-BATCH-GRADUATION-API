@@ -49,16 +49,10 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
 
-    @Mock
-    WebClient.RequestHeadersSpec requestHeadersMock;
-    @Mock WebClient.RequestHeadersUriSpec requestHeadersUriMock;
-    @Mock WebClient.ResponseSpec responseMock;
-    @Mock WebClient.RequestBodySpec requestBodyMock;
-    @Mock WebClient.RequestBodyUriSpec requestBodyUriMock;
-
     @Autowired
     private UserReqBlankDistributionRunCompletionNotificationListener userReqBlankDistributionRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
+
     @MockBean
     RestUtils restUtils;
 
@@ -71,8 +65,6 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
     @Autowired
     GraduationReportService graduationReportService;
 
-    @MockBean
-    WebClient webClient;
 
     @Before
     public void setUp() {

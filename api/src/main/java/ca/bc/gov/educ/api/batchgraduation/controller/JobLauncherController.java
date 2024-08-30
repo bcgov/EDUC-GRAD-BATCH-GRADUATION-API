@@ -183,10 +183,9 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.LOAD_STUDENT_IDS)
     @Operation(summary = "Load Students to GRAD", description = "Load Students to GRAD", tags = { "Student" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<String> loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData,
-                                                 @RequestHeader(name="Authorization") String accessToken) {
+    public ResponseEntity<String> loadStudentIDs(@RequestBody List<LoadStudentData> loadStudentData) {
         logger.debug("Inside loadStudentIDs");
-        Integer recordsAdded = restUtils.getStudentByPenFromStudentAPI(loadStudentData, accessToken.replace(BEARER, ""));
+        Integer recordsAdded = restUtils.getStudentByPenFromStudentAPI(loadStudentData);
         if(recordsAdded != null)
             return ResponseEntity.ok("Record Added Successfully");
         return ResponseEntity.status(500).body("Student Record Could not be added");
@@ -210,10 +209,9 @@ public class JobLauncherController {
     @Operation(summary = "Load Error students in batch runs", description = "Load Error students in batch runs", tags = { "Dashboard" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "204", description = "No Content")})
     public ResponseEntity<ErrorDashBoard> loadError(@PathVariable Long batchId, @RequestParam(name = "pageNumber", defaultValue = "0") Integer pageNumber,
-                                                    @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
-                                                    @RequestHeader(name="Authorization") String accessToken) {
+                                                    @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
         logger.debug("Inside loadError");
-        ErrorDashBoard dash = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize,accessToken.replace(BEARER, ""));
+        ErrorDashBoard dash = gradDashboardService.getErrorInfo(batchId,pageNumber,pageSize);
         if(dash == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }

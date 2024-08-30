@@ -18,6 +18,7 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -45,11 +46,9 @@ public class GradRunCompletionNotificationListenerTest {
     @Autowired
     private GradRunCompletionNotificationListener gradRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-    @MockBean
-    RestUtils restUtils;
 
     @MockBean
-    WebClient webClient;
+    RestUtils restUtils;
 
     @Before
     public void setUp() {

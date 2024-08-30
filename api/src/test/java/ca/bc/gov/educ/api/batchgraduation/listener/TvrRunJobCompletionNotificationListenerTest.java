@@ -45,11 +45,9 @@ public class TvrRunJobCompletionNotificationListenerTest {
     @Autowired
     private TvrRunJobCompletionNotificationListener tvrRunJobCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
-    @MockBean
-    RestUtils restUtils;
 
     @MockBean
-    WebClient webClient;
+    RestUtils restUtils;
 
     @Before
     public void setUp() {

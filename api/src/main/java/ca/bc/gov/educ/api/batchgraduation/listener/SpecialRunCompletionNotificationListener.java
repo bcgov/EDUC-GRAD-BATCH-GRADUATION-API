@@ -47,13 +47,12 @@ public class SpecialRunCompletionNotificationListener extends BaseRunCompletionN
 
 		JobParameters jobParameters = jobExecution.getJobParameters();
 		Long batchId = jobExecution.getId();
-		String accessToken = restUtils.fetchAccessToken();
 		String userName = jobParameters.getString(RUN_BY);
 
 		String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 		StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
 
-		restUtils.updateStudentGradRecordHistory(List.of(), batchId, accessToken, userName, StringUtils.upperCase(req.getActivityCode()));
+		restUtils.updateStudentGradRecordHistory(List.of(), batchId, userName, StringUtils.upperCase(req.getActivityCode()));
 	}
 
 

@@ -100,8 +100,12 @@ public class JobLauncherControllerTest {
     @InjectMocks
     private JobLauncherController jobLauncherController;
 
-    @MockBean
+    @Mock
     WebClient webClient;
+
+    @Mock
+    @Qualifier("batchClient")
+    WebClient batchWebClient;
 
     @MockBean
     RestUtils restUtils;
@@ -153,7 +157,7 @@ public class JobLauncherControllerTest {
 
         boolean exceptionIsThrown = false;
         try {
-            jobLauncherController.loadStudentIDs(Arrays.asList(loadStudentData), "");
+            jobLauncherController.loadStudentIDs(Arrays.asList(loadStudentData));
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
@@ -643,9 +647,9 @@ public class JobLauncherControllerTest {
         dash.setNumber(0);
         dash.setSize(10);
 
-        org.mockito.Mockito.when(gradDashboardService.getErrorInfo(1234L,0,10,"accessToken")).thenReturn(dash);
-        jobLauncherController.loadError(1234L,0,10,"accessToken");
-        org.mockito.Mockito.verify(gradDashboardService).getErrorInfo(1234L,0,10,"accessToken");
+        org.mockito.Mockito.when(gradDashboardService.getErrorInfo(1234L,0,10)).thenReturn(dash);
+        jobLauncherController.loadError(1234L,0,10);
+        org.mockito.Mockito.verify(gradDashboardService).getErrorInfo(1234L,0,10);
     }
 
     @Test
