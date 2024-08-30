@@ -92,8 +92,7 @@ public class RegenerateCertificatePartitioner extends BasePartitioner {
 
     private UUID getStudentIDByPen(String pen) {
         try {
-            String accessToken = restUtils.fetchAccessToken();
-            return restUtils.getStudentIDByPen(pen, accessToken);
+            return restUtils.getStudentIDByPen(pen);
         } catch (Exception e) {
             return null;
         }

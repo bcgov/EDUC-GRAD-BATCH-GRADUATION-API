@@ -5,7 +5,6 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -14,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -37,12 +35,6 @@ public class GradBatchHistoryServiceTest {
 
     @MockBean
     BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository;
-
-    @MockBean
-    private RestUtils restUtils;
-
-    @MockBean
-    WebClient webClient;
 
     @Test
     public void testGetGradAlgorithmJobHistory() {

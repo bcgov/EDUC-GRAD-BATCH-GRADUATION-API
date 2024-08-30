@@ -2,12 +2,13 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
+import ca.bc.gov.educ.api.batchgraduation.rest.RESTGenerics;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,10 +34,11 @@ public class GraduationReportServiceTest {
     GraduationReportService graduationReportService;
 
     @MockBean
-    private RestUtils restUtils;
+    RESTGenerics restGenerics;
 
     @MockBean
-    WebClient webClient;
+    @Qualifier("batchClient")
+    WebClient batchWebClient;
 
     @Mock
     WebClient.RequestHeadersSpec requestHeadersMock;
@@ -61,61 +63,43 @@ public class GraduationReportServiceTest {
         ParameterizedTypeReference<List<StudentCredentialDistribution>> tListRes = new ParameterizedTypeReference<>() {
         };
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.batchWebClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(constants.getTranscriptYearlyDistributionList())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(List.of(scd)));
 
-        List<StudentCredentialDistribution> res = graduationReportService.getTranscriptListYearly("accessTaken").block();
+        List<StudentCredentialDistribution> res = graduationReportService.getTranscriptListYearly().block();
         assertThat(res).isNotNull().hasSize(1);
 
     }
 
     @Test
     public void testGetSchoolsNonGradYearly() {
-        ParameterizedTypeReference<List<String>> listParameterizedTypeReference = new ParameterizedTypeReference<>() {
-        };
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getSchoolDataNonGradEarly())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(listParameterizedTypeReference)).thenReturn(Mono.just(List.of("1234567")));
+        when(this.restGenerics.get(constants.getSchoolDataNonGradEarly(), List.class, "accessToken")).thenReturn(List.of("1234567"));
 
-        List<String> res = graduationReportService.getSchoolsNonGradYearly("accessTaken");
+        List<String> res = graduationReportService.getSchoolsNonGradYearly("accessToken");
         assertThat(res).isNotEmpty();
 
     }
 
     @Test
     public void testGetDistrictsNonGradYearly() {
-        ParameterizedTypeReference<List<String>> listParameterizedTypeReference = new ParameterizedTypeReference<>() {
-        };
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getDistrictDataNonGradEarly())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(listParameterizedTypeReference)).thenReturn(Mono.just(List.of("123")));
+        when(this.restGenerics.get(constants.getDistrictDataNonGradEarly(), List.class, "accessToken")).thenReturn(List.of("123"));
 
-        List<String> res = graduationReportService.getDistrictsNonGradYearly("accessTaken");
+        List<String> res = graduationReportService.getDistrictsNonGradYearly("accessToken");
         assertThat(res).isNotEmpty();
 
     }
 
     @Test
     public void testGetDistrictsYearly() {
-        ParameterizedTypeReference<List<String>> listParameterizedTypeReference = new ParameterizedTypeReference<>() {
-        };
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getDistrictDataYearly())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(listParameterizedTypeReference)).thenReturn(Mono.just(List.of("123")));
+        when(this.restGenerics.get(constants.getDistrictDataYearly(), List.class, "accessToken")).thenReturn(List.of("1234567"));
 
-        List<String> res = graduationReportService.getDistrictsYearly("accessTaken");
+        List<String> res = graduationReportService.getDistrictsYearly("accessToken");
         assertThat(res).isNotEmpty();
 
     }
@@ -136,7 +120,7 @@ public class GraduationReportServiceTest {
         ParameterizedTypeReference<List<PsiCredentialDistribution>> tListRes = new ParameterizedTypeReference<>() {
         };
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.batchWebClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(String.format(constants.getPsiStudentList(),transmissionType,psiCode,psiYear))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);

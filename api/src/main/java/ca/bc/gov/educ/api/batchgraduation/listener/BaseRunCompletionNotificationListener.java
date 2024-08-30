@@ -86,7 +86,7 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
 
         ResponseObj obj = restUtils.getTokenResponseObject();
         if (!isSpecialRun) {
-            updateBackStudentFlagForErroredStudents(summaryDTO.getErrors(), jobType, obj.getAccess_token());
+            updateBackStudentFlagForErroredStudents(summaryDTO.getErrors(), jobType);
         }
         if(!StringUtils.equalsAnyIgnoreCase(req.getActivityCode(), TVRCREATE, TVRUPDATE, TVRDELETE, ALL)) {
             processSchoolList(jobExecutionId, jobType);
@@ -112,11 +112,11 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
         gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
     }
 
-    private void updateBackStudentFlagForErroredStudents(Map<UUID, ProcessError> errors, String jobType, String accessToken) {
+    private void updateBackStudentFlagForErroredStudents(Map<UUID, ProcessError> errors, String jobType) {
         List<UUID> erroredStudentIDs = new ArrayList<>(errors.keySet());
         if (!erroredStudentIDs.isEmpty()) {
             LOGGER.info(" Update Student Flags: [{}] for {} errored students ----------------------------", jobType, erroredStudentIDs.size());
-            String result = restUtils.updateStudentFlagReadyForBatch(erroredStudentIDs, jobType, accessToken);
+            String result = restUtils.updateStudentFlagReadyForBatch(erroredStudentIDs, jobType);
             LOGGER.info(" Update Student Flags completed {} ----------------------------", result);
         }
     }
