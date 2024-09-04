@@ -12,7 +12,6 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.List;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
@@ -56,7 +55,6 @@ public class ArchiveStudentsCompletionNotificationListener extends BaseDistribut
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
 			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of archived Students : {}", value.getMincode(), value.getNumberOfStudents()));
-			restUtils.updateStudentGradRecordHistory(List.of(), jobExecutionId, userName, "USERSTUDARC");
 		}
 	}
 }
