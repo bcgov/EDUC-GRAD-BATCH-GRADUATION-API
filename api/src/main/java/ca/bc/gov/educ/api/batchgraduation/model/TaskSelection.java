@@ -13,7 +13,8 @@ public enum TaskSelection {
     RCBJ ("certRegenBatchJob"),
     DSRBJ ("deleteStudentReportsBatchJob"),
     ASBJ("archiveStudentsBatchJob"),
-    ASRBJ("archiveSchoolReportsBatchJob");
+    ASRBJ("archiveSchoolReportsBatchJob"),
+    SRRBJ("schoolReportsRegenBatchJob");
 
     private final String value;
 

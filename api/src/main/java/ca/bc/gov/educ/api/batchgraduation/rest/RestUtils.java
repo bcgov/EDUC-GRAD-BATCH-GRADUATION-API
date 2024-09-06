@@ -556,6 +556,41 @@ public class RestUtils {
         return result;
     }
 
+    public Integer createAndStoreSchoolReports(Long batchId, List<String> uniqueSchools, String reportType, DistributionSummaryDTO summaryDTO) {
+        UUID correlationID = UUID.randomUUID();
+        Integer result = 0;
+        try {
+            if (uniqueSchools == null || uniqueSchools.isEmpty()) {
+                LOGGER.info("{} Schools selected for School Reports Regeneration", result);
+                return result;
+            }
+
+            for (String minCode : uniqueSchools) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Creating School Reports for school {}", minCode);
+                }
+                result += webClient.post()
+                        .uri(String.format(constants.getCreateAndStoreSchoolReports(), reportType))
+                        .headers(h -> {
+                            h.setBearerAuth(getAccessToken());
+                            h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                        })
+                        .body(BodyInserters.fromValue(List.of(minCode)))
+                        .retrieve()
+                        .bodyToMono(Integer.class)
+                        .block();
+            }
+            LOGGER.info("Created and Stored {} School Reports", result);
+        } catch(Exception e) {
+            LOGGER.error("Unable to Regenerate School Reports", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to Regenerate School Reports", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+            return 0;
+        }
+        return result;
+    }
+
     public Integer processStudentReports(List<UUID> uuidList, String studentReportType) {
         UUID correlationID = UUID.randomUUID();
         Integer result = webClient.post()

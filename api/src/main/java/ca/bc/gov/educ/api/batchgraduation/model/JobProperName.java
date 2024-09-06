@@ -13,7 +13,8 @@ public enum JobProperName {
     RCBJ ("Regenerate Certificates Batch Job"),
     DSRBJ ("Delete Student Report Batch Job"),
     ASBJ("Archive Students Batch Job"),
-    ASRBJ("Archive School Reports Batch Job");
+    ASRBJ("Archive School Reports Batch Job"),
+    SRRBJ("User Request School Report Regeneration")
     ;
 
     private final String value;
