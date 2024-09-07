@@ -556,7 +556,7 @@ public class RestUtils {
         return result;
     }
 
-    public Integer createAndStoreSchoolReports(Long batchId, List<String> uniqueSchools, String reportType, DistributionSummaryDTO summaryDTO) {
+    public Integer createAndStoreSchoolReports(List<String> uniqueSchools, String reportType, DistributionSummaryDTO summaryDTO) {
         UUID correlationID = UUID.randomUUID();
         Integer result = 0;
         try {

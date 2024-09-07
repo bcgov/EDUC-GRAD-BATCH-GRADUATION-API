@@ -33,10 +33,10 @@ public class RegenerateSchoolReportsProcessor implements ItemProcessor<List<Stri
 		if(reportTypes != null && !reportTypes.isEmpty() && "NONGRADPRJ".compareToIgnoreCase(reportTypes.get(0)) == 0)
 			reportType = "TVRRUN";
 		else
-			reportType = "GRADREG and NONGRADREG";
+			reportType = "REGALG";
 
 		for (String mincode : minCodes) {
-			countRegeneratedSchoolReports += restUtils.createAndStoreSchoolReports(batchId, minCodes, reportType, summaryDTO);
+			countRegeneratedSchoolReports += restUtils.createAndStoreSchoolReports(minCodes, reportType, summaryDTO);
 		}
 
 		summaryDTO.setProcessedCount(countRegeneratedSchoolReports);
