@@ -503,7 +503,7 @@ public class JobLauncherController {
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
     @Operation(summary = "Re-Generate School Reports for the given batchJobId", description = "Re-Generate School Reports for the given batchJobId", tags = { "RE-RUN" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
-    public ResponseEntity<BatchJobResponse> launchRegenerateSchoolReportsBatch(@RequestBody StudentSearchRequest searchRequest, @RequestParam(required = false) String type) {
+    public ResponseEntity<BatchJobResponse> launchRegenerateSchoolReportsBatch(@RequestBody StudentSearchRequest searchRequest) {
         logger.debug("launchSchoolReportRegenJob");
         BatchJobResponse response = new BatchJobResponse();
         JobParametersBuilder builder = new JobParametersBuilder();

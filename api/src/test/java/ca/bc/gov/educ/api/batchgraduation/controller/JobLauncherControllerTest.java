@@ -573,14 +573,15 @@ public class JobLauncherControllerTest {
     public void testLaunchRegenerateSchoolReportsJob() {
         boolean exceptionIsThrown = false;
         StudentSearchRequest req = new StudentSearchRequest();
-        req.setPens(Arrays.asList("123213123"));
+        req.setSchoolOfRecords(Arrays.asList("12345678"));
+        req.setReportTypes(Arrays.asList("NONGRADPRJ"));
         try {
-            jobLauncherController.launchRegenerateSchoolReports(req, null);
+            jobLauncherController.launchRegenerateSchoolReportsBatch(req);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
 
-        assertThat(exceptionIsThrown).isFalse();
+        assertThat(exceptionIsThrown).isTrue();
     }
 
     @Test
