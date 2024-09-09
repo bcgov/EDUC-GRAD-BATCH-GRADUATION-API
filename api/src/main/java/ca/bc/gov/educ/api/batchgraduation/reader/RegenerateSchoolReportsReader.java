@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 
 @Slf4j
-public class RegenerateSchoolReportsReader implements ItemReader<List<String>> {
+public class RegenerateSchoolReportsReader extends BaseReader implements ItemReader<List<String>> {
 
     @Value("#{stepExecutionContext['data']}")
     List<String> schools;
