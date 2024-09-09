@@ -896,6 +896,24 @@ public class RestUtilsTest {
         assertNotNull(type);
         assertNotNull(result);
     }
+    @Test
+    public void testcreateAndStoreSchoolReports_WithParams() {
+        final String type = "TVRRUN";
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
+
+        mockTokenResponseObject();
+
+        var result = this.restUtils.createAndStoreSchoolReports(Arrays.asList("12345"), type, new DistributionSummaryDTO());
+        assertNotNull(type);
+        assertNotNull(result);
+    }
 
     @Test
     public void testRunGradAlgorithm() {

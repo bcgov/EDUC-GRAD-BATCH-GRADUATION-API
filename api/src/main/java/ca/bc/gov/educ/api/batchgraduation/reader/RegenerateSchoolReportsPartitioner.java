@@ -67,7 +67,7 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
         executionContext.put("readCount", 0);
         map.put("partition0", executionContext);
 
-        log.info("Found {} in total running on 1 partitions", finalSchoolDistricts);
+        log.info("Found {} in total running on 1 partitions", finalSchoolDistricts.size());
         return map;
     }
 }

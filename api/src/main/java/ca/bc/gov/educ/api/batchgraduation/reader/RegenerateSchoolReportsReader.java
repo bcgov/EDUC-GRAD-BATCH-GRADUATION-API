@@ -24,7 +24,7 @@ public class RegenerateSchoolReportsReader implements ItemReader<List<String>> {
         if(readCount > 0) return null;
         readCount++;
         if(log.isDebugEnabled()) {
-            log.info("Read schools Codes -> {} of {} schools", schools.size(), String.join(",", schools));
+            log.info("Read schools Codes -> {} of {} schools", readCount, schools.size());
         }
         return schools;
     }
