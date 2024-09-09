@@ -913,6 +913,8 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
+        mockTokenResponseObject();
+
         var result = this.restUtils.createAndStoreSchoolReports(Arrays.asList("12345"), type, new DistributionSummaryDTO());
         assertNotNull(type);
         assertNotNull(result);
@@ -922,7 +924,6 @@ public class RestUtilsTest {
     public void whenCreateAndStoreSchoolReports_WithParams_ThenThrowException() {
         final String type = "TVRRUN";
         when(this.webClient.post()).thenThrow(Exception.class);
-
         var result = this.restUtils.createAndStoreSchoolReports(Arrays.asList("12345"), type, new DistributionSummaryDTO());
     }
 
