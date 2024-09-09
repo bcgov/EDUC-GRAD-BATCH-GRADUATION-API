@@ -900,7 +900,7 @@ public class RestUtilsTest {
         assertNotNull(type);
         assertNotNull(result);
     }
-    @Test(expected = Exception.class)
+    @Test
     public void testcreateAndStoreSchoolReports_WithParams() {
         final String type = "TVRRUN";
 
