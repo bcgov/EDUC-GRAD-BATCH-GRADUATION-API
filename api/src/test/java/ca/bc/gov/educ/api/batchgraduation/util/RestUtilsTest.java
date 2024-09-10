@@ -9,8 +9,11 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,8 +32,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -88,6 +90,8 @@ public class RestUtilsTest {
     private WebClient.RequestBodyUriSpec requestBodyUriMock;
     @Mock
     private WebClient.ResponseSpec responseMock;
+    @Mock
+    Logger LOGGER = LoggerFactory.getLogger(RestUtils.class);
 
     @Before
     public void setUp() {
@@ -895,6 +899,32 @@ public class RestUtilsTest {
         var result = this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
         assertNotNull(result);
+    }
+    @Test
+    public void whenCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
+        final String type = "TVRRUN";
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
+        when(LOGGER.isDebugEnabled()).thenReturn(true);
+
+        mockTokenResponseObject();
+
+        var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
+        assertNotNull(type);
+        assertNotNull(result);
+    }
+
+    @Test(expected = Exception.class)
+    public void whenCreateAndStoreSchoolReports_WithParams_ThenThrowException() {
+        final String type = "TVRRUN";
+        when(this.webClient.post()).thenThrow(Exception.class);
+        var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
     }
 
     @Test

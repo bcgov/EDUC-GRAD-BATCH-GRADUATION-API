@@ -13,7 +13,8 @@ public enum JobSelection {
     RCBJ ("CERT_REGEN"),
     DSRBJ ("TVR_DELETE"),
     ASBJ("ARC_STUDENTS"),
-    ASRBJ("ARC_SCH_REPORTS");
+    ASRBJ("ARC_SCH_REPORTS"),
+    SRRBJ("SCHL_RPT_REGEN");
 
     private final String value;
 

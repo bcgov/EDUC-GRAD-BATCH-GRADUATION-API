@@ -1046,6 +1046,66 @@ public class BatchJobConfig {
     }
 
     /**
+     * Regenerate School Reports
+     */
+
+    @Bean
+    @StepScope
+    public RegenerateSchoolReportsPartitioner partitionerSchoolReportsRegen() {
+        return new RegenerateSchoolReportsPartitioner();
+    }
+
+    @Bean
+    @StepScope
+    public RegenerateSchoolReportsReader itemReaderSchoolReportsRegen() {
+        return new RegenerateSchoolReportsReader();
+    }
+
+    @Bean
+    @StepScope
+    public RegenerateSchoolReportsProcessor itemProcessorSchoolReportsRegen() { return new RegenerateSchoolReportsProcessor(); }
+
+    @Bean
+    @StepScope
+    public RegenerateSchoolReportsWriter itemWriterSchoolReportsRegen() {
+        return new RegenerateSchoolReportsWriter();
+    }
+
+    @Bean
+    public Step schoolReportsRegenJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, SkipSQLTransactionExceptionsListener skipListener) {
+        return new StepBuilder("schoolReportsRegenJobStep", jobRepository)
+                .<List<String>, List<String>>chunk(1, transactionManager)
+                .reader(itemReaderSchoolReportsRegen())
+                .processor(itemProcessorSchoolReportsRegen())
+                .writer(itemWriterSchoolReportsRegen())
+                .faultTolerant()
+                .listener(skipListener)
+                .skip(Exception.class)
+                .build();
+    }
+
+    @Bean
+    public Step masterStepSchoolReportsRegen(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
+        return new StepBuilder("masterStepSchoolReportsRegen", jobRepository)
+                .partitioner(schoolReportsRegenJobStep(jobRepository, transactionManager, skipListener).getName(), partitionerSchoolReportsRegen())
+                .step(schoolReportsRegenJobStep(jobRepository, transactionManager, skipListener))
+                .gridSize(constants.getNumberOfPartitions())
+                .taskExecutor(taskExecutor())
+                .build();
+    }
+
+    @Bean(name="schoolReportsRegenBatchJob")
+    public Job schoolReportsRegenBatchJob(JobRepository jobRepository, PlatformTransactionManager transactionManager, RegenSchoolReportsCompletionNotificationListener listener, SkipSQLTransactionExceptionsListener skipListener, EducGradBatchGraduationApiConstants constants) {
+        return new JobBuilder("schoolReportsRegenBatchJob", jobRepository)
+                .incrementer(new RunIdIncrementer())
+                .listener(listener)
+                .start(masterStepSchoolReportsRegen(jobRepository, transactionManager,constants, skipListener))
+                .on("*")
+                .end().build()
+                .build();
+    }
+
+    /**
      * Create Graduation Status snapshot for EDW
      */
     @Bean
