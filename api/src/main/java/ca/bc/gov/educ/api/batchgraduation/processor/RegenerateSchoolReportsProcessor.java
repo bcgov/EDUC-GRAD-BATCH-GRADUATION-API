@@ -17,7 +17,7 @@ public class RegenerateSchoolReportsProcessor implements ItemProcessor<List<Stri
 	RestUtils restUtils;
 
 	@Value("#{stepExecutionContext['summary']}")
-	DistributionSummaryDTO summaryDTO;
+	SchoolReportsRegenSummaryDTO summaryDTO;
 
 	@Override
 	public List<String> process(List<String> minCodes) throws Exception {
@@ -35,8 +35,8 @@ public class RegenerateSchoolReportsProcessor implements ItemProcessor<List<Stri
 		else
 			reportType = "REGALG";
 
-		for (String mincode : minCodes) {
-			countRegeneratedSchoolReports += restUtils.createAndStoreSchoolReports(minCodes, reportType, summaryDTO);
+		for (String minCode : minCodes) {
+			countRegeneratedSchoolReports += restUtils.createAndStoreSchoolReports(minCode, reportType, summaryDTO);
 		}
 
 		summaryDTO.setProcessedCount(countRegeneratedSchoolReports);

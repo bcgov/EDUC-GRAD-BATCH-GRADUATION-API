@@ -32,10 +32,10 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobExecution.getExecutionContext().get("distributionSummaryDTO");
+        SchoolReportsRegenSummaryDTO summaryDTO = (SchoolReportsRegenSummaryDTO)jobExecution.getExecutionContext().get("schoolReportsRegenSummaryDTO");
         if(summaryDTO == null) {
-            summaryDTO = new DistributionSummaryDTO();
-            jobExecution.getExecutionContext().put("distributionSummaryDTO", summaryDTO);
+            summaryDTO = new SchoolReportsRegenSummaryDTO();
+            jobExecution.getExecutionContext().put("schoolReportsRegenSummaryDTO", summaryDTO);
         }
 
         StudentSearchRequest searchRequest = getStudentSearchRequest();

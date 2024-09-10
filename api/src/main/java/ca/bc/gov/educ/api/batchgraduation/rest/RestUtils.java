@@ -556,30 +556,28 @@ public class RestUtils {
         return result;
     }
 
-    public Integer createAndStoreSchoolReports(List<String> uniqueSchools, String reportType, DistributionSummaryDTO summaryDTO) {
+    public Integer createAndStoreSchoolReports(String minCode, String reportType, SchoolReportsRegenSummaryDTO summaryDTO) {
         UUID correlationID = UUID.randomUUID();
         Integer result = 0;
         try {
-            if (uniqueSchools == null || uniqueSchools.isEmpty()) {
+            if (minCode == null || minCode.isEmpty()) {
                 LOGGER.info("{} Schools selected for School Reports Regeneration", result);
                 return result;
             }
 
-            for (String minCode : uniqueSchools) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Creating School Reports for school {}", minCode);
-                }
-                result += webClient.post()
-                        .uri(String.format(constants.getCreateAndStoreSchoolReports(), reportType))
-                        .headers(h -> {
-                            h.setBearerAuth(getAccessToken());
-                            h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
-                        })
-                        .body(BodyInserters.fromValue(List.of(minCode)))
-                        .retrieve()
-                        .bodyToMono(Integer.class)
-                        .block();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Creating School Reports for school {}", minCode);
             }
+            result += webClient.post()
+                    .uri(String.format(constants.getCreateAndStoreSchoolReports(), reportType))
+                    .headers(h -> {
+                        h.setBearerAuth(getAccessToken());
+                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString());
+                    })
+                    .body(BodyInserters.fromValue(List.of(minCode)))
+                    .retrieve()
+                    .bodyToMono(Integer.class)
+                    .block();
             LOGGER.info("Created and Stored {} School Reports", result);
         } catch(Exception e) {
             LOGGER.error("Unable to Regenerate School Reports", e);

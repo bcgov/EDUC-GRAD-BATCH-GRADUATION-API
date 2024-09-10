@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import ca.bc.gov.educ.api.batchgraduation.model.DistributionSummaryDTO;
+import ca.bc.gov.educ.api.batchgraduation.model.SchoolReportsRegenSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.BatchStatus;
@@ -15,7 +15,7 @@ import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApi
 
 @Slf4j
 @Component
-public class RegenSchoolReportsCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
+public class RegenSchoolReportsCompletionNotificationListener extends BaseRegenSchoolReportsCompletionNotificationListener {
 
 	@Override
 	public void afterJob(JobExecution jobExecution) {
@@ -33,7 +33,7 @@ public class RegenSchoolReportsCompletionNotificationListener extends BaseDistri
 			Date endTime = DateUtils.toDate(jobExecution.getEndTime());
 			String jobTrigger = jobParameters.getString("jobTrigger");
 
-			DistributionSummaryDTO summaryDTO = (DistributionSummaryDTO)jobContext.get("distributionSummaryDTO");
+			SchoolReportsRegenSummaryDTO summaryDTO = (SchoolReportsRegenSummaryDTO) jobContext.get("schoolReportsRegenSummaryDTO");
 
 			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 			// display Summary Details
