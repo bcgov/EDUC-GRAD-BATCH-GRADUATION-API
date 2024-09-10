@@ -915,7 +915,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        var result = this.restUtils.createAndStoreSchoolReports(Arrays.asList("12345"), type, new DistributionSummaryDTO());
+        var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
         assertNotNull(type);
         assertNotNull(result);
     }
@@ -924,7 +924,7 @@ public class RestUtilsTest {
     public void whenCreateAndStoreSchoolReports_WithParams_ThenThrowException() {
         final String type = "TVRRUN";
         when(this.webClient.post()).thenThrow(Exception.class);
-        var result = this.restUtils.createAndStoreSchoolReports(Arrays.asList("12345"), type, new DistributionSummaryDTO());
+        var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
     }
 
     @Test
