@@ -579,6 +579,10 @@ public class RestUtils {
                     .bodyToMono(Integer.class)
                     .block();
             LOGGER.info("Created and Stored {} School Reports", result);
+            // When multiple reports are generated, the count is > 1. In this case, still return 1 so that the actual processed
+            // mincodes is only incremented by 1 and not by the number of school reports generated.
+            if (result > 1)
+                result = 1;
         } catch(Exception e) {
             LOGGER.error("Unable to Regenerate School Reports", e);
             summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
