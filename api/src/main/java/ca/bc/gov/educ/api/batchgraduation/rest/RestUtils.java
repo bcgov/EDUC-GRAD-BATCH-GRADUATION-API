@@ -932,6 +932,28 @@ public class RestUtils {
         return reportsCount;
     }
 
+    public Long getTotalReportsForProcessing(List<String> finalSchoolDistricts, String reportType, SchoolReportsRegenSummaryDTO summaryDTO) {
+        Long reportsCount = 0L;
+        UUID correlationID = UUID.randomUUID();
+        try {
+            String accessToken = getAccessToken();
+            reportsCount = this.webClient.post()
+                    .uri(String.format(constants.getGradSchoolReportsCountUrl(), reportType))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(finalSchoolDistricts))
+                    .retrieve().bodyToMono(Long.class).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to retrieve school reports counts", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to retrieve schools reports counts", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Total {} of {} reports available", reportsCount, reportType);
+        }
+        return reportsCount;
+    }
+
     public List<UUID> getReportStudentIDsByStudentIDsAndReportType(List<String> finalSchoolDistricts, String reportType, Integer rowCount, DistributionSummaryDTO summaryDTO) {
         List<UUID> result = new ArrayList<>();
         UUID correlationID = UUID.randomUUID();

@@ -41,22 +41,51 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         long startTime = System.currentTimeMillis();
         log.debug("Filter Schools for school reports regeneration");
-        boolean processAllStudents = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
+        boolean processAllReports = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
+
         List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
-        List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
+        List<String> schoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(log.isDebugEnabled()) {
-            log.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
+            log.debug("Final list of eligible District / School codes {}", String.join(", ", schoolDistricts));
         }
 
         summaryDTO.setBatchId(jobExecution.getId());
         summaryDTO.setStudentSearchRequest(searchRequest);
 
+        Long totalSchoolReportsCount = 0L;
+        List<String> reportTypes = searchRequest.getReportTypes();
+        Long schoolReportsCount = 0L;
+
+        List<String> finalSchoolDistricts = new ArrayList<>();
+
+        for (String schoolOfRecord : schoolDistricts) {
+            if (reportTypes != null && !reportTypes.isEmpty()) {
+                if ("NONGRADPRJ".compareToIgnoreCase(reportTypes.get(0)) == 0) {
+                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "NONGRADPRJ", summaryDTO);
+                } else {
+                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "GRADREG", summaryDTO);
+                }
+                if (schoolReportsCount == 0) {
+                    //finalSchoolDistricts.remove(schoolOfRecord);
+                    log.debug("Skip School : {}", schoolOfRecord);
+                }
+                else {
+                    finalSchoolDistricts.add(schoolOfRecord);
+                    School school = new School(schoolOfRecord);
+                    school.setNumberOfSchoolReports(schoolReportsCount);
+                    summaryDTO.getSchools().add(school);
+                    totalSchoolReportsCount += schoolReportsCount;
+                }
+                schoolReportsCount = 0L;
+            }
+        }
+
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
         log.debug("Total {} schools after filters in {} sec", finalSchoolDistricts.size(), diff);
 
-        updateBatchJobHistory(createBatchJobHistory(), (long)finalSchoolDistricts.size());
-        summaryDTO.setReadCount((long)finalSchoolDistricts.size());
+        updateBatchJobHistory(createBatchJobHistory(), totalSchoolReportsCount);
+        summaryDTO.setReadCount(totalSchoolReportsCount);
         summaryDTO.setProcessedCount(0);
 
         Map<String, ExecutionContext> map = new HashMap<>();
@@ -67,7 +96,7 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
         executionContext.put("readCount", 0);
         map.put("partition0", executionContext);
 
-        log.info("Found {} in total running on 1 partitions", finalSchoolDistricts.size());
+        log.info("Found {} in total running on 1 partitions", totalSchoolReportsCount);
         return map;
     }
 }
