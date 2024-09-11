@@ -910,7 +910,7 @@ public class RestUtilsTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         mockTokenResponseObject();
