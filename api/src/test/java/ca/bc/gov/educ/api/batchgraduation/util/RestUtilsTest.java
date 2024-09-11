@@ -910,7 +910,7 @@ public class RestUtilsTest {
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         mockTokenResponseObject();
@@ -923,7 +923,16 @@ public class RestUtilsTest {
     @Test(expected = Exception.class)
     public void whenCreateAndStoreSchoolReports_WithParams_ThenThrowException() {
         final String type = "TVRRUN";
-        when(this.webClient.post()).thenThrow(Exception.class);
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenThrow(Exception.class);
+        when(LOGGER.isDebugEnabled()).thenReturn(true);
+
         var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
     }
 
