@@ -933,7 +933,6 @@ public class RestUtilsTest {
         when(this.responseMock.bodyToMono(Integer.class)).thenThrow(Exception.class);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
-        mockTokenResponseObject();
         var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
     }
 
