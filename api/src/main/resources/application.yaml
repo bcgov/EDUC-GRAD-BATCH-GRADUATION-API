@@ -87,6 +87,7 @@ server:
       worker: 128
       io: 16
   #port: ${HTTP_PORT}
+  max-http-request-header-size: 20000
 
 #API Documentation
 springdoc:
@@ -169,16 +170,19 @@ endpoint:
     snapshot-graduation-status-for-edw:
       url: ${GRAD_GRADUATION_API}api/v1/graduate/edw/snapshot
   grad-student-api:
+    get-students-count: ${GRAD_STUDENT_API}api/v1/student/count?studentStatus=%S
+    archive-students: ${GRAD_STUDENT_API}api/v1/student/archive?batchId=%s&studentStatus=%S&userName=%s
     grad-status: ${GRAD_STUDENT_API}api/v1/student/studentid/%s
     student-for-grad-list: ${GRAD_STUDENT_API}api/v1/student/recalculate
     student-for-projectedgrad-list: ${GRAD_STUDENT_API}api/v1/student/projected
     get-student-for-batch-input: ${GRAD_STUDENT_API}api/v1/student/batch/gradstudent/studentid/%s
     pen-student-by-pen: ${PEN_API}api/v1/student?pen=%s
     student-for-special-grad-run-list: ${GRAD_STUDENT_API}api/v1/student/studentlistsearch
+    student-by-search-criteria: ${GRAD_STUDENT_API}api/v1/student/gradstudentbysearchcriteria
     get-student-data-list: ${GRAD_STUDENT_API}api/v1/student/multistudentids
     get-student-record: ${GRAD_STUDENT_API}api/v1/student/grad/%s
     update-student-record: ${GRAD_STUDENT_API}api/v1/student/distribution/studentid/%s?batchId=%s&activityCode=%s
-    update-student-record-history: ${GRAD_STUDENT_API}api/v1/student/distribution/batchid/%s?userName=%s
+    update-student-record-history: ${GRAD_STUDENT_API}api/v1/student/distribution/batchid/%s?userName=%s&activityCode=%s
     read-grad-student-record: ${GRAD_STUDENT_API}api/v1/student/studentid/%s/algorithm
     read-grad-student-record-batch: ${GRAD_STUDENT_API}api/v1/student/batch/%s
     update-flag-ready-for-batch: ${GRAD_STUDENT_API}api/v1/student/multistudentids/batchflag/jobtype/%s
@@ -188,6 +192,12 @@ endpoint:
     get-district-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/districtnongradreportdata
     get-deceased-student-id-list: ${GRAD_STUDENT_API}api/v1/student/deceasedstudentid
   grad-graduation-report-api:
+    get-school-reports-count:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/count?reportType=%s
+    get-student-reports-guid:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreportsbystudentid?reportType=%s&rowCount=%s
+    archive-school-reports:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/archive?batchId=%s&reportType=%s
     get-transcript-list:
       yearly:
         url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistributionyearly
@@ -204,8 +214,14 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/districtdataearly
     get-certificate-types:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/certificatetype/%s
+    get-school-reports-lite-by-report-type:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport/type/%s
     update-school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
+    update-student-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreports?reportTypeCode=%s
+    delete-student-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/delete?batchId=%s&reportType=%s
     get-school-report-list:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistribution
     check-sccp-certificate-exists: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/check-sccp-certificate-exists

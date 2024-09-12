@@ -10,7 +10,11 @@ public enum TaskSelection {
 	URDBJ ("UserReqDistributionBatchJob"),
     URPDBJ("psiDistributionBatchJob"),
     BDBJ ("blankDistributionBatchJob"),
-    RCBJ ("certRegenBatchJob");
+    RCBJ ("certRegenBatchJob"),
+    DSRBJ ("deleteStudentReportsBatchJob"),
+    ASBJ("archiveStudentsBatchJob"),
+    ASRBJ("archiveSchoolReportsBatchJob"),
+    SRRBJ("schoolReportsRegenBatchJob");
 
     private final String value;
 

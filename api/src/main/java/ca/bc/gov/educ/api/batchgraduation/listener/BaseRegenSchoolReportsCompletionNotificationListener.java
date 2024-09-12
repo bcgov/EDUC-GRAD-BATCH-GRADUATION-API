@@ -23,9 +23,9 @@ import java.util.List;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.USER_SCHEDULED;
 
-public abstract class BaseDistributionRunCompletionNotificationListener implements JobExecutionListener {
+public abstract class BaseRegenSchoolReportsCompletionNotificationListener implements JobExecutionListener {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseDistributionRunCompletionNotificationListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseRegenSchoolReportsCompletionNotificationListener.class);
 
     @Autowired
     GradBatchHistoryService gradBatchHistoryService;
@@ -42,7 +42,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener implemen
     @Autowired
     RestUtils restUtils;
 
-    protected void processBatchJobHistory(BaseDistributionSummaryDTO summaryDTO, Long jobExecutionId, String status, String jobTrigger, String jobType, Date startTime, Date endTime, String jobParameters) {
+    protected void processBatchJobHistory(SchoolReportsRegenSummaryDTO summaryDTO, Long jobExecutionId, String status, String jobTrigger, String jobType, Date startTime, Date endTime, String jobParameters) {
         int failedRecords = summaryDTO.getErrors().size();
         Long processedStudents = summaryDTO.getProcessedCount();
         Long expectedStudents = summaryDTO.getReadCount();
@@ -70,12 +70,8 @@ public abstract class BaseDistributionRunCompletionNotificationListener implemen
             jobParamsDtoStr = populateJobParametersDTO(jobType, null, studentSearchRequest);
         } else {
             jobParamsDtoStr = switch (taskSelection) {
-                case URDBJ -> // User Request Distribution
+                case SRRBJ -> // School Reports Regen Batch Job
                         populateJobParametersDTO(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
-                case BDBJ -> // Blank Distribution
-                        populateJobParametersDTOForBlankDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
-                case URPDBJ -> // PSI Distribution
-                        populateJobParametersDTOForPsiDistribution(taskSelection.getValue(), taskSelectionOptionType, studentSearchRequest);
                 default -> jobParamsDtoStr;
             };
         }
@@ -96,52 +92,11 @@ public abstract class BaseDistributionRunCompletionNotificationListener implemen
         return jsonTransformer.marshall(jobParamsDto);
     }
 
-    private String populateJobParametersDTOForBlankDistribution(String jobType, String credentialType, String studentSearchRequest) {
-        JobParametersForBlankDistribution jobParamsDto = new JobParametersForBlankDistribution();
-        jobParamsDto.setJobName(jobType);
-        jobParamsDto.setCredentialType(credentialType);
-
-        if(StringUtils.isNotBlank(studentSearchRequest)) {
-            BlankCredentialRequest payload = (BlankCredentialRequest) jsonTransformer.unmarshall(studentSearchRequest, BlankCredentialRequest.class);
-            jobParamsDto.setPayload(payload);
-        }
-        return jsonTransformer.marshall(jobParamsDto);
-    }
-
-    private String populateJobParametersDTOForPsiDistribution(String jobType, String transmissionType, String studentSearchRequest) {
-        JobParametersForPsiDistribution jobParamsDto = new JobParametersForPsiDistribution();
-        jobParamsDto.setJobName(jobType);
-        jobParamsDto.setTransmissionType(transmissionType);
-
-        if(StringUtils.isNotBlank(studentSearchRequest)) {
-            PsiCredentialRequest payload = (PsiCredentialRequest) jsonTransformer.unmarshall(studentSearchRequest, PsiCredentialRequest.class);
-            jobParamsDto.setPayload(payload);
-        }
-
-        String jobParamsDtoStr = jsonTransformer.marshall(jobParamsDto);
-        return jobParamsDtoStr != null? jobParamsDtoStr : studentSearchRequest;
-    }
-
     protected StudentSearchRequest getStudentSearchRequest(String searchRequest) {
         if(StringUtils.isNotBlank(searchRequest)) {
             return (StudentSearchRequest) jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
         }
         return new StudentSearchRequest();
-    }
-
-    void sortStudentCredentialDistribution(List<StudentCredentialDistribution> students) {
-        GradSorter.sortStudentCredentialDistributionByNames(students);
-    }
-
-    void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList, String activityCode) {
-        LOGGER.debug("Filter {} Student Credential Distribution for {} student credentials", activityCode, credentialList.size());
-        if("NONGRADYERUN".equalsIgnoreCase(activityCode)) {
-            LOGGER.debug("Apply {} filters for the list of {} students", "NONGRADYERUN", credentialList.size());
-            credentialList.removeIf(s->"SCCP".equalsIgnoreCase(s.getProgram()));
-            credentialList.removeIf(s->"1950".equalsIgnoreCase(s.getProgram()) && !"AD".equalsIgnoreCase(s.getStudentGrade()));
-            credentialList.removeIf(s->!"1950".equalsIgnoreCase(s.getProgram()) && !"12".equalsIgnoreCase(s.getStudentGrade()));
-        }
-        LOGGER.debug("Total {} Student Credentials selected after filter", credentialList.size());
     }
 
     long getElapsedTimeMillis(JobExecution jobExecution) {
@@ -153,9 +108,5 @@ public abstract class BaseDistributionRunCompletionNotificationListener implemen
         if (userScheduledId != null) {
             taskSchedulingService.updateUserScheduledJobs(userScheduledId);
         }
-    }
-
-    String extractUserName(BaseSummaryDTO summaryDTO, JobParameters jobParameters, StudentSearchRequest searchRequest) {
-        return StringUtils.defaultString(StringUtils.defaultString(summaryDTO.getUserName(), jobParameters.getString("runBy")), StringUtils.defaultString(searchRequest.getUser(), "Batch Process"));
     }
 }

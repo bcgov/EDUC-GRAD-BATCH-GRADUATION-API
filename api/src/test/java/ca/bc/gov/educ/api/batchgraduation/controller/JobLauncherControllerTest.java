@@ -6,18 +6,29 @@ import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
+import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.*;
+import org.springframework.batch.core.configuration.DuplicateJobException;
+import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.batch.core.launch.NoSuchJobException;
+import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -52,9 +63,16 @@ public class JobLauncherControllerTest {
     private static final String TRANMISSION_TYPE = "transmissionType";
     private static final String DISDTO = "distributionSummaryDTO";
     private static final String SCHREPORT = "SCHREP";
+    private static final String ARCHIVE_SCHOOL_REPORTS = "ARC_SCH_REPORTS";
+    private static final String DELETE_STUDENT_REPORTS = "TVR_DELETE";
+    private static final String RUN_BY = "runBy";
+    private static final String ARCHIVE_STUDENTS = "ARC_STUDENTS";
 
-    @Autowired
+    @Mock
     JsonTransformer jsonTransformer;
+
+    @Mock
+    ObjectMapper objectMapper;
 
     @Mock
     GradDashboardService gradDashboardService;
@@ -409,6 +427,92 @@ public class JobLauncherControllerTest {
     }
 
     @Test
+    public void testArchiveSchoolReportsBatchJob() {
+        ThreadLocalStateUtil.setCurrentUser("Batch Process");
+        StudentSearchRequest request = new StudentSearchRequest();
+        request.setSchoolOfRecords(List.of("12345678"));
+        request.setReportTypes(List.of("NONGRADREG"));
+
+        String searchData = jsonTransformer.marshall(request);
+
+        boolean exceptionIsThrown = false;
+
+        JobParametersBuilder builder = new JobParametersBuilder();
+
+        builder.addLong(TIME, System.currentTimeMillis());
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, ARCHIVE_SCHOOL_REPORTS);
+        builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
+
+        try {
+            createJob(210L, "archiveSchoolReportsBatchJob", builder.toJobParameters());
+            ResponseEntity<BatchJobResponse> result = jobLauncherController.launchArchiveSchoolReportsJob(request);
+            assertThat(result.getStatusCode().value()).isEqualTo(201);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+        assertThat(exceptionIsThrown).isFalse();
+    }
+
+    @Test
+    public void testDeleteStudentReportsBatchJob() {
+        ThreadLocalStateUtil.setCurrentUser("Batch Process");
+        StudentSearchRequest request = new StudentSearchRequest();
+        request.setSchoolOfRecords(List.of("12345678"));
+        request.setReportTypes(List.of("ACHV"));
+
+        String searchData = jsonTransformer.marshall(request);
+
+        boolean exceptionIsThrown = false;
+
+        JobParametersBuilder builder = new JobParametersBuilder();
+
+        builder.addLong(TIME, System.currentTimeMillis());
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, DELETE_STUDENT_REPORTS);
+        builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
+
+        try {
+            createJob(210L, "deleteStudentReportsBatchJob", builder.toJobParameters());
+            ResponseEntity<BatchJobResponse> result = jobLauncherController.launchDeleteStudentReportsJob(request);
+            assertThat(result.getStatusCode().value()).isEqualTo(201);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+        assertThat(exceptionIsThrown).isFalse();
+    }
+
+    @Test
+    public void testArchiveStudentsBatchJob() {
+        ThreadLocalStateUtil.setCurrentUser("Batch Process");
+        StudentSearchRequest request = new StudentSearchRequest();
+        request.setSchoolOfRecords(List.of("12345678"));
+
+        String searchData = jsonTransformer.marshall(request);
+
+        boolean exceptionIsThrown = false;
+
+        JobParametersBuilder builder = new JobParametersBuilder();
+
+        builder.addLong(TIME, System.currentTimeMillis());
+        builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
+        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TYPE, ARCHIVE_STUDENTS);
+        builder.addString(SEARCH_REQUEST, StringUtils.defaultString(searchData, "{}"));
+
+        try {
+            createJob(210L, "archiveStudentsBatchJob", builder.toJobParameters());
+            ResponseEntity<BatchJobResponse> result = jobLauncherController.launchArchiveStudentsJob(request);
+            assertThat(result.getStatusCode().value()).isEqualTo(201);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+        assertThat(exceptionIsThrown).isFalse();
+    }
+
+    @Test
     public void testlaunchUserReqPsiDisRunSpecialJob_1() {
         boolean exceptionIsThrown = false;
         PsiCredentialRequest req = new PsiCredentialRequest();
@@ -463,6 +567,34 @@ public class JobLauncherControllerTest {
         }
 
         assertThat(exceptionIsThrown).isTrue();
+    }
+
+    @Test
+    public void testLaunchRegenerateSchoolReportsJob() {
+        boolean exceptionIsThrown = false;
+        StudentSearchRequest req = new StudentSearchRequest();
+        req.setSchoolOfRecords(Arrays.asList("12345678"));
+        req.setReportTypes(Arrays.asList("NONGRADPRJ"));
+        try {
+            jobLauncherController.launchRegenerateSchoolReportsBatch(req);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+
+        assertThat(exceptionIsThrown).isTrue();
+    }
+
+    @Test
+    public void testLaunchRegenerateStudentReportsJob() {
+        boolean exceptionIsThrown = false;
+        StudentSearchRequest req = new StudentSearchRequest();
+        req.setStudentIDs(Arrays.asList(UUID.randomUUID()));
+        try {
+            jobLauncherController.launchRegenerateStudentReports(req, null);
+        } catch (Exception e) {
+            exceptionIsThrown = true;
+        }
+        assertThat(exceptionIsThrown).isFalse();
     }
 
     @Test
@@ -590,5 +722,57 @@ public class JobLauncherControllerTest {
         }
 
         assertThat(builder).isNotNull();
+    }
+
+    Pair<JobExecution, Job> createJob(Long batchId, String jobName, JobParameters jobParameters) throws DuplicateJobException, NoSuchJobException, JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+        ExecutionContext executionContext = new ExecutionContext();
+
+        JobExecution jobExecution = new JobExecution(batchId);
+        jobExecution.setExecutionContext(executionContext);
+        JobFactory jobFactory = new JobFactory() {
+
+            Job job;
+
+            JobParametersIncrementer jobParametersIncrementer;
+
+            @Override
+            public Job createJob() {
+                this.job = new Job() {
+                    String name = jobName;
+
+                    @Override
+                    public String getName() {
+                        return name;
+                    }
+
+                    @Override
+                    public void execute(JobExecution jobExec) {
+                        jobExecution.setStatus(BatchStatus.COMPLETED);
+                    }
+
+                    @Override
+                    public JobParametersIncrementer getJobParametersIncrementer() {
+                        jobParametersIncrementer = new RunIdIncrementer();
+                        return jobParametersIncrementer;
+                    }
+                };
+                return job;
+            }
+
+            @Override
+            public String getJobName() {
+                return job.getName();
+            }
+        };
+
+        Job job = jobFactory.createJob();
+        jobExecution.setJobInstance(new JobInstance(batchId, job.getName()));
+        jobExecution.setStatus(BatchStatus.STARTED);
+        jobRegistry.register(jobFactory);
+        job.getJobParametersIncrementer().getNext(jobParameters);
+        org.mockito.Mockito.when(jobRegistry.getJob(jobName)).thenReturn(job);
+        org.mockito.Mockito.when(asyncJobLauncher.run(job, jobParameters)).thenReturn(jobExecution);
+        org.mockito.Mockito.when(jobLauncher.run(job, jobParameters)).thenReturn(jobExecution);
+        return Pair.of(jobExecution, job);
     }
 }

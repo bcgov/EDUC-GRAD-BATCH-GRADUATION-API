@@ -9,8 +9,11 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,8 +32,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -88,6 +90,8 @@ public class RestUtilsTest {
     private WebClient.RequestBodyUriSpec requestBodyUriMock;
     @Mock
     private WebClient.ResponseSpec responseMock;
+    @Mock
+    Logger LOGGER = LoggerFactory.getLogger(RestUtils.class);
 
     @Before
     public void setUp() {
@@ -130,6 +134,10 @@ public class RestUtilsTest {
         assertThat(result).isNotNull();
         assertThat(result.size()).isPositive();
         assertThat(result.get(0).getPen()).isEqualTo(pen);
+
+        val result2 = this.restUtils.getStudentIDByPen(pen, "abc");
+        assertThat(result2).isNotNull();
+
     }
 
     @Test
@@ -855,6 +863,26 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testProcessStudentReports() {
+        final String studentReportType = "TVRRUN";
+        UUID studentID = UUID.randomUUID();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentReport(), studentReportType))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        mockTokenResponseObject();
+
+        var result = this.restUtils.processStudentReports(List.of(studentID),studentReportType);
+        assertNotNull(studentReportType);
+        assertNotNull(result);
+    }
+
+    @Test
     public void testcreateAndStoreSchoolReports_0() {
         final String type = "NONGRADPRJ";
 
@@ -871,6 +899,89 @@ public class RestUtilsTest {
         var result = this.restUtils.createAndStoreSchoolReports(new ArrayList<>(),type);
         assertNotNull(type);
         assertNotNull(result);
+    }
+    @Test
+    public void whenCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
+        final String type = "TVRRUN";
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(2));
+        when(LOGGER.isDebugEnabled()).thenReturn(true);
+
+        mockTokenResponseObject();
+
+        var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
+        assertNotNull(type);
+        assertNotNull(result);
+    }
+
+    @Test(expected = Exception.class)
+    public void whenCreateAndStoreSchoolReports_WithParams_ThenThrowException() {
+        final String type = "TVRRUN";
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getCreateAndStoreSchoolReports(),type))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException(""));
+        when(this.responseMock.bodyToMono(Integer.class)).thenThrow(Exception.class);
+        when(LOGGER.isDebugEnabled()).thenReturn(true);
+
+        var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
+    }
+
+    @Test
+    public void testGetSchoolReportsLiteByReportType() {
+
+        UUID uuid = UUID.randomUUID();
+        SchoolReport sr = new SchoolReport();
+        sr.setId(uuid);
+        sr.setReportTypeCode("GRADREG");
+        final ParameterizedTypeReference<List<SchoolReport>> responseType = new ParameterizedTypeReference<>() {};
+        List<SchoolReport> schoolReportsLite = new ArrayList<>();
+        schoolReportsLite.add(sr);
+
+        mockTokenResponseObject();
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(schoolReportsLite));
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(LOGGER.isDebugEnabled()).thenReturn(true);
+
+        val result = this.restUtils.getSchoolReportsLiteByReportType("GRADREG", new SchoolReportsRegenSummaryDTO());
+        assertThat(result).hasSize(1);
+    }
+
+    @Test(expected = Exception.class)
+    public void whenGetSchoolReportsLiteByReportType_ThenThrowException() {
+        UUID uuid = UUID.randomUUID();
+        SchoolReport sr = new SchoolReport();
+        sr.setId(uuid);
+        sr.setReportTypeCode("GRADREG");
+        final ParameterizedTypeReference<List<SchoolReport>> responseType = new ParameterizedTypeReference<>() {};
+        List<SchoolReport> schoolReportsLite = new ArrayList<>();
+        schoolReportsLite.add(sr);
+
+        mockTokenResponseObject();
+
+        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException(""));
+        when(this.responseMock.bodyToMono(responseType)).thenThrow(Exception.class);
+        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(LOGGER.isDebugEnabled()).thenReturn(true);
+
+        val result = this.restUtils.getSchoolReportsLiteByReportType("GRADREG", new SchoolReportsRegenSummaryDTO());
     }
 
     @Test
@@ -1106,6 +1217,40 @@ public class RestUtilsTest {
         val result = this.restUtils.getStudentsForUserReqDisRun(credentialType,req);
         assertThat(result).isNotNull();
         assertThat(result.size()).isPositive();
+    }
+
+    @Test
+    public void testGetStudentsForUserReqDisRunWithNullDistributionDate() {
+        String activityCode = "USERDISTRC";
+        DistributionResponse req = new DistributionResponse();
+        req.setMergeProcessResponse("Merged");
+        Long batchId = 3344L;
+
+        List<StudentCredentialDistribution> scdList = new ArrayList<>();
+        StudentCredentialDistribution scd = new StudentCredentialDistribution();
+        scd.setSchoolOfRecord("1212211");
+        scd.setPaperType("YED2");
+        scd.setCredentialTypeCode("E");
+        scd.setId(new UUID(1,1));
+        scdList.add(scd);
+
+        mockTokenResponseObject();
+
+        final ParameterizedTypeReference<List<StudentCredentialDistribution>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getStudentDataForUserReqDisRunWithNullDistributionDate(),activityCode))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(scdList));
+
+        StudentSearchRequest searchRequest = new StudentSearchRequest();
+        searchRequest.setActivityCode(activityCode);
+
+        val result = this.restUtils.getStudentsForUserReqDisRunWithNullDistributionDate(activityCode,searchRequest);
+        assertThat(result).isNotNull();
     }
 
     @Test
@@ -1370,7 +1515,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testupdateStudentGradRecordHistory() {
+    public void testUpdateStudentGradRecordHistory() {
         final UUID studentID = UUID.randomUUID();
         final String userName = "abc";
         final String accessToken = "xyz";
@@ -1387,7 +1532,19 @@ public class RestUtilsTest {
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.just(rec));
 
-        this.restUtils.updateStudentGradRecordHistory(batchId,accessToken, userName);
+        this.restUtils.updateStudentGradRecordHistory(List.of(), batchId, accessToken, userName, null);
+
+        when(this.webClient.put()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getUpdateStudentRecordHistory(), batchId, userName, "USERSTUDARC"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.retrieve()).thenReturn(this.responseMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(GraduationStudentRecord.class)).thenReturn(Mono.empty());
+
+        mockTokenResponseObject();
+
+        this.restUtils.updateStudentGradRecordHistory(List.of(studentID), batchId, userName, "USERSTUDARC");
         assertNotNull(rec);
 
     }
@@ -1642,6 +1799,311 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testGetTotalSchoolReportsForArchiving() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradSchoolReportsCountUrl(), "GRADREG"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Long.class)).thenReturn(Mono.just(1L));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getTotalReportsForProcessing(schools, "GRADREG", summaryDTO);
+        assertThat(result).isEqualTo(1);
+    }
+
+    @Test
+    public void testGetReportStudentIDsByStudentIDsAndReportType() {
+        UUID uuid = UUID.randomUUID();
+        List<String> studentIDsIn = Arrays.asList(uuid.toString());
+        List<UUID> studentIDsOut = Arrays.asList(uuid);
+
+        mockTokenResponseObject();
+
+        final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentReportsGuidsUrl(), "ACHV", 1))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(studentIDsOut));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getReportStudentIDsByStudentIDsAndReportType(studentIDsIn, "ACHV", 1, summaryDTO);
+        assertThat(result).isNotEmpty();
+    }
+
+    @Test
+    public void testGetReportStudentIDsByStudentIDsAndReportTypeError() {
+        UUID uuid = UUID.randomUUID();
+        List<String> studentIDsIn = Arrays.asList(uuid.toString());
+        List<UUID> studentIDsOut = Arrays.asList(uuid);
+
+        mockTokenResponseObject();
+
+        final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentReportsGuidsUrl(), "ACHV", 1))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException("Unable to retrieve report student guids"));
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(studentIDsOut));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getReportStudentIDsByStudentIDsAndReportType(studentIDsIn, "ACHV", 1, summaryDTO);
+        assertThat(result).isEmpty();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
+    }
+
+    @Test
+    public void testGetStudentIDsBySearchCriteriaOrAll() {
+        List<UUID> studentIDs = Arrays.asList(UUID.randomUUID());
+
+        mockTokenResponseObject();
+
+        StudentSearchRequest searchRequest = new StudentSearchRequest();
+        searchRequest.setStudentIDs(studentIDs);
+        final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(constants.getGradGetStudentsBySearchCriteriaUrl())).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(studentIDs));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getStudentIDsBySearchCriteriaOrAll(searchRequest, summaryDTO);
+        assertThat(result).isNotEmpty();
+    }
+
+    @Test
+    public void testGetStudentIDsBySearchCriteriaOrAllError() {
+        List<UUID> studentIDs = Arrays.asList(UUID.randomUUID());
+
+        mockTokenResponseObject();
+
+        StudentSearchRequest searchRequest = new StudentSearchRequest();
+        searchRequest.setStudentIDs(studentIDs);
+        final ParameterizedTypeReference<List<UUID>> responseType = new ParameterizedTypeReference<>() {
+        };
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(constants.getGradGetStudentsBySearchCriteriaUrl())).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException("Unable to retrieve list of Students"));
+        when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(studentIDs));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getStudentIDsBySearchCriteriaOrAll(searchRequest, summaryDTO);
+        assertThat(result).isEmpty();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
+    }
+
+    @Test
+    public void testGetTotalSchoolReportsForArchivingError() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradSchoolReportsCountUrl(), "GRADREG"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException("Unable to retrieve school reports counts"));
+        when(this.responseMock.bodyToMono(Long.class)).thenReturn(Mono.just(1L));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getTotalReportsForProcessing(schools, "GRADREG", summaryDTO);
+        assertThat(result).isNotNull();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
+    }
+
+    @Test
+    public void testDeleteStudentReports() {
+        List<UUID> studentIDs = Arrays.asList(UUID.randomUUID());
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getDeleteStudentReportsUrl(), 12345678L, "ACHV"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Long.class)).thenReturn(Mono.just(1L));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.deleteStudentReports(12345678L, studentIDs,"ACHV", summaryDTO);
+        assertThat(result).isEqualTo(1);
+    }
+
+    @Test
+    public void testDeleteStudentReportsError() {
+        List<UUID> studentIDs = Arrays.asList(UUID.randomUUID());
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getDeleteStudentReportsUrl(), 12345678L, "ACHV"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException("Unable to delete student reports"));
+        when(this.responseMock.bodyToMono(Long.class)).thenReturn(Mono.just(1L));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.deleteStudentReports(12345678L, studentIDs,"ACHV", summaryDTO);
+        assertThat(result).isZero();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
+    }
+
+    @Test
+    public void testArchiveSchoolReports() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradArchiveSchoolReportsUrl(), 12345678L, "GRADREG"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.archiveSchoolReports(12345678L, schools,"GRADREG", summaryDTO);
+        assertThat(result).isEqualTo(1);
+    }
+
+    @Test
+    public void testArchiveSchoolReportsError() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradArchiveSchoolReportsUrl(), 12345678L, "GRADREG"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException("Unable to archive School Reports"));
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.archiveSchoolReports(12345678L, schools,"GRADREG", summaryDTO);
+        assertThat(result).isNotNull();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
+    }
+
+    @Test
+    public void testGetTotalStudentsForArchiving() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentCountUrl(), "CUR"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Long.class)).thenReturn(Mono.just(1L));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(schools, "CUR", summaryDTO);
+        assertThat(result).isEqualTo(1);
+    }
+
+    @Test
+    public void testGetTotalStudentsForArchivingError() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradStudentCountUrl(), "CUR"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException("Unable to retrieve student counts"));
+        when(this.responseMock.bodyToMono(Long.class)).thenReturn(Mono.just(1L));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(schools, "CUR", summaryDTO);
+        assertThat(result).isNotNull();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
+    }
+
+    @Test
+    public void testArchiveStudents() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradArchiveStudentsUrl(), 12345678L, "CUR", "USER"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(1));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+        summaryDTO.setUserName("USER");
+
+        val result = this.restUtils.archiveStudents(12345678L, schools,"CUR", summaryDTO);
+        assertThat(result).isEqualTo(1);
+    }
+
+    @Test
+    public void testArchiveStudentsError() {
+        List<String> schools = Arrays.asList("12345678","11223344");
+
+        mockTokenResponseObject();
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(String.format(constants.getGradArchiveStudentsUrl(), 12345678L, "CUR", "USER"))).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersMock.retrieve()).thenThrow(new RuntimeException("Unable to archive Students"));
+        when(this.responseMock.bodyToMono(Integer.class)).thenReturn(Mono.just(0));
+
+        DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+        summaryDTO.setUserName("USER");
+
+        val result = this.restUtils.archiveStudents(12345678L, schools,"CUR", summaryDTO);
+        assertThat(result).isNotNull();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
+    }
+
+    @Test
     public void testGetEDWSnapshotStudents() {
         final Integer gradYear = Integer.parseInt("2023");
         final String mincode = "12345678";
@@ -1692,6 +2154,32 @@ public class RestUtilsTest {
         val result = this.restUtils.processSnapshot(snapshot, new EdwSnapshotSummaryDTO());
         assertThat(result).isNotNull();
         assertThat(result.getPen()).isEqualTo(snapshot.getPen());
+    }
+
+    @Test
+    public void testProcessSnapshotException() {
+        final Integer gradYear = Integer.parseInt("2023");
+        final String mincode = "12345678";
+
+        EdwGraduationSnapshot snapshot = new EdwGraduationSnapshot();
+        snapshot.setStudentID(UUID.randomUUID());
+        snapshot.setPen("123456789");
+        snapshot.setGradYear(gradYear);
+        snapshot.setSchoolOfRecord(mincode);
+
+        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.uri(constants.getSnapshotGraduationStatusForEdwUrl())).thenReturn(this.requestBodyUriMock);
+        when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
+        when(this.requestBodyMock.body(any(BodyInserter.class))).thenThrow(new RuntimeException());
+        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
+        when(this.responseMock.bodyToMono(EdwGraduationSnapshot.class)).thenReturn(Mono.just(snapshot));
+
+        EdwSnapshotSummaryDTO summaryDTO = new EdwSnapshotSummaryDTO();
+
+        val result = this.restUtils.processSnapshot(snapshot, summaryDTO);
+        assertThat(result).isNull();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
     }
 
 

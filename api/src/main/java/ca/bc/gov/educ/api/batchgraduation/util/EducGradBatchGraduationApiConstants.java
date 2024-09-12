@@ -28,6 +28,9 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_YEARLY_NON_GRAD_DIS_RUN_BATCH_JOB = "/executenongraddisrunbatchjob";
     public static final String EXECUTE_CERT_REGEN_BATCH_JOB = "/executecertregenbatchjob";
     public static final String EXECUTE_EDW_SNAPSHOT_BATCH_JOB = "/executeedwsnapshotbatchjob";
+    public static final String EXECUTE_ARCHIVE_SCHOOL_REPORTS_RUN_BATCH_JOB = "/report/school/archive";
+    public static final String EXECUTE_DELETE_STUDENT_REPORTS_RUN_BATCH_JOB = "/report/student/delete";
+    public static final String EXECUTE_YEARLY_ARCHIVE_STUDENTS_RUN_BATCH_JOB = "/student/archive";
 
     // Special Run
     public static final String EXECUTE_SPECIALIZED_RUNS = "/specialrun";
@@ -41,6 +44,7 @@ public class EducGradBatchGraduationApiConstants {
     public static final String EXECUTE_RE_RUNS_FAILED = "/rerun/failed/{batchId}";
     public static final String EXECUTE_REGEN_SCHOOL_REPORTS = "/regenerate/school-report/{batchId}";
     public static final String EXECUTE_REGEN_SCHOOL_REPORTS_BY_REQUEST = "/regenerate/school-report";
+    public static final String EXECUTE_REGEN_STUDENT_REPORTS_BY_REQUEST = "/regenerate/student-report";
 
     public static final String BATCH_JOB_TYPES_MAPPING = "/batchjobtype";
     public static final String BATCH_JOB_TYPE_MAPPING = "/batchjobtype/{batchJobTypeCode}";
@@ -84,6 +88,11 @@ public class EducGradBatchGraduationApiConstants {
     public static final String TRANSMISSION_TYPE = "transmissionType";
     public static final String USER_SCHEDULED = "userScheduled";
 
+    public static final String TVRCREATE = "tvrCreated";
+    public static final String TVRUPDATE = "tvrUpdated";
+    public static final String TVRDELETE = "tvrDeleted";
+    public static final String ALL = "all";
+
     @Value("${authorization.user}")
     private String userName;
 
@@ -122,6 +131,24 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-student-api.get-student-data-list}")
     private String gradStudentApiStudentDataListUrl;
+
+    @Value("${endpoint.grad-graduation-report-api.get-school-reports-count.url}")
+    private String gradSchoolReportsCountUrl;
+
+    @Value("${endpoint.grad-graduation-report-api.get-student-reports-guid.url}")
+    private String gradStudentReportsGuidsUrl;
+
+    @Value("${endpoint.grad-graduation-report-api.archive-school-reports.url}")
+    private String gradArchiveSchoolReportsUrl;
+
+    @Value("${endpoint.grad-student-api.get-students-count}")
+    private String gradStudentCountUrl;
+
+    @Value("${endpoint.grad-student-api.archive-students}")
+    private String gradArchiveStudentsUrl;
+
+    @Value("${endpoint.grad-student-api.student-by-search-criteria}")
+    private String gradGetStudentsBySearchCriteriaUrl;
 
     @Value("${endpoint.grad-graduation-report-api.check-sccp-certificate-exists}")
     private String checkSccpCertificateExists;
@@ -185,6 +212,9 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-report-api.get-certificate-types.url}")
     private String certificateTypes;
+
+    @Value("${endpoint.grad-graduation-report-api.get-school-reports-lite-by-report-type.url}")
+    private String schoolReportsLiteByReportTypeUrl;
 
     @Value("${endpoint.grad-student-api.update-student-record}")
     private String updateStudentRecord;
@@ -251,6 +281,12 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-report-api.update-school-report.url}")
     private String updateSchoolReport;
+
+    @Value("${endpoint.grad-graduation-report-api.update-student-report.url}")
+    private String updateStudentReport;
+
+    @Value("${endpoint.grad-graduation-report-api.delete-student-report.url}")
+    private String deleteStudentReportsUrl;
 
     @Value("${endpoint.grad-trax-api.get-psi-student-list.url}")
     private String psiStudentList;

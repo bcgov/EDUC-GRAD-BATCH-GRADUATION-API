@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.USER_SCHEDULED;
 
 @Service
 public class TaskDefinition implements Runnable {
@@ -71,7 +72,7 @@ public class TaskDefinition implements Runnable {
             builder.addString(TRANMISSION_TYPE,task.getTransmissionType());
         }
         if(task.getJobIdReference() != null) {
-            builder.addString("userScheduled",task.getJobIdReference().toString());
+            builder.addString(USER_SCHEDULED,task.getJobIdReference().toString());
             if (!isTaskRunnable(task.getJobIdReference())) {
                 LOGGER.error("{} should be QUEUED status for the given jobId, {}", task.getJobName(), task.getJobIdReference());
                 return;
