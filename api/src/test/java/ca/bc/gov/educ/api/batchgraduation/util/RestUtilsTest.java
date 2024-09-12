@@ -729,7 +729,7 @@ public class RestUtilsTest {
     public void whenCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
         final String type = "TVRRUN";
 
-        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of("12345"), Integer.class)).thenReturn(0);
+        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of("12345"), Integer.class)).thenReturn(2);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         mockTokenResponseObject();
