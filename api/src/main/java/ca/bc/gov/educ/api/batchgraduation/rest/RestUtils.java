@@ -971,7 +971,8 @@ public class RestUtils {
             summaryDTO.setException(e.getLocalizedMessage());
         }
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Total {} of {} reports available", schoolReportsLite.size(), reportType);
+            LOGGER.debug("Total {} of {} reports available",
+                    schoolReportsLite == null || schoolReportsLite.isEmpty() ? 0 : schoolReportsLite.size(), reportType);
         }
         return schoolReportsLite;
     }
