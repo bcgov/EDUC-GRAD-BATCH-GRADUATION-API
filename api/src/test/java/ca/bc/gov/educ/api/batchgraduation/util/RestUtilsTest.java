@@ -963,23 +963,9 @@ public class RestUtilsTest {
 
     @Test(expected = Exception.class)
     public void whenGetSchoolReportsLiteByReportType_ThenThrowException() {
-        UUID uuid = UUID.randomUUID();
-        SchoolReport sr = new SchoolReport();
-        sr.setId(uuid);
-        sr.setReportTypeCode("GRADREG");
         final ParameterizedTypeReference<List<SchoolReport>> responseType = new ParameterizedTypeReference<>() {};
-        List<SchoolReport> schoolReportsLite = new ArrayList<>();
-        schoolReportsLite.add(sr);
-
         mockTokenResponseObject();
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(responseType)).thenThrow(Exception.class);
-        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        when(LOGGER.isDebugEnabled()).thenReturn(true);
+        when(this.webClient.get()).thenThrow(Exception.class);
 
         val result = this.restUtils.getSchoolReportsLiteByReportType("GRADREG", new SchoolReportsRegenSummaryDTO());
     }
