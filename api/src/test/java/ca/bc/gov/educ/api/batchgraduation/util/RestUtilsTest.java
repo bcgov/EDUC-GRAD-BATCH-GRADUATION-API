@@ -955,6 +955,7 @@ public class RestUtilsTest {
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(responseType)).thenReturn(Mono.just(schoolReportsLite));
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
+        when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         val result = this.restUtils.getSchoolReportsLiteByReportType("GRADREG", new SchoolReportsRegenSummaryDTO());
         assertThat(result).hasSize(1);
