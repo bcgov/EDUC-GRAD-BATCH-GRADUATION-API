@@ -954,6 +954,28 @@ public class RestUtils {
         return reportsCount;
     }
 
+    public List<SchoolReport> getSchoolReportsLiteByReportType(String reportType, SchoolReportsRegenSummaryDTO summaryDTO) {
+
+        UUID correlationID = UUID.randomUUID();
+        final ParameterizedTypeReference<List<SchoolReport>> responseType = new ParameterizedTypeReference<>() {};
+        List<SchoolReport> schoolReportsLite = new ArrayList<>();
+        try {
+            String accessToken = getAccessToken();
+            schoolReportsLite = this.webClient.get()
+                    .uri(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), reportType))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .retrieve().bodyToMono(responseType).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to retrieve school reports data for ALL", e);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to retrieve schools reports data for ALL", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Total {} of {} reports available", schoolReportsLite.size(), reportType);
+        }
+        return schoolReportsLite;
+    }
+
     public List<UUID> getReportStudentIDsByStudentIDsAndReportType(List<String> finalSchoolDistricts, String reportType, Integer rowCount, DistributionSummaryDTO summaryDTO) {
         List<UUID> result = new ArrayList<>();
         UUID correlationID = UUID.randomUUID();

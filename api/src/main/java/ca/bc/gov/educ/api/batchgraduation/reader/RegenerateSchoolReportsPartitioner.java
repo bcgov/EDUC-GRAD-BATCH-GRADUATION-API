@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
@@ -57,26 +58,44 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
         Long schoolReportsCount = 0L;
 
         List<String> finalSchoolDistricts = new ArrayList<>();
+        List<SchoolReport> schoolReportsLite = new ArrayList<>();
 
-        for (String schoolOfRecord : schoolDistricts) {
+        if(processAllReports) {
             if (reportTypes != null && !reportTypes.isEmpty()) {
                 if ("NONGRADPRJ".compareToIgnoreCase(reportTypes.get(0)) == 0) {
-                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "NONGRADPRJ", summaryDTO);
+                    schoolReportsLite = restUtils.getSchoolReportsLiteByReportType("NONGRADPRJ", summaryDTO);
                 } else {
-                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "GRADREG", summaryDTO);
+                    schoolReportsLite = restUtils.getSchoolReportsLiteByReportType( "GRADREG", summaryDTO);
                 }
-                if (schoolReportsCount == 0) {
-                    //finalSchoolDistricts.remove(schoolOfRecord);
-                    log.debug("Skip School : {}", schoolOfRecord);
+            }
+
+            if (schoolReportsLite != null && !schoolReportsLite.isEmpty()) {
+                finalSchoolDistricts = schoolReportsLite.stream().map(SchoolReport::getSchoolOfRecord)
+                        .collect(Collectors.toList());
+                schoolReportsCount = (long)finalSchoolDistricts.size();
+            }
+
+            School school = new School("ALL_SCHOOLS");
+            school.setNumberOfSchoolReports(schoolReportsCount);
+            summaryDTO.getSchools().add(school);
+            totalSchoolReportsCount += finalSchoolDistricts.size();
+        } else {
+            for (String schoolOfRecord : schoolDistricts) {
+                if (reportTypes != null && !reportTypes.isEmpty()) {
+                    if ("NONGRADPRJ".compareToIgnoreCase(reportTypes.get(0)) == 0) {
+                        schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "NONGRADPRJ", summaryDTO);
+                    } else {
+                        schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "GRADREG", summaryDTO);
+                    }
+                    if (schoolReportsCount > 0) {
+                        finalSchoolDistricts.add(schoolOfRecord);
+                        School school = new School(schoolOfRecord);
+                        school.setNumberOfSchoolReports(schoolReportsCount);
+                        summaryDTO.getSchools().add(school);
+                        totalSchoolReportsCount += schoolReportsCount;
+                    }
+                    schoolReportsCount = 0L;
                 }
-                else {
-                    finalSchoolDistricts.add(schoolOfRecord);
-                    School school = new School(schoolOfRecord);
-                    school.setNumberOfSchoolReports(schoolReportsCount);
-                    summaryDTO.getSchools().add(school);
-                    totalSchoolReportsCount += schoolReportsCount;
-                }
-                schoolReportsCount = 0L;
             }
         }
 
