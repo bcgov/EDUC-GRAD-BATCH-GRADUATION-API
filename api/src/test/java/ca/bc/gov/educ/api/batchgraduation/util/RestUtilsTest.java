@@ -652,7 +652,7 @@ public class RestUtilsTest {
 
         DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).build();
 
-        when(this.restService.post(String.format(constants.getCreateBlanksAndUpload(),batchId,"N"), distributionRequest, DistributionResponse.class)).thenReturn(res);
+        when(this.restService.post(String.format(constants.getCreateBlanksAndUpload(),batchId,"N"), distributionRequest, DistributionResponse.class, "accessToken")).thenReturn(res);
 
         this.restUtils.createBlankCredentialsAndUpload(batchId,"abc",distributionRequest,"N");
         assertNotNull(res);
@@ -667,7 +667,7 @@ public class RestUtilsTest {
 
         DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(new HashMap<>()).build();
 
-        when(this.restService.post(String.format(constants.getCreateBlanksAndUpload(),batchId,"N"), distributionRequest, DistributionResponse.class)).thenReturn(null);
+        when(this.restService.post(String.format(constants.getCreateBlanksAndUpload(),batchId,"N"), distributionRequest, DistributionResponse.class, "accessToken")).thenReturn(null);
 
         this.restUtils.createBlankCredentialsAndUpload(batchId,"abc",distributionRequest,"N");
         assertNotNull(res);
@@ -717,7 +717,7 @@ public class RestUtilsTest {
     public void testcreateAndStoreSchoolReports_0() {
         final String type = "NONGRADPRJ";
 
-        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), new ArrayList<>(), Integer.class)).thenReturn(0);
+        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), new ArrayList<>(), Integer.class, "accessToken")).thenReturn(0);
 
         mockTokenResponseObject();
 
@@ -729,7 +729,7 @@ public class RestUtilsTest {
     public void whenCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
         final String type = "TVRRUN";
 
-        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of("12345"), Integer.class)).thenReturn(2);
+        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of("12345"), Integer.class, "accessToken")).thenReturn(2);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         mockTokenResponseObject();
@@ -743,7 +743,7 @@ public class RestUtilsTest {
     public void whenCreateAndStoreSchoolReports_WithParams_ThenThrowException() {
         final String type = "TVRRUN";
 
-        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of("12345"), Integer.class)).thenThrow(new RuntimeException(""));
+        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of("12345"), Integer.class, "accessToken")).thenThrow(Exception.class);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
@@ -761,7 +761,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class)).thenReturn(schoolReportsLite);
+        when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class, "accessToken")).thenReturn(schoolReportsLite);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         val result = this.restUtils.getSchoolReportsLiteByReportType("GRADREG", new SchoolReportsRegenSummaryDTO());
@@ -779,7 +779,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class)).thenThrow(Exception.class);
+        when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class, "accessToken")).thenThrow(Exception.class);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         val result = this.restUtils.getSchoolReportsLiteByReportType("GRADREG", new SchoolReportsRegenSummaryDTO());
