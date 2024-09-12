@@ -97,6 +97,7 @@ server:
       worker: 128
       io: 16
   #port: ${HTTP_PORT}
+  max-http-request-header-size: 20000
 
 #API Documentation
 springdoc:
@@ -223,6 +224,8 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/districtdataearly
     get-certificate-types:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/certificatetype/%s
+    get-school-reports-lite-by-report-type:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport/type/%s
     update-school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
     update-student-report:

@@ -356,6 +356,10 @@ public class RestUtils {
             }
             result += restService.post(String.format(constants.getCreateAndStoreSchoolReports(), reportType), List.of(minCode), Integer.class, getAccessToken());
             LOGGER.info("Created and Stored {} School Reports", result);
+            // When multiple reports are generated, the count is > 1. In this case, still return 1 so that the actual processed
+            // mincodes is only incremented by 1 and not by the number of school reports generated.
+            if (result > 1)
+                result = 1;
         } catch(Exception e) {
             LOGGER.error("Unable to Regenerate School Reports", e);
             summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
@@ -617,6 +621,51 @@ public class RestUtils {
             LOGGER.debug("Total {} of {} reports available", reportsCount, reportType);
         }
         return reportsCount;
+    }
+
+    public Long getTotalReportsForProcessing(List<String> finalSchoolDistricts, String reportType, SchoolReportsRegenSummaryDTO summaryDTO) {
+        Long reportsCount = 0L;
+        UUID correlationID = UUID.randomUUID();
+        try {
+            String accessToken = getAccessToken();
+            reportsCount = this.webClient.post()
+                    .uri(String.format(constants.getGradSchoolReportsCountUrl(), reportType))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .body(BodyInserters.fromValue(finalSchoolDistricts))
+                    .retrieve().bodyToMono(Long.class).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to retrieve school reports counts", e);
+            summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to retrieve schools reports counts", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Total {} of {} reports available", reportsCount, reportType);
+        }
+        return reportsCount;
+    }
+
+    public List<SchoolReport> getSchoolReportsLiteByReportType(String reportType, SchoolReportsRegenSummaryDTO summaryDTO) {
+
+        UUID correlationID = UUID.randomUUID();
+        final ParameterizedTypeReference<List<SchoolReport>> responseType = new ParameterizedTypeReference<>() {};
+        List<SchoolReport> schoolReportsLite = new ArrayList<>();
+        try {
+            String accessToken = getAccessToken();
+            schoolReportsLite = this.webClient.get()
+                    .uri(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), reportType))
+                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
+                    .retrieve().bodyToMono(responseType).block();
+        } catch(Exception e) {
+            LOGGER.error("Unable to retrieve school reports data for ALL", e);
+            summaryDTO.getErrors().add(new ProcessError(null,"Unable to retrieve schools reports data for ALL", e.getLocalizedMessage()));
+            summaryDTO.setException(e.getLocalizedMessage());
+        }
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Total {} of {} reports available",
+                    schoolReportsLite == null || schoolReportsLite.isEmpty() ? 0 : schoolReportsLite.size(), reportType);
+        }
+        return schoolReportsLite;
     }
 
     public List<UUID> getReportStudentIDsByStudentIDsAndReportType(List<String> finalSchoolDistricts, String reportType, Integer rowCount, DistributionSummaryDTO summaryDTO) {
