@@ -518,8 +518,8 @@ public class JobLauncherController {
 
         try {
             String studentSearchData = jsonTransformer.marshall(searchRequest);
-            if(searchRequest != null) {
-                builder.addString(SEARCH_REQUEST, jsonTransformer.marshall(searchRequest));
+            if(studentSearchData != null) {
+                builder.addString(SEARCH_REQUEST, studentSearchData);
             }
             response.setJobParameters(studentSearchData);
             JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob(REGENERATE_SCHOOL_REPORTS_BATCH_JOB), builder.toJobParameters());
