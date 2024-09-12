@@ -34,7 +34,7 @@ public class RestUtils {
 
     final EducGradBatchGraduationApiConstants constants;
 
-    final RESTGenerics restGenerics;
+    final RESTService restService;
 
     final JsonTransformer jsonTransformer;
 
@@ -45,9 +45,9 @@ public class RestUtils {
     @Autowired
     public RestUtils(final GraduationReportService graduationReportService,
                      final EducGradBatchGraduationApiConstants constants, final JsonTransformer jsonTransformer,
-                     final RESTGenerics restGenerics, final TokenUtils tokenUtils) {
+                     final RESTService restService, final TokenUtils tokenUtils) {
         this.constants = constants;
-        this.restGenerics = restGenerics;
+        this.restService = restService;
         this.tokenUtils = tokenUtils;
         this.graduationReportService = graduationReportService;
         this.jsonTransformer = jsonTransformer;
@@ -57,7 +57,7 @@ public class RestUtils {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         String url = String.format(constants.getPenStudentApiByPenUrl(), pen);
         LOGGER.debug(URL_FORMAT_STR, url);
-        var response = restGenerics.get(url, List.class);
+        var response = restService.get(url, List.class);
         if (response != null && !response.isEmpty()) {
             return jsonTransformer.convertValue(response, new TypeReference<>() {});
         }
@@ -68,17 +68,17 @@ public class RestUtils {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         String url = isReportOnly(studentID, gradProgram, programCompleteDate)?
             String.format(constants.getGraduationApiReportOnlyUrl(), studentID, batchId) : String.format(constants.getGraduationApiUrl(), studentID, batchId);
-        return restGenerics.get(url, AlgorithmResponse.class);
+        return restService.get(url, AlgorithmResponse.class);
     }
 
     public AlgorithmResponse runProjectedGradAlgorithm(UUID studentID, Long batchId) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        return restGenerics.get(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,batchId), AlgorithmResponse.class);
+        return restService.get(String.format(constants.getGraduationApiProjectedGradUrl(), studentID,batchId), AlgorithmResponse.class);
     }
 
     public BatchGraduationStudentRecord runGetStudentForBatchInput(UUID studentID) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        return restGenerics.get(String.format(constants.getGradStudentApiGradStatusForBatchUrl(), studentID), BatchGraduationStudentRecord.class);
+        return restService.get(String.format(constants.getGradStudentApiGradStatusForBatchUrl(), studentID), BatchGraduationStudentRecord.class);
     }
 
     public BatchGraduationStudentRecord getStudentForBatchInput(UUID studentID, AlgorithmSummaryDTO summary) {
@@ -108,31 +108,31 @@ public class RestUtils {
     public Integer runRegenerateStudentCertificate(String pen) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         String url = constants.getStudentCertificateRegeneration() + "?isOverwrite=%s";
-        return restGenerics.get(String.format(url, pen, "N"), Integer.class);
+        return restService.get(String.format(url, pen, "N"), Integer.class);
     }
 
     public List<UUID> getStudentsForAlgorithm() {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        var response = restGenerics.get(constants.getGradStudentApiStudentForGradListUrl(), List.class);
+        var response = restService.get(constants.getGradStudentApiStudentForGradListUrl(), List.class);
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
     }
 
     public List<UUID> getStudentsForProjectedAlgorithm() {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        var response =  restGenerics.get(constants.getGradStudentApiStudentForProjectedGradListUrl(), List.class);
+        var response =  restService.get(constants.getGradStudentApiStudentForProjectedGradListUrl(), List.class);
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
     }
 
     // EDUC-GRAD-STUDENT-API ========================================
 
     public GraduationStudentRecord saveGraduationStudentRecord(GraduationStudentRecord graduationStudentRecord) {
-        return restGenerics.post(String.format(constants.getGradStudentApiGradStatusUrl(),graduationStudentRecord.getStudentID()),
+        return restService.post(String.format(constants.getGradStudentApiGradStatusUrl(),graduationStudentRecord.getStudentID()),
                 graduationStudentRecord, GraduationStudentRecord.class);
     }
 
     public List<UUID> getStudentsForSpecialGradRun(StudentSearchRequest req) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        GraduationStudentRecordSearchResult res = restGenerics.post(constants.getGradStudentApiStudentForSpcGradListUrl(), req, GraduationStudentRecordSearchResult.class);
+        GraduationStudentRecordSearchResult res = restService.post(constants.getGradStudentApiStudentForSpcGradListUrl(), req, GraduationStudentRecordSearchResult.class);
         return res != null ?res.getStudentIDs() : new ArrayList<>();
     }
 
@@ -216,7 +216,7 @@ public class RestUtils {
         StudentList stuList = new StudentList();
         stuList.setStudentids(studentIds);
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        var response = restGenerics.post(constants.getGradStudentApiStudentDataListUrl(), stuList, List.class);
+        var response = restService.post(constants.getGradStudentApiStudentDataListUrl(), stuList, List.class);
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
     }
 
@@ -296,7 +296,7 @@ public class RestUtils {
 
     public GradCertificateTypes getCertTypes(String certType) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        var result = restGenerics.get(String.format(constants.getCertificateTypes(),certType), GradCertificateTypes.class);
+        var result = restService.get(String.format(constants.getCertificateTypes(),certType), GradCertificateTypes.class);
         if(result != null)
             LOGGER.info("Fetched {} Cert type Records : ",result.getCode());
 
@@ -305,7 +305,7 @@ public class RestUtils {
 
     public GraduationStudentRecord getStudentDataForBatch(String studentID) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        var result = restGenerics.get(String.format(constants.getStudentInfo(),studentID), GraduationStudentRecord.class);
+        var result = restService.get(String.format(constants.getStudentInfo(),studentID), GraduationStudentRecord.class);
         if(result != null)
             LOGGER.info("Fetched {} Graduation Records",result.getStudentID());
 
@@ -314,7 +314,7 @@ public class RestUtils {
 
     public GraduationStudentRecordDistribution getStudentData(String studentID) {
         String url = String.format(constants.getStudentInfo(),studentID);
-        var result = restGenerics.get(url, GraduationStudentRecordDistribution.class);
+        var result = restService.get(url, GraduationStudentRecordDistribution.class);
         if(result != null)
             LOGGER.info("Fetched {} Graduation Records",result.getStudentID());
         return result;
@@ -336,14 +336,14 @@ public class RestUtils {
             if(LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Creating School Reports for schools {}", mincodes.stream().collect(Collectors.joining(",", "{", "}")));
             }
-            result += restGenerics.post(String.format(constants.getCreateAndStoreSchoolReports(),type), mincodes, Integer.class);
+            result += restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), mincodes, Integer.class);
         }
         LOGGER.info("Created and Stored {} School Reports", result);
         return result;
     }
 
     public Integer createAndStoreSchoolReports(String minCode, String reportType, SchoolReportsRegenSummaryDTO summaryDTO) {
-        UUID correlationID = UUID.randomUUID();
+        ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         Integer result = 0;
         try {
             if (minCode == null || minCode.isEmpty()) {
@@ -354,7 +354,7 @@ public class RestUtils {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Creating School Reports for school {}", minCode);
             }
-            result += restGenerics.post(String.format(constants.getCreateAndStoreSchoolReports(), reportType), List.of(minCode), Integer.class, getAccessToken());
+            result += restService.post(String.format(constants.getCreateAndStoreSchoolReports(), reportType), List.of(minCode), Integer.class, getAccessToken());
             LOGGER.info("Created and Stored {} School Reports", result);
         } catch(Exception e) {
             LOGGER.error("Unable to Regenerate School Reports", e);
@@ -368,7 +368,7 @@ public class RestUtils {
 
     public Integer processStudentReports(List<UUID> uuidList, String studentReportType) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        Integer result = restGenerics.post(String.format(constants.getUpdateStudentReport(), studentReportType), uuidList, Integer.class, getAccessToken());
+        Integer result = restService.post(String.format(constants.getUpdateStudentReport(), studentReportType), uuidList, Integer.class, getAccessToken());
         LOGGER.info("{} Student {} Reports", result, studentReportType);
         return result;
     }
@@ -376,7 +376,7 @@ public class RestUtils {
     //Grad2-1931 sending transmissionType with the webclient.
     public DistributionResponse mergePsiAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest,String localDownload, String transmissionType) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        var result = restGenerics.post(String.format(constants.getMergePsiAndUpload(),batchId,localDownload,transmissionType), distributionRequest, DistributionResponse.class, accessToken);
+        var result = restService.post(String.format(constants.getMergePsiAndUpload(),batchId,localDownload,transmissionType), distributionRequest, DistributionResponse.class, accessToken);
         if(result != null)
             LOGGER.info(MERGE_MSG,result.getMergeProcessResponse());
         return  new DistributionResponse();
@@ -396,17 +396,17 @@ public class RestUtils {
             distributionUrl = String.format(constants.getMergeAndUpload(),batchId,activityCode,localDownload);
         }
         LOGGER.debug("****** Call distribution API {} to process the merge request for {} *******", distributionUrl, batchId);
-        return restGenerics.post(distributionUrl, distributionRequest, DistributionResponse.class, accessToken);
+        return restService.post(distributionUrl, distributionRequest, DistributionResponse.class, accessToken);
     }
 
     public Boolean executePostDistribution(DistributionResponse distributionResponse) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        return restGenerics.post(constants.getPostingDistribution(), distributionResponse, Boolean.class, getAccessToken());
+        return restService.post(constants.getPostingDistribution(), distributionResponse, Boolean.class, getAccessToken());
     }
 
     public void createBlankCredentialsAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest, String localDownload) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        var result = restGenerics.post(String.format(constants.getCreateBlanksAndUpload(),batchId,localDownload), distributionRequest, DistributionResponse.class, accessToken);
+        var result = restService.post(String.format(constants.getCreateBlanksAndUpload(),batchId,localDownload), distributionRequest, DistributionResponse.class, accessToken);
         if(result != null)
             LOGGER.info("Create and Upload Success {}",result.getMergeProcessResponse());
     }
@@ -414,7 +414,7 @@ public class RestUtils {
     public DistributionResponse createReprintAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest, String activityCode,String localDownload) {
         distributionRequest.setActivityCode(activityCode);
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        var result = restGenerics.post(String.format(constants.getReprintAndUpload(),batchId,activityCode,localDownload), distributionRequest, DistributionResponse.class, accessToken);
+        var result = restService.post(String.format(constants.getReprintAndUpload(),batchId,activityCode,localDownload), distributionRequest, DistributionResponse.class, accessToken);
         if(result != null)
             LOGGER.info(MERGE_MSG,result.getMergeProcessResponse());
         return  result;
@@ -423,24 +423,24 @@ public class RestUtils {
     public void updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String documentStatusCode,String activityCode,String accessToken) {
         String url = String.format(constants.getUpdateStudentCredential(),studentID,
                 credentialTypeCode != null? credentialTypeCode : "",paperType,documentStatusCode,activityCode);
-        restGenerics.get(url, Boolean.class, accessToken);
+        restService.get(url, Boolean.class, accessToken);
     }
 
     public void updateSchoolReportRecord(String schoolOfRecord, String reportTypeCode, String accessToken) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        restGenerics.get(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode), Boolean.class, accessToken);
+        restService.get(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode), Boolean.class, accessToken);
     }
 
     public void deleteSchoolReportRecord(String schoolOfRecord, String reportTypeCode) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         String accessToken = getAccessToken();
-        restGenerics.delete(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode), Boolean.class, accessToken);
+        restService.delete(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode), Boolean.class, accessToken);
     }
 
     public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         String accessToken = getAccessToken();
-        var response = restGenerics.post(String.format(constants.getStudentDataForUserReqDisRun(),credentialType), req, List.class, accessToken);
+        var response = restService.post(String.format(constants.getStudentDataForUserReqDisRun(),credentialType), req, List.class, accessToken);
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
 
     }
@@ -448,7 +448,7 @@ public class RestUtils {
     public List<StudentCredentialDistribution> getStudentsForUserReqDisRunWithNullDistributionDate(String credentialType, StudentSearchRequest req) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         String accessToken = getAccessToken();
-        var response = restGenerics.post(String.format(constants.getStudentDataForUserReqDisRunWithNullDistributionDate(),credentialType), req, List.class, accessToken);
+        var response = restService.post(String.format(constants.getStudentDataForUserReqDisRunWithNullDistributionDate(),credentialType), req, List.class, accessToken);
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
     }
 
@@ -458,7 +458,7 @@ public class RestUtils {
             if (studentID != null) {
                 String accessToken = getAccessToken();
                 String url = String.format(constants.getUpdateStudentRecord(), studentID, batchId, activityCode);
-                restGenerics.post(url, "{}", GraduationStudentRecord.class, accessToken);
+                restService.post(url, "{}", GraduationStudentRecord.class, accessToken);
             }
         } catch (Exception e) {
             LOGGER.error("Unable to update student record {}", studentID);
@@ -469,7 +469,7 @@ public class RestUtils {
         try {
             if (batchId != null) {
                 String url = String.format(constants.getUpdateStudentRecordHistory(), batchId, userName, activityCode);
-                restGenerics.put(url,studentIDs, GraduationStudentRecord.class, accessToken);
+                restService.put(url,studentIDs, GraduationStudentRecord.class, accessToken);
             }
         } catch (Exception e) {
             LOGGER.error("Unable to update student record history {}", e.getLocalizedMessage());
@@ -484,19 +484,19 @@ public class RestUtils {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         StudentList stuList = new StudentList();
         stuList.setStudentids(studentIds);
-        return restGenerics.post(String.format(constants.getUpdateStudentFlagReadyForBatchByStudentIDs(), batchJobType), stuList, String.class);
+        return restService.post(String.format(constants.getUpdateStudentFlagReadyForBatchByStudentIDs(), batchJobType), stuList, String.class);
     }
 
     public Boolean checkSccpCertificateExists (UUID studentID) {
         String url = constants.getCheckSccpCertificateExists() + "?studentID=%s";
-        return restGenerics.get(String.format(url, studentID), Boolean.class);
+        return restService.get(String.format(url, studentID), Boolean.class);
     }
 
     public List<String> getEDWSnapshotSchools(Integer gradYear) {
         String accessToken = getAccessToken();
         String url = String.format(constants.getEdwSnapshotSchoolsUrl(), gradYear);
         LOGGER.debug(URL_FORMAT_STR,url);
-        var response = restGenerics.get(url, List.class, accessToken);
+        var response = restService.get(url, List.class, accessToken);
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
     }
 
@@ -504,7 +504,7 @@ public class RestUtils {
         String accessToken = getAccessToken();
         String url = String.format(constants.getEdwSnapshotStudentsByMincodeUrl(), gradYear, mincode);
         LOGGER.debug(URL_FORMAT_STR,url);
-        var response = restGenerics.get(url, List.class, accessToken);
+        var response = restService.get(url, List.class, accessToken);
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
     }
 
@@ -524,13 +524,13 @@ public class RestUtils {
         if (StringUtils.isBlank(schoolOfRecord)) {
             return null;
         }
-        return restGenerics.get(String.format(constants.getCommonSchoolByMincode(), schoolOfRecord), CommonSchool.class);
+        return restService.get(String.format(constants.getCommonSchoolByMincode(), schoolOfRecord), CommonSchool.class);
     }
 
     public List<District> getDistrictBySchoolCategoryCode(String schoolCategoryCode) {
         try {
             String url = String.format(constants.getTraxDistrictBySchoolCategory(), schoolCategoryCode);
-            var response = restGenerics.get(url, List.class);
+            var response = restService.get(url, List.class);
             return jsonTransformer.convertValue(response, new TypeReference<>(){});
         } catch (Exception e) {
             LOGGER.error(TRAX_API_IS_DOWN, e.getLocalizedMessage());
@@ -541,7 +541,7 @@ public class RestUtils {
     public List<School> getSchoolBySchoolCategoryCode(String schoolCategoryCode) {
         try {
             String url = String.format(constants.getTraxSchoolBySchoolCategory(), schoolCategoryCode);
-            var response = restGenerics.get(url, List.class);
+            var response = restService.get(url, List.class);
             return jsonTransformer.convertValue(response, new TypeReference<>(){});
         } catch (Exception e) {
             LOGGER.error(TRAX_API_IS_DOWN, e.getLocalizedMessage());
@@ -552,7 +552,7 @@ public class RestUtils {
     public List<School> getSchoolByDistrictCode(String district) {
         try {
             String url = String.format(constants.getTraxSchoolByDistrict(), district);
-            var response = restGenerics.get(url, List.class);
+            var response = restService.get(url, List.class);
             return jsonTransformer.convertValue(response, new TypeReference<>(){});
         } catch (Exception e) {
             LOGGER.error(TRAX_API_IS_DOWN, e.getLocalizedMessage());
@@ -561,11 +561,11 @@ public class RestUtils {
     }
 
     public TraxSchool getTraxSchool(String mincode) {
-        return restGenerics.get(String.format(constants.getTraxSchoolByMincode(), mincode), TraxSchool.class, getAccessToken());
+        return restService.get(String.format(constants.getTraxSchoolByMincode(), mincode), TraxSchool.class, getAccessToken());
     }
 
     public List<UUID> getDeceasedStudentIDs(List<UUID> studentIDs) {
-        var response = restGenerics.post(constants.getDeceasedStudentIDList(), studentIDs, List.class);
+        var response = restService.post(constants.getDeceasedStudentIDList(), studentIDs, List.class);
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
     }
 
@@ -592,7 +592,7 @@ public class RestUtils {
 //                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, correlationID.toString()); })
 //                    .body(BodyInserters.fromValue(item))
 //                    .retrieve().bodyToMono(EdwGraduationSnapshot.class).block();
-            return restGenerics.post(constants.getSnapshotGraduationStatusForEdwUrl(), item, EdwGraduationSnapshot.class);
+            return restService.post(constants.getSnapshotGraduationStatusForEdwUrl(), item, EdwGraduationSnapshot.class);
         } catch(Exception e) {
             summary.updateError(item.getPen(),item.getSchoolOfRecord(),GRADUATION_API_IS_DOWN,GRADUATION_API_DOWN_MSG);
             summary.setProcessedCount(summary.getProcessedCount() - 1L);
@@ -606,7 +606,7 @@ public class RestUtils {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         try {
             String accessToken = getAccessToken();
-            reportsCount = restGenerics.post(String.format(constants.getGradSchoolReportsCountUrl(), reportType), finalSchoolDistricts, Long.class, accessToken);
+            reportsCount = restService.post(String.format(constants.getGradSchoolReportsCountUrl(), reportType), finalSchoolDistricts, Long.class, accessToken);
         } catch(Exception e) {
             LOGGER.error("Unable to retrieve school reports counts", e);
             summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
@@ -624,7 +624,7 @@ public class RestUtils {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         try {
             String accessToken = getAccessToken();
-            var response = restGenerics.post(String.format(constants.getGradStudentReportsGuidsUrl(), reportType, rowCount), finalSchoolDistricts, List.class, accessToken);
+            var response = restService.post(String.format(constants.getGradStudentReportsGuidsUrl(), reportType, rowCount), finalSchoolDistricts, List.class, accessToken);
             if (response != null) {
                 List<UUID> guids = jsonTransformer.convertValue(response, new TypeReference<>() {});
                 result.addAll(guids);
@@ -648,7 +648,7 @@ public class RestUtils {
         }
         try {
             String accessToken = getAccessToken();
-            return restGenerics.post(String.format(constants.getGradArchiveSchoolReportsUrl(), batchId, reportType), finalSchoolDistricts, Integer.class, accessToken);
+            return restService.post(String.format(constants.getGradArchiveSchoolReportsUrl(), batchId, reportType), finalSchoolDistricts, Integer.class, accessToken);
         } catch(Exception e) {
             LOGGER.error("Unable to archive School Reports", e);
             summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
@@ -663,7 +663,7 @@ public class RestUtils {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         try {
             String accessToken = getAccessToken();
-            studentsCount = restGenerics.post(String.format(constants.getGradStudentCountUrl(), studentStatus), finalSchoolDistricts, Long.class, accessToken);
+            studentsCount = restService.post(String.format(constants.getGradStudentCountUrl(), studentStatus), finalSchoolDistricts, Long.class, accessToken);
         } catch(Exception e) {
             LOGGER.error("Unable to retrieve student counts", e);
             summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
@@ -684,7 +684,7 @@ public class RestUtils {
         try {
             String accessToken = getAccessToken();
             String userName = StringUtils.defaultString(summaryDTO.getUserName(), "Batch Archive Process");
-            return restGenerics.post(String.format(constants.getGradArchiveStudentsUrl(), batchId, studentStatus, userName), finalSchoolDistricts, Integer.class, accessToken);
+            return restService.post(String.format(constants.getGradArchiveStudentsUrl(), batchId, studentStatus, userName), finalSchoolDistricts, Integer.class, accessToken);
         } catch(Exception e) {
             LOGGER.error("Unable to archive Students", e);
             summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);
@@ -698,7 +698,7 @@ public class RestUtils {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         try {
             String accessToken = getAccessToken();
-            var response = restGenerics.post(constants.getGradGetStudentsBySearchCriteriaUrl(), searchRequest, List.class, accessToken);
+            var response = restService.post(constants.getGradGetStudentsBySearchCriteriaUrl(), searchRequest, List.class, accessToken);
             return jsonTransformer.convertValue(response, new TypeReference<>() {});
         } catch(Exception e) {
             LOGGER.error("Unable to retrieve list of Students", e);
@@ -714,7 +714,7 @@ public class RestUtils {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         try {
             String accessToken = getAccessToken();
-            studentsCount = restGenerics.post(String.format(constants.getDeleteStudentReportsUrl(), batchId, reportType), uuids, Long.class, accessToken);
+            studentsCount = restService.post(String.format(constants.getDeleteStudentReportsUrl(), batchId, reportType), uuids, Long.class, accessToken);
         } catch(Exception e) {
             LOGGER.error("Unable to delete student reports", e);
             summaryDTO.setErroredCount(summaryDTO.getErroredCount() + 1);

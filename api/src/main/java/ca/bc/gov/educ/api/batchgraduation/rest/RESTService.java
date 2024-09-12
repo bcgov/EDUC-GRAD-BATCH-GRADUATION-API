@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
-public class RESTGenerics {
+public class RESTService {
 
     public static final String ERROR_MESSAGE1 = "Service failed to process after max retries.";
     public static final String ERROR_MESSAGE2 = "5xx error.";
@@ -32,7 +32,7 @@ public class RESTGenerics {
     private final WebClient batchWebClient;
 
     @Autowired
-    public RESTGenerics(@Qualifier("batchClient") WebClient batchWebClient, WebClient webClient, final EducGradBatchGraduationApiConstants constants) {
+    public RESTService(@Qualifier("batchClient") WebClient batchWebClient, WebClient webClient, final EducGradBatchGraduationApiConstants constants) {
         this.constants = constants;
         this.webClient = webClient;
         this.batchWebClient = batchWebClient;

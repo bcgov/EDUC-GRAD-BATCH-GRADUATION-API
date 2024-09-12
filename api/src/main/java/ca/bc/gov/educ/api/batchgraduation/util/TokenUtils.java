@@ -19,8 +19,8 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
-import static ca.bc.gov.educ.api.batchgraduation.rest.RESTGenerics.ERROR_MESSAGE1;
-import static ca.bc.gov.educ.api.batchgraduation.rest.RESTGenerics.ERROR_MESSAGE2;
+import static ca.bc.gov.educ.api.batchgraduation.rest.RESTService.ERROR_MESSAGE1;
+import static ca.bc.gov.educ.api.batchgraduation.rest.RESTService.ERROR_MESSAGE2;
 
 @Component
 public class TokenUtils {
