@@ -2,7 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.rest.RESTGenerics;
+import ca.bc.gov.educ.api.batchgraduation.rest.RESTService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +34,7 @@ public class GraduationReportServiceTest {
     GraduationReportService graduationReportService;
 
     @MockBean
-    RESTGenerics restGenerics;
+    RESTService restService;
 
     @MockBean
     @Qualifier("batchClient")
@@ -77,7 +77,7 @@ public class GraduationReportServiceTest {
     @Test
     public void testGetSchoolsNonGradYearly() {
 
-        when(this.restGenerics.get(constants.getSchoolDataNonGradEarly(), List.class, "accessToken")).thenReturn(List.of("1234567"));
+        when(this.restService.get(constants.getSchoolDataNonGradEarly(), List.class, "accessToken")).thenReturn(List.of("1234567"));
 
         List<String> res = graduationReportService.getSchoolsNonGradYearly("accessToken");
         assertThat(res).isNotEmpty();
@@ -87,7 +87,7 @@ public class GraduationReportServiceTest {
     @Test
     public void testGetDistrictsNonGradYearly() {
 
-        when(this.restGenerics.get(constants.getDistrictDataNonGradEarly(), List.class, "accessToken")).thenReturn(List.of("123"));
+        when(this.restService.get(constants.getDistrictDataNonGradEarly(), List.class, "accessToken")).thenReturn(List.of("123"));
 
         List<String> res = graduationReportService.getDistrictsNonGradYearly("accessToken");
         assertThat(res).isNotEmpty();
@@ -97,7 +97,7 @@ public class GraduationReportServiceTest {
     @Test
     public void testGetDistrictsYearly() {
 
-        when(this.restGenerics.get(constants.getDistrictDataYearly(), List.class, "accessToken")).thenReturn(List.of("1234567"));
+        when(this.restService.get(constants.getDistrictDataYearly(), List.class, "accessToken")).thenReturn(List.of("1234567"));
 
         List<String> res = graduationReportService.getDistrictsYearly("accessToken");
         assertThat(res).isNotEmpty();

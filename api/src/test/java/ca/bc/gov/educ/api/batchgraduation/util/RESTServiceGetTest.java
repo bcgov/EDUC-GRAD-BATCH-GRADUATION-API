@@ -1,6 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
-import ca.bc.gov.educ.api.batchgraduation.rest.RESTGenerics;
+import ca.bc.gov.educ.api.batchgraduation.rest.RESTService;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,26 +12,26 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
-public class RestGenericsGetTest {
+public class RESTServiceGetTest {
 
     @Autowired
-    private RESTGenerics restGenerics;
+    private RESTService restService;
 
     //@Test
     public void testGet_GivenProperData_Expect200Response(){
         String response;
-        response = this.restGenerics.get("https://httpstat.us/200", String.class, "1234");
+        response = this.restService.get("https://httpstat.us/200", String.class, "1234");
         Assert.assertEquals("200 OK", response);
     }
 
     //@Test(expected = ServiceException.class)
     public void testGet_Given5xxErrorFromService_ExpectServiceError(){
-        this.restGenerics.get("https://httpstat.us/503", String.class, "1234");
+        this.restService.get("https://httpstat.us/503", String.class, "1234");
     }
 
     //@Test(expected = ServiceException.class)
     public void testGet_Given4xxErrorFromService_ExpectServiceError(){
-        this.restGenerics.get("https://httpstat.us/403", String.class, "1234");
+        this.restService.get("https://httpstat.us/403", String.class, "1234");
     }
 
     @Test

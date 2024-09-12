@@ -3,7 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.ReportGradStudentData;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.rest.RESTGenerics;
+import ca.bc.gov.educ.api.batchgraduation.rest.RESTService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
@@ -33,7 +33,7 @@ public class GraduationReportService {
 	WebClient batchWebClient;
 
 	@Autowired
-	RESTGenerics restGenerics;
+	RESTService restService;
 	
 	@Autowired
 	EducGradBatchGraduationApiConstants constants;
@@ -74,37 +74,37 @@ public class GraduationReportService {
 	}
 
 	public List<StudentCredentialDistribution> getStudentsNonGradForYearlyDistribution(String accessToken) {
-		var response = restGenerics.get(String.format(constants.getStudentDataNonGradEarly()), List.class, accessToken);
+		var response = restService.get(String.format(constants.getStudentDataNonGradEarly()), List.class, accessToken);
 		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
 	// Year-end NonGrad distribution
 	public List<StudentCredentialDistribution> getStudentsNonGradForYearlyDistribution(String mincode, String accessToken) {
-		var response = restGenerics.get(String.format(constants.getStudentDataNonGradEarlyByMincode(), mincode), List.class, accessToken);
+		var response = restService.get(String.format(constants.getStudentDataNonGradEarlyByMincode(), mincode), List.class, accessToken);
 		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
 	// Year-end distribution
 	public List<StudentCredentialDistribution> getStudentsForYearlyDistribution(String accessToken) {
-		var response = restGenerics.get(String.format(constants.getStudentReportDataYearly()), List.class, accessToken);
+		var response = restService.get(String.format(constants.getStudentReportDataYearly()), List.class, accessToken);
 		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
 	public List<String> getSchoolsNonGradYearly(String accessToken) {
-		var response = restGenerics.get(constants.getSchoolDataNonGradEarly(), List.class, accessToken);
+		var response = restService.get(constants.getSchoolDataNonGradEarly(), List.class, accessToken);
 		return jsonTransformer.convertValue(response, new TypeReference<List<String>>(){});
 	}
 
 	public List<String> getDistrictsNonGradYearly(String accessToken) {
-		var response = restGenerics.get(constants.getDistrictDataNonGradEarly(), List.class, accessToken);
+		var response = restService.get(constants.getDistrictDataNonGradEarly(), List.class, accessToken);
 		return jsonTransformer.convertValue(response, new TypeReference<List<String>>(){});
 	}
 
 	public List<String> getDistrictsYearly(String accessToken) {
-		var response = restGenerics.get(constants.getDistrictDataYearly(), List.class, accessToken);
+		var response = restService.get(constants.getDistrictDataYearly(), List.class, accessToken);
 		return jsonTransformer.convertValue(response, new TypeReference<List<String>>(){});
 	}
 

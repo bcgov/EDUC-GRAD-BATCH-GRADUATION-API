@@ -3,7 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
-import ca.bc.gov.educ.api.batchgraduation.rest.RESTGenerics;
+import ca.bc.gov.educ.api.batchgraduation.rest.RESTService;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
@@ -51,7 +51,7 @@ public class DistributionRunCompletionNotificationListenerTest {
     RestUtils restUtils;
 
     @MockBean
-    RESTGenerics restGenerics;
+    RESTService restService;
 
     @Autowired
     EducGradBatchGraduationApiConstants constants;
@@ -163,7 +163,7 @@ public class DistributionRunCompletionNotificationListenerTest {
 //        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 //        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
 
-        when(this.restGenerics.get(constants.getTranscriptDistributionList(), List.class, "accessToken")).thenReturn(tList);
+        when(this.restService.get(constants.getTranscriptDistributionList(), List.class, "accessToken")).thenReturn(tList);
 
 
 //        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
@@ -172,7 +172,7 @@ public class DistributionRunCompletionNotificationListenerTest {
 //        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 //        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
 
-        when(this.restGenerics.get(constants.getTranscriptYearlyDistributionList(), List.class, "accessToken")).thenReturn(tList);
+        when(this.restService.get(constants.getTranscriptYearlyDistributionList(), List.class, "accessToken")).thenReturn(tList);
 
         ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
         reportGradStudentData.setGraduationStudentRecordId(scd.getStudentID());
@@ -187,7 +187,7 @@ public class DistributionRunCompletionNotificationListenerTest {
 //        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 //        when(this.responseMock.bodyToMono(repListRes)).thenReturn(Mono.just(List.of(reportGradStudentData)));
 
-        when(this.restGenerics.get(constants.getStudentDataNonGradEarlyByMincode(), List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
+        when(this.restService.get(constants.getStudentDataNonGradEarlyByMincode(), List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
 
         ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
         };
@@ -198,7 +198,7 @@ public class DistributionRunCompletionNotificationListenerTest {
 //        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
 //        when(this.responseMock.bodyToMono(cListRes)).thenReturn(Mono.just(cList));
 
-        when(this.restGenerics.get(constants.getCertificateDistributionList(), List.class, "accessToken")).thenReturn(cList);
+        when(this.restService.get(constants.getCertificateDistributionList(), List.class, "accessToken")).thenReturn(cList);
 
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
