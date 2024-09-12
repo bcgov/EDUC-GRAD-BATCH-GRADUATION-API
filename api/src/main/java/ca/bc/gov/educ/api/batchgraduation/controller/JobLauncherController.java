@@ -518,7 +518,9 @@ public class JobLauncherController {
 
         try {
             String studentSearchData = jsonTransformer.marshall(searchRequest);
-            builder.addString(SEARCH_REQUEST, studentSearchData);
+            if(searchRequest != null) {
+                builder.addString(SEARCH_REQUEST, jsonTransformer.marshall(searchRequest));
+            }
             response.setJobParameters(studentSearchData);
             JobExecution jobExecution =  asyncJobLauncher.run(jobRegistry.getJob(REGENERATE_SCHOOL_REPORTS_BATCH_JOB), builder.toJobParameters());
             response.setBatchId(jobExecution.getId());
