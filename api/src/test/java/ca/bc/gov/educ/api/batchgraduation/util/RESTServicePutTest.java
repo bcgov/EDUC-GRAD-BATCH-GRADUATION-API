@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
-public class RESTServicePostTest {
+public class RESTServicePutTest {
 
     @Autowired
     @InjectMocks
@@ -69,8 +69,7 @@ public class RESTServicePostTest {
 
     @Before
     public void setUp(){
-        when(this.webClient.post()).thenReturn(this.requestBodyUriMock);
-        when(this.batchWebClient.post()).thenReturn(this.requestBodyUriMock);
+        when(this.batchWebClient.put()).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.uri(any(String.class))).thenReturn(this.requestBodyUriMock);
         when(this.requestBodyUriMock.headers(any(Consumer.class))).thenReturn(this.requestBodyMock);
         when(this.requestBodyMock.contentType(any())).thenReturn(this.requestBodyMock);
@@ -80,28 +79,16 @@ public class RESTServicePostTest {
     }
 
     @Test
-    public void testPost_GivenProperData_Expect200Response(){
+    public void testPut_GivenProperData_Expect200Response(){
         when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        byte[] response = this.restService.post(TEST_URL, TEST_BODY, byte[].class, ACCESS_TOKEN);
-        Assert.assertArrayEquals(TEST_BYTES, response);
-    }
-
-    @Test
-    public void testPostOverride_GivenProperData_Expect200Response(){
-        when(this.responseMock.onStatus(any(), any())).thenReturn(this.responseMock);
-        byte[] response = this.restService.post(TEST_URL, TEST_BODY, byte[].class);
+        byte[] response = this.restService.put(TEST_URL, TEST_BODY, byte[].class);
         Assert.assertArrayEquals(TEST_BYTES, response);
     }
 
     @Test(expected = ServiceException.class)
-    public void testPost_Given4xxErrorFromService_ExpectServiceError() {
+    public void testPut_Given4xxErrorFromService_ExpectServiceError() {
         when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException());
-        this.restService.post(TEST_URL, TEST_BODY, byte[].class, ACCESS_TOKEN);
+        this.restService.put(TEST_URL, TEST_BODY, byte[].class);
     }
 
-    @Test(expected = ServiceException.class)
-    public void testPostOverride_Given4xxErrorFromService_ExpectServiceError() {
-        when(this.responseMock.onStatus(any(), any())).thenThrow(new ServiceException());
-        this.restService.post(TEST_URL, TEST_BODY, byte[].class);
-    }
 }

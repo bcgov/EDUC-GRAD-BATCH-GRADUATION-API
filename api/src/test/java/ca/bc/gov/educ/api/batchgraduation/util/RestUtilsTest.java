@@ -1170,7 +1170,7 @@ public class RestUtilsTest {
 
         when(this.restService.put(String.format(constants.getUpdateStudentRecordHistory(),studentID, batchId, userName),"{}", GraduationStudentRecord.class)).thenReturn(rec);
 
-        this.restUtils.updateStudentGradRecordHistory(List.of(), batchId, accessToken, userName, null);
+        this.restUtils.updateStudentGradRecordHistory(List.of(), batchId, accessToken, userName);
 
         when(this.restService.put(String.format(constants.getUpdateStudentRecordHistory(), batchId, userName, "USERSTUDARC"),"{}", GraduationStudentRecord.class)).thenReturn(new GraduationStudentRecord());
 
@@ -1193,7 +1193,7 @@ public class RestUtilsTest {
         restUtils.updateSchoolReportRecord(mincode,reportTypeCode,null);
         assertThat(reportTypeCode).isEqualTo("E");
 
-        when(this.restService.delete(String.format(constants.getUpdateSchoolReport(),mincode,reportTypeCode), Boolean.class, "abc")).thenReturn(true);
+        when(this.restService.delete(String.format(constants.getUpdateSchoolReport(),mincode,reportTypeCode), Boolean.class)).thenReturn(true);
 
         restUtils.deleteSchoolReportRecord(mincode,reportTypeCode);
         assertThat(reportTypeCode).isEqualTo("E");
@@ -1206,7 +1206,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.delete(String.format(constants.getUpdateSchoolReport(),mincode,reportTypeCode), Boolean.class, "abc")).thenReturn(true);
+        when(this.restService.delete(String.format(constants.getUpdateSchoolReport(),mincode,reportTypeCode), Boolean.class)).thenReturn(true);
 
         this.restUtils.deleteSchoolReportRecord(mincode,reportTypeCode);
         assertThat(reportTypeCode).isEqualTo("E");

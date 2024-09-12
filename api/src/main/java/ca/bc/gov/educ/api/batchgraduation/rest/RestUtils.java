@@ -437,8 +437,7 @@ public class RestUtils {
 
     public void deleteSchoolReportRecord(String schoolOfRecord, String reportTypeCode) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        String accessToken = getAccessToken();
-        restService.delete(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode), Boolean.class, accessToken);
+        restService.delete(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode), Boolean.class);
     }
 
     public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req) {
@@ -469,19 +468,15 @@ public class RestUtils {
         }
     }
 
-    public void updateStudentGradRecordHistory(List<UUID> studentIDs, Long batchId, String accessToken, String userName, String activityCode) {
+    public void updateStudentGradRecordHistory(List<UUID> studentIDs, Long batchId, String userName, String activityCode) {
         try {
             if (batchId != null) {
                 String url = String.format(constants.getUpdateStudentRecordHistory(), batchId, userName, activityCode);
-                restService.put(url,studentIDs, GraduationStudentRecord.class, accessToken);
+                restService.put(url,studentIDs, GraduationStudentRecord.class);
             }
         } catch (Exception e) {
             LOGGER.error("Unable to update student record history {}", e.getLocalizedMessage());
         }
-    }
-
-    public void updateStudentGradRecordHistory(List<UUID> studentIDs, Long batchId, String userName, String activityCode) {
-        updateStudentGradRecordHistory(studentIDs, batchId, getAccessToken(), userName, activityCode);
     }
 
     public String updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType) {

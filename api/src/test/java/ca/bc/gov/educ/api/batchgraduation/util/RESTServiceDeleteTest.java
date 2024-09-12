@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +26,14 @@ import java.util.function.Consumer;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @RunWith(SpringRunner.class)
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles("test")
-public class RESTServiceGetTest {
+public class RESTServiceDeleteTest {
 
     @Autowired
+    @InjectMocks
     private RESTService restService;
 
     @Mock
@@ -66,8 +68,7 @@ public class RESTServiceGetTest {
 
     @Before
     public void setUp(){
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.batchWebClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.batchWebClient.delete()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(any(String.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
@@ -75,41 +76,22 @@ public class RESTServiceGetTest {
     }
 
     @Test
-    public void testGet_GivenProperData_Expect200Response(){
+    public void testDelete_GivenProperData_Expect200Response(){
         when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just(OK_RESPONSE));
-        String response = this.restService.get(TEST_URL_200, String.class, "1234");
+        String response = this.restService.delete(TEST_URL_200, String.class);
         Assert.assertEquals("200 OK", response);
     }
 
-    @Test
-    public void testGetOverride_GivenProperData_Expect200Response(){
-        when(this.responseMock.bodyToMono(String.class)).thenReturn(Mono.just(OK_RESPONSE));
-        String response = this.restService.get(TEST_URL_200, String.class);
-        Assert.assertEquals(OK_RESPONSE, response);
+    @Test(expected = ServiceException.class)
+    public void testDelete_Given5xxErrorFromService_ExpectServiceError(){
+        when(this.responseMock.bodyToMono(ServiceException.class)).thenReturn(Mono.just(new ServiceException()));
+        this.restService.delete(TEST_URL_503, String.class);
     }
 
     @Test(expected = ServiceException.class)
-    public void testGet_Given5xxErrorFromService_ExpectServiceError(){
+    public void testDelete_Given4xxErrorFromService_ExpectServiceError(){
         when(this.responseMock.bodyToMono(ServiceException.class)).thenReturn(Mono.just(new ServiceException()));
-        this.restService.get(TEST_URL_503, String.class, "1234");
-    }
-
-    @Test(expected = ServiceException.class)
-    public void testGetOverride_Given5xxErrorFromService_ExpectServiceError(){
-        when(this.responseMock.bodyToMono(ServiceException.class)).thenReturn(Mono.just(new ServiceException()));
-        this.restService.get(TEST_URL_503, String.class);
-    }
-
-    @Test(expected = ServiceException.class)
-    public void testGet_Given4xxErrorFromService_ExpectServiceError(){
-        when(this.responseMock.bodyToMono(ServiceException.class)).thenReturn(Mono.just(new ServiceException()));
-        this.restService.get(TEST_URL_403, String.class, "1234");
-    }
-
-    @Test(expected = ServiceException.class)
-    public void testGetOverride_Given4xxErrorFromService_ExpectServiceError(){
-        when(this.responseMock.bodyToMono(ServiceException.class)).thenReturn(Mono.just(new ServiceException()));
-        this.restService.get(TEST_URL_403, String.class);
+        this.restService.delete(TEST_URL_403, String.class);
     }
 
 }
