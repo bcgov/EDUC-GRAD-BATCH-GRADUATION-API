@@ -213,6 +213,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-report-api.get-certificate-types.url}")
     private String certificateTypes;
 
+    @Value("${endpoint.grad-graduation-report-api.get-school-reports-lite-by-report-type.url}")
+    private String schoolReportsLiteByReportTypeUrl;
+
     @Value("${endpoint.grad-student-api.update-student-record}")
     private String updateStudentRecord;
 
