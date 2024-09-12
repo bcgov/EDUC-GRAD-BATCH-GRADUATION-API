@@ -354,7 +354,7 @@ public class RestUtils {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Creating School Reports for school {}", minCode);
             }
-            result += restService.post(String.format(constants.getCreateAndStoreSchoolReports(), reportType), List.of(minCode), Integer.class, getAccessToken());
+            result += restService.post(String.format(constants.getCreateAndStoreSchoolReports(), reportType), List.of(minCode), Integer.class);
             LOGGER.info("Created and Stored {} School Reports", result);
             // When multiple reports are generated, the count is > 1. In this case, still return 1 so that the actual processed
             // mincodes is only incremented by 1 and not by the number of school reports generated.
