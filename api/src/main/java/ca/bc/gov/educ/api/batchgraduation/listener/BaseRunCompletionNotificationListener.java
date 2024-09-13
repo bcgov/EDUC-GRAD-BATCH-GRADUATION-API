@@ -10,7 +10,6 @@ import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -21,7 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
-import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.*;
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
+import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.USER_SCHEDULED;
 
 public abstract class BaseRunCompletionNotificationListener implements JobExecutionListener {
 
@@ -88,9 +88,7 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
         if (!isSpecialRun) {
             updateBackStudentFlagForErroredStudents(summaryDTO.getErrors(), jobType, obj.getAccess_token());
         }
-        if(!StringUtils.equalsAnyIgnoreCase(req.getActivityCode(), TVRCREATE, TVRUPDATE, TVRDELETE, ALL)) {
-            processSchoolList(jobExecutionId, jobType);
-        }
+        processSchoolList(jobExecutionId, jobType);
     }
 
     private void processBatchJobHistory(AlgorithmSummaryDTO summaryDTO, Long jobExecutionId, String status, String jobTrigger, String jobType, Date startTime, Date endTime) {
