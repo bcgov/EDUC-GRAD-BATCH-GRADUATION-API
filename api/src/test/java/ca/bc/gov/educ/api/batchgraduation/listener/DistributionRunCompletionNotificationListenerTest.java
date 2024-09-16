@@ -22,7 +22,6 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Mono;
@@ -85,7 +84,6 @@ public class DistributionRunCompletionNotificationListenerTest {
         jobExecution.setEndTime(LocalDateTime.now());
         jobExecution.setId(121L);
         ExecutionContext jobContext = new ExecutionContext();
-
 
         Map<String,DistributionPrintRequest> mapDist = new HashMap<>();
         DistributionPrintRequest dpR = new DistributionPrintRequest();
@@ -154,24 +152,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         mapDist.put("05005001",dpR);
         DistributionDataParallelDTO dp = new DistributionDataParallelDTO(tList,cList);
 
-        ParameterizedTypeReference<List<StudentCredentialDistribution>> tListRes = new ParameterizedTypeReference<>() {
-        };
-
-//        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-//        when(this.requestHeadersUriMock.uri(constants.getTranscriptDistributionList())).thenReturn(this.requestHeadersMock);
-//        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-//        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-//        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
-
         when(this.restService.get(constants.getTranscriptDistributionList(), List.class, "accessToken")).thenReturn(tList);
-
-
-//        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-//        when(this.requestHeadersUriMock.uri(constants.getTranscriptYearlyDistributionList())).thenReturn(this.requestHeadersMock);
-//        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-//        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-//        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
-
         when(this.restService.get(constants.getTranscriptYearlyDistributionList(), List.class, "accessToken")).thenReturn(tList);
 
         ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
@@ -179,25 +160,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         reportGradStudentData.setFirstName(scd.getLegalFirstName());
         reportGradStudentData.setLastName(scd.getLegalLastName());
 
-//        ParameterizedTypeReference<List<ReportGradStudentData>> repListRes = new ParameterizedTypeReference<>() {
-//        };
-//        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-//        when(this.requestHeadersUriMock.uri(constants.getStudentDataNonGradEarlyByMincode())).thenReturn(this.requestHeadersMock);
-//        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-//        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-//        when(this.responseMock.bodyToMono(repListRes)).thenReturn(Mono.just(List.of(reportGradStudentData)));
-
         when(this.restService.get(constants.getStudentDataNonGradEarlyByMincode(), List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
-
-        ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
-        };
-
-//        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-//        when(this.requestHeadersUriMock.uri(constants.getCertificateDistributionList())).thenReturn(this.requestHeadersMock);
-//        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-//        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-//        when(this.responseMock.bodyToMono(cListRes)).thenReturn(Mono.just(cList));
-
         when(this.restService.get(constants.getCertificateDistributionList(), List.class, "accessToken")).thenReturn(cList);
 
         ResponseObj obj = new ResponseObj();

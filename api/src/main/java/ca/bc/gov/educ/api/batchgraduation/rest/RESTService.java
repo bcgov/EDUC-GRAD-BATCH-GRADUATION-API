@@ -56,8 +56,10 @@ public class RESTService {
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
-                    // only does retry if initial error was 5xx as service may be temporarily down
-                    // 4xx errors will always happen if 404, 401, 403 etc., so does not retry
+                    /*
+                      - retry if initial error is 5xx as service may be temporarily down
+                      - do not retry if 4xx errors happens like 404, 401, 403 etc.
+                     */
                     .retryWhen(reactor.util.retry.Retry.backoff(constants.getDefaultRetryMaxAttempts(), Duration.ofSeconds(constants.getDefaultRetryWaitDurationSeconds()))
                             .filter(ServiceException.class::isInstance)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
@@ -87,8 +89,10 @@ public class RESTService {
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
-                    // only does retry if initial error was 5xx as service may be temporarily down
-                    // 4xx errors will always happen if 404, 401, 403 etc., so does not retry
+                    /*
+                      - retry if initial error is 5xx as service may be temporarily down
+                      - do not retry if 4xx errors happens like 404, 401, 403 etc.
+                     */
                     .retryWhen(reactor.util.retry.Retry.backoff(constants.getDefaultRetryMaxAttempts(), Duration.ofSeconds(constants.getDefaultRetryWaitDurationSeconds()))
                             .filter(ServiceException.class::isInstance)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
