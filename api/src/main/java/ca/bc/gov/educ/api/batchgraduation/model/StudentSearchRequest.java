@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,12 +42,13 @@ public class StudentSearchRequest implements Serializable {
     String localDownload;
     Integer quantity;
 
+    @JsonIgnore
     public boolean isEmpty() {
-        return  schoolOfRecords.isEmpty() &&
-                districts.isEmpty() &&
-                schoolCategoryCodes.isEmpty() &&
-                pens.isEmpty() &&
-                studentIDs.isEmpty() &&
-                programs.isEmpty();
+        return  (schoolOfRecords == null || schoolOfRecords.isEmpty()) &&
+                (districts == null || districts.isEmpty()) &&
+                (schoolCategoryCodes == null || schoolCategoryCodes.isEmpty()) &&
+                (pens == null || pens.isEmpty()) &&
+                (studentIDs == null || studentIDs.isEmpty());
     }
+
 }
