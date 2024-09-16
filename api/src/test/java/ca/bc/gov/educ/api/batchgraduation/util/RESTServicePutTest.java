@@ -64,7 +64,6 @@ public class RESTServicePutTest {
 
     private static final byte[] TEST_BYTES = "How much wood would a woodchuck chuck if a woodchuck could chuck wood?".getBytes();
     private static final String TEST_BODY = "{test:test}";
-    private static final String ACCESS_TOKEN = "123";
     private static final String TEST_URL = "https://fake.url.com";
 
     @Before
