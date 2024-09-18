@@ -1,11 +1,9 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.UserScheduledJobsEntity;
-import ca.bc.gov.educ.api.batchgraduation.model.BatchJobType;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.repository.UserScheduledJobsRepository;
-import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import net.javacrumbs.shedlock.spring.LockableTaskScheduler;
 import org.junit.Test;
@@ -19,9 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
@@ -47,13 +43,7 @@ public class TaskSchedulingServiceTest {
     JsonTransformer jsonTransformer;
 
     @MockBean
-    private RestUtils restUtils;
-
-    @MockBean
     private UserScheduledJobsRepository userScheduledJobsRepository;
-
-    @MockBean
-    WebClient webClient;
 
     @Mock
     private CodeService codeService;

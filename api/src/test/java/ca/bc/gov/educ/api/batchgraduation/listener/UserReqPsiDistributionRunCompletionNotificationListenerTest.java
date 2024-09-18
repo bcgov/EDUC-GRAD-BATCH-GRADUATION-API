@@ -14,7 +14,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -27,7 +26,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,16 +46,10 @@ public class UserReqPsiDistributionRunCompletionNotificationListenerTest {
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
 
-    @Mock
-    WebClient.RequestHeadersSpec requestHeadersMock;
-    @Mock WebClient.RequestHeadersUriSpec requestHeadersUriMock;
-    @Mock WebClient.ResponseSpec responseMock;
-    @Mock WebClient.RequestBodySpec requestBodyMock;
-    @Mock WebClient.RequestBodyUriSpec requestBodyUriMock;
-
     @Autowired
     private UserReqPsiDistributionRunCompletionNotificationListener userReqPsiDistributionRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
+
     @MockBean
     RestUtils restUtils;
 
@@ -69,9 +61,6 @@ public class UserReqPsiDistributionRunCompletionNotificationListenerTest {
 
     @Autowired
     GraduationReportService graduationReportService;
-
-    @MockBean
-    WebClient webClient;
 
     @Before
     public void setUp() {

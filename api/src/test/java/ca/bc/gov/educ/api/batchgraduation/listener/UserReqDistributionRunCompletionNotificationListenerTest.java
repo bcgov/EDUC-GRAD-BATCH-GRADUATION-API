@@ -20,6 +20,7 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
@@ -60,6 +61,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
     @Autowired
     private UserReqDistributionRunCompletionNotificationListener userReqDistributionRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
+
     @MockBean
     RestUtils restUtils;
 
@@ -73,7 +75,12 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
     GraduationReportService graduationReportService;
 
     @MockBean
+    @Qualifier("webClient")
     WebClient webClient;
+
+    @MockBean
+    @Qualifier("batchClient")
+    WebClient batchWebClient;
 
     @Before
     public void setUp() {
@@ -175,7 +182,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         ParameterizedTypeReference<List<StudentCredentialDistribution>> tListRes = new ParameterizedTypeReference<>() {
         };
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.batchWebClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(constants.getTranscriptDistributionList())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
@@ -184,7 +191,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
         };
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.batchWebClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(constants.getCertificateDistributionList())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
@@ -193,8 +200,8 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
         Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
-        Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
-        Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
+        Mockito.when(graduationReportService.getTranscriptList()).thenReturn(Mono.just(tList));
+        Mockito.when(graduationReportService.getCertificateList()).thenReturn(Mono.just(cList));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredData()).thenReturn(Mono.just(dp));
         userReqDistributionRunCompletionNotificationListener.afterJob(jobExecution);
 
@@ -290,13 +297,13 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         ParameterizedTypeReference<List<StudentCredentialDistribution>> tListRes = new ParameterizedTypeReference<>() {
         };
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.batchWebClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(constants.getTranscriptYearlyDistributionList())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.batchWebClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(constants.getTranscriptDistributionList())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
@@ -305,7 +312,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
         };
 
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
+        when(this.batchWebClient.get()).thenReturn(this.requestHeadersUriMock);
         when(this.requestHeadersUriMock.uri(constants.getCertificateDistributionList())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
@@ -328,8 +335,8 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
         Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
-        Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
-        Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
+        Mockito.when(graduationReportService.getTranscriptList()).thenReturn(Mono.just(tList));
+        Mockito.when(graduationReportService.getCertificateList()).thenReturn(Mono.just(cList));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredData()).thenReturn(Mono.just(dp));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredDataYearly()).thenReturn(Mono.just(dp));
         userReqDistributionRunCompletionNotificationListener.afterJob(jobExecution);

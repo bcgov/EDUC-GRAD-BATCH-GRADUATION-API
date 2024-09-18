@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
+import ca.bc.gov.educ.api.batchgraduation.rest.RESTService;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
@@ -12,7 +13,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -22,18 +22,14 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
@@ -46,30 +42,24 @@ public class DistributionRunCompletionNotificationListenerTest {
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
 
-    @Mock
-    WebClient.RequestHeadersSpec requestHeadersMock;
-    @Mock WebClient.RequestHeadersUriSpec requestHeadersUriMock;
-    @Mock WebClient.ResponseSpec responseMock;
-    @Mock WebClient.RequestBodySpec requestBodyMock;
-    @Mock WebClient.RequestBodyUriSpec requestBodyUriMock;
-
     @Autowired
     private DistributionRunCompletionNotificationListener distributionRunCompletionNotificationListener;
     @MockBean BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
+
     @MockBean
     RestUtils restUtils;
+
+    @MockBean
+    RESTService restService;
 
     @Autowired
     EducGradBatchGraduationApiConstants constants;
 
-    @Autowired
+    @MockBean
     ParallelDataFetch parallelDataFetch;
 
-    @Autowired
-    GraduationReportService graduationReportService;
-
     @MockBean
-    WebClient webClient;
+    GraduationReportService graduationReportService;
 
     @Before
     public void setUp() {
@@ -94,7 +84,6 @@ public class DistributionRunCompletionNotificationListenerTest {
         jobExecution.setEndTime(LocalDateTime.now());
         jobExecution.setId(121L);
         ExecutionContext jobContext = new ExecutionContext();
-
 
         Map<String,DistributionPrintRequest> mapDist = new HashMap<>();
         DistributionPrintRequest dpR = new DistributionPrintRequest();
@@ -163,51 +152,24 @@ public class DistributionRunCompletionNotificationListenerTest {
         mapDist.put("05005001",dpR);
         DistributionDataParallelDTO dp = new DistributionDataParallelDTO(tList,cList);
 
-        ParameterizedTypeReference<List<StudentCredentialDistribution>> tListRes = new ParameterizedTypeReference<>() {
-        };
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getTranscriptDistributionList())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getTranscriptYearlyDistributionList())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(tListRes)).thenReturn(Mono.just(tList));
+        when(this.restService.get(constants.getTranscriptDistributionList(), List.class, "accessToken")).thenReturn(tList);
+        when(this.restService.get(constants.getTranscriptYearlyDistributionList(), List.class, "accessToken")).thenReturn(tList);
 
         ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
         reportGradStudentData.setGraduationStudentRecordId(scd.getStudentID());
         reportGradStudentData.setFirstName(scd.getLegalFirstName());
         reportGradStudentData.setLastName(scd.getLegalLastName());
 
-        ParameterizedTypeReference<List<ReportGradStudentData>> repListRes = new ParameterizedTypeReference<>() {
-        };
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getStudentDataNonGradEarlyByMincode())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(repListRes)).thenReturn(Mono.just(List.of(reportGradStudentData)));
-
-        ParameterizedTypeReference<List<StudentCredentialDistribution>> cListRes = new ParameterizedTypeReference<>() {
-        };
-
-        when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getCertificateDistributionList())).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
-        when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
-        when(this.responseMock.bodyToMono(cListRes)).thenReturn(Mono.just(cList));
+        when(this.restService.get(constants.getStudentDataNonGradEarlyByMincode(), List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
+        when(this.restService.get(constants.getCertificateDistributionList(), List.class, "accessToken")).thenReturn(cList);
 
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
 
         DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode("YEARENDDIST").build();
-        Mockito.when(restUtils.getTokenResponseObject()).thenReturn(obj);
-        Mockito.when(graduationReportService.getTranscriptList(null)).thenReturn(Mono.just(tList));
-        Mockito.when(graduationReportService.getCertificateList(null)).thenReturn(Mono.just(cList));
+        Mockito.when(restUtils.getAccessToken()).thenReturn(obj.getAccess_token());
+        Mockito.when(graduationReportService.getTranscriptList()).thenReturn(Mono.just(tList));
+        Mockito.when(graduationReportService.getCertificateList()).thenReturn(Mono.just(cList));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredData()).thenReturn(Mono.just(dp));
         Mockito.when(parallelDataFetch.fetchDistributionRequiredDataYearly()).thenReturn(Mono.just(dp));
         Mockito.when(restUtils.mergeAndUpload(121L, distributionRequest,"YEARENDDIST",null)).thenReturn(new DistributionResponse());

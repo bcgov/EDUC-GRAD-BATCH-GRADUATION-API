@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +57,12 @@ public class SchedulingControllerTest {
     private SchedulingController schedulingController;
 
     @MockBean
+    @Qualifier("webClient")
     WebClient webClient;
+
+    @MockBean
+    @Qualifier("batchClient")
+    WebClient batchWebClient;
 
     @MockBean
     RestUtils restUtils;

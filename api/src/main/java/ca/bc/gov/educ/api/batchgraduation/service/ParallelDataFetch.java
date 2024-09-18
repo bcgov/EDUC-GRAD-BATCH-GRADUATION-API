@@ -20,19 +20,15 @@ public class ParallelDataFetch {
 
     // Monthly distribution
     public Mono<DistributionDataParallelDTO> fetchDistributionRequiredData() {
-        String accessToken = restUtils.getAccessToken();
-        Mono<List<StudentCredentialDistribution>> transcriptList = graduationReportService.getTranscriptList(accessToken);
-        accessToken = restUtils.getAccessToken();
-        Mono<List<StudentCredentialDistribution>> certificateList = graduationReportService.getCertificateList(accessToken);
+        Mono<List<StudentCredentialDistribution>> transcriptList = graduationReportService.getTranscriptList();
+        Mono<List<StudentCredentialDistribution>> certificateList = graduationReportService.getCertificateList();
         return Mono.zip(transcriptList,certificateList).map(tuple -> new DistributionDataParallelDTO(tuple.getT1(),tuple.getT2()));
     }
 
     // Supplemental distribution
     public Mono<DistributionDataParallelDTO> fetchDistributionRequiredDataYearly() {
-        String accessToken = restUtils.getAccessToken();
-        Mono<List<StudentCredentialDistribution>> transcriptList = graduationReportService.getTranscriptListYearly(accessToken);
-        accessToken = restUtils.getAccessToken();
-        Mono<List<StudentCredentialDistribution>> certificateList = graduationReportService.getCertificateList(accessToken);
+        Mono<List<StudentCredentialDistribution>> transcriptList = graduationReportService.getTranscriptListYearly();
+        Mono<List<StudentCredentialDistribution>> certificateList = graduationReportService.getCertificateList();
         return Mono.zip(transcriptList,certificateList).map(tuple -> new DistributionDataParallelDTO(tuple.getT1(),tuple.getT2()));
     }
 

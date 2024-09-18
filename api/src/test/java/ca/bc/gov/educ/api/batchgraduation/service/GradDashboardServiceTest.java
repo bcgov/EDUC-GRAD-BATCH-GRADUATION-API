@@ -17,7 +17,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -50,9 +49,6 @@ public class GradDashboardServiceTest {
 
     @MockBean
     private RestUtils restUtils;
-
-    @MockBean
-    WebClient webClient;
 
     @Test
     public void testGetDashboardInfo() {
@@ -204,7 +200,7 @@ public class GradDashboardServiceTest {
         Mockito.when(restUtils.getStudentData(List.of(studentId))).thenReturn(List.of(rec));
         Mockito.when(batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(rec.getStudentID(),batchId)).thenReturn(Optional.of(ent));
 
-        ErrorDashBoard res = gradDashboardService.getErrorInfo(batchId,0,10,"accessToken");
+        ErrorDashBoard res = gradDashboardService.getErrorInfo(batchId,0,10);
         assertThat(res).isNotNull();
         assertThat(res.getErrorList()).hasSize(1);
 
