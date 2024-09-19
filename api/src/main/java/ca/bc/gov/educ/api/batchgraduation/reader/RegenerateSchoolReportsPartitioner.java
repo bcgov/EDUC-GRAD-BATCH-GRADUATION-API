@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
-
 @Slf4j
 public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
 
@@ -51,22 +49,19 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
         }
 
         summaryDTO.setBatchId(jobExecution.getId());
-        summaryDTO.setStudentSearchRequest(searchRequest);
+        summaryDTO.setReportBatchType(determineReportBatchType(searchRequest.getReportTypes()));
 
         Long totalSchoolReportsCount = 0L;
-        List<String> reportTypes = searchRequest.getReportTypes();
         Long schoolReportsCount = 0L;
 
         List<String> finalSchoolDistricts = new ArrayList<>();
-        List<SchoolReport> schoolReportsLite = new ArrayList<>();
+        List<SchoolReport> schoolReportsLite;
 
         if(processAllReports) {
-            if (reportTypes != null && !reportTypes.isEmpty()) {
-                if ("NONGRADPRJ".compareToIgnoreCase(reportTypes.get(0)) == 0) {
-                    schoolReportsLite = restUtils.getSchoolReportsLiteByReportType("NONGRADPRJ", summaryDTO);
-                } else {
-                    schoolReportsLite = restUtils.getSchoolReportsLiteByReportType( "GRADREG", summaryDTO);
-                }
+            if ("TVRRUN".compareToIgnoreCase(summaryDTO.getReportBatchType()) == 0) {
+                schoolReportsLite = restUtils.getSchoolReportsLiteByReportType("NONGRADPRJ", summaryDTO);
+            } else {
+                schoolReportsLite = restUtils.getSchoolReportsLiteByReportType( "GRADREG", summaryDTO);
             }
 
             if (schoolReportsLite != null && !schoolReportsLite.isEmpty()) {
@@ -81,21 +76,19 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
             totalSchoolReportsCount += finalSchoolDistricts.size();
         } else {
             for (String schoolOfRecord : schoolDistricts) {
-                if (reportTypes != null && !reportTypes.isEmpty()) {
-                    if ("NONGRADPRJ".compareToIgnoreCase(reportTypes.get(0)) == 0) {
-                        schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "NONGRADPRJ", summaryDTO);
-                    } else {
-                        schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "GRADREG", summaryDTO);
-                    }
-                    if (schoolReportsCount > 0) {
-                        finalSchoolDistricts.add(schoolOfRecord);
-                        School school = new School(schoolOfRecord);
-                        school.setNumberOfSchoolReports(schoolReportsCount);
-                        summaryDTO.getSchools().add(school);
-                        totalSchoolReportsCount += schoolReportsCount;
-                    }
-                    schoolReportsCount = 0L;
+                if ("TVRRUN".compareToIgnoreCase(summaryDTO.getReportBatchType()) == 0) {
+                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "NONGRADPRJ", summaryDTO);
+                } else {
+                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "GRADREG", summaryDTO);
                 }
+                if (schoolReportsCount > 0) {
+                    finalSchoolDistricts.add(schoolOfRecord);
+                    School school = new School(schoolOfRecord);
+                    school.setNumberOfSchoolReports(schoolReportsCount);
+                    summaryDTO.getSchools().add(school);
+                    totalSchoolReportsCount += schoolReportsCount;
+                }
+                schoolReportsCount = 0L;
             }
         }
 
@@ -103,19 +96,37 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
         long diff = (endTime - startTime)/1000;
         log.debug("Total {} schools after filters in {} sec", finalSchoolDistricts.size(), diff);
 
-        updateBatchJobHistory(createBatchJobHistory(), totalSchoolReportsCount);
         summaryDTO.setReadCount(totalSchoolReportsCount);
         summaryDTO.setProcessedCount(0);
 
-        Map<String, ExecutionContext> map = new HashMap<>();
-        ExecutionContext executionContext = new ExecutionContext();
-        executionContext.put(SEARCH_REQUEST, searchRequest);
-        executionContext.put("data", finalSchoolDistricts);
-        executionContext.put("summary", summaryDTO);
-        executionContext.put("readCount", 0);
-        map.put("partition0", executionContext);
+        if (!finalSchoolDistricts.isEmpty()) {
+            updateBatchJobHistory(createBatchJobHistory(), totalSchoolReportsCount);
+            int partitionSize = finalSchoolDistricts.size()/gridSize + 1;
+            List<List<String>> partitions = new LinkedList<>();
+            for (int i = 0; i < finalSchoolDistricts.size(); i += partitionSize) {
+                partitions.add(finalSchoolDistricts.subList(i, Math.min(i + partitionSize, finalSchoolDistricts.size())));
+            }
+            Map<String, ExecutionContext> map = new HashMap<>(partitions.size());
+            for (int i = 0; i < partitions.size(); i++) {
+                ExecutionContext executionContext = new ExecutionContext();
+                SchoolReportsRegenSummaryDTO partitionSummaryDTO = new SchoolReportsRegenSummaryDTO();
+                partitionSummaryDTO.setReportBatchType(summaryDTO.getReportBatchType());
+                List<String> data = partitions.get(i);
+                executionContext.put("data", data);
+                partitionSummaryDTO.setReadCount(data.size());
+                executionContext.put("summary", partitionSummaryDTO);
+                executionContext.put("index",0);
+                String key = "partition" + i;
+                map.put(key, executionContext);
+            }
+            log.info("Found {} in total running on {} partitions",finalSchoolDistricts.size(),map.size());
+            return map;
+        }
+        log.info("No Schools Found for School Reports Regeneration");
+        return new HashMap<>();
+    }
 
-        log.info("Found {} in total running on 1 partitions", totalSchoolReportsCount);
-        return map;
+    private String determineReportBatchType(List<String> reportTypes) {
+        return reportTypes != null && !reportTypes.isEmpty() && "NONGRADPRJ".compareToIgnoreCase(reportTypes.get(0)) == 0 ? "TVRRUN" : "REGALG";
     }
 }
