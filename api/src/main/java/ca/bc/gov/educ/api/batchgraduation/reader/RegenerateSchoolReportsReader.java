@@ -2,36 +2,26 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.SchoolReportsRegenSummaryDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.List;
-
 @Slf4j
-public class RegenerateSchoolReportsReader implements ItemReader<List<String>> {
-
-    @Value("#{stepExecutionContext['data']}")
-    List<String> schools;
+public class RegenerateSchoolReportsReader extends BaseSchoolReader implements ItemReader<String> {
 
     @Value("#{stepExecutionContext['summary']}")
     SchoolReportsRegenSummaryDTO summaryDTO;
 
-    @Value("#{stepExecution.jobExecution}")
-    JobExecution jobExecution;
-
-    @Value("#{stepExecutionContext['readCount']}")
-    Long readCount;
-
     @Override
-    public List<String> read() throws Exception {
-        if(readCount > 0) return null;
-        readCount++;
-        if(log.isDebugEnabled()) {
-            log.info("Read schools Codes -> {} of {} schools", readCount, schools.size());
+    public String read() throws Exception {
+        String nextSchool = null;
+        if (nextSchoolForProcessing < schools.size()) {
+            nextSchool = schools.get(nextSchoolForProcessing);
+            log.info("School: {} - {} of {}", nextSchool, nextSchoolForProcessing + 1, summaryDTO.getReadCount());
+            nextSchoolForProcessing++;
+        } else {
+            aggregate("schoolReportsRegenSummaryDTO");
         }
-        aggregate("schoolReportsRegenSummaryDTO");
-        return schools;
+        return nextSchool;
     }
 
     private void aggregate(String summaryContextName) {
@@ -41,7 +31,7 @@ public class RegenerateSchoolReportsReader implements ItemReader<List<String>> {
             jobExecution.getExecutionContext().put(summaryContextName, totalSummaryDTO);
         }
         totalSummaryDTO.setBatchId(summaryDTO.getBatchId());
-        totalSummaryDTO.setReadCount(summaryDTO.getReadCount());
+        totalSummaryDTO.setProcessedCount(totalSummaryDTO.getProcessedCount() + summaryDTO.getProcessedCount());
         totalSummaryDTO.getGlobalList().addAll(summaryDTO.getGlobalList());
     }
 }
