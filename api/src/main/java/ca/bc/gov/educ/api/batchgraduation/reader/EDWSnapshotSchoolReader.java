@@ -4,16 +4,19 @@ import ca.bc.gov.educ.api.batchgraduation.model.EdwSnapshotSchoolSummaryDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
+import org.springframework.beans.factory.annotation.Value;
 
 public class EDWSnapshotSchoolReader extends BaseSchoolReader implements ItemReader<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EDWSnapshotSchoolReader.class);
 
+    @Value("#{stepExecutionContext['summary']}")
+    EdwSnapshotSchoolSummaryDTO summaryDTO;
+
     @Override
     public String read() throws Exception {
         String nextSchool = null;
         if (nextSchoolForProcessing < schools.size()) {
-            fetchAccessToken();
             nextSchool = schools.get(nextSchoolForProcessing);
             LOGGER.info("School: {} - {} of {}", nextSchool, nextSchoolForProcessing + 1, summaryDTO.getReadCount());
             nextSchoolForProcessing++;
