@@ -43,7 +43,4 @@ public class StudentCredentialDistributionEntity extends BaseEntity {
 	
 	@Column(name = "ERROR", nullable = true)
     private String error;
-
-	@Column(name = "SCHOOL_OF_RECORD_ID")
-	private UUID schoolOfRecordId;
 }
