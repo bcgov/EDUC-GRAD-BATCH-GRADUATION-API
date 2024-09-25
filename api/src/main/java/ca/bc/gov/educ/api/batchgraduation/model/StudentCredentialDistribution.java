@@ -17,6 +17,7 @@ public class StudentCredentialDistribution implements Serializable {
 	private UUID studentID;
 	private String paperType;
 	private String schoolOfRecord;
+	private UUID schoolOfRecordId;
 	private String documentStatusCode;
 
 	private String pen;
