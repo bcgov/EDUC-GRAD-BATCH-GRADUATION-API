@@ -20,7 +20,6 @@ public class RegenerateCertificateReader extends BaseReader implements ItemReade
 
     @Override
     public StudentCredentialDistribution read() throws Exception {
-        fetchAccessToken();
         summaryDTO.setReadCount(credentialList.size());
 
         StudentCredentialDistribution nextCredential = null;

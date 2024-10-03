@@ -11,7 +11,6 @@ import java.util.*;
 @JsonSerialize
 public class AlgorithmSummaryDTO extends BaseSummaryDTO {
 
-//  List<UUID> successfulStudentIDs = new ArrayList<>();
   private Map<UUID,ProcessError> errors = new HashMap<>();
 
   public void updateError(UUID studentID,String errMsg, String errorDesc) {

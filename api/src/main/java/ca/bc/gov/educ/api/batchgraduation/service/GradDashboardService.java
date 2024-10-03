@@ -81,7 +81,7 @@ public class GradDashboardService extends GradService {
     }
 
 	@Transactional(readOnly = true)
-    public ErrorDashBoard getErrorInfo(Long batchId, Integer pageNumber, Integer pageSize,String accessToken) {
+    public ErrorDashBoard getErrorInfo(Long batchId, Integer pageNumber, Integer pageSize) {
 		ErrorDashBoard edb = new ErrorDashBoard();
 		Pageable paging = PageRequest.of(pageNumber, pageSize);
 		Page<BatchGradAlgorithmStudentEntity> pagedDate = batchGradAlgorithmStudentRepository.findByJobExecutionIdAndStatusIn(batchId, Arrays.asList(BatchStatusEnum.STARTED.toString(), BatchStatusEnum.FAILED.toString()), paging);

@@ -34,6 +34,16 @@ spring:
         jwt:
           issuer-uri: ${TOKEN_ISSUER_URL}
           jwk-set-uri: ${TOKEN_ISSUER_URL}/protocol/openid-connect/certs
+      client:
+        registration:
+          batch-client:
+            client-id: ${GRAD_CLIENT_NAME}
+            client-secret: ${GRAD_CLIENT_SECRET}
+            authorization-grant-type: client_credentials
+        provider:
+          batch-client:
+            issuer-uri: ${TOKEN_ISSUER_URL}
+            token-uri: ${TOKEN_ISSUER_URL}/protocol/openid-connect/token
   batch:
     job:
       enabled: false
