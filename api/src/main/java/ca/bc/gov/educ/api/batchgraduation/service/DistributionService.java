@@ -61,6 +61,7 @@ public class DistributionService extends GradService {
         entity.setJobType(jobType);
         entity.setStudentID(scd.getStudentID());
         entity.setSchoolOfRecord(scd.getSchoolOfRecord());
+        entity.setSchoolOfRecordId(scd.getSchoolOfRecordId());
         try {
             String payload = jsonUtil.getJsonStringFromObject(scd);
             entity.setPayload(payload);
