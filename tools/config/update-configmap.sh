@@ -52,17 +52,13 @@ PARSER_CONFIG="
 ###########################################################
 echo Creating config map "$APP_NAME"-config-map
 oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map \
- --from-literal=CONNECTION_TIMEOUT="30000" \
  --from-literal=GRAD_TRAX_API="http://educ-grad-trax-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
- --from-literal=MAX_LIFETIME="420000" \
  --from-literal=GRAD_STUDENT_API="http://educ-grad-student-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
- --from-literal=MAXIMUM_POOL_SIZE="25" \
  --from-literal=APP_LOG_LEVEL="$APP_LOG_LEVEL" \
  --from-literal=GRAD_GRADUATION_REPORT_API="http://educ-grad-graduation-report-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=GRAD_DISTRIBUTION_API="http://educ-grad-distribution-api.$BUSINESS_NAMESPACE-$envValue.svc.cluster.local:8080/" \
  --from-literal=TVR_RUN_CRON="0 0 02 * * *" \
  --from-literal=PEN_API="http://student-api-master.$COMMON_NAMESPACE-$envValue.svc.cluster.local:8080/" \
- --from-literal=IDLE_TIMEOUT="300000" \
  --from-literal=MAX_RETRY_ATTEMPTS="5" \
  --from-literal=ENABLE_FLYWAY="true" \
  --from-literal=TOKEN_EXPIRY_OFFSET="30" \
@@ -73,6 +69,11 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
  --from-literal=KEYCLOAK_TOKEN_URL="https://soam-$envValue.apps.silver.devops.gov.bc.ca/" \
  --from-literal=REG_ALG_CRON="0 30 18 * * *" \
  --from-literal=RECORDS_STALE_IN_DAYS="1095" \
+ --from-literal=CONNECTION_TIMEOUT='30000' \
+ --from-literal=MAXIMUM_POOL_SIZE='25' \
+ --from-literal=MIN_IDLE='25' \
+ --from-literal=IDLE_TIMEOUT='300000' \
+ --from-literal=MAX_LIFETIME='1500000' \
  --dry-run=client -o yaml | oc apply -f -
 
 echo Creating config map "$APP_NAME"-flb-sc-config-map
