@@ -1120,12 +1120,12 @@ public class RestUtilsTest {
 
     @Test
     public void testGetSchoolByDistrictCode() {
-        School school = new School();
-        school.setMincode("1234567");
+        SchoolClob school = new SchoolClob();
+        school.setMinCode("1234567");
 
-        when(this.restService.get(String.format(constants.getTraxSchoolByDistrict(), "005"), List.class)).thenReturn(List.of(school));
+        when(this.restService.get(String.format(constants.getSchoolsByDistrictNumber(), "005"), List.class)).thenReturn(List.of(school));
 
-        List<School> res = this.restUtils.getSchoolByDistrictCode("005");
+        List<SchoolClob> res = this.restUtils.getSchoolByDistrictCode("005");
         assertThat(res).isNotNull();
     }
 

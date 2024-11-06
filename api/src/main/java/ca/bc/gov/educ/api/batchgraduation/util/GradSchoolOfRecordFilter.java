@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
 import ca.bc.gov.educ.api.batchgraduation.model.School;
+import ca.bc.gov.educ.api.batchgraduation.model.SchoolClob;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,10 +45,10 @@ public class GradSchoolOfRecordFilter implements Serializable {
             } else {
                 for(String district: searchRequest.getDistricts()) {
                     logger.debug("Use district code {} to find list of schools", district);
-                    List<School> schools = restUtils.getSchoolByDistrictCode(district);
-                    for(School school: schools) {
-                        logger.debug("School {} found by district code {}", school.getMincode(), district);
-                        eligibleStudentSchoolDistricts.add(school.getMincode());
+                    List<SchoolClob> schools = restUtils.getSchoolByDistrictCode(district);
+                    for(SchoolClob school: schools) {
+                        logger.debug("School {} found by district code {}", school.getMinCode(), district);
+                        eligibleStudentSchoolDistricts.add(school.getMinCode());
                     }
                 }
             }

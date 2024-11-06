@@ -297,11 +297,8 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-api.student-certificate-regeneration.url}")
     private String studentCertificateRegeneration;
 
-    @Value("${endpoint.grad-trax-api.commonschool-by-mincode.url}")
-    private String commonSchoolByMincode;
-
     @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
-    private String traxSchoolByMincode;
+    private String schoolByMincode;
 
     @Value("${endpoint.grad-trax-api.district-by-school-category.url}")
     private String traxDistrictBySchoolCategory;
@@ -310,7 +307,7 @@ public class EducGradBatchGraduationApiConstants {
     private String traxSchoolBySchoolCategory;
 
     @Value("${endpoint.grad-trax-api.school-by-district-code.url}")
-    private String traxSchoolByDistrict;
+    private String schoolsByDistrictNumber;
 
     @Value("${endpoint.grad-student-api.get-deceased-student-id-list}")
     private String deceasedStudentIDList;

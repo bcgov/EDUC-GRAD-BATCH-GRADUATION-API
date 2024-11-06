@@ -221,9 +221,9 @@ endpoint:
     get-psi-student-list:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
     school-by-min-code:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/%s
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school-clob/%s
     school-by-district-code:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/search?district=%s
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/schools-by-district/%s
     district-by-school-category:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/district/schoolCategories?schoolCategory=%s
     school-by-school-category:
@@ -232,8 +232,6 @@ endpoint:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/edw/get-schools/snapshot/%s
     get-edw-snapshot-students-by-min-code:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/edw/get-students/snapshot/%s/%s
-    commonschool-by-mincode:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/common/%s
 
 #Splunk LogHelper
 splunk:
