@@ -552,8 +552,8 @@ public class RestUtils {
         }
     }
 
-    public SchoolClob getSchoolClob(String minCode) {
-        return restService.get(String.format(constants.getSchoolByMincode(), minCode), SchoolClob.class, getAccessToken());
+    public SchoolClob getSchoolClob(String schoolId) {
+        return restService.get(String.format(constants.getSchoolClobBySchoolId(), schoolId), SchoolClob.class, getAccessToken());
     }
 
     public List<UUID> getDeceasedStudentIDs(List<UUID> studentIDs) {

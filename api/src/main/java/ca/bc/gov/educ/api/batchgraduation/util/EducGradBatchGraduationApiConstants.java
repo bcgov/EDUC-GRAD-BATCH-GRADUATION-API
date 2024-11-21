@@ -297,8 +297,8 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-api.student-certificate-regeneration.url}")
     private String studentCertificateRegeneration;
 
-    @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
-    private String schoolByMincode;
+    @Value("${endpoint.grad-trax-api.school-clob-by-school-id.url}")
+    private String schoolClobBySchoolId;
 
     @Value("${endpoint.grad-trax-api.district-by-school-category.url}")
     private String traxDistrictBySchoolCategory;

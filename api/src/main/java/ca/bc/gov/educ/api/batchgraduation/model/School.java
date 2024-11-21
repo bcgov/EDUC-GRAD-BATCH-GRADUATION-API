@@ -10,6 +10,7 @@ public class School implements Serializable {
 
     private static final long serialVersionUID = 2L;
 
+    private String schoolId;
     private String mincode;
     private String name;
     private String typeIndicator;
@@ -31,6 +32,14 @@ public class School implements Serializable {
 
     public School(String mincode) {
         this.mincode = mincode;
+    }
+
+    public String getSchoolId() {
+        return schoolId;
+    }
+
+    public void setSchoolId(String value) {
+        this.schoolId = value;
     }
 
     public String getMincode() {
