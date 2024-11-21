@@ -15,7 +15,7 @@ spring:
     password: ${PASSWORD}
     driver-class-name: oracle.jdbc.driver.OracleDriver
   jpa:
-    show-sql: false
+    show-sql: ${SHOW_SQL_LOGS}
     database-platform: org.hibernate.dialect.OracleDialect
     hibernate:
       ddl-auto: none
@@ -255,10 +255,10 @@ endpoint:
   grad-trax-api:
     get-psi-student-list:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
-    school-by-min-code:
-      url: ${GRAD_TRAX_API}api/v1/trax/school/%s
+    school-clob-by-school-id:
+      url: ${GRAD_TRAX_API}api/v2/trax/school-clob/%s
     school-by-district-code:
-      url: ${GRAD_TRAX_API}api/v1/trax/school/search?district=%s
+      url: ${GRAD_TRAX_API}api/v2/trax/schools-by-district/%s
     district-by-school-category:
       url: ${GRAD_TRAX_API}api/v1/trax/district/schoolCategories?schoolCategory=%s
     school-by-school-category:
@@ -267,8 +267,6 @@ endpoint:
       url: ${GRAD_TRAX_API}api/v1/trax/edw/get-schools/snapshot/%s
     get-edw-snapshot-students-by-min-code:
       url: ${GRAD_TRAX_API}api/v1/trax/edw/get-students/snapshot/%s/%s
-    commonschool-by-mincode:
-        url: ${GRAD_TRAX_API}api/v1/trax/school/common/%s
 
 
 #Splunk LogHelper

@@ -519,13 +519,6 @@ public class RestUtils {
         return tokenUtils.getTokenResponseObject();
     }
 
-    public CommonSchool getCommonSchool(String schoolOfRecord) {
-        if (StringUtils.isBlank(schoolOfRecord)) {
-            return null;
-        }
-        return restService.get(String.format(constants.getCommonSchoolByMincode(), schoolOfRecord), CommonSchool.class);
-    }
-
     public List<District> getDistrictBySchoolCategoryCode(String schoolCategoryCode) {
         try {
             String url = String.format(constants.getTraxDistrictBySchoolCategory(), schoolCategoryCode);
@@ -548,9 +541,9 @@ public class RestUtils {
         }
     }
 
-    public List<School> getSchoolByDistrictCode(String district) {
+    public List<SchoolClob> getSchoolByDistrictCode(String district) {
         try {
-            String url = String.format(constants.getTraxSchoolByDistrict(), district);
+            String url = String.format(constants.getSchoolsByDistrictNumber(), district);
             var response = restService.get(url, List.class);
             return jsonTransformer.convertValue(response, new TypeReference<>(){});
         } catch (Exception e) {
@@ -559,8 +552,8 @@ public class RestUtils {
         }
     }
 
-    public TraxSchool getTraxSchool(String mincode) {
-        return restService.get(String.format(constants.getTraxSchoolByMincode(), mincode), TraxSchool.class, getAccessToken());
+    public SchoolClob getSchoolClob(String schoolId) {
+        return restService.get(String.format(constants.getSchoolClobBySchoolId(), schoolId), SchoolClob.class, getAccessToken());
     }
 
     public List<UUID> getDeceasedStudentIDs(List<UUID> studentIDs) {
