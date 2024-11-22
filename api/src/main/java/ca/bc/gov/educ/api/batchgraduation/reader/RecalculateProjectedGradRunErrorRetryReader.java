@@ -12,6 +12,7 @@ public class RecalculateProjectedGradRunErrorRetryReader extends BaseStudentRead
     @Override
     public UUID read() throws Exception {
         fetchAccessToken();
+        setUserName();
         UUID nextStudent = null;
 
         if (nxtStudentForProcessing < studentList.size()) {

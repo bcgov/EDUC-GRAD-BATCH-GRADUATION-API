@@ -12,6 +12,7 @@ public class RecalculateStudentReader extends BaseStudentReader {
     @Override
     public UUID read() throws Exception {
         fetchAccessToken();
+        setUserName();
         summaryDTO.setReadCount(studentList.size());
 
         UUID nextStudent = null;
