@@ -5,6 +5,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -30,6 +31,8 @@ public class RegGradAlgPartitionerRetry extends BasePartitioner {
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         Long batchId = jobExecution.getId();
+        JobParameters jobParameters = jobExecution.getJobParameters();
+        String username = jobParameters.getString(RUN_BY);
         List<UUID> studentList = getInputDataForErroredStudents(batchId);
         createTotalSummaryDTO("regGradAlgSummaryDTO");
 
@@ -48,6 +51,7 @@ public class RegGradAlgPartitionerRetry extends BasePartitioner {
                 summaryDTO.setReadCount(data.size());
                 executionContext.put("summary", summaryDTO);
                 executionContext.put("index",0);
+                executionContext.put("runBy", username);
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }

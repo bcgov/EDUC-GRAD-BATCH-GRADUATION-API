@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEnt
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
+import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
@@ -37,6 +38,7 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
         BatchGradAlgorithmJobHistoryEntity jobHistory = createBatchJobHistory();
         List<UUID> studentList;
         JobParameters jobParameters = jobExecution.getJobParameters();
+        String username = jobParameters.getString(RUN_BY);
         String searchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
         StudentSearchRequest req = (StudentSearchRequest)jsonTransformer.unmarshall(searchRequest, StudentSearchRequest.class);
         if (runType == RunTypeEnum.NORMAL_JOB_PROCESS) {
@@ -64,6 +66,7 @@ public class SpcRegGradAlgPartitioner extends BasePartitioner {
                 summaryDTO.setReadCount(data.size());
                 executionContext.put("summary", summaryDTO);
                 executionContext.put("index",0);
+                executionContext.put("runBy", username);
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }
