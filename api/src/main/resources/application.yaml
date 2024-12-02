@@ -225,15 +225,13 @@ endpoint:
     get-certificate-types:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/certificatetype/%s
     get-school-reports-lite-by-report-type:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport/type/%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreport/search?reportType=%s
     update-school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
     update-student-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreports?reportTypeCode=%s
     delete-student-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/delete?batchId=%s&reportType=%s
-    get-school-report-list:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistribution
     check-sccp-certificate-exists: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/check-sccp-certificate-exists
   grad-distribution-api:
     merge-n-upload:
