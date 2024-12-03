@@ -225,7 +225,7 @@ endpoint:
     get-certificate-types:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/certificatetype/%s
     get-school-reports-lite-by-report-type:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreport/search?reportType=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreport/search?reportType=%s&isLight=true
     update-school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
     update-student-report:
