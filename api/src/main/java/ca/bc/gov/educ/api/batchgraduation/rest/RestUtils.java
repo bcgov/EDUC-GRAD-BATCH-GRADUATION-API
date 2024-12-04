@@ -627,8 +627,7 @@ public class RestUtils {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         List<SchoolReport> schoolReportsLite = new ArrayList<>();
         try {
-            String accessToken = getAccessToken();
-            var response = restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), reportType), List.class, accessToken);
+            var response = restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), reportType), List.class);
             if (response != null) {
                 schoolReportsLite = jsonTransformer.convertValue(response, new TypeReference<List<SchoolReport>>() {
                 });
