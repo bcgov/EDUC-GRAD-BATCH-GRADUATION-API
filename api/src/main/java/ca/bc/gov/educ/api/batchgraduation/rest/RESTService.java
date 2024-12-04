@@ -71,7 +71,7 @@ public class RESTService {
             throw new ServiceException(getErrorMessage(
                     url,
                     e.getLocalizedMessage()),
-                    (e instanceof WebClientResponseException) ? ((WebClientResponseException) e).getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
+                    (e instanceof WebClientResponseException exception) ? exception.getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
                     e);
         }
         return obj;
@@ -83,7 +83,10 @@ public class RESTService {
             obj = this.batchWebClient
                     .get()
                     .uri(url)
-                    .headers(h -> h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()))
+                    .headers(h -> {
+                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
+                        h.set(EducGradBatchGraduationApiConstants.USERNAME, ThreadLocalStateUtil.getCurrentUser());
+                    })
                     .retrieve()
                     // if 5xx errors, throw Service error
                     .onStatus(HttpStatusCode::is5xxServerError,
@@ -104,7 +107,7 @@ public class RESTService {
             throw new ServiceException(getErrorMessage(
                     url,
                     e.getLocalizedMessage()),
-                    (e instanceof WebClientResponseException) ? ((WebClientResponseException) e).getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
+                    (e instanceof WebClientResponseException exception) ? exception.getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
                     e);
         }
         return obj;
@@ -143,7 +146,7 @@ public class RESTService {
             throw new ServiceException(getErrorMessage(
                     url,
                     e.getLocalizedMessage()),
-                    (e instanceof WebClientResponseException) ? ((WebClientResponseException) e).getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
+                    (e instanceof WebClientResponseException exception) ? exception.getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
                     e);
         }
         return obj;
@@ -154,7 +157,10 @@ public class RESTService {
         try {
             obj = this.batchWebClient.post()
                     .uri(url)
-                    .headers(h -> h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()))
+                    .headers(h -> {
+                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
+                        h.set(EducGradBatchGraduationApiConstants.USERNAME, ThreadLocalStateUtil.getCurrentUser());
+                    })
                     .body(BodyInserters.fromValue(body))
                     .retrieve()
                     .onStatus(HttpStatusCode::is5xxServerError,
@@ -171,7 +177,7 @@ public class RESTService {
             throw new ServiceException(getErrorMessage(
                     url,
                     e.getLocalizedMessage()),
-                    (e instanceof WebClientResponseException) ? ((WebClientResponseException) e).getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
+                    (e instanceof WebClientResponseException exception) ? exception.getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
                     e);
         }
         return obj;
@@ -192,7 +198,10 @@ public class RESTService {
         try {
             obj = this.batchWebClient.put()
                     .uri(url)
-                    .headers(h -> h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()))
+                    .headers(h -> {
+                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
+                        h.set(EducGradBatchGraduationApiConstants.USERNAME, ThreadLocalStateUtil.getCurrentUser());
+                    })
                     .body(BodyInserters.fromValue(body))
                     .retrieve()
                     .onStatus(HttpStatusCode::is5xxServerError,
@@ -209,7 +218,7 @@ public class RESTService {
             throw new ServiceException(getErrorMessage(
                     url,
                     e.getLocalizedMessage()),
-                    (e instanceof WebClientResponseException) ? ((WebClientResponseException) e).getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
+                    (e instanceof WebClientResponseException exception) ? exception.getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
                     e);
         }
         return obj;
@@ -227,14 +236,17 @@ public class RESTService {
         T obj;
         try {
             obj = this.batchWebClient.delete().uri(url)
-                    .headers(h -> h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()))
+                    .headers(h -> {
+                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
+                        h.set(EducGradBatchGraduationApiConstants.USERNAME, ThreadLocalStateUtil.getCurrentUser());
+                    })
                     .retrieve().bodyToMono(boundClass).block();
         } catch(Exception e) {
             // catches IOExceptions and the like
             throw new ServiceException(getErrorMessage(
                     url,
                     e.getLocalizedMessage()),
-                    (e instanceof WebClientResponseException) ? ((WebClientResponseException) e).getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
+                    (e instanceof WebClientResponseException exception) ? exception.getStatusCode().value() : HttpStatus.SERVICE_UNAVAILABLE.value(),
                     e);
         }
         return obj;

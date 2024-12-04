@@ -3,7 +3,6 @@ package ca.bc.gov.educ.api.batchgraduation.listener;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
-import ca.bc.gov.educ.api.batchgraduation.model.ResponseObj;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
@@ -84,7 +83,6 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
         }
         LOGGER.info(" --------------------------------------------------------------------------------------");
 
-        ResponseObj obj = restUtils.getTokenResponseObject();
         if (!isSpecialRun) {
             updateBackStudentFlagForErroredStudents(summaryDTO.getErrors(), jobType);
         }
