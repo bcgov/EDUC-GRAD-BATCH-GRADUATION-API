@@ -43,8 +43,7 @@ public class RequestInterceptor implements AsyncHandlerInterceptor {
 
 		// username
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		if (auth instanceof JwtAuthenticationToken) {
-			JwtAuthenticationToken authenticationToken = (JwtAuthenticationToken) auth;
+		if (auth instanceof JwtAuthenticationToken authenticationToken) {
 			Jwt jwt = (Jwt) authenticationToken.getCredentials();
 			String username = JwtUtil.getName(jwt);
 			ThreadLocalStateUtil.setCurrentUser(username);

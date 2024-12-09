@@ -12,6 +12,7 @@ public class SpecialProjectedGradRunReader extends BaseStudentReader {
     @Override
     public UUID read() throws Exception {
         fetchAccessToken();
+        setUserName();
         UUID nextStudent = null;
         
         if (nxtStudentForProcessing < studentList.size()) {
