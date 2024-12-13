@@ -234,9 +234,6 @@ public class JobLauncherController {
         response.setTriggerBy(MANUAL);
         response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
-        if(StringUtils.isBlank(studentSearchRequest.getActivityCode())) {
-            studentSearchRequest.setActivityCode("USERDIST");
-        }
         validateInput(response, studentSearchRequest);
         if(response.getException() != null) {
             return ResponseEntity.status(400).body(response);

@@ -26,7 +26,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePartitioner.class);
     private static final String RERUN_TYPE = "reRunType";
-    private static final String RUN_BY = "runBy";
+    protected static final String RUN_BY = "runBy";
     private static final String PREV_BATCH_ID = "previousBatchId";
     private static final String RERUN_ALL = "RERUN_ALL";
     private static final String RERUN_FAILED = "RERUN_FAILED";
