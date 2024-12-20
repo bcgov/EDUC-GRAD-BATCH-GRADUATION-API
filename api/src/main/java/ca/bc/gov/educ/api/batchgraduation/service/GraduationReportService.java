@@ -131,10 +131,10 @@ public class GraduationReportService {
 		dist.setPaperType(paperType);
 		//--> Revert code back to school of record GRAD2-2758
 		/** dist.setSchoolId(StringUtils.isBlank(data.getMincodeAtGrad()) ? data.getMincode() : data.getMincodeAtGrad()); **/
-		dist.setSchoolOfRecord(data.getMincode());
+		dist.setSchoolId(data.getSchoolOfRecordId());
 		//<--
-		dist.setSchoolAtGrad(data.getMincodeAtGrad());
-		dist.setSchoolOfRecordOrigin(data.getMincode());
+		dist.setSchoolAtGradId(data.getSchoolAtGradId());
+		dist.setSchoolOfRecordOriginId(data.getSchoolOfRecordId());
 		dist.setDocumentStatusCode("COMPL");
 		dist.setPen(data.getPen());
 		dist.setLegalFirstName(data.getFirstName());
@@ -146,7 +146,7 @@ public class GraduationReportService {
 		dist.setStudentGrade(data.getStudentGrade());
 		dist.setNonGradReasons(data.getNonGradReasons());
 		dist.setLastUpdateDate(data.lastUpdateDateAsString());
-		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOrigin(), dist.getSchoolAtGrad(), dist.getSchoolOfRecord());
+		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOriginId(), dist.getSchoolAtGradId(), dist.getSchoolOfRecord());
 		return dist;
 	}
 }

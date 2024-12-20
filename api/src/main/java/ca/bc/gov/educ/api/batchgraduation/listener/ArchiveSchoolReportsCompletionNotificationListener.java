@@ -50,7 +50,7 @@ public class ArchiveSchoolReportsCompletionNotificationListener extends BaseDist
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
-			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of archived School Reports : {}", value.getMincode(), value.getNumberOfSchoolReports()));
+			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of archived School Reports : {}", value.getSchoolId(), value.getNumberOfSchoolReports()));
 
 		}
 	}
