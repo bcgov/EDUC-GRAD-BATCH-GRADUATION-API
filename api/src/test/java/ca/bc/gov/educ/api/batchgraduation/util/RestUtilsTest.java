@@ -876,8 +876,9 @@ public class RestUtilsTest {
     @Test
     public void testGetStudentForBatchInput() {
         final String mincode = "123213123";
+        final UUID schoolId = UUID.randomUUID();
         final UUID studentID = UUID.randomUUID();
-        BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, "1234567");
+        BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, mincode, schoolId);
 
         when(this.restService.get(String.format(constants.getGradStudentApiGradStatusForBatchUrl(), studentID), BatchGraduationStudentRecord.class)).thenReturn(grd);
 
@@ -891,7 +892,8 @@ public class RestUtilsTest {
     @Test
     public void testGetStudentForBatchInput_When_APIisDown_returns_null() {
         final UUID studentID = UUID.randomUUID();
-        BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, "1234567");
+        final UUID schoolId = UUID.randomUUID();
+        BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, "1234567", schoolId);
 
         when(this.restService.get(String.format(constants.getGradStudentApiGradStatusForBatchUrl(), studentID), BatchGraduationStudentRecord.class)).thenReturn(grd);
 
@@ -938,12 +940,13 @@ public class RestUtilsTest {
     @Test
     public void testGetStudentsForUserReqDisRun() {
         String credentialType = "OT";
+        UUID schoolId = UUID.randomUUID();
         StudentSearchRequest req = new StudentSearchRequest();
-        List<String> sch = Arrays.asList("43224223");
-        req.setSchoolOfRecords(sch);
+        List<UUID> sch = List.of(schoolId);
+        req.setSchoolIds(sch);
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
-        scd.setSchoolOfRecord("1212211");
+        scd.setSchoolId(schoolId);
         scd.setPaperType("YED2");
         scd.setCredentialTypeCode("E");
         scd.setId(new UUID(1,1));
@@ -1097,35 +1100,43 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetDistrictBySchoolCategoryCode() {
-        District district = new District();
+    public void testGetDistrictsBySchoolCategoryCode() {
+        ca.bc.gov.educ.api.batchgraduation.model.institute.District district = new ca.bc.gov.educ.api.batchgraduation.model.institute.District();
+        district.setDistrictId(UUID.randomUUID().toString());
         district.setDistrictNumber("042");
 
-        when(this.restService.get(String.format(constants.getTraxDistrictBySchoolCategory(), "02"), List.class)).thenReturn(List.of(district));
+        when(this.restService.get(String.format(constants.getDistricstBySchoolCategory(), "02"), List.class)).thenReturn(List.of(district));
 
-        List<District> res = this.restUtils.getDistrictBySchoolCategoryCode("02");
+        List<ca.bc.gov.educ.api.batchgraduation.model.institute.District> res = this.restUtils.getDistrictsBySchoolCategoryCode("02");
         assertThat(res).isNotNull();
     }
 
     @Test
-    public void testGetSchoolBySchoolCategoryCode() {
-        School school = new School();
+    public void testGetSchoolsBySchoolCategoryCode() {
+        ca.bc.gov.educ.api.batchgraduation.model.institute.School school = new ca.bc.gov.educ.api.batchgraduation.model.institute.School();
+        school.setSchoolId(UUID.randomUUID().toString());
+        school.setDistrictId(UUID.randomUUID().toString());
         school.setMincode("1234567");
 
-        when(this.restService.get(String.format(constants.getTraxSchoolBySchoolCategory(), "02"), List.class)).thenReturn(List.of(school));
+        when(this.restService.get(String.format(constants.getSchoolsBySchoolCategory(), "02"), List.class)).thenReturn(List.of(school));
 
-        List<School> res = this.restUtils.getSchoolBySchoolCategoryCode("02");
+        List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> res = this.restUtils.getSchoolsBySchoolCategoryCode("02");
         assertThat(res).isNotNull();
     }
 
     @Test
-    public void testGetSchoolByDistrictCode() {
-        SchoolClob school = new SchoolClob();
-        school.setMinCode("1234567");
+    public void testSearchSchoolsByDistrictId() {
+        UUID schoolId = UUID.randomUUID();
+        UUID districtId = UUID.randomUUID();
 
-        when(this.restService.get(String.format(constants.getSchoolsByDistrictNumber(), "005"), List.class)).thenReturn(List.of(school));
+        ca.bc.gov.educ.api.batchgraduation.model.institute.School school = new ca.bc.gov.educ.api.batchgraduation.model.institute.School();
+        school.setSchoolId(schoolId.toString());
+        school.setDistrictId(districtId.toString());
+        school.setMincode("1234567");
 
-        List<SchoolClob> res = this.restUtils.getSchoolByDistrictCode("005");
+        when(this.restService.get(String.format(constants.getSearchSchoolsByDistrictId(), districtId), List.class)).thenReturn(List.of(school));
+
+        List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> res = this.restUtils.getSchoolsByDistrictId(districtId);
         assertThat(res).isNotNull();
     }
 
@@ -1364,7 +1375,9 @@ public class RestUtilsTest {
 
     @Test
     public void testGetTotalSchoolReportsForArchiving() {
-        List<String> schools = Arrays.asList("12345678","11223344");
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
 
         mockTokenResponseObject();
 
@@ -1446,7 +1459,9 @@ public class RestUtilsTest {
 
     @Test
     public void testGetTotalSchoolReportsForArchivingError() {
-        List<String> schools = Arrays.asList("12345678","11223344");
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
 
         mockTokenResponseObject();
 
@@ -1491,7 +1506,9 @@ public class RestUtilsTest {
 
     @Test
     public void testArchiveSchoolReports() {
-        List<String> schools = Arrays.asList("12345678","11223344");
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
 
         mockTokenResponseObject();
 
@@ -1505,7 +1522,9 @@ public class RestUtilsTest {
 
     @Test
     public void testArchiveSchoolReportsError() {
-        List<String> schools = Arrays.asList("12345678","11223344");
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
 
         mockTokenResponseObject();
 
@@ -1520,7 +1539,9 @@ public class RestUtilsTest {
 
     @Test
     public void testGetTotalStudentsForArchiving() {
-        List<String> schools = Arrays.asList("12345678","11223344");
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
 
         mockTokenResponseObject();
 
@@ -1528,13 +1549,15 @@ public class RestUtilsTest {
 
         when(this.restService.post(String.format(constants.getGradStudentCountUrl(), "CUR"), schools, Long.class, "accessToken")).thenReturn(1L);
 
-        val result = this.restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(schools, "CUR", summaryDTO);
+        val result = this.restUtils.getTotalStudentsBySchoolOfRecordIdAndStudentStatus(schools, "CUR", summaryDTO);
         assertThat(result).isEqualTo(1);
     }
 
     @Test
     public void testGetTotalStudentsForArchivingError() {
-        List<String> schools = Arrays.asList("12345678","11223344");
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
 
         mockTokenResponseObject();
 
@@ -1542,14 +1565,16 @@ public class RestUtilsTest {
 
         when(this.restService.post(String.format(constants.getGradStudentCountUrl(), "CUR"), schools, Long.class, "accessToken")).thenThrow(new RuntimeException("Unable to retrieve student counts"));
 
-        val result = this.restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(schools, "CUR", summaryDTO);
+        val result = this.restUtils.getTotalStudentsBySchoolOfRecordIdAndStudentStatus(schools, "CUR", summaryDTO);
         assertThat(result).isNotNull();
         assertThat(summaryDTO.getErrors()).isNotEmpty();
     }
 
     @Test
     public void testArchiveStudents() {
-        List<String> schools = Arrays.asList("12345678","11223344");
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
 
         mockTokenResponseObject();
 
@@ -1564,7 +1589,9 @@ public class RestUtilsTest {
 
     @Test
     public void testArchiveStudentsError() {
-        List<String> schools = Arrays.asList("12345678","11223344");
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
 
         mockTokenResponseObject();
 

@@ -227,11 +227,8 @@ public class RestUtils {
                 .findAny()
                 .orElse(null);
         if(scObj != null) {
-            if(useSchoolAtGrad) {
-                item.setSchoolOfRecord(StringUtils.isBlank(scObj.getSchoolAtGrad()) ? scObj.getSchoolOfRecord() : scObj.getSchoolAtGrad());
-            } else {
-                item.setSchoolOfRecord(scObj.getSchoolOfRecord());
-            }
+            item.setSchoolId(scObj.getSchoolId());
+            item.setDistrictId(scObj.getDistrictId());
             item.setPen(scObj.getPen());
             item.setLegalLastName(scObj.getLegalLastName());
             item.setLegalFirstName(scObj.getLegalFirstName());
@@ -243,8 +240,14 @@ public class RestUtils {
                 item.setHonoursStanding(stuRec.getHonoursStanding());
                 if(useSchoolAtGrad) {
                     item.setSchoolOfRecord(StringUtils.isBlank(stuRec.getSchoolAtGrad()) ? stuRec.getSchoolOfRecord() : stuRec.getSchoolAtGrad());
+                    item.setSchoolId(stuRec.getSchoolAtGradId() == null? stuRec.getSchoolOfRecordId() : stuRec.getSchoolAtGradId());
                 } else {
                     item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
+                    item.setSchoolId(stuRec.getSchoolOfRecordId());
+                }
+                ca.bc.gov.educ.api.batchgraduation.model.institute.School school  = getSchool(item.getSchoolId());
+                if (school != null) {
+                    item.setDistrictId(UUID.fromString(school.getDistrictId()));
                 }
                 item.setProgramCompletionDate(stuRec.getProgramCompletionDate());
                 item.setStudentID(stuRec.getStudentID());
@@ -320,7 +323,15 @@ public class RestUtils {
         return result;
     }
 
-    public Integer createAndStoreSchoolReports(List<String> uniqueSchools, String type) {
+    public ca.bc.gov.educ.api.batchgraduation.model.institute.School getSchool(UUID schoolId) {
+        String url = String.format(constants.getSchoolBySchoolId(),schoolId);
+        var result = restService.get(url, ca.bc.gov.educ.api.batchgraduation.model.institute.School.class);
+        if(result != null)
+            LOGGER.info("Fetched {} Institute School",result.getSchoolId());
+        return result;
+    }
+
+    public Integer createAndStoreSchoolReports(List<UUID> uniqueSchools, String type) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         Integer result = 0;
         if(uniqueSchools == null || uniqueSchools.isEmpty()) {
@@ -332,11 +343,11 @@ public class RestUtils {
         for (int i = 0; i < pageNum; i++) {
             int startIndex = i * pageSize;
             int endIndex = Math.min(startIndex + pageSize, uniqueSchools.size());
-            List<String> mincodes = uniqueSchools.subList(startIndex, endIndex);
+            List<UUID> schoolIds = uniqueSchools.subList(startIndex, endIndex);
             if(LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Creating School Reports for schools {}", mincodes.stream().collect(Collectors.joining(",", "{", "}")));
+                LOGGER.debug("Creating School Reports for schools: {}", schoolIds.size());
             }
-            result += restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), mincodes, Integer.class);
+            result += restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), schoolIds, Integer.class);
         }
         LOGGER.info("Created and Stored {} School Reports", result);
         return result;
@@ -519,9 +530,9 @@ public class RestUtils {
         return tokenUtils.getTokenResponseObject();
     }
 
-    public List<District> getDistrictBySchoolCategoryCode(String schoolCategoryCode) {
+    public List<ca.bc.gov.educ.api.batchgraduation.model.institute.District> getDistrictsBySchoolCategoryCode(String schoolCategoryCode) {
         try {
-            String url = String.format(constants.getTraxDistrictBySchoolCategory(), schoolCategoryCode);
+            String url = String.format(constants.getDistricstBySchoolCategory(), schoolCategoryCode);
             var response = restService.get(url, List.class);
             return jsonTransformer.convertValue(response, new TypeReference<>(){});
         } catch (Exception e) {
@@ -530,9 +541,9 @@ public class RestUtils {
         }
     }
 
-    public List<School> getSchoolBySchoolCategoryCode(String schoolCategoryCode) {
+    public List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> getSchoolsBySchoolCategoryCode(String schoolCategoryCode) {
         try {
-            String url = String.format(constants.getTraxSchoolBySchoolCategory(), schoolCategoryCode);
+            String url = String.format(constants.getSchoolsBySchoolCategory(), schoolCategoryCode);
             var response = restService.get(url, List.class);
             return jsonTransformer.convertValue(response, new TypeReference<>(){});
         } catch (Exception e) {
@@ -541,9 +552,20 @@ public class RestUtils {
         }
     }
 
-    public List<SchoolClob> getSchoolByDistrictCode(String district) {
+    public List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> getSchoolsByDistrictId(UUID districtId) {
         try {
-            String url = String.format(constants.getSchoolsByDistrictNumber(), district);
+            String url = String.format(constants.getSearchSchoolsByDistrictId(), districtId);
+            var response = restService.get(url, List.class);
+            return jsonTransformer.convertValue(response, new TypeReference<>(){});
+        } catch (Exception e) {
+            LOGGER.error(TRAX_API_IS_DOWN, e.getLocalizedMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    public List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> getSchoolsByDistrictNumber(String distNo) {
+        try {
+            String url = String.format(constants.getSearchSchoolsByDistrictNumber(), distNo);
             var response = restService.get(url, List.class);
             return jsonTransformer.convertValue(response, new TypeReference<>(){});
         } catch (Exception e) {
@@ -553,7 +575,11 @@ public class RestUtils {
     }
 
     public SchoolClob getSchoolClob(String schoolId) {
-        return restService.get(String.format(constants.getSchoolClobBySchoolId(), schoolId), SchoolClob.class, getAccessToken());
+        return restService.get(String.format(constants.getSchoolClobBySchoolId(), schoolId), SchoolClob.class);
+    }
+
+    public ca.bc.gov.educ.api.batchgraduation.model.institute.School getSchool(String schoolId) {
+        return restService.get(String.format(constants.getSchoolBySchoolId(), schoolId), ca.bc.gov.educ.api.batchgraduation.model.institute.School.class);
     }
 
     public List<UUID> getDeceasedStudentIDs(List<UUID> studentIDs) {
@@ -587,7 +613,7 @@ public class RestUtils {
         }
     }
 
-    public Long getTotalReportsForProcessing(List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
+    public Long getTotalReportsForProcessing(List<UUID> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
         Long reportsCount = 0L;
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         try {
@@ -605,7 +631,7 @@ public class RestUtils {
         return reportsCount;
     }
 
-    public Long getTotalReportsForProcessing(List<String> finalSchoolDistricts, String reportType, SchoolReportsRegenSummaryDTO summaryDTO) {
+    public Long getTotalReportsForProcessing(List<UUID> finalSchoolDistricts, String reportType, SchoolReportsRegenSummaryDTO summaryDTO) {
         Long reportsCount = 0L;
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         try {
@@ -667,10 +693,10 @@ public class RestUtils {
         return result;
     }
 
-    public Integer archiveSchoolReports(Long batchId, List<String> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
+    public Integer archiveSchoolReports(Long batchId, List<UUID> finalSchoolDistricts, String reportType, DistributionSummaryDTO summaryDTO) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Archive {} School Reports for Ministry Codes: {}", reportType, !finalSchoolDistricts.isEmpty() ? String.join(",", finalSchoolDistricts) : summaryDTO.getSchools().stream().map(School::getMincode).collect(Collectors.joining(",")));
+            LOGGER.debug("Archive {} School Reports for Ministry Codes: {}", reportType, !finalSchoolDistricts.isEmpty() ? String.join(",", finalSchoolDistricts.toString()) : summaryDTO.getSchools().stream().map(School::getSchoolId).collect(Collectors.joining(",")));
         }
         try {
             String accessToken = getAccessToken();
@@ -684,7 +710,7 @@ public class RestUtils {
         }
     }
 
-    public Long getTotalStudentsBySchoolOfRecordAndStudentStatus(List<String> finalSchoolDistricts, String studentStatus, DistributionSummaryDTO summaryDTO) {
+    public Long getTotalStudentsBySchoolOfRecordIdAndStudentStatus(List<UUID> finalSchoolDistricts, String studentStatus, DistributionSummaryDTO summaryDTO) {
         Long studentsCount = 0L;
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         try {
@@ -697,15 +723,15 @@ public class RestUtils {
             summaryDTO.setException(e.getLocalizedMessage());
         }
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Total {} of {} students for archiving of SoR: {}", studentsCount, studentStatus, String.join(",", finalSchoolDistricts));
+            LOGGER.debug("Total {} of {} students for archiving of SoR: {}", studentsCount, studentStatus, String.join(",", finalSchoolDistricts.toString()));
         }
         return studentsCount;
     }
 
-    public Integer archiveStudents(Long batchId, List<String> finalSchoolDistricts, String studentStatus, DistributionSummaryDTO summaryDTO) {
+    public Integer archiveStudents(Long batchId, List<UUID> finalSchoolDistricts, String studentStatus, DistributionSummaryDTO summaryDTO) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Archive {} Students for Ministry Codes: {}", studentStatus, String.join(",", finalSchoolDistricts));
+            LOGGER.debug("Archive {} Students for Institute School: {}", studentStatus, String.join(",", finalSchoolDistricts.toString()));
         }
         try {
             String accessToken = getAccessToken();

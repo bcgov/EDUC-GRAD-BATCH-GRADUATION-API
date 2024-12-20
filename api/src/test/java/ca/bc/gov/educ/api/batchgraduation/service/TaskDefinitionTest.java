@@ -99,7 +99,7 @@ public class TaskDefinitionTest {
         task.setProperUserName("GREG");
         BlankCredentialRequest bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
-        bReq.setSchoolOfRecords(List.of("123112311"));
+        bReq.setSchoolIds(List.of(UUID.randomUUID()));
         bReq.setCredentialTypeCode(List.of("E"));
         task.setBlankPayLoad(bReq);
         taskDefinition.setTask(task);
@@ -140,7 +140,7 @@ public class TaskDefinitionTest {
         task.setJobParams("342342");
         BlankCredentialRequest bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
-        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setSchoolIds(new ArrayList<>());
         bReq.setCredentialTypeCode(new ArrayList<>());
         task.setBlankPayLoad(bReq);
         taskDefinition.setTask(task);
@@ -162,7 +162,7 @@ public class TaskDefinitionTest {
         task.setJobParams(null);
         BlankCredentialRequest bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
-        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setSchoolIds(new ArrayList<>());
         bReq.setCredentialTypeCode(List.of("E"));
         task.setBlankPayLoad(bReq);
         taskDefinition.setTask(task);
@@ -180,7 +180,7 @@ public class TaskDefinitionTest {
 
         bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
-        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setSchoolIds(new ArrayList<>());
         bReq.setCredentialTypeCode(List.of("E"));
         task.setBlankPayLoad(bReq);
         taskDefinition.setTask(task);
@@ -201,7 +201,7 @@ public class TaskDefinitionTest {
         task.setJobParams("342342");
         BlankCredentialRequest bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
-        bReq.setSchoolOfRecords(List.of("E"));
+        bReq.setSchoolIds(List.of(UUID.randomUUID()));
         bReq.setCredentialTypeCode(new ArrayList<>());
         task.setBlankPayLoad(bReq);
         taskDefinition.setTask(task);
@@ -219,7 +219,7 @@ public class TaskDefinitionTest {
 
         bReq = new BlankCredentialRequest();
         bReq.setQuantity(5);
-        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setSchoolIds(new ArrayList<>());
         bReq.setCredentialTypeCode(List.of("E"));
         task.setBlankPayLoad(bReq);
         taskDefinition.setTask(task);
@@ -238,10 +238,10 @@ public class TaskDefinitionTest {
         task.setCredentialType(null);
         StudentSearchRequest bReq = new StudentSearchRequest();
         bReq.setPens(new ArrayList<>());
-        bReq.setDistricts(new ArrayList<>());
+        bReq.setDistrictIds(new ArrayList<>());
         bReq.setPrograms(new ArrayList<>());
         bReq.setSchoolCategoryCodes(new ArrayList<>());
-        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setSchoolIds(new ArrayList<>());
         task.setPayload(bReq);
         taskDefinition.setTask(task);
         Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
@@ -260,10 +260,10 @@ public class TaskDefinitionTest {
         task.setCredentialType(null);
         StudentSearchRequest bReq = new StudentSearchRequest();
         bReq.setPens(new ArrayList<>());
-        bReq.setDistricts(List.of("003"));
+        bReq.setDistrictIds(List.of(UUID.randomUUID()));
         bReq.setPrograms(new ArrayList<>());
         bReq.setSchoolCategoryCodes(new ArrayList<>());
-        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setSchoolIds(new ArrayList<>());
         task.setPayload(bReq);
         taskDefinition.setTask(task);
         Mockito.when(jobRegistry.getJob("SpecialGraduationBatchJob")).thenReturn(SpecialGraduationBatchJob);
@@ -271,30 +271,30 @@ public class TaskDefinitionTest {
 
         bReq = new StudentSearchRequest();
         bReq.setPens(new ArrayList<>());
-        bReq.setDistricts(new ArrayList<>());
+        bReq.setDistrictIds(new ArrayList<>());
         bReq.setPrograms(List.of("003"));
         bReq.setSchoolCategoryCodes(new ArrayList<>());
-        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setSchoolIds(new ArrayList<>());
         task.setPayload(bReq);
         taskDefinition.setTask(task);
         taskDefinition.run();
 
         bReq = new StudentSearchRequest();
         bReq.setPens(new ArrayList<>());
-        bReq.setDistricts(new ArrayList<>());
+        bReq.setDistrictIds(new ArrayList<>());
         bReq.setPrograms(new ArrayList<>());
         bReq.setSchoolCategoryCodes(List.of("003"));
-        bReq.setSchoolOfRecords(new ArrayList<>());
+        bReq.setSchoolIds(new ArrayList<>());
         task.setPayload(bReq);
         taskDefinition.setTask(task);
         taskDefinition.run();
 
         bReq = new StudentSearchRequest();
         bReq.setPens(new ArrayList<>());
-        bReq.setDistricts(new ArrayList<>());
+        bReq.setDistrictIds(new ArrayList<>());
         bReq.setPrograms(new ArrayList<>());
         bReq.setSchoolCategoryCodes(new ArrayList<>());
-        bReq.setSchoolOfRecords(List.of("003"));
+        bReq.setSchoolIds(List.of(UUID.randomUUID()));
         task.setPayload(bReq);
         taskDefinition.setTask(task);
         taskDefinition.run();
