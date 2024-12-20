@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Value;
 
-public class EDWSnapshotSchoolReader extends BaseSchoolReader implements ItemReader<String> {
+public class EDWSnapshotSchoolReader extends BaseMinCodeReader implements ItemReader<String> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EDWSnapshotSchoolReader.class);
 

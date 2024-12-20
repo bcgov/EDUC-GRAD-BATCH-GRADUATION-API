@@ -353,22 +353,22 @@ public class RestUtils {
         return result;
     }
 
-    public Integer createAndStoreSchoolReports(String minCode, String reportType, SchoolReportsRegenSummaryDTO summaryDTO) {
+    public Integer createAndStoreSchoolReports(UUID schoolId, String reportType, SchoolReportsRegenSummaryDTO summaryDTO) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         Integer result = 0;
         try {
-            if (minCode == null || minCode.isEmpty()) {
+            if (schoolId == null) {
                 LOGGER.info("{} Schools selected for School Reports Regeneration", result);
                 return result;
             }
 
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Creating School Reports for school {}", minCode);
+                LOGGER.debug("Creating School Reports for school {}", schoolId);
             }
-            result += restService.post(String.format(constants.getCreateAndStoreSchoolReports(), reportType), List.of(minCode), Integer.class);
+            result += restService.post(String.format(constants.getCreateAndStoreSchoolReports(), reportType), List.of(schoolId), Integer.class);
             LOGGER.info("Created and Stored {} School Reports", result);
             // When multiple reports are generated, the count is > 1. In this case, still return 1 so that the actual processed
-            // mincodes is only incremented by 1 and not by the number of school reports generated.
+            // schoolId is only incremented by 1 and not by the number of school reports generated.
             if (result > 1)
                 result = 1;
         } catch(Exception e) {

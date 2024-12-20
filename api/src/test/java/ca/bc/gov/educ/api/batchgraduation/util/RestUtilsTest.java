@@ -714,7 +714,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testcreateAndStoreSchoolReports_0() {
+    public void testCreateAndStoreSchoolReports_0() {
         final String type = "NONGRADPRJ";
 
         when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), new ArrayList<>(), Integer.class)).thenReturn(0);
@@ -725,16 +725,33 @@ public class RestUtilsTest {
         assertNotNull(type);
         assertNotNull(result);
     }
-    @Test
-    public void whenCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
-        final String type = "TVRRUN";
 
-        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of("12345"), Integer.class)).thenReturn(2);
+    @Test
+    public void testCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
+        final String type = "NONGRADPRJ";
+        final UUID schoolId = UUID.randomUUID();
+
+        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of(schoolId), Integer.class)).thenReturn(2);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         mockTokenResponseObject();
 
-        var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
+        var result = this.restUtils.createAndStoreSchoolReports(List.of(schoolId),type);
+        assertNotNull(type);
+        assertNotNull(result);
+    }
+
+    @Test
+    public void whenCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
+        final String type = "TVRRUN";
+        final UUID schoolId = UUID.randomUUID();
+
+        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of(schoolId), Integer.class)).thenReturn(2);
+        when(LOGGER.isDebugEnabled()).thenReturn(true);
+
+        mockTokenResponseObject();
+
+        var result = this.restUtils.createAndStoreSchoolReports(schoolId, type, new SchoolReportsRegenSummaryDTO());
         assertNotNull(type);
         assertNotNull(result);
     }
@@ -742,11 +759,12 @@ public class RestUtilsTest {
     @Test(expected = Exception.class)
     public void whenCreateAndStoreSchoolReports_WithParams_ThenThrowException() {
         final String type = "TVRRUN";
+        final UUID schoolId = UUID.randomUUID();
 
-        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of("12345"), Integer.class, "accessToken")).thenThrow(Exception.class);
+        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of(schoolId), Integer.class, "accessToken")).thenThrow(Exception.class);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
-        var result = this.restUtils.createAndStoreSchoolReports("12345", type, new SchoolReportsRegenSummaryDTO());
+        var result = this.restUtils.createAndStoreSchoolReports(schoolId, type, new SchoolReportsRegenSummaryDTO());
     }
 
     @Test
@@ -1191,6 +1209,7 @@ public class RestUtilsTest {
         assertThat(res).isEmpty();
     }
 
+    @Test
     public void testGetSchoolClob() {
         UUID schoolId = UUID.randomUUID();
 
@@ -1198,7 +1217,7 @@ public class RestUtilsTest {
         school.setSchoolId(schoolId.toString());
         school.setMinCode("1234567");
 
-        when(this.restService.get(String.format(constants.getSchoolClobBySchoolId(), schoolId), List.class)).thenReturn(List.of(school));
+        when(this.restService.get(String.format(constants.getSchoolClobBySchoolId(), schoolId), SchoolClob.class)).thenReturn(school);
 
         val res = this.restUtils.getSchoolClob(schoolId.toString());
         assertThat(res).isNotNull();
