@@ -1112,6 +1112,14 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testGetDistrictsBySchoolCategoryCode_whenException_isThrown() {
+        when(this.restService.get(String.format(constants.getDistricstBySchoolCategory(), "02"), List.class)).thenThrow(new RuntimeException("Test Exception"));
+
+        List<ca.bc.gov.educ.api.batchgraduation.model.institute.District> res = this.restUtils.getDistrictsBySchoolCategoryCode("02");
+        assertThat(res).isEmpty();
+    }
+
+    @Test
     public void testGetSchoolsBySchoolCategoryCode() {
         ca.bc.gov.educ.api.batchgraduation.model.institute.School school = new ca.bc.gov.educ.api.batchgraduation.model.institute.School();
         school.setSchoolId(UUID.randomUUID().toString());
@@ -1122,6 +1130,14 @@ public class RestUtilsTest {
 
         List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> res = this.restUtils.getSchoolsBySchoolCategoryCode("02");
         assertThat(res).isNotNull();
+    }
+
+    @Test
+    public void testGetSchoolsBySchoolCategoryCode_whenException_isThrown() {
+        when(this.restService.get(String.format(constants.getSchoolsBySchoolCategory(), "02"), List.class)).thenThrow(new RuntimeException("Test Exception"));
+
+        List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> res = this.restUtils.getSchoolsBySchoolCategoryCode("02");
+        assertThat(res).isEmpty();
     }
 
     @Test
@@ -1137,6 +1153,54 @@ public class RestUtilsTest {
         when(this.restService.get(String.format(constants.getSearchSchoolsByDistrictId(), districtId), List.class)).thenReturn(List.of(school));
 
         List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> res = this.restUtils.getSchoolsByDistrictId(districtId);
+        assertThat(res).isNotNull();
+    }
+
+    @Test
+    public void testSearchSchoolsByDistrictId_whenException_isThrown() {
+        UUID districtId = UUID.randomUUID();
+        when(this.restService.get(String.format(constants.getSearchSchoolsByDistrictId(), districtId), List.class)).thenThrow(new RuntimeException("Test Exception"));
+
+        List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> res = this.restUtils.getSchoolsByDistrictId(districtId);
+        assertThat(res).isEmpty();
+    }
+
+    @Test
+    public void testSearchSchoolsByDistrictNumber() {
+        UUID schoolId = UUID.randomUUID();
+        UUID districtId = UUID.randomUUID();
+        String districtNumber = "039";
+
+        ca.bc.gov.educ.api.batchgraduation.model.institute.School school = new ca.bc.gov.educ.api.batchgraduation.model.institute.School();
+        school.setSchoolId(schoolId.toString());
+        school.setDistrictId(districtId.toString());
+        school.setMincode("1234567");
+
+        when(this.restService.get(String.format(constants.getSearchSchoolsByDistrictNumber(), districtNumber), List.class)).thenReturn(List.of(school));
+
+        List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> res = this.restUtils.getSchoolsByDistrictNumber(districtNumber);
+        assertThat(res).isNotNull();
+    }
+
+    @Test
+    public void testSearchSchoolsByDistrictNumber_whenException_isThrown() {
+        String districtNumber = "039";
+        when(this.restService.get(String.format(constants.getSearchSchoolsByDistrictNumber(), districtNumber), List.class)).thenThrow(new RuntimeException("Test Exception"));
+
+        List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> res = this.restUtils.getSchoolsByDistrictNumber(districtNumber);
+        assertThat(res).isEmpty();
+    }
+
+    public void testGetSchoolClob() {
+        UUID schoolId = UUID.randomUUID();
+
+        SchoolClob school = new SchoolClob();
+        school.setSchoolId(schoolId.toString());
+        school.setMinCode("1234567");
+
+        when(this.restService.get(String.format(constants.getSchoolClobBySchoolId(), schoolId), List.class)).thenReturn(List.of(school));
+
+        val res = this.restUtils.getSchoolClob(schoolId.toString());
         assertThat(res).isNotNull();
     }
 

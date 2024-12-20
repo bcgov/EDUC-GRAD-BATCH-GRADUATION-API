@@ -578,10 +578,6 @@ public class RestUtils {
         return restService.get(String.format(constants.getSchoolClobBySchoolId(), schoolId), SchoolClob.class);
     }
 
-    public ca.bc.gov.educ.api.batchgraduation.model.institute.School getSchool(String schoolId) {
-        return restService.get(String.format(constants.getSchoolBySchoolId(), schoolId), ca.bc.gov.educ.api.batchgraduation.model.institute.School.class);
-    }
-
     public List<UUID> getDeceasedStudentIDs(List<UUID> studentIDs) {
         var response = restService.post(constants.getDeceasedStudentIDList(), studentIDs, List.class);
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
