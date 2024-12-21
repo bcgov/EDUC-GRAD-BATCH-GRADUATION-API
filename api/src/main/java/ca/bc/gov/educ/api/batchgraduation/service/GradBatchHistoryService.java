@@ -74,12 +74,13 @@ public class GradBatchHistoryService {
     }
 
     @Transactional
-    public void saveBatchAlgorithmStudent(Long batchId, UUID studentID, String program, String schoolOfRecord) {
+    public void saveBatchAlgorithmStudent(Long batchId, UUID studentID, String program, String schoolOfRecord, UUID schoolId) {
         Optional<BatchGradAlgorithmStudentEntity> optional = batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(studentID, batchId);
         if (optional.isPresent()) {
             BatchGradAlgorithmStudentEntity currentEntity = optional.get();
             currentEntity.setProgram(program);
             currentEntity.setSchoolOfRecord(schoolOfRecord);
+            currentEntity.setSchoolOfRecordId(schoolId);
             batchGradAlgorithmStudentRepository.save(currentEntity);
         } else {
             BatchGradAlgorithmStudentEntity entity = new BatchGradAlgorithmStudentEntity();
@@ -87,6 +88,7 @@ public class GradBatchHistoryService {
             entity.setStudentID(studentID);
             entity.setProgram(program);
             entity.setSchoolOfRecord(schoolOfRecord);
+            entity.setSchoolOfRecordId(schoolId);
             entity.setStatus(BatchStatusEnum.STARTED.name());
             batchGradAlgorithmStudentRepository.save(entity);
         }
@@ -121,7 +123,7 @@ public class GradBatchHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<String> getSchoolListForReport(Long batchId) {
+    public List<UUID> getSchoolListForReport(Long batchId) {
         return batchGradAlgorithmStudentRepository.getSchoolList(batchId);
     }
 

@@ -60,7 +60,7 @@ public class DistributionService extends GradService {
         entity.setJobExecutionId(batchId);
         entity.setJobType(jobType);
         entity.setStudentID(scd.getStudentID());
-        entity.setSchoolOfRecord(scd.getSchoolOfRecord());
+        entity.setSchoolId(scd.getSchoolOfRecord());
         try {
             String payload = jsonUtil.getJsonStringFromObject(scd);
             entity.setPayload(payload);

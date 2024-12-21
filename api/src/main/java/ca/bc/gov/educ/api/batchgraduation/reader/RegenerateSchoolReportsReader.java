@@ -5,15 +5,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.UUID;
+
 @Slf4j
-public class RegenerateSchoolReportsReader extends BaseSchoolReader implements ItemReader<String> {
+public class RegenerateSchoolReportsReader extends BaseSchoolReader implements ItemReader<UUID> {
 
     @Value("#{stepExecutionContext['summary']}")
     SchoolReportsRegenSummaryDTO summaryDTO;
 
     @Override
-    public String read() throws Exception {
-        String nextSchool = null;
+    public UUID read() throws Exception {
+        UUID nextSchool = null;
         if (nextSchoolForProcessing < schools.size()) {
             nextSchool = schools.get(nextSchoolForProcessing);
             log.info("School: {} - {} of {}", nextSchool, nextSchoolForProcessing + 1, summaryDTO.getReadCount());

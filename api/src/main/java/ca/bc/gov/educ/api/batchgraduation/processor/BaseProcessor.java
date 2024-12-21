@@ -42,7 +42,7 @@ public abstract class BaseProcessor implements ItemProcessor<UUID, GraduationStu
             GraduationStudentRecord inputRecord = new GraduationStudentRecord();
             BeanUtils.copyProperties(item, inputRecord);
             // update input data
-            gradBatchHistoryService.saveBatchAlgorithmStudent(batchId, inputRecord.getStudentID(), inputRecord.getProgram(), inputRecord.getSchoolOfRecord());
+            gradBatchHistoryService.saveBatchAlgorithmStudent(batchId, inputRecord.getStudentID(), inputRecord.getProgram(), inputRecord.getSchoolOfRecord(), inputRecord.getSchoolOfRecordId());
             return inputRecord;
         }
         return null;

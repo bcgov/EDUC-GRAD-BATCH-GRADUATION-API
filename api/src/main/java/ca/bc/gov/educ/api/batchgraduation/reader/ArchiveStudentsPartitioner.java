@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
@@ -48,10 +49,10 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
         long startTime = System.currentTimeMillis();
         logger.debug("Filter Schools for archiving students");
         boolean processAllStudents = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
-        List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
-        List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
+        List<UUID> finalSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolsByStudentSearch(searchRequest);
+//        List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {
-            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
+            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts.toString()));
         }
 
         summaryDTO.setBatchId(jobExecution.getId());
@@ -59,34 +60,34 @@ public class ArchiveStudentsPartitioner extends BasePartitioner {
 
         List<String> studentStatusCodes = searchRequest.getStatuses();
         Long totalStudentsCount = 0L;
-        for(String schoolOfRecord: finalSchoolDistricts) {
+        for(UUID schoolId: finalSchoolDistricts) {
             Long schoolStudentCount = 0L;
             if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
                 for(String studentStatusCode: studentStatusCodes) {
-                    schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(schoolOfRecord), studentStatusCode, summaryDTO);
+                    schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordIdAndStudentStatus(List.of(schoolId), studentStatusCode, summaryDTO);
                 }
             } else {
-                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(schoolOfRecord), "CUR", summaryDTO);
-                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(schoolOfRecord), "TER", summaryDTO);
+                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordIdAndStudentStatus(List.of(schoolId), "CUR", summaryDTO);
+                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordIdAndStudentStatus(List.of(schoolId), "TER", summaryDTO);
             }
-            School school = new School(schoolOfRecord);
+            School school = new School(schoolId);
             school.setNumberOfStudents(schoolStudentCount);
             summaryDTO.getSchools().add(school);
             totalStudentsCount += schoolStudentCount;
         }
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
-        logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
+        logger.debug("Total {} schools after filters in {} sec", finalSchoolDistricts.size(), diff);
 
         if(processAllStudents && finalSchoolDistricts.isEmpty()) {
             Long schoolStudentCount = 0L;
             if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
                 for(String studentStatusCode: studentStatusCodes) {
-                    schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(), studentStatusCode, summaryDTO);
+                    schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordIdAndStudentStatus(List.of(), studentStatusCode, summaryDTO);
                 }
             } else {
-                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(), "CUR", summaryDTO);
-                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordAndStudentStatus(List.of(), "TER", summaryDTO);
+                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordIdAndStudentStatus(List.of(), "CUR", summaryDTO);
+                schoolStudentCount += restUtils.getTotalStudentsBySchoolOfRecordIdAndStudentStatus(List.of(), "TER", summaryDTO);
             }
             totalStudentsCount = schoolStudentCount;
         }

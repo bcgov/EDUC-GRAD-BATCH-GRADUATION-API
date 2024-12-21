@@ -19,7 +19,7 @@ public class RestWebClient {
     }
 
     @Bean("batchClient")
-    public WebClient batchClient() {
+    public WebClient getBatchWebClient() {
         return WebClient.builder().exchangeStrategies(ExchangeStrategies.builder()
                 .codecs(configurer -> configurer
                         .defaultCodecs()

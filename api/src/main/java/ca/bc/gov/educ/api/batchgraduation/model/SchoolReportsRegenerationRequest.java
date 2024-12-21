@@ -13,7 +13,7 @@ public class SchoolReportsRegenerationRequest extends StudentSearchRequest {
     private String runMode; // "Y" or "N"
 
     public boolean runForAll () {
-        return (getSchoolOfRecords() == null || getSchoolOfRecords().isEmpty()) &&
+        return (getSchoolIds() == null || getSchoolIds().isEmpty()) &&
                 (getSchoolCategoryCodes() == null || getSchoolCategoryCodes().isEmpty());
     }
 }

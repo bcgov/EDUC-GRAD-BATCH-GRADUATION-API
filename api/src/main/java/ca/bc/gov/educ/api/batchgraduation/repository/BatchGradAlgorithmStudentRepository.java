@@ -26,8 +26,8 @@ public interface BatchGradAlgorithmStudentRepository extends JpaRepository<Batch
 
     Page<BatchGradAlgorithmStudentEntity> findByJobExecutionIdAndStatusIn(Long batchId, List<String> statuses, Pageable paging);
 
-    @Query(value="select distinct e.schoolOfRecord from BatchGradAlgorithmStudentEntity e where e.jobExecutionId = :batchId and e.status = 'COMPLETED'")
-    List<String> getSchoolList(Long batchId);
+    @Query(value="select distinct e.schoolOfRecordId from BatchGradAlgorithmStudentEntity e where e.jobExecutionId = :batchId and e.status = 'COMPLETED'")
+    List<UUID> getSchoolList(Long batchId);
 
     long countAllByJobExecutionIdAndStatus(Long batchId, String status);
 

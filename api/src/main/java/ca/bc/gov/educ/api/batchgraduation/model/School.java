@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class School implements Serializable {
 
@@ -30,8 +31,12 @@ public class School implements Serializable {
     public School() {
     }
 
-    public School(String mincode) {
-        this.mincode = mincode;
+    public School(String schoolId) {
+        this.schoolId = schoolId;
+    }
+
+    public School(UUID schoolId) {
+        this.schoolId = schoolId != null? schoolId.toString() : null;
     }
 
     public String getSchoolId() {

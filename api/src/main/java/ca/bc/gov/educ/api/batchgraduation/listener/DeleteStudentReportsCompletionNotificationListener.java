@@ -52,7 +52,7 @@ public class DeleteStudentReportsCompletionNotificationListener extends BaseDist
 			StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
 			String userName = extractUserName(summaryDTO, jobParameters, searchRequest);
 
-			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of Deleted Student Reports : {}", value.getMincode(), value.getNumberOfStudents()));
+			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of Deleted Student Reports : {}", value.getSchoolId(), value.getNumberOfStudents()));
 			if(summaryDTO.getProcessedCount() > 0) {
 				List<UUID> finalStudentGuids = searchRequest.getStudentIDs();
 				int partitionSize = finalStudentGuids.size()/200;

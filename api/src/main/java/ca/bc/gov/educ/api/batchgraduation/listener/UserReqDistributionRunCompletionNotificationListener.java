@@ -167,6 +167,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				for(StudentCredentialDistribution trScd: transcriptDistributionList) {
 					if(certScd.getStudentID().equals(trScd.getStudentID())) {
 						trScd.setSchoolOfRecord(certScd.getSchoolOfRecord());
+						trScd.setSchoolId(certScd.getSchoolId());
 						trScd.setPen(certScd.getPen());
 						trScd.setLegalFirstName(certScd.getLegalFirstName());
 						trScd.setLegalMiddleNames(certScd.getLegalMiddleNames());

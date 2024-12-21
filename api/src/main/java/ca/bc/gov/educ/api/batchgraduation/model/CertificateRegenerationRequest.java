@@ -14,8 +14,8 @@ public class CertificateRegenerationRequest extends StudentSearchRequest {
 
     public boolean runForAll () {
         return (getPens() == null || getPens().isEmpty()) &&
-                (getDistricts() == null || getDistricts().isEmpty()) &&
-                (getSchoolOfRecords() == null || getSchoolOfRecords().isEmpty()) &&
+                (getDistrictIds() == null || getDistrictIds().isEmpty()) &&
+                (getSchoolIds() == null || getSchoolIds().isEmpty()) &&
                 (getSchoolCategoryCodes() == null || getSchoolCategoryCodes().isEmpty()) &&
                 (getStudentIDs() == null || getStudentIDs().isEmpty());
     }

@@ -10,8 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
+import java.util.UUID;
 
-public class ArchiveStudentsProcessor implements ItemProcessor<List<String>, List<String>> {
+public class ArchiveStudentsProcessor implements ItemProcessor<List<UUID>, List<UUID>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveStudentsProcessor.class);
 
@@ -22,21 +23,21 @@ public class ArchiveStudentsProcessor implements ItemProcessor<List<String>, Lis
 	DistributionSummaryDTO summaryDTO;
 
 	@Override
-	public List<String> process(List<String> minCodes) throws Exception {
+	public List<UUID> process(List<UUID> schoolIds) throws Exception {
 		Long batchId = summaryDTO.getBatchId();
 		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
 		boolean processAllStudents = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
 		long countArchivedStudents = 0l;
 		List<String> studentStatusCodes = searchRequest.getStatuses();
-		if(minCodes != null && !minCodes.isEmpty()) {
-			LOGGER.debug("Process Schools: {}", String.join(",", minCodes));
+		if(schoolIds != null && !schoolIds.isEmpty()) {
+			LOGGER.debug("Process Schools: {}", String.join(",", schoolIds.toString()));
 			if(studentStatusCodes != null && !studentStatusCodes.isEmpty()) {
 				for (String studentStatusCode : studentStatusCodes) {
-					countArchivedStudents += restUtils.archiveStudents(batchId, minCodes, studentStatusCode, summaryDTO);
+					countArchivedStudents += restUtils.archiveStudents(batchId, schoolIds, studentStatusCode, summaryDTO);
 				}
 			} else {
-				countArchivedStudents += restUtils.archiveStudents(batchId, minCodes, "CUR", summaryDTO);
-				countArchivedStudents += restUtils.archiveStudents(batchId, minCodes, "TER", summaryDTO);
+				countArchivedStudents += restUtils.archiveStudents(batchId, schoolIds, "CUR", summaryDTO);
+				countArchivedStudents += restUtils.archiveStudents(batchId, schoolIds, "TER", summaryDTO);
 			}
 		} else if(processAllStudents) {
 			LOGGER.debug("Process All Students");
@@ -50,6 +51,6 @@ public class ArchiveStudentsProcessor implements ItemProcessor<List<String>, Lis
 			}
 		}
 		summaryDTO.setProcessedCount(countArchivedStudents);
-		return minCodes;
+		return schoolIds;
 	}
 }

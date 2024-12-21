@@ -1,10 +1,8 @@
 package ca.bc.gov.educ.api.batchgraduation.util;
 
 import ca.bc.gov.educ.api.batchgraduation.model.School;
-import ca.bc.gov.educ.api.batchgraduation.model.SchoolClob;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,37 +25,37 @@ public class GradSchoolOfRecordFilter implements Serializable {
         this.restUtils = restUtils;
     }
 
-    public List<String> filterSchoolOfRecords(StudentSearchRequest searchRequest) {
-        List<String> eligibleStudentSchoolDistricts = new ArrayList<>();
+    public List<UUID> filterSchoolsByStudentSearch(StudentSearchRequest searchRequest) {
+        List<UUID> eligibleStudentSchoolDistricts = new ArrayList<>();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
             for(String schoolCategoryCode: searchRequest.getSchoolCategoryCodes()) {
                 logger.debug("Use schoolCategory code {} to find list of schools", schoolCategoryCode);
-                List<School> schools = restUtils.getSchoolBySchoolCategoryCode(schoolCategoryCode);
-                for(School school: schools) {
-                    logger.debug("School {} found by schoolCategory code {}", school.getMincode(), schoolCategoryCode);
-                    eligibleStudentSchoolDistricts.add(school.getMincode());
+                List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> schools = restUtils.getSchoolsBySchoolCategoryCode(schoolCategoryCode);
+                for(ca.bc.gov.educ.api.batchgraduation.model.institute.School school: schools) {
+                    logger.debug("SchoolId {} / Mincode {} found by schoolCategory code {}", school.getSchoolId(), school.getMincode(), schoolCategoryCode);
+                    eligibleStudentSchoolDistricts.add(UUID.fromString(school.getSchoolId()));
                 }
             }
         }
-        if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
+        if(searchRequest != null && searchRequest.getDistrictIds() != null && !searchRequest.getDistrictIds().isEmpty()) {
             if(!eligibleStudentSchoolDistricts.isEmpty()) {
-                eligibleStudentSchoolDistricts.removeIf(scr -> !searchRequest.getDistricts().contains(StringUtils.substring(scr, 0, 3)));
+                eligibleStudentSchoolDistricts.removeIf(scr -> !searchRequest.getDistrictIds().contains(scr));
             } else {
-                for(String district: searchRequest.getDistricts()) {
-                    logger.debug("Use district code {} to find list of schools", district);
-                    List<SchoolClob> schools = restUtils.getSchoolByDistrictCode(district);
-                    for(SchoolClob school: schools) {
-                        logger.debug("School {} found by district code {}", school.getMinCode(), district);
-                        eligibleStudentSchoolDistricts.add(school.getMinCode());
+                for(UUID districtId: searchRequest.getDistrictIds()) {
+                    logger.debug("Use district id {} to find list of schools", districtId);
+                    List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> schools = restUtils.getSchoolsByDistrictId(districtId);
+                    for(ca.bc.gov.educ.api.batchgraduation.model.institute.School school: schools) {
+                        logger.debug("School {} found by district id {}", school.getMincode(), school.getDistrictId());
+                        eligibleStudentSchoolDistricts.add(UUID.fromString(school.getSchoolId()));
                     }
                 }
             }
         }
-        if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
+        if(searchRequest != null && searchRequest.getSchoolIds() != null && !searchRequest.getSchoolIds().isEmpty()) {
             if(!eligibleStudentSchoolDistricts.isEmpty()) {
-                eligibleStudentSchoolDistricts.removeIf(scr -> !searchRequest.getSchoolOfRecords().contains(scr));
+                eligibleStudentSchoolDistricts.removeIf(scr -> !searchRequest.getSchoolIds().contains(scr));
             } else {
-                eligibleStudentSchoolDistricts = searchRequest.getSchoolOfRecords();
+                eligibleStudentSchoolDistricts = searchRequest.getSchoolIds();
             }
         }
         return eligibleStudentSchoolDistricts;

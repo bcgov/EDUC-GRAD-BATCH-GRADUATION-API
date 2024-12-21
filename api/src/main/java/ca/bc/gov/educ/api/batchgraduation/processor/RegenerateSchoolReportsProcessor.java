@@ -6,9 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
+
+import java.util.List;
+import java.util.UUID;
 
 @Slf4j
-public class RegenerateSchoolReportsProcessor implements ItemProcessor<String, String> {
+public class RegenerateSchoolReportsProcessor implements ItemProcessor<UUID, UUID> {
 
 	@Autowired
 	RestUtils restUtils;
@@ -20,15 +24,15 @@ public class RegenerateSchoolReportsProcessor implements ItemProcessor<String, S
 	Long batchId;
 
 	@Override
-	public String process(String minCode) throws Exception {
+	public UUID process(@NonNull UUID schoolId) throws Exception {
 		summaryDTO.setBatchId(batchId);
 		if(log.isDebugEnabled()) {
-			log.debug("Processing {} School Report: {} ", summaryDTO.getReportBatchType(), minCode);
+			log.debug("Processing {} School Report: {} ", summaryDTO.getReportBatchType(), schoolId);
 		}
 
-		long countRegeneratedSchoolReports = restUtils.createAndStoreSchoolReports(minCode, summaryDTO.getReportBatchType(), summaryDTO);
+		long countRegeneratedSchoolReports = restUtils.createAndStoreSchoolReports(schoolId, summaryDTO.getReportBatchType(), summaryDTO);
 
 		summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + countRegeneratedSchoolReports);
-		return minCode;
+		return schoolId;
 	}
 }

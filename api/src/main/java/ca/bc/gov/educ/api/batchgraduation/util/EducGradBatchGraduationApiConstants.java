@@ -301,14 +301,20 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-trax-api.school-clob-by-school-id.url}")
     private String schoolClobBySchoolId;
 
+    @Value("${endpoint.grad-trax-api.school-by-school-id.url}")
+    private String schoolBySchoolId;
+
+    @Value("${endpoint.grad-trax-api.search-schools-by-district-id.url}")
+    private String searchSchoolsByDistrictId;
+
+    @Value("${endpoint.grad-trax-api.search-schools-by-district-number.url}")
+    private String searchSchoolsByDistrictNumber;
+
     @Value("${endpoint.grad-trax-api.district-by-school-category.url}")
-    private String traxDistrictBySchoolCategory;
+    private String districstBySchoolCategory;
 
     @Value("${endpoint.grad-trax-api.school-by-school-category.url}")
-    private String traxSchoolBySchoolCategory;
-
-    @Value("${endpoint.grad-trax-api.school-by-district-code.url}")
-    private String schoolsByDistrictNumber;
+    private String schoolsBySchoolCategory;
 
     @Value("${endpoint.grad-student-api.get-deceased-student-id-list}")
     private String deceasedStudentIDList;

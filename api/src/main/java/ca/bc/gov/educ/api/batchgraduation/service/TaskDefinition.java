@@ -144,7 +144,7 @@ public class TaskDefinition implements Runnable {
     }
 
     private AlgorithmSummaryDTO validateInput(StudentSearchRequest studentSearchRequest) {
-        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
+        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistrictIds().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolIds().isEmpty()) {
             AlgorithmSummaryDTO summaryDTO = new AlgorithmSummaryDTO();
             summaryDTO.setException("Please provide at least 1 parameter");
             return summaryDTO;
@@ -153,7 +153,7 @@ public class TaskDefinition implements Runnable {
     }
 
     private BlankDistributionSummaryDTO validateInputBlankDisRun(BlankCredentialRequest blankCredentialRequest) {
-        if(blankCredentialRequest.getSchoolOfRecords().isEmpty() || blankCredentialRequest.getCredentialTypeCode().isEmpty()) {
+        if(blankCredentialRequest.getSchoolIds().isEmpty() || blankCredentialRequest.getCredentialTypeCode().isEmpty()) {
             BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
             summaryDTO.setException("Please provide both parameters");
             return summaryDTO;

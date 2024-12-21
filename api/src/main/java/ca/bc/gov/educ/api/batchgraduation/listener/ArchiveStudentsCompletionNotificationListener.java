@@ -54,7 +54,7 @@ public class ArchiveStudentsCompletionNotificationListener extends BaseDistribut
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(" --------------------------------------------------------------------------------------");
-			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of archived Students : {}", value.getMincode(), value.getNumberOfStudents()));
+			summaryDTO.getSchools().forEach((value) -> LOGGER.info("School {} number of archived Students : {}", value.getSchoolId(), value.getNumberOfStudents()));
 		}
 	}
 }

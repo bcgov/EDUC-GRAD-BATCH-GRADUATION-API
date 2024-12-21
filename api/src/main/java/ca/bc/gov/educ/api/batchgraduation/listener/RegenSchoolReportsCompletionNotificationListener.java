@@ -37,7 +37,7 @@ public class RegenSchoolReportsCompletionNotificationListener extends BaseRegenS
 			log.info(" --------------------------------------------------------------------------------------");
 			log.info("Errors:{}", summaryDTO.getErrors().size());
 			log.info(" --------------------------------------------------------------------------------------");
-			summaryDTO.getSchools().forEach(value -> log.debug("School Report regenerated for {}", value.getMincode()));
+			summaryDTO.getSchools().forEach(value -> log.debug("School Report regenerated for {}", value.getSchoolId()));
 			// save batch job & error history
 			saveBatchJobHistory(summaryDTO, jobExecutionId, status, endTime);
 

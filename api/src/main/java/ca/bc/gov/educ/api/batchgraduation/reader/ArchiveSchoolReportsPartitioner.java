@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
@@ -49,10 +50,10 @@ public class ArchiveSchoolReportsPartitioner extends BasePartitioner {
         logger.debug("Filter Schools for archiving school reports");
         boolean processAllReports = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
 
-        List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
-        List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
+        List<UUID> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolsByStudentSearch(searchRequest);
+        List<UUID> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {
-            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
+            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts.toString()));
         }
 
         summaryDTO.setBatchId(jobExecution.getId());
@@ -73,13 +74,13 @@ public class ArchiveSchoolReportsPartitioner extends BasePartitioner {
             summaryDTO.getSchools().add(school);
             totalSchoolReporsCount += schoolReportsCount;
         } else {
-            for (String schoolOfRecord : finalSchoolDistricts) {
+            for (UUID schoolId : finalSchoolDistricts) {
                 if (reportTypes != null && !reportTypes.isEmpty()) {
                     for (String reportType : reportTypes) {
-                        schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), reportType, summaryDTO);
+                        schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolId), reportType, summaryDTO);
                     }
                 }
-                School school = new School(schoolOfRecord);
+                School school = new School(schoolId);
                 school.setNumberOfSchoolReports(schoolReportsCount);
                 summaryDTO.getSchools().add(school);
                 totalSchoolReporsCount += schoolReportsCount;

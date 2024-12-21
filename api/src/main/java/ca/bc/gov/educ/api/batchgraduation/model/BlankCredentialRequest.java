@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Component
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class BlankCredentialRequest implements Serializable {
-    private List<String> schoolOfRecords;
+    private List<UUID> schoolIds;
     private List<String> credentialTypeCode;
     private String user;
     private Address address;

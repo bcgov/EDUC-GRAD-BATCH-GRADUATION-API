@@ -13,6 +13,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -64,24 +65,24 @@ public class ParallelDataFetchTest {
 
     @Test
     public void testFetchDistributionRequiredDataSchoolsNonGradYearly() {
-
+        UUID schoolId = UUID.randomUUID();
         mockTokenResponseObject();
 
-        when(this.graduationReportService.getSchoolsNonGradYearly("accessToken")).thenReturn(List.of("1234567"));
+        when(this.graduationReportService.getSchoolsNonGradYearly("accessToken")).thenReturn(List.of(schoolId));
 
-        List<String> result = parallelDataFetch.fetchDistributionRequiredDataSchoolsNonGradYearly();
+        List<UUID> result = parallelDataFetch.fetchDistributionRequiredDataSchoolsNonGradYearly();
         assertThat(result).isNotEmpty();
 
     }
 
     @Test
     public void testFetchDistributionRequiredDataDistrictsNonGradYearly() {
-
+        UUID schoolId = UUID.randomUUID();
         mockTokenResponseObject();
 
-        when(this.graduationReportService.getDistrictsNonGradYearly("accessToken")).thenReturn(List.of("123"));
+        when(this.graduationReportService.getDistrictsNonGradYearly("accessToken")).thenReturn(List.of(schoolId));
 
-        List<String> result = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly();
+        List<UUID> result = parallelDataFetch.fetchDistributionRequiredDataDistrictsNonGradYearly();
         assertThat(result).isNotEmpty();
 
     }

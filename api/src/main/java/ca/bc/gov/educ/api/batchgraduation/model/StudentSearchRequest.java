@@ -20,14 +20,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class StudentSearchRequest implements Serializable {
-    private List<String> schoolOfRecords = new ArrayList<>();
-    private List<String> districts = new ArrayList<>();
+    private List<UUID> schoolIds = new ArrayList<>();
+    private List<UUID> districtIds = new ArrayList<>();
     private List<String> schoolCategoryCodes = new ArrayList<>();
     private List<String> pens = new ArrayList<>();
     private List<String> programs = new ArrayList<>();
     private List<UUID> studentIDs = new ArrayList<>();
     private List<String> statuses = new ArrayList<>();
-    private List<String> reportTypes = new ArrayList();
+    private List<String> reportTypes = new ArrayList<>();
 
     private String user;
     private Address address;
@@ -44,8 +44,8 @@ public class StudentSearchRequest implements Serializable {
 
     @JsonIgnore
     public boolean isEmpty() {
-        return  (schoolOfRecords == null || schoolOfRecords.isEmpty()) &&
-                (districts == null || districts.isEmpty()) &&
+        return  (schoolIds == null || schoolIds.isEmpty()) &&
+                (districtIds == null || districtIds.isEmpty()) &&
                 (schoolCategoryCodes == null || schoolCategoryCodes.isEmpty()) &&
                 (pens == null || pens.isEmpty()) &&
                 (studentIDs == null || studentIDs.isEmpty());

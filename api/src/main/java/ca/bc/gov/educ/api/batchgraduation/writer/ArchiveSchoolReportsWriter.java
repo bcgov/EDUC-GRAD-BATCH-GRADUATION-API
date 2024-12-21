@@ -6,12 +6,13 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 
 import java.util.List;
+import java.util.UUID;
 
-public class ArchiveSchoolReportsWriter implements ItemWriter<List<String>> {
+public class ArchiveSchoolReportsWriter implements ItemWriter<List<UUID>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveSchoolReportsWriter.class);
     @Override
-    public void write(Chunk<? extends List<String>> chunk) throws Exception {
+    public void write(Chunk<? extends List<UUID>> chunk) throws Exception {
         LOGGER.info("Archive Students Writer");
     }
 }

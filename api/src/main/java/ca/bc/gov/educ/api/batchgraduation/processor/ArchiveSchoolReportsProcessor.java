@@ -11,9 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class ArchiveSchoolReportsProcessor implements ItemProcessor<List<String>, List<String>> {
+public class ArchiveSchoolReportsProcessor implements ItemProcessor<List<UUID>, List<UUID>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArchiveSchoolReportsProcessor.class);
 
@@ -24,20 +25,20 @@ public class ArchiveSchoolReportsProcessor implements ItemProcessor<List<String>
 	DistributionSummaryDTO summaryDTO;
 
 	@Override
-	public List<String> process(List<String> minCodes) throws Exception {
+	public List<UUID> process(List<UUID> schoolIds) throws Exception {
 		Long batchId = summaryDTO.getBatchId();
 		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
 		long countArchivedSchoolReports = 0l;
 		List<String> reportTypes = searchRequest.getReportTypes();
 		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Process Schools: {}", !minCodes.isEmpty() ? String.join(",", minCodes) : summaryDTO.getSchools().stream().map(School::getMincode).collect(Collectors.joining(",")));
+			LOGGER.debug("Process Schools: {}", !schoolIds.isEmpty() ? String.join(",", schoolIds.toString()) : summaryDTO.getSchools().stream().map(School::getSchoolId).collect(Collectors.joining(",")));
 		}
 		if(reportTypes != null && !reportTypes.isEmpty()) {
 			for (String reportTypeCode : reportTypes) {
-				countArchivedSchoolReports += restUtils.archiveSchoolReports(batchId, minCodes, reportTypeCode, summaryDTO);
+				countArchivedSchoolReports += restUtils.archiveSchoolReports(batchId, schoolIds, reportTypeCode, summaryDTO);
 			}
 		}
 		summaryDTO.setProcessedCount(countArchivedSchoolReports);
-		return minCodes;
+		return schoolIds;
 	}
 }

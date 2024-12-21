@@ -119,7 +119,7 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
 
     private void processSchoolList(Long batchId, String jobType) {
         LOGGER.info(" Creating Reports for {}", jobType);
-        List<String> uniqueSchoolList = gradBatchHistoryService.getSchoolListForReport(batchId);
+        List<UUID> uniqueSchoolList = gradBatchHistoryService.getSchoolListForReport(batchId);
         LOGGER.info(" Number of Schools [{}]", uniqueSchoolList.size());
         restUtils.createAndStoreSchoolReports(uniqueSchoolList,jobType);
     }
