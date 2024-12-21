@@ -756,15 +756,28 @@ public class RestUtilsTest {
         assertNotNull(result);
     }
 
-    @Test(expected = Exception.class)
+    @Test
+    public void whenCreateAndStoreSchoolReports_WithParams_ThenReturnsEmptyList() {
+        final String type = "TVRRUN";
+
+        when(LOGGER.isDebugEnabled()).thenReturn(true);
+
+        var result = this.restUtils.createAndStoreSchoolReports(null, type, new SchoolReportsRegenSummaryDTO());
+        assertThat(result).isZero();
+    }
+
+    @Test
     public void whenCreateAndStoreSchoolReports_WithParams_ThenThrowException() {
         final String type = "TVRRUN";
         final UUID schoolId = UUID.randomUUID();
 
-        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of(schoolId), Integer.class, "accessToken")).thenThrow(Exception.class);
+        SchoolReportsRegenSummaryDTO summaryDTO = new SchoolReportsRegenSummaryDTO();
+
+        when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of(schoolId), Integer.class)).thenThrow(RuntimeException.class);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
-        var result = this.restUtils.createAndStoreSchoolReports(schoolId, type, new SchoolReportsRegenSummaryDTO());
+        val result = this.restUtils.createAndStoreSchoolReports(schoolId, type, summaryDTO);
+        assertThat(result).isZero();
     }
 
     @Test
@@ -779,14 +792,14 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class, "accessToken")).thenReturn(schoolReportsLite);
+        when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class)).thenReturn(schoolReportsLite);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         val result = this.restUtils.getSchoolReportsLiteByReportType("GRADREG", new SchoolReportsRegenSummaryDTO());
         assertThat(result).hasSize(1);
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void whenGetSchoolReportsLiteByReportType_ThenThrowException() {
         UUID uuid = UUID.randomUUID();
         SchoolReport sr = new SchoolReport();
@@ -797,10 +810,11 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class, "accessToken")).thenThrow(Exception.class);
+        when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class)).thenThrow(new RuntimeException("Test Exception"));
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
         val result = this.restUtils.getSchoolReportsLiteByReportType("GRADREG", new SchoolReportsRegenSummaryDTO());
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -1464,9 +1478,25 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.post(String.format(constants.getGradSchoolReportsCountUrl(), "GRADREG"), schools, Long.class, "accessToken")).thenReturn(1L);
+        when(this.restService.post(String.format(constants.getGradSchoolReportsCountUrl(), "GRADREG"), schools, Long.class)).thenReturn(1L);
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getTotalReportsForProcessing(schools, "GRADREG", summaryDTO);
+        assertThat(result).isEqualTo(1);
+    }
+
+    @Test
+    public void testGetTotalSchoolReportsRegeneration() {
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
+
+        mockTokenResponseObject();
+
+        when(this.restService.post(String.format(constants.getGradSchoolReportsCountUrl(), "GRADREG"), schools, Long.class)).thenReturn(1L);
+
+        SchoolReportsRegenSummaryDTO summaryDTO = new SchoolReportsRegenSummaryDTO();
 
         val result = this.restUtils.getTotalReportsForProcessing(schools, "GRADREG", summaryDTO);
         assertThat(result).isEqualTo(1);
@@ -1480,7 +1510,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.post(String.format(constants.getGradStudentReportsGuidsUrl(), "ACHV", 1), studentIDsIn, List.class, "accessToken")).thenReturn(studentIDsOut);
+        when(this.restService.post(String.format(constants.getGradStudentReportsGuidsUrl(), "ACHV", 1), studentIDsIn, List.class)).thenReturn(studentIDsOut);
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
@@ -1496,7 +1526,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.post(String.format(constants.getGradStudentReportsGuidsUrl(), "ACHV", 1), studentIDsIn, List.class, "accessToken")).thenThrow(new RuntimeException("Unable to retrieve report student guids"));
+        when(this.restService.post(String.format(constants.getGradStudentReportsGuidsUrl(), "ACHV", 1), studentIDsIn, List.class)).thenThrow(new RuntimeException("Unable to retrieve report student guids"));
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
@@ -1514,7 +1544,7 @@ public class RestUtilsTest {
         StudentSearchRequest searchRequest = new StudentSearchRequest();
         searchRequest.setStudentIDs(studentIDs);
 
-        when(this.restService.post(constants.getGradGetStudentsBySearchCriteriaUrl(), searchRequest, List.class, "accessToken")).thenReturn(studentIDs);
+        when(this.restService.post(constants.getGradGetStudentsBySearchCriteriaUrl(), searchRequest, List.class)).thenReturn(studentIDs);
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
@@ -1531,7 +1561,7 @@ public class RestUtilsTest {
         StudentSearchRequest searchRequest = new StudentSearchRequest();
         searchRequest.setStudentIDs(studentIDs);
 
-        when(this.restService.post(constants.getGradGetStudentsBySearchCriteriaUrl(), searchRequest, List.class, "accessToken")).thenThrow(new RuntimeException("Unable to retrieve list of Students"));
+        when(this.restService.post(constants.getGradGetStudentsBySearchCriteriaUrl(), searchRequest, List.class)).thenThrow(new RuntimeException("Unable to retrieve list of Students"));
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
@@ -1548,9 +1578,26 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.post(String.format(constants.getGradSchoolReportsCountUrl(), "GRADREG"), schools, Long.class, "accessToken")).thenThrow(new RuntimeException("Unable to retrieve school reports counts"));
+        when(this.restService.post(String.format(constants.getGradSchoolReportsCountUrl(), "GRADREG"), schools, Long.class)).thenThrow(new RuntimeException("Unable to retrieve school reports counts"));
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
+
+        val result = this.restUtils.getTotalReportsForProcessing(schools, "GRADREG", summaryDTO);
+        assertThat(result).isNotNull();
+        assertThat(summaryDTO.getErrors()).isNotEmpty();
+    }
+
+    @Test
+    public void testGetTotalSchoolReportsRegenerationError() {
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
+
+        mockTokenResponseObject();
+
+        when(this.restService.post(String.format(constants.getGradSchoolReportsCountUrl(), "GRADREG"), schools, Long.class)).thenThrow(new RuntimeException("Unable to retrieve school reports counts"));
+
+        SchoolReportsRegenSummaryDTO summaryDTO = new SchoolReportsRegenSummaryDTO();
 
         val result = this.restUtils.getTotalReportsForProcessing(schools, "GRADREG", summaryDTO);
         assertThat(result).isNotNull();
@@ -1563,7 +1610,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.post(String.format(constants.getDeleteStudentReportsUrl(), 12345678L, "ACHV"), studentIDs, Long.class, "accessToken")).thenReturn(1L);
+        when(this.restService.post(String.format(constants.getDeleteStudentReportsUrl(), 12345678L, "ACHV"), studentIDs, Long.class)).thenReturn(1L);
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
@@ -1577,7 +1624,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.post(String.format(constants.getDeleteStudentReportsUrl(), 12345678L, "ACHV"), studentIDs, Long.class, "accessToken")).thenThrow(new RuntimeException("Unable to delete student reports"));
+        when(this.restService.post(String.format(constants.getDeleteStudentReportsUrl(), 12345678L, "ACHV"), studentIDs, Long.class)).thenThrow(new RuntimeException("Unable to delete student reports"));
 
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
@@ -1595,7 +1642,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.post(String.format(constants.getGradArchiveSchoolReportsUrl(), 12345678L, "GRADREG"), schools, Integer.class, "accessToken")).thenReturn(1);
+        when(this.restService.post(String.format(constants.getGradArchiveSchoolReportsUrl(), 12345678L, "GRADREG"), schools, Integer.class)).thenReturn(1);
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
@@ -1611,7 +1658,7 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
 
-        when(this.restService.post(String.format(constants.getGradArchiveSchoolReportsUrl(), 12345678L, "GRADREG"), schools, Integer.class, "accessToken")).thenThrow(new RuntimeException("Unable to archive School Reports"));
+        when(this.restService.post(String.format(constants.getGradArchiveSchoolReportsUrl(), 12345678L, "GRADREG"), schools, Integer.class)).thenThrow(new RuntimeException("Unable to archive School Reports"));
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
@@ -1630,7 +1677,7 @@ public class RestUtilsTest {
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
-        when(this.restService.post(String.format(constants.getGradStudentCountUrl(), "CUR"), schools, Long.class, "accessToken")).thenReturn(1L);
+        when(this.restService.post(String.format(constants.getGradStudentCountUrl(), "CUR"), schools, Long.class)).thenReturn(1L);
 
         val result = this.restUtils.getTotalStudentsBySchoolOfRecordIdAndStudentStatus(schools, "CUR", summaryDTO);
         assertThat(result).isEqualTo(1);
@@ -1646,7 +1693,7 @@ public class RestUtilsTest {
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
 
-        when(this.restService.post(String.format(constants.getGradStudentCountUrl(), "CUR"), schools, Long.class, "accessToken")).thenThrow(new RuntimeException("Unable to retrieve student counts"));
+        when(this.restService.post(String.format(constants.getGradStudentCountUrl(), "CUR"), schools, Long.class)).thenThrow(new RuntimeException("Unable to retrieve student counts"));
 
         val result = this.restUtils.getTotalStudentsBySchoolOfRecordIdAndStudentStatus(schools, "CUR", summaryDTO);
         assertThat(result).isNotNull();
@@ -1664,7 +1711,7 @@ public class RestUtilsTest {
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
         summaryDTO.setUserName("USER");
 
-        when(this.restService.post(String.format(constants.getGradArchiveStudentsUrl(), 12345678L, "CUR", "USER"), schools, Integer.class, "accessToken")).thenReturn(1);
+        when(this.restService.post(String.format(constants.getGradArchiveStudentsUrl(), 12345678L, "CUR", "USER"), schools, Integer.class)).thenReturn(1);
 
         val result = this.restUtils.archiveStudents(12345678L, schools,"CUR", summaryDTO);
         assertThat(result).isEqualTo(1);
@@ -1681,7 +1728,7 @@ public class RestUtilsTest {
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
         summaryDTO.setUserName("USER");
 
-        when(this.restService.post(String.format(constants.getGradArchiveStudentsUrl(), 12345678L, "CUR", "USER"), schools, Integer.class, "accessToken")).thenThrow(new RuntimeException("Unable to archive Students"));
+        when(this.restService.post(String.format(constants.getGradArchiveStudentsUrl(), 12345678L, "CUR", "USER"), schools, Integer.class)).thenThrow(new RuntimeException("Unable to archive Students"));
 
         val result = this.restUtils.archiveStudents(12345678L, schools,"CUR", summaryDTO);
         assertThat(result).isNotNull();
