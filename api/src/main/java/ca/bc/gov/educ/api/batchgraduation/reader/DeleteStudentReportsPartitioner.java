@@ -47,7 +47,7 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
         long startTime = System.currentTimeMillis();
         logger.debug("Filter Schools for deleting student reports");
         boolean processAllReports = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
-        Long batchId = jobExecution.getId();;
+        Long batchId = jobExecution.getId();
         List<UUID> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolsByStudentSearch(searchRequest);
         List<UUID> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {

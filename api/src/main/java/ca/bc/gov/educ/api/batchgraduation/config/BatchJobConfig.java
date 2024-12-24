@@ -1086,7 +1086,7 @@ public class BatchJobConfig {
 
     @Bean
     public Step masterStepSchoolReportsRegen(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constants, SkipSQLTransactionExceptionsListener skipListener) {
-        int partitionSize = (constants.getNumberOfPartitions() / 2) + 1;
+        int partitionSize = constants.getNumberOfPartitions() / 2;
         return new StepBuilder("masterStepSchoolReportsRegen", jobRepository)
                 .partitioner(schoolReportsRegenJobStep(jobRepository, transactionManager, skipListener).getName(), partitionerSchoolReportsRegen())
                 .step(schoolReportsRegenJobStep(jobRepository, transactionManager, skipListener))
