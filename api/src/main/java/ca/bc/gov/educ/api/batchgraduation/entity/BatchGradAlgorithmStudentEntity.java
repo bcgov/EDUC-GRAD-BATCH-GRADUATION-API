@@ -34,6 +34,9 @@ public class BatchGradAlgorithmStudentEntity extends BaseEntity {
 	@Column(name = "SCHOOL_OF_RECORD", nullable = true)
 	private String schoolOfRecord;
 
+	@Column(name = "SCHOOL_OF_RECORD_ID", nullable = true)
+	private UUID schoolOfRecordId;
+
 	@Column(name = "STATUS", nullable = true)
 	private String status;
 	

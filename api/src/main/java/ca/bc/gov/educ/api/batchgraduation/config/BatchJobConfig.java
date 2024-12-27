@@ -84,7 +84,7 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ItemWriter<? super List<String>> archiveStudentsWriter() {
+    public ItemWriter<? super List<UUID>> archiveStudentsWriter() {
         return new ArchiveStudentsWriter();
     }
 
@@ -114,7 +114,7 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public ItemWriter<? super List<String>> archiveSchoolReportsWriter() {
+    public ItemWriter<? super List<UUID>> archiveSchoolReportsWriter() {
         return new ArchiveSchoolReportsWriter();
     }
 
@@ -148,7 +148,7 @@ public class BatchJobConfig {
     @Bean
     public Step archiveStudentsJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constant) {
         return new StepBuilder("archiveStudentsJobStep", jobRepository)
-                .<List<String>, List<String>>chunk(1, transactionManager)
+                .<List<UUID>, List<UUID>>chunk(1, transactionManager)
                 .processor(archiveStudentsProcessor())
                 .reader(archiveStudentsReader())
                 .writer(archiveStudentsWriter())
@@ -178,7 +178,7 @@ public class BatchJobConfig {
     @Bean
     public Step archiveSchoolReportsJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constant) {
         return new StepBuilder("archiveSchoolReportsJobStep", jobRepository)
-                .<List<String>, List<String>>chunk(1, transactionManager)
+                .<List<UUID>, List<UUID>>chunk(1, transactionManager)
                 .reader(archiveSchoolReportsReader())
                 .processor(archiveSchoolReportsProcessor())
                 .writer(archiveSchoolReportsWriter())
@@ -1074,7 +1074,7 @@ public class BatchJobConfig {
     @Bean
     public Step schoolReportsRegenJobStep(JobRepository jobRepository, PlatformTransactionManager transactionManager, SkipSQLTransactionExceptionsListener skipListener) {
         return new StepBuilder("schoolReportsRegenJobStep", jobRepository)
-                .<String, String>chunk(1, transactionManager)
+                .<UUID, UUID>chunk(1, transactionManager)
                 .reader(itemReaderSchoolReportsRegen())
                 .processor(itemProcessorSchoolReportsRegen())
                 .writer(itemWriterSchoolReportsRegen())

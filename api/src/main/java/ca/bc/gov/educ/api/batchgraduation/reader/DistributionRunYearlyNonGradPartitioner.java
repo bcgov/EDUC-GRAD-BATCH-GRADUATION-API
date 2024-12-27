@@ -11,10 +11,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
 
@@ -45,7 +42,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         startTime = System.currentTimeMillis();
         logger.debug("Retrieve schools for Non Grad Yearly Distribution");
         StudentSearchRequest searchRequest = getStudentSearchRequest();
-        List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
+        List<UUID> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolsByStudentSearch(searchRequest);
         endTime = System.currentTimeMillis();
         diff = (endTime - startTime)/1000;
         logger.debug("Total {} schools after filters in {} sec", eligibleStudentSchoolDistricts.size(), diff);
@@ -57,14 +54,14 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
             diff = (endTime - startTime)/1000;
             logger.debug("All {} districts retrieved in {} sec", eligibleStudentSchoolDistricts.size(), diff);
         }
-        List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
+        List<UUID> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {
-            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
+            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts.toString()));
         }
         if(!finalSchoolDistricts.isEmpty()) {
             updateBatchJobHistory(createBatchJobHistory(), (long) finalSchoolDistricts.size());
             int partitionSize = finalSchoolDistricts.size()/gridSize + 1;
-            List<List<String>> partitions = new LinkedList<>();
+            List<List<UUID>> partitions = new LinkedList<>();
             for (int i = 0; i < finalSchoolDistricts.size(); i += partitionSize) {
                 partitions.add(finalSchoolDistricts.subList(i, Math.min(i + partitionSize, finalSchoolDistricts.size())));
             }
@@ -77,7 +74,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
                 if(searchRequest != null) {
                     summaryDTO.setStudentSearchRequest(searchRequest);
                 }
-                List<String> data = partitions.get(i);
+                List<UUID> data = partitions.get(i);
                 executionContext.put("data", data);
                 summaryDTO.setReadCount(data.size());
                 executionContext.put("summary", summaryDTO);

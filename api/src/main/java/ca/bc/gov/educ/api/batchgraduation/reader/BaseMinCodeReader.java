@@ -7,9 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
-import java.util.UUID;
 
-public abstract class BaseSchoolReader implements ItemReader<UUID> {
+public abstract class BaseMinCodeReader implements ItemReader<String> {
 
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
@@ -19,7 +18,7 @@ public abstract class BaseSchoolReader implements ItemReader<UUID> {
     Integer nextSchoolForProcessing;
 
     @Value("#{stepExecutionContext['data']}")
-    List<UUID> schools;
+    List<String> schools;
 
     @Value("#{stepExecution.jobExecution}")
     JobExecution jobExecution;

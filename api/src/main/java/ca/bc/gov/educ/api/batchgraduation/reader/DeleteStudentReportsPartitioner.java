@@ -47,14 +47,14 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
         long startTime = System.currentTimeMillis();
         logger.debug("Filter Schools for deleting student reports");
         boolean processAllReports = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
-        Long batchId = jobExecution.getId();;
-        List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
-        List<String> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
+        Long batchId = jobExecution.getId();
+        List<UUID> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolsByStudentSearch(searchRequest);
+        List<UUID> finalSchoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(logger.isDebugEnabled()) {
-            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts));
+            logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts.toString()));
         }
 
-        searchRequest.setSchoolOfRecords(finalSchoolDistricts);
+        searchRequest.setSchoolIds(finalSchoolDistricts);
         if(searchRequest.getReportTypes().isEmpty()) {
             searchRequest.getReportTypes().add("ACHV");
         }
@@ -78,7 +78,7 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
             List<String> studentGuidsBySearchString = studentGuidsBySearch.stream().map(UUID::toString).toList();
             if(!studentGuidsBySearch.isEmpty()) {
                 for (String reportType : searchRequest.getReportTypes()) {
-                    Long studentReportsCount = restUtils.getTotalReportsForProcessing(studentGuidsBySearchString, reportType, distributionSummaryDTO);
+                    Long studentReportsCount = restUtils.getTotalReportsForProcessing(studentGuidsBySearch, reportType, distributionSummaryDTO);
                     Integer guidsRowCount = Integer.min(studentReportsCount.intValue(), DEFAULT_ROW_COUNT);
                     totalStudentReportsCount += guidsRowCount;
                     updateBatchJobHistory(algorithmJobHistory, totalStudentReportsCount);

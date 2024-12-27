@@ -213,14 +213,14 @@ public class JobLauncherControllerTest {
             exceptionIsThrown = true;
         }
         req = new StudentSearchRequest();
-        req.setSchoolOfRecords(Arrays.asList("123213123"));
+        req.setSchoolIds(Arrays.asList(UUID.randomUUID()));
         try {
             jobLauncherController.launchTvrRunSpecialJob(req);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
         req = new StudentSearchRequest();
-        req.setDistricts(Arrays.asList("123213123"));
+        req.setDistrictIds(Arrays.asList(UUID.randomUUID()));
         try {
             jobLauncherController.launchTvrRunSpecialJob(req);
         } catch (Exception e) {
@@ -237,10 +237,10 @@ public class JobLauncherControllerTest {
 
         req = new StudentSearchRequest();
         req.setPens(new ArrayList<>());
-        req.setDistricts(new ArrayList<>());
+        req.setDistrictIds(new ArrayList<>());
         req.setSchoolCategoryCodes(new ArrayList<>());
         req.setPrograms(new ArrayList<>());
-        req.setSchoolOfRecords(new ArrayList<>());
+        req.setSchoolIds(new ArrayList<>());
 
         try {
             jobLauncherController.launchTvrRunSpecialJob(req);
@@ -274,14 +274,14 @@ public class JobLauncherControllerTest {
             exceptionIsThrown = true;
         }
         req = new StudentSearchRequest();
-        req.setSchoolOfRecords(Arrays.asList("123213123"));
+        req.setSchoolIds(Arrays.asList(UUID.randomUUID()));
         try {
             jobLauncherController.launchUserReqDisRunSpecialJob("OT",req);
         } catch (Exception e) {
             exceptionIsThrown = true;
         }
         req = new StudentSearchRequest();
-        req.setDistricts(Arrays.asList("123213123"));
+        req.setDistrictIds(Arrays.asList(UUID.randomUUID()));
         try {
             jobLauncherController.launchUserReqDisRunSpecialJob("OT",req);
         } catch (Exception e) {
@@ -298,10 +298,10 @@ public class JobLauncherControllerTest {
 
         req = new StudentSearchRequest();
         req.setPens(new ArrayList<>());
-        req.setDistricts(new ArrayList<>());
+        req.setDistrictIds(new ArrayList<>());
         req.setSchoolCategoryCodes(new ArrayList<>());
         req.setPrograms(new ArrayList<>());
-        req.setSchoolOfRecords(new ArrayList<>());
+        req.setSchoolIds(new ArrayList<>());
 
         try {
             jobLauncherController.launchUserReqDisRunSpecialJob("OT",req);
@@ -323,7 +323,7 @@ public class JobLauncherControllerTest {
 
         BlankCredentialRequest req = new BlankCredentialRequest();
         req.setCredentialTypeCode(Arrays.asList("123213123"));
-        req.setSchoolOfRecords(List.of("23213112"));
+        req.setSchoolIds(List.of(UUID.randomUUID()));
         try {
             org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
             jobLauncherController.launchUserReqBlankDisRunSpecialJob(req,"OT");
@@ -344,7 +344,7 @@ public class JobLauncherControllerTest {
         builder.addString("LocalDownload","Y");
 
         BlankCredentialRequest req = new BlankCredentialRequest();
-        req.setSchoolOfRecords(Arrays.asList("123213123"));
+        req.setSchoolIds(Arrays.asList(UUID.randomUUID()));
         req.setCredentialTypeCode(new ArrayList<>());
         try {
             org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
@@ -367,7 +367,7 @@ public class JobLauncherControllerTest {
 
         BlankCredentialRequest req = new BlankCredentialRequest();
         req.setCredentialTypeCode(new ArrayList<>());
-        req.setSchoolOfRecords(new ArrayList<>());
+        req.setSchoolIds(new ArrayList<>());
 
         try {
             org.mockito.Mockito.when(jobLauncher.run(jobRegistry.getJob("blankDistributionBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
@@ -434,7 +434,7 @@ public class JobLauncherControllerTest {
     public void testArchiveSchoolReportsBatchJob() {
         ThreadLocalStateUtil.setCurrentUser("Batch Process");
         StudentSearchRequest request = new StudentSearchRequest();
-        request.setSchoolOfRecords(List.of("12345678"));
+        request.setSchoolIds(List.of(UUID.randomUUID()));
         request.setReportTypes(List.of("NONGRADREG"));
 
         String searchData = jsonTransformer.marshall(request);
@@ -463,7 +463,7 @@ public class JobLauncherControllerTest {
     public void testDeleteStudentReportsBatchJob() {
         ThreadLocalStateUtil.setCurrentUser("Batch Process");
         StudentSearchRequest request = new StudentSearchRequest();
-        request.setSchoolOfRecords(List.of("12345678"));
+        request.setSchoolIds(List.of(UUID.randomUUID()));
         request.setReportTypes(List.of("ACHV"));
 
         String searchData = jsonTransformer.marshall(request);
@@ -492,7 +492,7 @@ public class JobLauncherControllerTest {
     public void testArchiveStudentsBatchJob() {
         ThreadLocalStateUtil.setCurrentUser("Batch Process");
         StudentSearchRequest request = new StudentSearchRequest();
-        request.setSchoolOfRecords(List.of("12345678"));
+        request.setSchoolIds(List.of(UUID.randomUUID()));
 
         String searchData = jsonTransformer.marshall(request);
 
@@ -577,7 +577,7 @@ public class JobLauncherControllerTest {
     public void testLaunchRegenerateSchoolReportsJob() {
         boolean exceptionIsThrown = false;
         StudentSearchRequest req = new StudentSearchRequest();
-        req.setSchoolOfRecords(Arrays.asList("12345678"));
+        req.setSchoolIds(Arrays.asList(UUID.randomUUID()));
         req.setReportTypes(Arrays.asList("NONGRADPRJ"));
         try {
             jobLauncherController.launchRegenerateSchoolReportsBatch(req);
