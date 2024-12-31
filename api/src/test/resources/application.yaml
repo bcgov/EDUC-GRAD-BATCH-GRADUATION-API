@@ -218,14 +218,18 @@ endpoint:
   grad-trax-api:
     get-psi-student-list:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
+    school-by-school-id:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school/%s
     school-clob-by-school-id:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school-clob/%s
-    school-by-district-code:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/schools-by-district/%s
+    search-schools-by-district-id:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school/search?districtId=%s
+    search-schools-by-district-number:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school/search?distNo=%s
     district-by-school-category:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/district/schoolCategories?schoolCategory=%s
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/district/schoolCategories?schoolCategoryCode=%s
     school-by-school-category:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/schoolCategories?schoolCategory=%s
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school/schoolCategories?schoolCategoryCode=%s
     get-edw-snapshot-schools:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/edw/get-schools/snapshot/%s
     get-edw-snapshot-students-by-min-code:

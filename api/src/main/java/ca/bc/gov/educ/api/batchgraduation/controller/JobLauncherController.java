@@ -234,9 +234,6 @@ public class JobLauncherController {
         response.setTriggerBy(MANUAL);
         response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
-        if(StringUtils.isBlank(studentSearchRequest.getActivityCode())) {
-            studentSearchRequest.setActivityCode("USERDIST");
-        }
         validateInput(response, studentSearchRequest);
         if(response.getException() != null) {
             return ResponseEntity.status(400).body(response);
@@ -255,14 +252,14 @@ public class JobLauncherController {
     }
 
     private void validateInput(BatchJobResponse response, StudentSearchRequest studentSearchRequest) {
-        if(studentSearchRequest.getStudentIDs().isEmpty() && studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
+        if(studentSearchRequest.getStudentIDs().isEmpty() && studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistrictIds().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolIds().isEmpty()) {
             response.setException("Please provide at least 1 parameter");
         }
         response.setException(null);
     }
 
     private DistributionSummaryDTO validateInputDisRun(StudentSearchRequest studentSearchRequest) {
-        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistricts().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolOfRecords().isEmpty()) {
+        if(studentSearchRequest.getPens().isEmpty() && studentSearchRequest.getDistrictIds().isEmpty() && studentSearchRequest.getSchoolCategoryCodes().isEmpty() && studentSearchRequest.getPrograms().isEmpty() && studentSearchRequest.getSchoolIds().isEmpty()) {
             DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
             summaryDTO.setException("Please provide at least 1 parameter");
             return summaryDTO;
@@ -308,7 +305,7 @@ public class JobLauncherController {
     }
 
     private BlankDistributionSummaryDTO validateInputBlankDisRun(BlankCredentialRequest blankCredentialRequest) {
-        if(blankCredentialRequest.getSchoolOfRecords().isEmpty() || blankCredentialRequest.getCredentialTypeCode().isEmpty()) {
+        if(blankCredentialRequest.getSchoolIds().isEmpty() || blankCredentialRequest.getCredentialTypeCode().isEmpty()) {
             BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
             summaryDTO.setException("Please provide both parameters");
             return summaryDTO;
@@ -469,7 +466,7 @@ public class JobLauncherController {
         if (entity != null) {
             try {
                 logger.info(" Re-Generating School Reports for {} --------------------------------------------------------", entity.getJobType());
-                List<String> uniqueSchoolList = gradBatchHistoryService.getSchoolListForReport(batchId);
+                List<UUID> uniqueSchoolList = gradBatchHistoryService.getSchoolListForReport(batchId);
                 logger.info(" Number of Schools [{}] ---------------------------------------------------------", uniqueSchoolList.size());
                 restUtils.createAndStoreSchoolReports(uniqueSchoolList, entity.getJobType());
                 return ResponseEntity.ok(Boolean.TRUE);

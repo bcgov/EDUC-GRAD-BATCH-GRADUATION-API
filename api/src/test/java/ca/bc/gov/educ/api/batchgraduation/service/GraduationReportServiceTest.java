@@ -77,9 +77,9 @@ public class GraduationReportServiceTest {
     @Test
     public void testGetSchoolsNonGradYearly() {
 
-        when(this.restService.get(constants.getSchoolDataNonGradEarly(), List.class, "accessToken")).thenReturn(List.of("1234567"));
+        when(this.restService.get(constants.getSchoolDataNonGradEarly(), List.class, "accessToken")).thenReturn(List.of(UUID.randomUUID()));
 
-        List<String> res = graduationReportService.getSchoolsNonGradYearly("accessToken");
+        List<UUID> res = graduationReportService.getSchoolsNonGradYearly("accessToken");
         assertThat(res).isNotEmpty();
 
     }
@@ -87,9 +87,9 @@ public class GraduationReportServiceTest {
     @Test
     public void testGetDistrictsNonGradYearly() {
 
-        when(this.restService.get(constants.getDistrictDataNonGradEarly(), List.class, "accessToken")).thenReturn(List.of("123"));
+        when(this.restService.get(constants.getDistrictDataNonGradEarly(), List.class, "accessToken")).thenReturn(List.of(UUID.randomUUID()));
 
-        List<String> res = graduationReportService.getDistrictsNonGradYearly("accessToken");
+        List<UUID> res = graduationReportService.getDistrictsNonGradYearly("accessToken");
         assertThat(res).isNotEmpty();
 
     }
@@ -97,9 +97,9 @@ public class GraduationReportServiceTest {
     @Test
     public void testGetDistrictsYearly() {
 
-        when(this.restService.get(constants.getDistrictDataYearly(), List.class, "accessToken")).thenReturn(List.of("1234567"));
+        when(this.restService.get(constants.getDistrictDataYearly(), List.class, "accessToken")).thenReturn(List.of(UUID.randomUUID()));
 
-        List<String> res = graduationReportService.getDistrictsYearly("accessToken");
+        List<UUID> res = graduationReportService.getDistrictsYearly("accessToken");
         assertThat(res).isNotEmpty();
 
     }

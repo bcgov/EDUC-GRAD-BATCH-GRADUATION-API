@@ -48,13 +48,13 @@ public class DistributionServiceTest {
         entity.setJobExecutionId(batchId);
         entity.setStudentID(UUID.randomUUID());
         entity.setJobType("DISTRUN");
-        entity.setSchoolOfRecord("12345678");
+        entity.setSchoolId("12345678");
 
         StudentCredentialDistribution dto = new StudentCredentialDistribution();
         dto.setId(entity.getId());
         dto.setStudentID(entity.getStudentID());
         dto.setPen("123456789");
-        dto.setSchoolOfRecord(entity.getSchoolOfRecord());
+        dto.setSchoolOfRecord(entity.getSchoolId());
 
         entity.setPayload(jsonUtil.getJsonStringFromObject(dto));
 
@@ -85,13 +85,13 @@ public class DistributionServiceTest {
         entity.setId(UUID.randomUUID());
         entity.setJobExecutionId(batchId);
         entity.setJobType("DISTRUN");
-        entity.setSchoolOfRecord("12345678");
+        entity.setSchoolId("12345678");
 
         StudentCredentialDistribution dto = new StudentCredentialDistribution();
         dto.setId(entity.getId());
         dto.setStudentID(entity.getStudentID());
         dto.setPen("123456789");
-        dto.setSchoolOfRecord(entity.getSchoolOfRecord());
+        dto.setSchoolOfRecord(entity.getSchoolId());
 
         entity.setPayload(jsonUtil.getJsonStringFromObject(dto));
 

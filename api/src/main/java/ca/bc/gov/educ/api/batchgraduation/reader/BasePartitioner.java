@@ -26,7 +26,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasePartitioner.class);
     private static final String RERUN_TYPE = "reRunType";
-    private static final String RUN_BY = "runBy";
+    protected static final String RUN_BY = "runBy";
     private static final String PREV_BATCH_ID = "previousBatchId";
     private static final String RERUN_ALL = "RERUN_ALL";
     private static final String RERUN_FAILED = "RERUN_FAILED";
@@ -168,14 +168,13 @@ public abstract class BasePartitioner extends SimplePartitioner {
         Iterator scdIt = credentialList.iterator();
         while (scdIt.hasNext()) {
             StudentCredentialDistribution scd = (StudentCredentialDistribution)scdIt.next();
-            String districtCode = StringUtils.substring(scd.getSchoolOfRecord(), 0, 3);
             if (
-                    (StringUtils.isNotBlank(districtCode) && request.getDistricts() != null && !request.getDistricts().isEmpty() && !request.getDistricts().contains(districtCode))
+                    (scd.getDistrictId() != null && request.getDistrictIds() != null && !request.getDistrictIds().isEmpty() && !request.getDistrictIds().contains(scd.getDistrictId()))
                     ||
-                    (StringUtils.isNotBlank(scd.getSchoolOfRecord()) && request.getSchoolOfRecords() != null && !request.getSchoolOfRecords().isEmpty() && !request.getSchoolOfRecords().contains(scd.getSchoolOfRecord()))
+                    (scd.getSchoolId() != null && request.getSchoolIds() != null && !request.getSchoolIds().isEmpty() && !request.getSchoolIds().contains(scd.getSchoolId()))
             ) {
                 scdIt.remove();
-                LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getStudentID(), scd.getSchoolOfRecord(), String.join(",", request.getDistricts()));
+                LOGGER.debug("Student Credential {}/{} removed by the filter \"{}\"", scd.getStudentID(), scd.getSchoolId(), String.join(",", request.getDistrictIds().toString()));
             }
         }
         LOGGER.debug("Total {} Student Credentials selected after filter", credentialList.size());
@@ -221,25 +220,25 @@ public abstract class BasePartitioner extends SimplePartitioner {
     void filterByStudentSearchRequest(List<StudentCredentialDistribution> eligibleStudentSchoolDistricts) {
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
-            List<String> useFilterSchoolDistricts = new ArrayList<>();
+            List<UUID> useFilterSchoolDistricts = new ArrayList<>();
             for(String schoolCategoryCode: searchRequest.getSchoolCategoryCodes()) {
                 LOGGER.debug("Use schoolCategory code {} to find list of schools", schoolCategoryCode);
-                List<School> schools = restUtils.getSchoolBySchoolCategoryCode(schoolCategoryCode);
-                for(School school: schools) {
-                    LOGGER.debug("School {} found by schoolCategory code {}", school.getMincode(), schoolCategoryCode);
-                    useFilterSchoolDistricts.add(school.getMincode());
+                List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> schools = restUtils.getSchoolsBySchoolCategoryCode(schoolCategoryCode);
+                for(ca.bc.gov.educ.api.batchgraduation.model.institute.School school: schools) {
+                    LOGGER.debug("SchoolId {} / Mincode {} found by schoolCategory code {}", school.getSchoolId(), school.getMincode(), schoolCategoryCode);
+                    useFilterSchoolDistricts.add(UUID.fromString(school.getSchoolId()));
                 }
             }
-            eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !useFilterSchoolDistricts.contains(scr.getSchoolOfRecord()));
+            eligibleStudentSchoolDistricts.removeIf(scr->scr.getSchoolId() != null && !useFilterSchoolDistricts.contains(scr.getSchoolId()));
             LOGGER.debug("Student Credential Distribution filtered by schoolCategory code {}: {}", searchRequest.getSchoolCategoryCodes(), eligibleStudentSchoolDistricts.size());
         }
-        if(searchRequest != null && searchRequest.getDistricts() != null && !searchRequest.getDistricts().isEmpty()) {
-            eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !searchRequest.getDistricts().contains(StringUtils.substring(scr.getSchoolOfRecord(), 0, 3)));
-            LOGGER.debug("Student Credential Distribution filtered by district code {}: {}", searchRequest.getDistricts(), eligibleStudentSchoolDistricts.size());
+        if(searchRequest != null && searchRequest.getDistrictIds() != null && !searchRequest.getDistrictIds().isEmpty()) {
+            eligibleStudentSchoolDistricts.removeIf(scr->scr.getDistrictId() != null && !searchRequest.getDistrictIds().contains(scr.getDistrictId()));
+            LOGGER.debug("Student Credential Distribution filtered by district id {}: {}", searchRequest.getDistrictIds(), eligibleStudentSchoolDistricts.size());
         }
-        if(searchRequest != null && searchRequest.getSchoolOfRecords() != null && !searchRequest.getSchoolOfRecords().isEmpty()) {
-            eligibleStudentSchoolDistricts.removeIf(scr->StringUtils.isNotBlank(scr.getSchoolOfRecord()) && !searchRequest.getSchoolOfRecords().contains(scr.getSchoolOfRecord()));
-            LOGGER.debug("Student Credential Distribution filtered by schoolOfRecord code {}: {}", searchRequest.getSchoolOfRecords(), eligibleStudentSchoolDistricts.size());
+        if(searchRequest != null && searchRequest.getSchoolIds() != null && !searchRequest.getSchoolIds().isEmpty()) {
+            eligibleStudentSchoolDistricts.removeIf(scr->scr.getSchoolId() != null && !searchRequest.getSchoolIds().contains(scr.getSchoolId()));
+            LOGGER.debug("Student Credential Distribution filtered by school id {}: {}", searchRequest.getSchoolIds(), eligibleStudentSchoolDistricts.size());
         }
         if(searchRequest != null && searchRequest.getStudentIDs() != null && !searchRequest.getStudentIDs().isEmpty()) {
             eligibleStudentSchoolDistricts.removeIf(scr->scr.getStudentID() != null && !searchRequest.getStudentIDs().contains(scr.getStudentID()));

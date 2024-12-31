@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.RunTypeEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
+import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ public class SpcRegGradAlgPartitionerRetry extends BasePartitioner {
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         Long batchId = jobExecution.getId();
+        JobParameters jobParameters = jobExecution.getJobParameters();
+        String username = jobParameters.getString(RUN_BY);
         List<UUID> studentList = getInputDataForErroredStudents(batchId);
         createTotalSummaryDTO("spcRunAlgSummaryDTO");
 
@@ -52,6 +55,7 @@ public class SpcRegGradAlgPartitionerRetry extends BasePartitioner {
                 summaryDTO.setReadCount(data.size());
                 executionContext.put("summary", summaryDTO);
                 executionContext.put("index",0);
+                executionContext.put("runBy", username);
                 String key = "partition" + i;
                 map.put(key, executionContext);
             }

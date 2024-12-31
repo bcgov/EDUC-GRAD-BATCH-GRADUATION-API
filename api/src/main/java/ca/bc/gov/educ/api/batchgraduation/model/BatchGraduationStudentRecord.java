@@ -15,5 +15,6 @@ public class BatchGraduationStudentRecord {
 	private String program;
 	private String programCompletionDate;
 	private String schoolOfRecord;
+	private UUID schoolOfRecordId;
 
 }
