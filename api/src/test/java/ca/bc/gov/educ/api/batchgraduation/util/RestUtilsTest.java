@@ -791,7 +791,6 @@ public class RestUtilsTest {
         schoolReportsLite.add(sr);
 
         mockTokenResponseObject();
-
         when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class)).thenReturn(schoolReportsLite);
         when(LOGGER.isDebugEnabled()).thenReturn(true);
 
