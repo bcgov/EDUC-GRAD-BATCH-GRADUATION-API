@@ -96,8 +96,8 @@ public class RestUtils {
         return graduationReportService.getStudentsNonGradForYearlyDistribution(fetchAccessToken());
     }
 
-    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(String mincode) {
-        return graduationReportService.getStudentsNonGradForYearlyDistribution(mincode, fetchAccessToken());
+    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(UUID schoolId) {
+        return graduationReportService.getStudentsNonGradForYearlyDistribution(schoolId, fetchAccessToken());
     }
 
     public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearly() {

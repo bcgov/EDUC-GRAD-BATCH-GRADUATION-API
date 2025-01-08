@@ -1431,15 +1431,15 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testFetchDistributionRequiredDataStudentsNonGradYearlyByMincode() {
-        String mincode = "1234567";
+    public void testFetchDistributionRequiredDataStudentsNonGradYearlyBySchoolId() {
+        UUID schoolId = UUID.randomUUID();
         ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
 
         mockTokenResponseObject();
 
-        when(this.restService.get(String.format(constants.getStudentDataNonGradEarlyByMincode(), mincode), List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
+        when(this.restService.get(String.format(constants.getStudentDataNonGradEarlyBySchoolId(), schoolId), List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
 
-        val result = this.restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
+        val result = this.restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(schoolId);
         assertThat(result).isNotEmpty();
     }
 

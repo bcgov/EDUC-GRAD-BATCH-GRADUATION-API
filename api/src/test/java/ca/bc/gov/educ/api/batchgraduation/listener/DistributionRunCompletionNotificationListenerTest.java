@@ -160,7 +160,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         reportGradStudentData.setFirstName(scd.getLegalFirstName());
         reportGradStudentData.setLastName(scd.getLegalLastName());
 
-        when(this.restService.get(constants.getStudentDataNonGradEarlyByMincode(), List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
+        when(this.restService.get(constants.getStudentDataNonGradEarlyBySchoolId(), List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
         when(this.restService.get(constants.getCertificateDistributionList(), List.class, "accessToken")).thenReturn(cList);
 
         ResponseObj obj = new ResponseObj();

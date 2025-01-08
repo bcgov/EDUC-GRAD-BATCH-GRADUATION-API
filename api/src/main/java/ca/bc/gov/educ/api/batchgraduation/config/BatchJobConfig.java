@@ -659,7 +659,7 @@ public class BatchJobConfig {
 
     @Bean
     @StepScope
-    public DistributionRunYearlyNonGradProcessor itemProcessorDisRunYearlyNonGradByMincode() {
+    public DistributionRunYearlyNonGradProcessor itemProcessorDisRunYearlyNonGradBySchoolId() {
         return new DistributionRunYearlyNonGradProcessor();
     }
 
@@ -715,11 +715,11 @@ public class BatchJobConfig {
     }
 
     @Bean
-    public Step slaveStepDisRunYearlyNonGradByMincode(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+    public Step slaveStepDisRunYearlyNonGradBySchoolId(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
         return new StepBuilder("slaveStepDisRunYearlyNonGrad", jobRepository)
-                .<String, List<StudentCredentialDistribution>>chunk(1, transactionManager)
+                .<UUID, List<StudentCredentialDistribution>>chunk(1, transactionManager)
                 .reader(itemReaderDisRunYearlyNonGrad())
-                .processor(itemProcessorDisRunYearlyNonGradByMincode())
+                .processor(itemProcessorDisRunYearlyNonGradBySchoolId())
                 .writer(itemWriterDisRunYearlyNonGrad())
                 .build();
     }
@@ -785,8 +785,8 @@ public class BatchJobConfig {
     @Bean
     public Step masterStepDisRunYearlyNonGrad(JobRepository jobRepository, PlatformTransactionManager transactionManager, EducGradBatchGraduationApiConstants constants) {
         return new StepBuilder("masterStepDisRunYearlyNonGrad", jobRepository)
-                .partitioner(slaveStepDisRunYearlyNonGradByMincode(jobRepository, transactionManager).getName(), partitionerDisRunYearlyNonGrad())
-                .step(slaveStepDisRunYearlyNonGradByMincode(jobRepository, transactionManager))
+                .partitioner(slaveStepDisRunYearlyNonGradBySchoolId(jobRepository, transactionManager).getName(), partitionerDisRunYearlyNonGrad())
+                .step(slaveStepDisRunYearlyNonGradBySchoolId(jobRepository, transactionManager))
                 .gridSize(constants.getNumberOfPartitions())
                 .taskExecutor(taskExecutor())
                 .build();
