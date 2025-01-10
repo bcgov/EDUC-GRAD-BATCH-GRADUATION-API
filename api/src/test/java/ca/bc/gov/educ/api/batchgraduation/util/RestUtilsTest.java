@@ -1229,7 +1229,26 @@ public class RestUtilsTest {
 
         val res = this.restUtils.getSchoolClob(schoolId);
         assertThat(res).isNotNull();
+        assertThat(res.getSchoolId()).isEqualTo(schoolId.toString());
     }
+
+    @Test
+    public void testSearchSchoolClob() {
+        UUID schoolId = UUID.randomUUID();
+        String mincode = "12345678";
+
+        SchoolClob school = new SchoolClob();
+        school.setSchoolId(schoolId.toString());
+        school.setMinCode(mincode);
+
+        when(this.restService.get(String.format(constants.getSearchSchoolClobByMinCode(), mincode), SchoolClob.class)).thenReturn(school);
+
+        val res = this.restUtils.getSchoolClob(mincode);
+        assertThat(res).isNotNull();
+        assertThat(res.getSchoolId()).isEqualTo(schoolId.toString());
+        assertThat(res.getMinCode()).isEqualTo(mincode);
+    }
+
 
     @Test
     public void testExecutePostDistribution() {
