@@ -298,6 +298,9 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-trax-api.school-clob-by-school-id.url}")
     private String schoolClobBySchoolId;
 
+    @Value("${endpoint.grad-trax-api.search-school-clob-by-min-code.url}")
+    private String searchSchoolClobByMinCode;
+
     @Value("${endpoint.grad-trax-api.school-by-school-id.url}")
     private String schoolBySchoolId;
 

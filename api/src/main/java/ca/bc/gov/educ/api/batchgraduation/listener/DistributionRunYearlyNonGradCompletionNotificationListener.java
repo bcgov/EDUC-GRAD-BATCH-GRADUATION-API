@@ -16,12 +16,13 @@ import javax.annotation.processing.Generated;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.COMPLETED;
 import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.STARTED;
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
-import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
+import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecordId;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
 
 @Component
@@ -87,13 +88,13 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
 		summaryDTO.recalculateCredentialCounts();
 		LOGGER.info("Student Credentials list size =  {}", cList.size());
-    	Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
-		List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
-		sortSchoolBySchoolOfRecord(uniqueSchoolList);
+    	Map<UUID, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
+		List<UUID> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolId).distinct().collect(Collectors.toList());
+		sortSchoolBySchoolOfRecordId(uniqueSchoolList);
 		LOGGER.info("Unique Schools =  {}", uniqueSchoolList.size());
 		uniqueSchoolList.forEach(usl->{
-			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
-			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->scd.getSchoolOfRecord().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());
+			List<StudentCredentialDistribution> yed4List = cList.stream().filter(scd->scd.getSchoolId().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen()) && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->scd.getSchoolId().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());
 			supportListener.transcriptPrintFile(yed4List,batchId,usl,mapDist,null);
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
@@ -106,7 +107,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 		return callDistribution;
 	}
 
-	protected void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, String usl, Map<String,DistributionPrintRequest> mapDist) {
+	protected void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, UUID usl, Map<UUID,DistributionPrintRequest> mapDist) {
 		if(!studentList.isEmpty()) {
 			SchoolDistributionRequest tpReq = new SchoolDistributionRequest();
 			tpReq.setBatchId(batchId);

@@ -360,14 +360,14 @@ public class RestUtilsTest {
         final UUID studentID = UUID.randomUUID();
         final UUID studentID2 = UUID.randomUUID();
         final Long batchId = 9879L;
-        final String mincode = "123121111";
+        final UUID schoolId = UUID.randomUUID();
         List<StudentCredentialDistribution> globalList = new ArrayList<>();
 
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
         scd.setStudentGrade("12");
         scd.setId(UUID.randomUUID());
         scd.setPaperType("YED4");
-        scd.setSchoolOfRecord(mincode);
+        scd.setSchoolId(schoolId);
         scd.setStudentID(studentID);
         globalList.add(scd);
 
@@ -375,7 +375,7 @@ public class RestUtilsTest {
         scd2.setStudentGrade("12");
         scd2.setId(UUID.randomUUID());
         scd2.setPaperType("YED4");
-        scd2.setSchoolOfRecord(mincode);
+        scd2.setSchoolId(schoolId);
         scd2.setStudentID(studentID2);
 
 
@@ -383,7 +383,7 @@ public class RestUtilsTest {
         grd.setStudentID(studentID2);
         grd.setProgram("2018-EN");
         grd.setStudentGrade("12");
-        grd.setSchoolOfRecord("454445444");
+        grd.setSchoolOfRecordId(schoolId);
 
         mockTokenResponseObject();
 
@@ -403,14 +403,14 @@ public class RestUtilsTest {
         final UUID studentID = UUID.randomUUID();
         final UUID studentID2 = UUID.randomUUID();
         final Long batchId = 9879L;
-        final String mincode = "123121111";
+        final UUID schoolId = UUID.randomUUID();
         List<StudentCredentialDistribution> globalList = new ArrayList<>();
 
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
         scd.setStudentGrade("12");
         scd.setId(UUID.randomUUID());
         scd.setPaperType("YED4");
-        scd.setSchoolOfRecord(mincode);
+        scd.setSchoolId(schoolId);
         scd.setStudentID(studentID);
         globalList.add(scd);
 
@@ -418,7 +418,7 @@ public class RestUtilsTest {
         scd2.setStudentGrade("12");
         scd2.setId(UUID.randomUUID());
         scd2.setPaperType("YED4");
-        scd2.setSchoolOfRecord(mincode);
+        scd2.setSchoolId(schoolId);
         scd2.setStudentID(studentID2);
 
         mockTokenResponseObject();
@@ -427,7 +427,7 @@ public class RestUtilsTest {
         grd.setStudentID(studentID2);
         grd.setProgram("2018-EN");
         grd.setStudentGrade("12");
-        grd.setSchoolOfRecord("454445444");
+        grd.setSchoolOfRecordId(schoolId);
 
         when(this.restService.get(String.format(constants.getStudentInfo(),studentID2), GraduationStudentRecordDistribution.class)).thenReturn(null);
 
@@ -449,7 +449,6 @@ public class RestUtilsTest {
 
         BlankCredentialDistribution bcd = new BlankCredentialDistribution();
         bcd.setQuantity(5);
-        bcd.setSchoolOfRecord("11231111");
         bcd.setCredentialTypeCode("BC1996-PUB");
 
         BlankCredentialDistribution res = this.restUtils.processBlankDistribution(bcd,summary);
@@ -464,7 +463,6 @@ public class RestUtilsTest {
 
         BlankCredentialDistribution bcd = new BlankCredentialDistribution();
         bcd.setQuantity(5);
-        bcd.setSchoolOfRecord("11231111");
         bcd.setCredentialTypeCode("BC1996-PUB");
 
         BlankCredentialDistribution res = this.restUtils.processBlankDistribution(bcd,summary);
@@ -489,7 +487,6 @@ public class RestUtilsTest {
 
         BlankCredentialDistribution bcd = new BlankCredentialDistribution();
         bcd.setQuantity(5);
-        bcd.setSchoolOfRecord("11231111");
         bcd.setCredentialTypeCode("E");
 
         BlankCredentialDistribution res = this.restUtils.processBlankDistribution(bcd,summary);
@@ -513,7 +510,6 @@ public class RestUtilsTest {
 
         BlankCredentialDistribution bcd = new BlankCredentialDistribution();
         bcd.setQuantity(5);
-        bcd.setSchoolOfRecord("11231111");
         bcd.setCredentialTypeCode("E");
 
         BlankCredentialDistribution res = this.restUtils.processBlankDistribution(bcd,summary);
@@ -906,10 +902,9 @@ public class RestUtilsTest {
 
     @Test
     public void testGetStudentForBatchInput() {
-        final String mincode = "123213123";
         final UUID schoolId = UUID.randomUUID();
         final UUID studentID = UUID.randomUUID();
-        BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, mincode, schoolId);
+        BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, schoolId);
 
         when(this.restService.get(String.format(constants.getGradStudentApiGradStatusForBatchUrl(), studentID), BatchGraduationStudentRecord.class)).thenReturn(grd);
 
@@ -924,7 +919,7 @@ public class RestUtilsTest {
     public void testGetStudentForBatchInput_When_APIisDown_returns_null() {
         final UUID studentID = UUID.randomUUID();
         final UUID schoolId = UUID.randomUUID();
-        BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, "1234567", schoolId);
+        BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, schoolId);
 
         when(this.restService.get(String.format(constants.getGradStudentApiGradStatusForBatchUrl(), studentID), BatchGraduationStudentRecord.class)).thenReturn(grd);
 
@@ -1232,7 +1227,7 @@ public class RestUtilsTest {
 
         when(this.restService.get(String.format(constants.getSchoolClobBySchoolId(), schoolId), SchoolClob.class)).thenReturn(school);
 
-        val res = this.restUtils.getSchoolClob(schoolId.toString());
+        val res = this.restUtils.getSchoolClob(schoolId);
         assertThat(res).isNotNull();
     }
 
@@ -1322,8 +1317,10 @@ public class RestUtilsTest {
     @Test
     public void testGetStudentByPenFromStudentAPI() {
         final UUID studentID = UUID.randomUUID();
+        final UUID schoolId = UUID.randomUUID();
 
         final String pen = "123456789";
+        final String mincode = "12345678";
 
         List<LoadStudentData> loadStudentData = new ArrayList<>();
         LoadStudentData lSD = new LoadStudentData();
@@ -1336,6 +1333,7 @@ public class RestUtilsTest {
         final Student student = new Student();
         student.setStudentID(studentID.toString());
         student.setPen(pen);
+        student.setMincode(mincode);
 
         when(this.restService.get(String.format(constants.getPenStudentApiByPenUrl(), pen), List.class)).thenReturn(List.of(student));
 
@@ -1344,12 +1342,17 @@ public class RestUtilsTest {
         GraduationStudentRecord graduationStatus = new GraduationStudentRecord();
         graduationStatus.setStudentID(studentID);
         graduationStatus.setPen(pen);
+        graduationStatus.setSchoolOfRecordId(schoolId);
 
+        SchoolClob school = new SchoolClob();
+        school.setSchoolId(schoolId.toString());
+        school.setMinCode(mincode);
+
+        when(this.restService.get(String.format(constants.getSearchSchoolClobByMinCode(), mincode), SchoolClob.class)).thenReturn(school);
         when(this.restService.post(String.format(constants.getGradStudentApiGradStatusUrl(), studentID), loadStudentData, GraduationStudentRecord.class)).thenReturn(graduationStatus);
 
         Integer res = this.restUtils.getStudentByPenFromStudentAPI(loadStudentData);
         assertThat(res).isEqualTo(1);
-
     }
 
     @Test

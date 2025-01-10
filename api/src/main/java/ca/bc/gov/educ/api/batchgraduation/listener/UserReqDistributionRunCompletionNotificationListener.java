@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
-import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecord;
+import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecordId;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
 
 @Component
@@ -92,9 +92,9 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 	private void processGlobalList(DistributionSummaryDTO summaryDTO, Long batchId, String credentialType, String accessToken,String localDownload,String properName) {
 		List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
-		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
-    	List<String> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
-		sortSchoolBySchoolOfRecord(uniqueSchoolList);
+		Map<UUID, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
+    	List<UUID> uniqueSchoolList = cList.stream().map(StudentCredentialDistribution::getSchoolId).distinct().collect(Collectors.toList());
+		sortSchoolBySchoolOfRecordId(uniqueSchoolList);
 		List<StudentCredentialDistribution> studentCredentialDistributionControlList = new ArrayList<>();
 		uniqueSchoolList.forEach(usl->{
 			List<StudentCredentialDistribution> yed4List = new ArrayList<>();
@@ -103,12 +103,12 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			List<StudentCredentialDistribution> yedbList = new ArrayList<>();
 			if(credentialType != null) {
 				if (credentialType.equalsIgnoreCase("OT") || credentialType.equalsIgnoreCase("RT")) {
-					yed4List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+					yed4List = cList.stream().filter(scd -> scd.getSchoolId().compareTo(usl) == 0 && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 				}
 				if (credentialType.equalsIgnoreCase("OC") || credentialType.equalsIgnoreCase("RC")) {
-					yed2List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YED2".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
-					yedrList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YEDR".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
-					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YEDB".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+					yed2List = cList.stream().filter(scd -> scd.getSchoolId().compareTo(usl) == 0 && "YED2".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+					yedrList = cList.stream().filter(scd -> scd.getSchoolId().compareTo(usl) == 0 && "YEDR".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+					yedbList = cList.stream().filter(scd -> scd.getSchoolId().compareTo(usl) == 0 && "YEDB".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 				}
 			}
 
@@ -151,7 +151,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 	}
 
 	private void addTranscriptsToDistributionRequest(List<StudentCredentialDistribution> controlList, List<StudentCredentialDistribution> cList, DistributionSummaryDTO summaryDTO, Long batchId, String properName) {
-		Map<String, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
+		Map<UUID, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
 		mapDist.forEach((schoolCode, distributionPrintRequest) -> {
 			List<StudentCredentialDistribution> mergedCertificateList = distributionPrintRequest.getMergedListOfCertificates();
 			List<StudentCredentialDistribution> uniqueCertificateList = mergedCertificateList.stream().distinct().collect(Collectors.toList());
