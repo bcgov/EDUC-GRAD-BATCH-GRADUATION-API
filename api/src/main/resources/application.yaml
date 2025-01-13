@@ -98,6 +98,11 @@ server:
       io: 16
   #port: ${HTTP_PORT}
   max-http-request-header-size: 20000
+  compression:
+    enabled: ${ENABLE_COMPRESSION}
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,text/css,text/javascript,application/javascript
+    min-response-size: 2048
+    excluded-user-agents: MSIE 6.0,UCBrowser
 
 #API Documentation
 springdoc:
@@ -255,6 +260,8 @@ endpoint:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
     school-clob-by-school-id:
       url: ${GRAD_TRAX_API}api/v2/trax/school-clob/%s
+    search-school-clob-by-min-code:
+      url: ${GRAD_TRAX_API}api/v2/trax/school-clob/search?mincode=%s
     school-by-school-id:
       url: ${GRAD_TRAX_API}api/v2/trax/school/%s
     search-schools-by-district-id:

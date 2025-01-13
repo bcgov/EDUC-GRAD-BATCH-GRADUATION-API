@@ -224,7 +224,7 @@ public class EducGradBatchGraduationApiConstants {
     private String updateStudentRecordHistory;
 
     @Value("${endpoint.grad-student-api.get-student-data-nongrad-yearly}")
-    private String studentDataNonGradEarlyByMincode;
+    private String studentDataNonGradEarlyBySchoolId;
 
     @Value("${endpoint.grad-student-api.get-school-data-nongrad-yearly}")
     private String schoolDataNonGradEarly;
@@ -297,6 +297,9 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-trax-api.school-clob-by-school-id.url}")
     private String schoolClobBySchoolId;
+
+    @Value("${endpoint.grad-trax-api.search-school-clob-by-min-code.url}")
+    private String searchSchoolClobByMinCode;
 
     @Value("${endpoint.grad-trax-api.school-by-school-id.url}")
     private String schoolBySchoolId;

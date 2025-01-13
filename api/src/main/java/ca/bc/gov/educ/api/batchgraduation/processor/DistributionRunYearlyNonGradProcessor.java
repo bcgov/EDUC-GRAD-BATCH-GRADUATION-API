@@ -9,10 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
+import java.util.UUID;
 
-public class DistributionRunYearlyNonGradProcessor implements ItemProcessor<String, List<StudentCredentialDistribution>> {
+public class DistributionRunYearlyNonGradProcessor implements ItemProcessor<UUID, List<StudentCredentialDistribution>> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradProcessor.class);
 
@@ -26,16 +28,16 @@ public class DistributionRunYearlyNonGradProcessor implements ItemProcessor<Stri
 	Long batchId;
 
 	@Override
-	public List<StudentCredentialDistribution> process(String mincode) throws Exception {
+	public List<StudentCredentialDistribution> process(@NonNull UUID schoolId) throws Exception {
 		summaryDTO.setBatchId(batchId);
-		LOGGER.debug("Processing partitionData for district {} ", mincode);
+		LOGGER.debug("Processing partitionData for school {} ", schoolId);
 		summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1L);
-		List<StudentCredentialDistribution> studentCredentials = restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(mincode);
+		List<StudentCredentialDistribution> studentCredentials = restUtils.fetchDistributionRequiredDataStudentsNonGradYearly(schoolId);
 		StudentSearchRequest searchRequest = summaryDTO.getStudentSearchRequest();
 		if(searchRequest != null && searchRequest.getPens() != null && !searchRequest.getPens().isEmpty()) {
 			studentCredentials.removeIf(scr->!searchRequest.getPens().contains(scr.getPen()));
 		}
-		LOGGER.debug("Completed partitionData for district {} with {} students", mincode, studentCredentials.size());
+		LOGGER.debug("Completed partitionData for school {} with {} students", schoolId, studentCredentials.size());
 		summaryDTO.getGlobalList().addAll(studentCredentials);
 		return studentCredentials;
 	}

@@ -28,7 +28,7 @@ public interface StudentCredentialDistributionRepository extends JpaRepository<S
     Page<StudentCredentialDistributionEntity> findByJobExecutionIdAndStatusIn(Long batchId, List<String> statuses, Pageable paging);
 
     @Query(value="select distinct e.schoolId from StudentCredentialDistributionEntity e where e.jobExecutionId = :batchId")
-    List<String> getSchoolList(Long batchId);
+    List<UUID> getSchoolList(Long batchId);
 
     long countAllByJobExecutionIdAndStatus(Long batchId, String status);
 

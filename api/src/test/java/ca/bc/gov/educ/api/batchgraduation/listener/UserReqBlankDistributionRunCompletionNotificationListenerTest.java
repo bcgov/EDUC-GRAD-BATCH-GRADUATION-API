@@ -92,30 +92,32 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         jobExecution.setId(121L);
         ExecutionContext jobContext = jobExecution.getExecutionContext();
 
+        UUID schoolId = UUID.randomUUID();
+
         List<BlankCredentialDistribution> scdList = new ArrayList<>();
         BlankCredentialDistribution scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("E");
         scd.setPaperType("YED2");
-        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("EI");
         scd.setPaperType("YEDR");
-        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("S");
         scd.setPaperType("YED4");
-        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("S");
         scd.setPaperType("YEDB");
-        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("X");
         scd.setPaperType("YED4");
-        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
 
         BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();
@@ -182,30 +184,32 @@ public class UserReqBlankDistributionRunCompletionNotificationListenerTest {
         jobExecution.setId(121L);
         ExecutionContext jobContext = jobExecution.getExecutionContext();
 
+        UUID schoolId = UUID.randomUUID();
+
         List<BlankCredentialDistribution> scdList = new ArrayList<>();
         BlankCredentialDistribution scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("E");
         scd.setPaperType("YED2");
-        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("EI");
         scd.setPaperType("YEDR");
-        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("S");
         scd.setPaperType("YED4");
-        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("X");
         scd.setPaperType("YED4");
-        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new BlankCredentialDistribution();
         scd.setCredentialTypeCode("S");
         scd.setPaperType("YEDB");
-        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
 
         BlankDistributionSummaryDTO summaryDTO = new BlankDistributionSummaryDTO();

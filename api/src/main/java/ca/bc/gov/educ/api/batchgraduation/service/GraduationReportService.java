@@ -80,8 +80,8 @@ public class GraduationReportService {
 	}
 
 	// Year-end NonGrad distribution
-	public List<StudentCredentialDistribution> getStudentsNonGradForYearlyDistribution(String mincode, String accessToken) {
-		var response = restService.get(String.format(constants.getStudentDataNonGradEarlyByMincode(), mincode), List.class, accessToken);
+	public List<StudentCredentialDistribution> getStudentsNonGradForYearlyDistribution(UUID schoolId, String accessToken) {
+		var response = restService.get(String.format(constants.getStudentDataNonGradEarlyBySchoolId(), schoolId), List.class, accessToken);
 		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
@@ -146,7 +146,7 @@ public class GraduationReportService {
 		dist.setStudentGrade(data.getStudentGrade());
 		dist.setNonGradReasons(data.getNonGradReasons());
 		dist.setLastUpdateDate(data.lastUpdateDateAsString());
-		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOriginId(), dist.getSchoolAtGradId(), dist.getSchoolOfRecord());
+		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOriginId(), dist.getSchoolAtGradId(), dist.getSchoolId());
 		return dist;
 	}
 }

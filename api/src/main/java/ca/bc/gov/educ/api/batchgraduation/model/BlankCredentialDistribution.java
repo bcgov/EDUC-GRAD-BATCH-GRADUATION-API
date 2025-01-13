@@ -8,7 +8,6 @@ import java.util.UUID;
 public class BlankCredentialDistribution {
 
 	private String credentialTypeCode;
-	private String schoolOfRecord;
 	private UUID schoolId;
 	private int quantity;
 	private String paperType;

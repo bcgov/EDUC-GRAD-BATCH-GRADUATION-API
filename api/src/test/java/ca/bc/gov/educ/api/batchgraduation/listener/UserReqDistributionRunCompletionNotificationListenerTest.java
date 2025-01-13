@@ -108,6 +108,8 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         jobExecution.setId(121L);
         ExecutionContext jobContext = jobExecution.getExecutionContext();
 
+        UUID schoolId = UUID.randomUUID();
+
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
         scd.setId(new UUID(1,1));
@@ -115,6 +117,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         scd.setCredentialTypeCode("E");
         scd.setPaperType("YED2");
         scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new StudentCredentialDistribution();
         scd.setId(new UUID(1,1));
@@ -122,6 +125,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         scd.setCredentialTypeCode("BC1996-PUB");
         scd.setPaperType("YED4");
         scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new StudentCredentialDistribution();
         scd.setId(new UUID(1,1));
@@ -129,6 +133,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         scd.setCredentialTypeCode("S");
         scd.setPaperType("YEDB");
         scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new StudentCredentialDistribution();
         scd.setId(new UUID(1,1));
@@ -136,6 +141,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         scd.setCredentialTypeCode("X");
         scd.setPaperType("YEDR");
         scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
@@ -223,6 +229,8 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         jobExecution.setId(121L);
         ExecutionContext jobContext = jobExecution.getExecutionContext();
 
+        UUID schoolId = UUID.randomUUID();
+
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
         scd.setId(new UUID(1,1));
@@ -230,6 +238,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         scd.setCredentialTypeCode("E");
         scd.setPaperType("YED2");
         scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new StudentCredentialDistribution();
         scd.setId(new UUID(1,1));
@@ -237,6 +246,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         scd.setCredentialTypeCode("BC1996-PUB");
         scd.setPaperType("YED4");
         scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new StudentCredentialDistribution();
         scd.setId(new UUID(1,1));
@@ -244,6 +254,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         scd.setCredentialTypeCode("S");
         scd.setPaperType("YEDB");
         scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
         scd = new StudentCredentialDistribution();
         scd.setId(new UUID(1,1));
@@ -251,6 +262,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         scd.setCredentialTypeCode("X");
         scd.setPaperType("YEDR");
         scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
         scdList.add(scd);
 
         DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
@@ -327,7 +339,7 @@ public class UserReqDistributionRunCompletionNotificationListenerTest {
         };
 
         when(this.webClient.get()).thenReturn(this.requestHeadersUriMock);
-        when(this.requestHeadersUriMock.uri(constants.getStudentDataNonGradEarlyByMincode())).thenReturn(this.requestHeadersMock);
+        when(this.requestHeadersUriMock.uri(constants.getStudentDataNonGradEarlyBySchoolId())).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.headers(any(Consumer.class))).thenReturn(this.requestHeadersMock);
         when(this.requestHeadersMock.retrieve()).thenReturn(this.responseMock);
         when(this.responseMock.bodyToMono(repListRes)).thenReturn(Mono.just(List.of(reportGradStudentData)));

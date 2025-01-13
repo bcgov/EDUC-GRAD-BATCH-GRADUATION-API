@@ -74,6 +74,7 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
  --from-literal=MIN_IDLE='25' \
  --from-literal=IDLE_TIMEOUT='300000' \
  --from-literal=MAX_LIFETIME='1500000' \
+ --from-literal=ENABLE_COMPRESSION="true" \
  --dry-run=client -o yaml | oc apply -f -
 
 echo Creating config map "$APP_NAME"-flb-sc-config-map

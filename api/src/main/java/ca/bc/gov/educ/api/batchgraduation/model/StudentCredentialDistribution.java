@@ -16,7 +16,6 @@ public class StudentCredentialDistribution implements Serializable {
 	private String credentialTypeCode;
 	private UUID studentID;
 	private String paperType;
-	private String schoolOfRecord;
 	private UUID schoolId;
 	private String documentStatusCode;
 
@@ -37,5 +36,7 @@ public class StudentCredentialDistribution implements Serializable {
 	private UUID schoolOfRecordOriginId;
 	@JsonIgnore
 	private UUID districtId;
+	@JsonIgnore
+	private String schoolOfRecord; // minCode is required for the print file name
 
 }

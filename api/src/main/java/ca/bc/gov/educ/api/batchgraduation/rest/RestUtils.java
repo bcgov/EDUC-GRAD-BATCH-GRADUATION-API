@@ -96,8 +96,8 @@ public class RestUtils {
         return graduationReportService.getStudentsNonGradForYearlyDistribution(fetchAccessToken());
     }
 
-    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(String mincode) {
-        return graduationReportService.getStudentsNonGradForYearlyDistribution(mincode, fetchAccessToken());
+    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsNonGradYearly(UUID schoolId) {
+        return graduationReportService.getStudentsNonGradForYearlyDistribution(schoolId, fetchAccessToken());
     }
 
     public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearly() {
@@ -200,7 +200,10 @@ public class RestUtils {
             stuDataList.forEach(st-> {
                 GraduationStudentRecord gradStu = new GraduationStudentRecord();
                 gradStu.setProgram(student.getProgramCode());
-                gradStu.setSchoolOfRecord(student.getSchool());
+                SchoolClob school = getSchoolClob(st.getMincode());
+                if (school != null && StringUtils.isNotBlank(school.getSchoolId())) {
+                    gradStu.setSchoolOfRecordId(UUID.fromString(school.getSchoolId()));
+                }
                 gradStu.setStudentGrade(student.getStudentGrade());
                 gradStu.setRecalculateGradStatus("Y");
                 gradStu.setStudentStatus(student.getStudentStatus());
@@ -233,21 +236,21 @@ public class RestUtils {
             item.setLegalLastName(scObj.getLegalLastName());
             item.setLegalFirstName(scObj.getLegalFirstName());
             item.setLegalMiddleNames(scObj.getLegalMiddleNames());
+            item.setSchoolOfRecord(scObj.getSchoolOfRecord());
         } else {
             GraduationStudentRecordDistribution stuRec = getStudentData(item.getStudentID().toString());
             if (stuRec != null) {
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
                 if(useSchoolAtGrad) {
-                    item.setSchoolOfRecord(StringUtils.isBlank(stuRec.getSchoolAtGrad()) ? stuRec.getSchoolOfRecord() : stuRec.getSchoolAtGrad());
                     item.setSchoolId(stuRec.getSchoolAtGradId() == null? stuRec.getSchoolOfRecordId() : stuRec.getSchoolAtGradId());
                 } else {
-                    item.setSchoolOfRecord(stuRec.getSchoolOfRecord());
                     item.setSchoolId(stuRec.getSchoolOfRecordId());
                 }
                 ca.bc.gov.educ.api.batchgraduation.model.institute.School school  = getSchool(item.getSchoolId());
                 if (school != null) {
                     item.setDistrictId(UUID.fromString(school.getDistrictId()));
+                    item.setSchoolOfRecord(school.getMincode());
                 }
                 item.setProgramCompletionDate(stuRec.getProgramCompletionDate());
                 item.setStudentID(stuRec.getStudentID());
@@ -271,6 +274,7 @@ public class RestUtils {
             if(!stuDataList.isEmpty()) {
                 item.setStudentID(UUID.fromString(stuDataList.get(0).getStudentID()));
             }
+            // item.setPsiId(UUID.randomUUID()); // TODO: PSI GUID will be populated from STS
             summary.getGlobalList().add(item);
         } catch (Exception e) {
             LOGGER.error("Error processing student with id {} due to {}", item.getStudentID(), e.getLocalizedMessage());
@@ -574,8 +578,12 @@ public class RestUtils {
         }
     }
 
-    public SchoolClob getSchoolClob(String schoolId) {
+    public SchoolClob getSchoolClob(UUID schoolId) {
         return restService.get(String.format(constants.getSchoolClobBySchoolId(), schoolId), SchoolClob.class);
+    }
+
+    public SchoolClob getSchoolClob(String mincode) {
+        return restService.get(String.format(constants.getSearchSchoolClobByMinCode(), mincode), SchoolClob.class);
     }
 
     public List<UUID> getDeceasedStudentIDs(List<UUID> studentIDs) {

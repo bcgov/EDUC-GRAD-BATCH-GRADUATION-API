@@ -12,10 +12,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
@@ -79,8 +76,8 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 		}
     }
 
-	private void processGlobalList(StudentSearchRequest studentSearchRequest , String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String localDownload,String properName) {
-		List<String> uniqueSchoolList = cList.stream().map(BlankCredentialDistribution::getSchoolOfRecord).distinct().collect(Collectors.toList());
+	private void processGlobalList(StudentSearchRequest studentSearchRequest , String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<UUID, DistributionPrintRequest> mapDist, String accessToken,String localDownload,String properName) {
+		List<UUID> uniqueSchoolList = cList.stream().map(BlankCredentialDistribution::getSchoolId).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
 			List<BlankCredentialDistribution> yed4List = new ArrayList<>();
 			List<BlankCredentialDistribution> yed2List = new ArrayList<>();
@@ -89,13 +86,13 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 
 			if(credentialType != null) {
 				if (StringUtils.equalsIgnoreCase(credentialType, "OT")) {
-					yed4List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+					yed4List = cList.stream().filter(scd -> scd.getSchoolId().compareTo(usl) == 0 && "YED4".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 				}
 
 				if (StringUtils.equalsIgnoreCase(credentialType, "OC")) {
-					yed2List = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YED2".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
-					yedrList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YEDR".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
-					yedbList = cList.stream().filter(scd -> scd.getSchoolOfRecord().compareTo(usl) == 0 && "YEDB".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+					yed2List = cList.stream().filter(scd -> scd.getSchoolId().compareTo(usl) == 0 && "YED2".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+					yedrList = cList.stream().filter(scd -> scd.getSchoolId().compareTo(usl) == 0 && "YEDR".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
+					yedbList = cList.stream().filter(scd -> scd.getSchoolId().compareTo(usl) == 0 && "YEDB".compareTo(scd.getPaperType()) == 0).collect(Collectors.toList());
 				}
 			}
 

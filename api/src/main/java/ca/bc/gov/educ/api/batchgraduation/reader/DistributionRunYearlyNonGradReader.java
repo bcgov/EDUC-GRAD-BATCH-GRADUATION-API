@@ -6,8 +6,9 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
+import java.util.UUID;
 
-public class DistributionRunYearlyNonGradReader extends DistributionRunBaseReader implements ItemReader<String> {
+public class DistributionRunYearlyNonGradReader extends DistributionRunBaseReader implements ItemReader<UUID> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributionRunYearlyNonGradReader.class);
 
@@ -15,11 +16,11 @@ public class DistributionRunYearlyNonGradReader extends DistributionRunBaseReade
     private Integer nxtCredentialForProcessing;
 
     @Value("#{stepExecutionContext['data']}")
-    List<String> schoolsList;
+    List<UUID> schoolsList;
 
     @Override
-    public String read() throws Exception {
-        String nextSchool = null;
+    public UUID read() throws Exception {
+        UUID nextSchool = null;
         if (nxtCredentialForProcessing < schoolsList.size()) {
             summaryDTO.setProcessedCount(summaryDTO.getProcessedCount() + 1);
             nextSchool = schoolsList.get(nxtCredentialForProcessing);

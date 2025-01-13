@@ -32,7 +32,7 @@ public class StudentCredentialDistributionEntity extends BaseEntity {
 	private UUID studentID;
 
 	@Column(name = "SCHOOL_OF_RECORD_ID", nullable = true)
-	private String schoolId;
+	private UUID schoolId;
 
 	@Lob
 	@Column(name = "PAYLOAD")
