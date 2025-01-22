@@ -75,14 +75,13 @@ public class DeleteStudentReportsPartitioner extends BasePartitioner {
             }
         } else {
             List<UUID> studentGuidsBySearch = restUtils.getStudentIDsBySearchCriteriaOrAll(searchRequest, distributionSummaryDTO);
-            List<String> studentGuidsBySearchString = studentGuidsBySearch.stream().map(UUID::toString).toList();
             if(!studentGuidsBySearch.isEmpty()) {
                 for (String reportType : searchRequest.getReportTypes()) {
                     Long studentReportsCount = restUtils.getTotalReportsForProcessing(studentGuidsBySearch, reportType, distributionSummaryDTO);
                     Integer guidsRowCount = Integer.min(studentReportsCount.intValue(), DEFAULT_ROW_COUNT);
                     totalStudentReportsCount += guidsRowCount;
                     updateBatchJobHistory(algorithmJobHistory, totalStudentReportsCount);
-                    List<UUID> reportTypeGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(studentGuidsBySearchString, reportType, guidsRowCount, distributionSummaryDTO);
+                    List<UUID> reportTypeGuids = restUtils.getReportStudentIDsByStudentIDsAndReportType(studentGuidsBySearch, reportType, guidsRowCount, distributionSummaryDTO);
                     finalStudentGuids.addAll(reportTypeGuids);
                 }
             }

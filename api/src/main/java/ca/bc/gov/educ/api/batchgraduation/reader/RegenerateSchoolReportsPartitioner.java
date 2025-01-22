@@ -43,7 +43,6 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
         boolean processAllReports = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
 
         List<UUID> schoolDistricts = gradSchoolOfRecordFilter.filterSchoolsByStudentSearch(searchRequest);
-//        List<UUID> schoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
         if(log.isDebugEnabled()) {
             log.debug("Final list of eligible District / School codes {}", String.join(", ", schoolDistricts.toString()));
         }

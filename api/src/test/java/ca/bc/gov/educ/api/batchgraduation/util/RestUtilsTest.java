@@ -1526,7 +1526,7 @@ public class RestUtilsTest {
     @Test
     public void testGetReportStudentIDsByStudentIDsAndReportType() {
         UUID uuid = UUID.randomUUID();
-        List<String> studentIDsIn = Arrays.asList(uuid.toString());
+        List<UUID> studentIDsIn = Arrays.asList(uuid);
         List<UUID> studentIDsOut = Arrays.asList(uuid);
 
         mockTokenResponseObject();
@@ -1542,8 +1542,7 @@ public class RestUtilsTest {
     @Test
     public void testGetReportStudentIDsByStudentIDsAndReportTypeError() {
         UUID uuid = UUID.randomUUID();
-        List<String> studentIDsIn = Arrays.asList(uuid.toString());
-        List<UUID> studentIDsOut = Arrays.asList(uuid);
+        List<UUID> studentIDsIn = Arrays.asList(uuid);
 
         mockTokenResponseObject();
 
