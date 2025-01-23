@@ -31,10 +31,10 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
         // Clean up existing reports before running new one
         logger.debug("Delete School Reports for Yearly Distribution");
         long startTime = System.currentTimeMillis();
-        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL");
-        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_YE");
-        restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SC");
-        restUtils.deleteSchoolReportRecord("", "NONGRADDISTREP_SD");
+        restUtils.deleteSchoolReportRecord("ADDRESS_LABEL_SCHL");
+        restUtils.deleteDistrictReportRecord("ADDRESS_LABEL_YE");
+        restUtils.deleteSchoolReportRecord("NONGRADDISTREP_SC");
+        restUtils.deleteDistrictReportRecord("NONGRADDISTREP_SD");
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
         logger.debug("Old School Reports deleted in {} sec", diff);

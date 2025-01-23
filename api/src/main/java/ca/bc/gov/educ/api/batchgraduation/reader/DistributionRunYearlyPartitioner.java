@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class DistributionRunYearlyPartitioner extends BasePartitioner {
 
@@ -29,8 +30,8 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         // Clean up existing reports before running new one
         logger.debug("Delete School Reports for Yearly Distribution");
         long startTime = System.currentTimeMillis();
-        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL");
-        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_YE");
+        restUtils.deleteSchoolReportRecord("ADDRESS_LABEL_SCHL");
+        restUtils.deleteDistrictReportRecord("ADDRESS_LABEL_YE");
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
         logger.debug("Old School Reports deleted in {} sec", diff);
@@ -44,10 +45,10 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         filterByStudentSearchRequest(eligibleStudentSchoolDistricts);
         if(!eligibleStudentSchoolDistricts.isEmpty()) {
             updateBatchJobHistory(createBatchJobHistory(), (long) eligibleStudentSchoolDistricts.size());
-            List<String> schoolOfRecords = eligibleStudentSchoolDistricts.stream().map(StudentCredentialDistribution::getSchoolOfRecord).distinct().toList();
-            for(String mincode: schoolOfRecords) {
-                restUtils.deleteSchoolReportRecord(mincode, "DISTREP_YE_SC");
-                restUtils.deleteSchoolReportRecord(mincode, "DISTREP_YE_SD");
+            List<UUID> schoolIds = eligibleStudentSchoolDistricts.stream().map(StudentCredentialDistribution::getSchoolId).distinct().toList();
+            for(UUID schoolId: schoolIds) {
+                restUtils.deleteSchoolReportRecord(schoolId, "DISTREP_YE_SC");
+                restUtils.deleteDistrictReportRecord(schoolId, "DISTREP_YE_SD");
             }
             return getStringExecutionContextMap(gridSize, eligibleStudentSchoolDistricts, null);
         }

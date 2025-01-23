@@ -191,8 +191,14 @@ endpoint:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/certificatetype/%s
     get-school-reports-lite-by-report-type:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport/search?reportTypeCode=%s&isLight=true
-    update-school-report:
-      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/updateschoolreports?mincode=%s&reportTypeCode=%s
+    delete-school-report:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports/%s/%s
+    delete-school-report-by-report-type-only:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports?reportTypeCode=%s
+    delete-district-report:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report/%s/%s
+    delete-district-report-by-report-type-only:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report?reportTypeCode=%s
     update-student-report:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreports?reportTypeCode=%s
     delete-student-report:

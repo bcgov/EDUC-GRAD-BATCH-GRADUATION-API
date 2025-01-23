@@ -231,8 +231,14 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/certificatetype/%s
     get-school-reports-lite-by-report-type:
       url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreport/search?reportTypeCode=%s&isLight=true
-    update-school-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
+    delete-school-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports/%s/%s
+    delete-school-report-by-report-type-only:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports?reportTypeCode=%s
+    delete-district-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report/%s/%s
+    delete-district-report-by-report-type-only:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report?reportTypeCode=%s
     update-student-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreports?reportTypeCode=%s
     delete-student-report:
