@@ -447,17 +447,17 @@ public class RestUtils {
 
     public void deleteSchoolReportRecord(UUID schoolId, String reportTypeCode) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        restService.delete(String.format(constants.getDeleteSchoolReportsBySchoolIdAndReportType(),reportTypeCode), Boolean.class);
-    }
-
-    public void deleteDistrictReportRecord(UUID districtId, String reportTypeCode) {
-        ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        restService.delete(String.format(constants.getDeleteDistrictReportsByDistrictIdAndReportType(),reportTypeCode), Boolean.class);
+        restService.delete(String.format(constants.getDeleteSchoolReportsBySchoolIdAndReportType(),schoolId, reportTypeCode), Boolean.class);
     }
 
     public void deleteSchoolReportRecord(String reportTypeCode) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         restService.delete(String.format(constants.getDeleteSchoolReportsByReportType(),reportTypeCode), Boolean.class);
+    }
+
+    public void deleteDistrictReportRecord(UUID districtId, String reportTypeCode) {
+        ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
+        restService.delete(String.format(constants.getDeleteDistrictReportsByDistrictIdAndReportType(),districtId, reportTypeCode), Boolean.class);
     }
 
     public void deleteDistrictReportRecord(String reportTypeCode) {

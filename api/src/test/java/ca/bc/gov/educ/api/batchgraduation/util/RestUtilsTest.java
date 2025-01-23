@@ -1331,7 +1331,7 @@ public class RestUtilsTest {
 
         when(this.restService.delete(String.format(constants.getDeleteDistrictReportsByReportType(),reportTypeCode), Boolean.class)).thenReturn(true);
 
-        restUtils.deleteSchoolReportRecord(reportTypeCode);
+        restUtils.deleteDistrictReportRecord(reportTypeCode);
         assertThat(reportTypeCode).isEqualTo("E");
     }
 
@@ -1344,7 +1344,7 @@ public class RestUtilsTest {
 
         when(this.restService.delete(String.format(constants.getDeleteDistrictReportsByDistrictIdAndReportType(),districtId,reportTypeCode), Boolean.class)).thenReturn(true);
 
-        this.restUtils.deleteSchoolReportRecord(districtId,reportTypeCode);
+        this.restUtils.deleteDistrictReportRecord(districtId,reportTypeCode);
         assertThat(reportTypeCode).isEqualTo("E");
     }
 
