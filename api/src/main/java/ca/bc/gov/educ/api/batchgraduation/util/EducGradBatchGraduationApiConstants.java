@@ -277,8 +277,17 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-student-api.read-grad-student-record-batch}")
     private String readGradStudentRecordBatch;
 
-    @Value("${endpoint.grad-graduation-report-api.update-school-report.url}")
-    private String updateSchoolReport;
+    @Value("${endpoint.grad-graduation-report-api.delete-school-report-by-report-type-only.url}")
+    private String deleteSchoolReportsByReportType;
+
+    @Value("${endpoint.grad-graduation-report-api.delete-school-report.url}")
+    private String deleteSchoolReportsBySchoolIdAndReportType;
+
+    @Value("${endpoint.grad-graduation-report-api.delete-district-report-by-report-type-only.url}")
+    private String deleteDistrictReportsByReportType;
+
+    @Value("${endpoint.grad-graduation-report-api.delete-district-report.url}")
+    private String deleteDistrictReportsByDistrictIdAndReportType;
 
     @Value("${endpoint.grad-graduation-report-api.update-student-report.url}")
     private String updateStudentReport;

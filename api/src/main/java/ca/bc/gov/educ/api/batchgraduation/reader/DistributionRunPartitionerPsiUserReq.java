@@ -33,7 +33,7 @@ public class DistributionRunPartitionerPsiUserReq extends BasePartitioner {
         String transmissionType = jobParameters.getString("transmissionType");
         PsiCredentialRequest req = (PsiCredentialRequest)jsonTransformer.unmarshall(searchRequest, PsiCredentialRequest.class);
         String accessToken = restUtils.getAccessToken();
-        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_PSI");
+        restUtils.deleteSchoolReportRecord("ADDRESS_LABEL_PSI");
 
         List<PsiCredentialDistribution> credentialList = getRecordsForPSIUserReqDisRun(req,transmissionType,accessToken);
         if(!credentialList.isEmpty()) {

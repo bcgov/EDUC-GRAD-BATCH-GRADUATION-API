@@ -445,14 +445,24 @@ public class RestUtils {
         restService.get(url, Boolean.class, accessToken);
     }
 
-    public void updateSchoolReportRecord(String schoolOfRecord, String reportTypeCode, String accessToken) {
+    public void deleteSchoolReportRecord(UUID schoolId, String reportTypeCode) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        restService.get(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode), Boolean.class, accessToken);
+        restService.delete(String.format(constants.getDeleteSchoolReportsBySchoolIdAndReportType(),schoolId, reportTypeCode), Boolean.class);
     }
 
-    public void deleteSchoolReportRecord(String schoolOfRecord, String reportTypeCode) {
+    public void deleteSchoolReportRecord(String reportTypeCode) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
-        restService.delete(String.format(constants.getUpdateSchoolReport(),schoolOfRecord,reportTypeCode), Boolean.class);
+        restService.delete(String.format(constants.getDeleteSchoolReportsByReportType(),reportTypeCode), Boolean.class);
+    }
+
+    public void deleteDistrictReportRecord(UUID districtId, String reportTypeCode) {
+        ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
+        restService.delete(String.format(constants.getDeleteDistrictReportsByDistrictIdAndReportType(),districtId, reportTypeCode), Boolean.class);
+    }
+
+    public void deleteDistrictReportRecord(String reportTypeCode) {
+        ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
+        restService.delete(String.format(constants.getDeleteDistrictReportsByReportType(),reportTypeCode), Boolean.class);
     }
 
     public List<StudentCredentialDistribution> getStudentsForUserReqDisRun(String credentialType, StudentSearchRequest req) {
@@ -672,11 +682,11 @@ public class RestUtils {
         return schoolReportsLite;
     }
 
-    public List<UUID> getReportStudentIDsByStudentIDsAndReportType(List<String> finalSchoolDistricts, String reportType, Integer rowCount, DistributionSummaryDTO summaryDTO) {
+    public List<UUID> getReportStudentIDsByStudentIDsAndReportType(List<UUID> studentGuids, String reportType, Integer rowCount, DistributionSummaryDTO summaryDTO) {
         List<UUID> result = new ArrayList<>();
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         try {
-            var response = restService.post(String.format(constants.getGradStudentReportsGuidsUrl(), reportType, rowCount), finalSchoolDistricts, List.class);
+            var response = restService.post(String.format(constants.getGradStudentReportsGuidsUrl(), reportType, rowCount), studentGuids, List.class);
             if (response != null) {
                 List<UUID> guids = jsonTransformer.convertValue(response, new TypeReference<>() {});
                 result.addAll(guids);

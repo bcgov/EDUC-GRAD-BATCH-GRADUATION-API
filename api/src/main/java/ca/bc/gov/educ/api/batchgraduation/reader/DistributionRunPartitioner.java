@@ -35,7 +35,7 @@ public class DistributionRunPartitioner extends BasePartitioner {
         // Clean up existing reports before running new one
         logger.debug("Delete School Reports for Monthly Distribution");
         long startTime = System.currentTimeMillis();
-        restUtils.deleteSchoolReportRecord("", "ADDRESS_LABEL_SCHL");
+        restUtils.deleteSchoolReportRecord("ADDRESS_LABEL_SCHL");
         long endTime = System.currentTimeMillis();
         long diff = (endTime - startTime)/1000;
         logger.debug("Old School Reports deleted in {} sec", diff);

@@ -1303,33 +1303,48 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testUpdateSchoolReportRecord() {
-        final String mincode = "123213123";
+    public void testDeleteSchoolReportRecordByReportType() {
         String reportTypeCode = "E";
 
-        when(this.restService.get(String.format(constants.getUpdateSchoolReport(),mincode,reportTypeCode), Boolean.class)).thenReturn(true);
+        when(this.restService.delete(String.format(constants.getDeleteSchoolReportsByReportType(),reportTypeCode), Boolean.class)).thenReturn(true);
 
-        mockTokenResponseObject();
-
-        restUtils.updateSchoolReportRecord(mincode,reportTypeCode,null);
-        assertThat(reportTypeCode).isEqualTo("E");
-
-        when(this.restService.delete(String.format(constants.getUpdateSchoolReport(),mincode,reportTypeCode), Boolean.class)).thenReturn(true);
-
-        restUtils.deleteSchoolReportRecord(mincode,reportTypeCode);
+        restUtils.deleteSchoolReportRecord(reportTypeCode);
         assertThat(reportTypeCode).isEqualTo("E");
     }
 
     @Test
     public void testDeleteSchoolReportRecord() {
-        final String mincode = "123213123";
+        final UUID schoolId = UUID.randomUUID();
         String reportTypeCode = "E";
 
         mockTokenResponseObject();
 
-        when(this.restService.delete(String.format(constants.getUpdateSchoolReport(),mincode,reportTypeCode), Boolean.class)).thenReturn(true);
+        when(this.restService.delete(String.format(constants.getDeleteSchoolReportsBySchoolIdAndReportType(),schoolId,reportTypeCode), Boolean.class)).thenReturn(true);
 
-        this.restUtils.deleteSchoolReportRecord(mincode,reportTypeCode);
+        this.restUtils.deleteSchoolReportRecord(schoolId,reportTypeCode);
+        assertThat(reportTypeCode).isEqualTo("E");
+    }
+
+    @Test
+    public void testDeleteDistrictReportRecordByReportType() {
+        String reportTypeCode = "E";
+
+        when(this.restService.delete(String.format(constants.getDeleteDistrictReportsByReportType(),reportTypeCode), Boolean.class)).thenReturn(true);
+
+        restUtils.deleteDistrictReportRecord(reportTypeCode);
+        assertThat(reportTypeCode).isEqualTo("E");
+    }
+
+    @Test
+    public void testDeleteDistrictReportRecord() {
+        final UUID districtId = UUID.randomUUID();
+        String reportTypeCode = "E";
+
+        mockTokenResponseObject();
+
+        when(this.restService.delete(String.format(constants.getDeleteDistrictReportsByDistrictIdAndReportType(),districtId,reportTypeCode), Boolean.class)).thenReturn(true);
+
+        this.restUtils.deleteDistrictReportRecord(districtId,reportTypeCode);
         assertThat(reportTypeCode).isEqualTo("E");
     }
 
@@ -1526,7 +1541,7 @@ public class RestUtilsTest {
     @Test
     public void testGetReportStudentIDsByStudentIDsAndReportType() {
         UUID uuid = UUID.randomUUID();
-        List<String> studentIDsIn = Arrays.asList(uuid.toString());
+        List<UUID> studentIDsIn = Arrays.asList(uuid);
         List<UUID> studentIDsOut = Arrays.asList(uuid);
 
         mockTokenResponseObject();
@@ -1542,8 +1557,7 @@ public class RestUtilsTest {
     @Test
     public void testGetReportStudentIDsByStudentIDsAndReportTypeError() {
         UUID uuid = UUID.randomUUID();
-        List<String> studentIDsIn = Arrays.asList(uuid.toString());
-        List<UUID> studentIDsOut = Arrays.asList(uuid);
+        List<UUID> studentIDsIn = Arrays.asList(uuid);
 
         mockTokenResponseObject();
 
