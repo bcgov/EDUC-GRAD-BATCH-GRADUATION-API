@@ -48,7 +48,10 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
             List<UUID> schoolIds = eligibleStudentSchoolDistricts.stream().map(StudentCredentialDistribution::getSchoolId).distinct().toList();
             for(UUID schoolId: schoolIds) {
                 restUtils.deleteSchoolReportRecord(schoolId, "DISTREP_YE_SC");
-                restUtils.deleteDistrictReportRecord(schoolId, "DISTREP_YE_SD");
+            }
+            List<UUID> districtIds = eligibleStudentSchoolDistricts.stream().map(StudentCredentialDistribution::getDistrictId).distinct().toList();
+            for(UUID districtId: districtIds) {
+                restUtils.deleteDistrictReportRecord(districtId, "DISTREP_YE_SD");
             }
             return getStringExecutionContextMap(gridSize, eligibleStudentSchoolDistricts, null);
         }
