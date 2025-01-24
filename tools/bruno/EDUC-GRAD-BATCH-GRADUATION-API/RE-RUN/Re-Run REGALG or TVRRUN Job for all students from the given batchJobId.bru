@@ -1,0 +1,15 @@
+meta {
+  name: Re-Run REGALG or TVRRUN Job for all students from the given batchJobId
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v1/batch/rerun/all/:batchId
+  body: none
+  auth: none
+}
+
+params:path {
+  batchId: 
+}

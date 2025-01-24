@@ -1,0 +1,26 @@
+meta {
+  name: Run Specialized User Req Runs
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/batch/userrequestblankdisrun/:credentialType
+  body: json
+  auth: none
+}
+
+params:path {
+  credentialType: 
+}
+
+body:json {
+  {
+    "schoolIds": [],
+    "credentialTypeCode": [],
+    "user": "",
+    "address": "",
+    "quantity": "",
+    "localDownload": ""
+  }
+}

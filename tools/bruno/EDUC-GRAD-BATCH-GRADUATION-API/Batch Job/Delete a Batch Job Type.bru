@@ -1,0 +1,15 @@
+meta {
+  name: Delete a Batch Job Type
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/batch/batchjobtype/:batchJobTypeCode
+  body: none
+  auth: none
+}
+
+params:path {
+  batchJobTypeCode: 
+}

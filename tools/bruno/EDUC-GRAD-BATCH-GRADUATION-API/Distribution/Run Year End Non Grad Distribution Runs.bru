@@ -1,0 +1,11 @@
+meta {
+  name: Run Year End Non Grad Distribution Runs
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/v1/batch/executenongraddisrunbatchjob
+  body: json
+  auth: none
+}
