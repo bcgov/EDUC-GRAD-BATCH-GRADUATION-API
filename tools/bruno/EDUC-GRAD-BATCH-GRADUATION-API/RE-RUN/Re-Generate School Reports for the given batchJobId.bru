@@ -1,0 +1,15 @@
+meta {
+  name: Re-Generate School Reports for the given batchJobId
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/v1/batch/regenerate/school-report/:batchId
+  body: none
+  auth: none
+}
+
+params:path {
+  batchId: 
+}

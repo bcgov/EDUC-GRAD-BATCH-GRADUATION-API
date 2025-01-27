@@ -1,0 +1,20 @@
+meta {
+  name: Load Error students in batch runs
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/batch/dashboard/errors/:batchId
+  body: none
+  auth: none
+}
+
+params:query {
+  ~pageNumber: 
+  ~pageSize: 
+}
+
+params:path {
+  batchId: 
+}

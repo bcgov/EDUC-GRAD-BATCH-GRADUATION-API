@@ -1,0 +1,15 @@
+meta {
+  name: Schedule Jobs
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/v1/batch/schedule/remove/:jobId
+  body: none
+  auth: none
+}
+
+params:path {
+  jobId: 
+}

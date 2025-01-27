@@ -1,0 +1,44 @@
+meta {
+  name: Run Specialized TVR Runs
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/batch/userrequestdisrun/:credentialType
+  body: json
+  auth: none
+}
+
+params:path {
+  credentialType: 
+}
+
+body:json {
+  {
+    "schoolIds": [],
+    "districtIds": [],
+    "schoolCategoryCodes": [],
+    "pens": [],
+    "programs": [],
+    "studentIDs": [],
+    "statuses": [],
+    "reportTypes": [],
+    "user": "",
+    "address": {
+      "streetLine1": "",
+      "streetLine2": "",
+      "streetLine3": "",
+      "city": "",
+      "region": "",
+      "country": "",
+      "code": ""
+    },
+    "gradDateFrom": "",
+    "gradDateTo": "",
+    "validateInput": "",
+    "activityCode": "",
+    "localDownload": "",
+    "quantity": ""
+  }
+}

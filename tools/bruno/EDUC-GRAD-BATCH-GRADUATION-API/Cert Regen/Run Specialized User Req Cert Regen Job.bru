@@ -1,0 +1,33 @@
+meta {
+  name: Run Specialized User Req Cert Regen Job
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/batch/executecertregenbatchjob
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "schoolIds": [],
+    "districtIds": [],
+    "schoolCategoryCodes": [],
+    "pens": [],
+    "programs": [],
+    "studentIDs": [],
+    "statuses": [],
+    "reportTypes": [],
+    "user": "",
+    "address": "",
+    "gradDateFrom": "",
+    "gradDateTo": "",
+    "validateInput": "",
+    "activityCode": "",
+    "localDownload": "",
+    "quantity": "",
+    "runMode": ""
+  }
+}

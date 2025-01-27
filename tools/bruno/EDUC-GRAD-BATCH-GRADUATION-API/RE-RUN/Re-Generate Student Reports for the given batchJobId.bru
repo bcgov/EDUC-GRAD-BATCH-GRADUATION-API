@@ -1,0 +1,15 @@
+meta {
+  name: Re-Generate Student Reports for the given batchJobId
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/batch/regenerate/student-report
+  body: json
+  auth: none
+}
+
+params:query {
+  reportType: 
+}

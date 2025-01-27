@@ -1,0 +1,15 @@
+meta {
+  name: Re-Run REGALG or TVRRUN Job for failed students from the given batchJobId
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/v1/batch/rerun/failed/:batchId
+  body: none
+  auth: none
+}
+
+params:path {
+  batchId: 
+}
