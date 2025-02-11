@@ -210,7 +210,7 @@ endpoint:
     get-school-reports-count:
       url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/count?reportType=%s
     get-student-reports-guid:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/studentreportsbystudentid?reportType=%s&rowCount=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreportsbystudentid?reportType=%s&rowCount=%s
     archive-school-reports:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/archive?batchId=%s&reportType=%s
     get-transcript-list:
@@ -230,7 +230,7 @@ endpoint:
     get-certificate-types:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/certificatetype/%s
     get-school-reports-lite-by-report-type:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreport/search?reportTypeCode=%s&isLight=true
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports/search?reportTypeCode=%s&isLight=true
     delete-school-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports/%s/%s
     delete-school-report-by-report-type-only:
