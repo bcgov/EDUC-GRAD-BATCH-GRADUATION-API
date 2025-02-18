@@ -135,6 +135,7 @@ public class GraduationReportService {
 		//<--
 		dist.setSchoolAtGradId(data.getSchoolAtGradId());
 		dist.setSchoolOfRecordOriginId(data.getSchoolOfRecordId());
+		dist.setDistrictId(data.getDistrictId());
 		dist.setDocumentStatusCode("COMPL");
 		dist.setPen(data.getPen());
 		dist.setLegalFirstName(data.getFirstName());
