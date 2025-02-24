@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
+import ca.bc.gov.educ.api.batchgraduation.model.institute.District;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class DistributionResponse {
     private String localDownload;
     private String activityCode;
     private List<School> schools = new ArrayList<>();
-    private List<School> districts = new ArrayList<>();
+    private List<District> districts = new ArrayList<>();
     private StudentSearchRequest studentSearchRequest;
 
     private List<UUID> districtSchools = new ArrayList<>();
