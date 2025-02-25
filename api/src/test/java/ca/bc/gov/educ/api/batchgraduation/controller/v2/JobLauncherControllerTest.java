@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.controller.v2;
 import ca.bc.gov.educ.api.batchgraduation.EducGradBatchGraduationApplication;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.filter.FilterOperation;
+import ca.bc.gov.educ.api.batchgraduation.model.dto.Condition;
 import ca.bc.gov.educ.api.batchgraduation.model.dto.Search;
 import ca.bc.gov.educ.api.batchgraduation.model.dto.SearchCriteria;
 import ca.bc.gov.educ.api.batchgraduation.model.dto.ValueType;
@@ -14,6 +15,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +31,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static ca.bc.gov.educ.api.batchgraduation.model.dto.Condition.AND;
 import static ca.bc.gov.educ.api.batchgraduation.model.dto.Condition.OR;
@@ -56,63 +61,49 @@ class JobLauncherControllerTest {
     var entity1 = createJobHistoryEntity();
     var entity2 = createJobHistoryEntity();
     entity2.setStatus("FAILED");
+    entity2.setFailedStudentsProcessed(10);
     repository.saveAll(List.of(entity1, entity2));
   }
 
-  @Test
-  void testGetJobHistory_givenSearchCriteria_returnsCorrectly() throws Exception {
+  static Stream<Arguments> searchCriteriaProvider() {
+    return Stream.of(
+        Arguments.of("status", FilterOperation.NOT_EQUAL, "FAILED", ValueType.STRING, AND, "endTime", FilterOperation.LESS_THAN, LocalDateTime.now().plusDays(1).toString(), ValueType.DATE_TIME, AND, 1),
+        Arguments.of("jobExecutionId", FilterOperation.BETWEEN, "124,125", ValueType.INTEGER, OR, "failedStudentsProcessed", FilterOperation.IN, "5,58,59", ValueType.LONG, OR, 1),
+        Arguments.of("jobExecutionId", FilterOperation.EQUAL, "123", ValueType.INTEGER, AND, "failedStudentsProcessed", FilterOperation.GREATER_THAN, "9", ValueType.LONG, AND, 1),
+        Arguments.of("jobExecutionId", FilterOperation.LESS_THAN_OR_EQUAL_TO, "123", ValueType.INTEGER, AND, "failedStudentsProcessed", FilterOperation.GREATER_THAN_OR_EQUAL_TO, "10", ValueType.LONG, AND, 1),
+        Arguments.of("status", FilterOperation.CONTAINS, "F", ValueType.STRING, AND, "failedStudentsProcessed", FilterOperation.NOT_IN, "10,8,14", ValueType.LONG, AND, 0),
+        Arguments.of("status", FilterOperation.STARTS_WITH, "F", ValueType.STRING, AND, "jobType", FilterOperation.NOT_STARTS_WITH, "GR", ValueType.STRING, AND, 0),
+        Arguments.of("status", FilterOperation.ENDS_WITH, "F", ValueType.STRING, OR, "jobType", FilterOperation.STARTS_WITH_IGNORE_CASE, "gr", ValueType.STRING, OR, 2),
+        Arguments.of("status", FilterOperation.CONTAINS_IGNORE_CASE, "ail", ValueType.STRING, AND, "jobType", FilterOperation.STARTS_WITH_IGNORE_CASE, "gr", ValueType.STRING, AND, 1)
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("searchCriteriaProvider")
+  void testGetJobHistory_givenSearchCriteria_returnsCorrectly(String key1, FilterOperation operation1, String value1, ValueType valueType1, Condition condition1,
+                                                              String key2, FilterOperation operation2, String value2, ValueType valueType2, Condition condition2, int size) throws Exception {
     final SearchCriteria searchCriteria1 = SearchCriteria.builder()
-        .condition(AND)
-        .key("status")
-        .operation(FilterOperation.EQUAL)
-        .value("FAILED")
-        .valueType(ValueType.STRING)
+        .condition(condition1)
+        .key(key1)
+        .operation(operation1)
+        .value(value1)
+        .valueType(valueType1)
         .build();
 
     final SearchCriteria searchCriteria2 = SearchCriteria.builder()
-        .condition(AND)
-        .key("endTime")
-        .operation(FilterOperation.LESS_THAN)
-        .value(LocalDateTime.now().toString())
-        .valueType(ValueType.DATE_TIME)
+        .condition(condition2)
+        .key(key2)
+        .operation(operation2)
+        .value(value2)
+        .valueType(valueType2)
         .build();
 
     final List<SearchCriteria> criteriaList = new ArrayList<>();
     criteriaList.add(searchCriteria1);
     criteriaList.add(searchCriteria2);
 
-    final SearchCriteria searchCriteria3 = SearchCriteria.builder()
-        .condition(OR)
-        .key("jobExecutionId")
-        .operation(FilterOperation.BETWEEN)
-        .value("124,125")
-        .valueType(ValueType.INTEGER)
-        .build();
-
-    final SearchCriteria searchCriteria4 = SearchCriteria.builder()
-        .condition(OR)
-        .key("failedStudentsProcessed")
-        .operation(FilterOperation.IN)
-        .value("57,58,59")
-        .valueType(ValueType.LONG)
-        .build();
-
-    final SearchCriteria searchCriteria5 = SearchCriteria.builder()
-        .condition(OR)
-        .key("failedStudentsProcessed")
-        .operation(FilterOperation.NOT_EQUAL)
-        .value("5")
-        .valueType(ValueType.LONG)
-        .build();
-
-    final List<SearchCriteria> criteriaList2 = new ArrayList<>();
-    criteriaList.add(searchCriteria3);
-    criteriaList.add(searchCriteria4);
-    criteriaList.add(searchCriteria5);
-
     final List<Search> searches = new LinkedList<>();
     searches.add(Search.builder().searchCriteriaList(criteriaList).condition(AND).build());
-    searches.add(Search.builder().searchCriteriaList(criteriaList2).condition(AND).build());
 
     final String criteriaJSON = objectMapper.writeValueAsString(searches);
     final MvcResult result = this.mockMvc
@@ -121,7 +112,7 @@ class JobLauncherControllerTest {
             .param("searchParams", criteriaJSON)
             .contentType(APPLICATION_JSON))
         .andReturn();
-    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(1)));
+    this.mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk()).andExpect(MockMvcResultMatchers.jsonPath("$.content", hasSize(size)));
   }
 
   @Test
