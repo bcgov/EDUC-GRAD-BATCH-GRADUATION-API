@@ -97,9 +97,18 @@ class JobLauncherControllerTest {
         .valueType(ValueType.LONG)
         .build();
 
+    final SearchCriteria searchCriteria5 = SearchCriteria.builder()
+        .condition(OR)
+        .key("failedStudentsProcessed")
+        .operation(FilterOperation.NOT_EQUAL)
+        .value("5")
+        .valueType(ValueType.LONG)
+        .build();
+
     final List<SearchCriteria> criteriaList2 = new ArrayList<>();
     criteriaList.add(searchCriteria3);
     criteriaList.add(searchCriteria4);
+    criteriaList.add(searchCriteria5);
 
     final List<Search> searches = new LinkedList<>();
     searches.add(Search.builder().searchCriteriaList(criteriaList).condition(AND).build());
