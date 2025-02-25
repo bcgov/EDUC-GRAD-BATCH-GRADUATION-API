@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static ca.bc.gov.educ.api.batchgraduation.model.dto.Condition.AND;
+import static ca.bc.gov.educ.api.batchgraduation.model.dto.Condition.OR;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -80,8 +81,29 @@ class JobLauncherControllerTest {
     criteriaList.add(searchCriteria1);
     criteriaList.add(searchCriteria2);
 
+    final SearchCriteria searchCriteria3 = SearchCriteria.builder()
+        .condition(OR)
+        .key("jobExecutionId")
+        .operation(FilterOperation.BETWEEN)
+        .value("124,125")
+        .valueType(ValueType.INTEGER)
+        .build();
+
+    final SearchCriteria searchCriteria4 = SearchCriteria.builder()
+        .condition(OR)
+        .key("failedStudentsProcessed")
+        .operation(FilterOperation.IN)
+        .value("57,58,59")
+        .valueType(ValueType.LONG)
+        .build();
+
+    final List<SearchCriteria> criteriaList2 = new ArrayList<>();
+    criteriaList.add(searchCriteria3);
+    criteriaList.add(searchCriteria4);
+
     final List<Search> searches = new LinkedList<>();
-    searches.add(Search.builder().searchCriteriaList(criteriaList).build());
+    searches.add(Search.builder().searchCriteriaList(criteriaList).condition(AND).build());
+    searches.add(Search.builder().searchCriteriaList(criteriaList2).condition(AND).build());
 
     final String criteriaJSON = objectMapper.writeValueAsString(searches);
     final MvcResult result = this.mockMvc
