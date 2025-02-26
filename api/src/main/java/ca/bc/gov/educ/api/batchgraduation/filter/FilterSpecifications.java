@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.filter;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -75,11 +76,25 @@ public class FilterSpecifications<E, T extends Comparable<T>> {
         filterCriteria -> (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(
             root.get(filterCriteria.getFieldName()), filterCriteria.getConvertedSingleValue()));
 
-    map.put(FilterOperation.IN, filterCriteria -> (root, criteriaQuery, criteriaBuilder) -> root
-        .get(filterCriteria.getFieldName()).in(filterCriteria.getConvertedValues()));
+    map.put(FilterOperation.IN, filterCriteria -> (root, criteriaQuery, criteriaBuilder) -> {
+      criteriaQuery.distinct(true);
+      if (filterCriteria.getFieldName().contains(".")) {
+        String[] splits = filterCriteria.getFieldName().split("\\.");
+        if (splits.length ==3) {
+          return root.join(splits[0]).join(splits[1]).get(splits[2]).in(filterCriteria.getConvertedValues());
+        }
+        return root.join(splits[0]).get(splits[1]).in(filterCriteria.getConvertedValues());
+      }
+      return root.get(filterCriteria.getFieldName()).in(filterCriteria.getConvertedValues());
+    });
 
-    map.put(FilterOperation.NOT_IN, filterCriteria -> (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder
-        .not(root.get(filterCriteria.getFieldName()).in(filterCriteria.getConvertedValues())));
+    map.put(FilterOperation.NOT_IN, filterCriteria -> (root, criteriaQuery, criteriaBuilder) -> {
+      if (filterCriteria.getFieldName().contains(".")) {
+        String[] splits = filterCriteria.getFieldName().split("\\.");
+        return criteriaBuilder.or(criteriaBuilder.not(root.join(splits[0], JoinType.LEFT).get(splits[1]).in(filterCriteria.getConvertedValues())), criteriaBuilder.isEmpty(root.get(splits[0])));
+      }
+      return criteriaBuilder.or(criteriaBuilder.not(root.get(filterCriteria.getFieldName()).in(filterCriteria.getConvertedValues())), criteriaBuilder.isNull(root.get(filterCriteria.getFieldName())));
+    });
 
     map.put(FilterOperation.BETWEEN,
         filterCriteria -> (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.between(

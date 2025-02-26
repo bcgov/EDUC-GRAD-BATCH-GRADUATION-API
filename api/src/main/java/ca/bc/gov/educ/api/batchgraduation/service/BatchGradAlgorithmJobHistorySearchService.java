@@ -49,21 +49,21 @@ public class BatchGradAlgorithmJobHistorySearchService {
     this.repository = repository;
   }
 
-  public Specification<BatchGradAlgorithmJobHistoryEntity> getSpecifications(Specification<BatchGradAlgorithmJobHistoryEntity> schoolSpecs, int i, Search search) {
+  public Specification<BatchGradAlgorithmJobHistoryEntity> getSpecifications(Specification<BatchGradAlgorithmJobHistoryEntity> specs, int i, Search search) {
     if (i == 0) {
-      schoolSpecs = getSpecification(search.getSearchCriteriaList());
+      specs = getSpecification(search.getSearchCriteriaList());
     } else {
       if (search.getCondition() == Condition.AND) {
-        schoolSpecs = schoolSpecs.and(getSpecification(search.getSearchCriteriaList()));
+        specs = specs.and(getSpecification(search.getSearchCriteriaList()));
       } else {
-        schoolSpecs = schoolSpecs.or(getSpecification(search.getSearchCriteriaList()));
+        specs = specs.or(getSpecification(search.getSearchCriteriaList()));
       }
     }
-    return schoolSpecs;
+    return specs;
   }
 
   private Specification<BatchGradAlgorithmJobHistoryEntity> getSpecification(List<SearchCriteria> criteriaList) {
-    Specification<BatchGradAlgorithmJobHistoryEntity> schoolSpecs = null;
+    Specification<BatchGradAlgorithmJobHistoryEntity> specs = null;
     if (!criteriaList.isEmpty()) {
       int i = 0;
       for (SearchCriteria criteria : criteriaList) {
@@ -73,14 +73,14 @@ public class BatchGradAlgorithmJobHistorySearchService {
             criteriaValue = criteriaValue.toUpperCase();
           }
           Specification<BatchGradAlgorithmJobHistoryEntity> typeSpecification = getTypeSpecification(criteria.getKey(), criteria.getOperation(), criteriaValue, criteria.getValueType());
-          schoolSpecs = getSpecificationPerGroup(schoolSpecs, i, criteria, typeSpecification);
+          specs = getSpecificationPerGroup(specs, i, criteria, typeSpecification);
           i++;
         } else {
           throw new InvalidParameterException("Search Criteria can not contain null values for key, value and operation type");
         }
       }
     }
-    return schoolSpecs;
+    return specs;
   }
   private Specification<BatchGradAlgorithmJobHistoryEntity> getSpecificationPerGroup(Specification<BatchGradAlgorithmJobHistoryEntity> specification, int i, SearchCriteria criteria, Specification<BatchGradAlgorithmJobHistoryEntity> typeSpecification) {
     if (i == 0) {
@@ -123,13 +123,13 @@ public class BatchGradAlgorithmJobHistorySearchService {
   }
 
   @Transactional(propagation = Propagation.SUPPORTS)
-  public CompletableFuture<Page<BatchGradAlgorithmJobHistoryEntity>> findAll(Specification<BatchGradAlgorithmJobHistoryEntity> schoolSpecs, final Integer pageNumber, final Integer pageSize, final List<Sort.Order> sorts) {
-    log.trace("In find all query: {}", schoolSpecs);
+  public CompletableFuture<Page<BatchGradAlgorithmJobHistoryEntity>> findAll(Specification<BatchGradAlgorithmJobHistoryEntity> specs, final Integer pageNumber, final Integer pageSize, final List<Sort.Order> sorts) {
+    log.trace("In find all query: {}", specs);
     return CompletableFuture.supplyAsync(() -> {
       Pageable paging = PageRequest.of(pageNumber, pageSize, Sort.by(sorts));
       try {
-        log.trace("Running paginated query: {}", schoolSpecs);
-        var results = this.repository.findAll(schoolSpecs, paging);
+        log.trace("Running paginated query: {}", specs);
+        var results = this.repository.findAll(specs, paging);
         log.trace("Paginated query returned with results: {}", results);
         return results;
       } catch (final Throwable ex) {
@@ -141,7 +141,7 @@ public class BatchGradAlgorithmJobHistorySearchService {
   }
 
   public Specification<BatchGradAlgorithmJobHistoryEntity> setSpecificationAndSortCriteria(String sortCriteriaJson, String searchCriteriaListJson, ObjectMapper objectMapper, List<Sort.Order> sorts) {
-    Specification<BatchGradAlgorithmJobHistoryEntity> schoolSpecs = null;
+    Specification<BatchGradAlgorithmJobHistoryEntity> specs = null;
     try {
       RequestUtil.getSortCriteria(sortCriteriaJson, objectMapper, sorts);
       if (StringUtils.isNotBlank(searchCriteriaListJson)) {
@@ -149,13 +149,13 @@ public class BatchGradAlgorithmJobHistorySearchService {
         });
         int i = 0;
         for (var search : searches) {
-          schoolSpecs = getSpecifications(schoolSpecs, i, search);
+          specs = getSpecifications(specs, i, search);
           i++;
         }
       }
     } catch (JsonProcessingException e) {
       throw new ServiceException(e.getMessage());
     }
-    return schoolSpecs;
+    return specs;
   }
 }
