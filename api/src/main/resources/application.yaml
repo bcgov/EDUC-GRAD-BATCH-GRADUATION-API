@@ -212,7 +212,7 @@ endpoint:
     get-student-reports-guid:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreportsbystudentid?reportType=%s&rowCount=%s
     archive-school-reports:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/archive?batchId=%s&reportType=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/archive?batchId=%s&reportType=%s
     get-transcript-list:
       yearly:
         url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistributionyearly
