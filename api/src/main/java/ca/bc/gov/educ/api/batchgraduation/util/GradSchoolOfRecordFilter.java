@@ -30,7 +30,7 @@ public class GradSchoolOfRecordFilter implements Serializable {
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
             for(String schoolCategoryCode: searchRequest.getSchoolCategoryCodes()) {
                 logger.debug("Use schoolCategory code {} to find list of schools", schoolCategoryCode);
-                eligibleSchools = restUtils.getSchoolsBySchoolCategoryCode(schoolCategoryCode);
+                eligibleSchools.addAll(restUtils.getSchoolsBySchoolCategoryCode(schoolCategoryCode));
                 logger.debug("Found {} schools by schoolCategory code {}", eligibleSchools.size(), schoolCategoryCode);
             }
         }
