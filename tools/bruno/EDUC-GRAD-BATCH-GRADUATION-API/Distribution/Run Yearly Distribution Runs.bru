@@ -1,0 +1,11 @@
+meta {
+  name: Run Yearly Distribution Runs
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/v1/batch/executeyearlydisrunbatchjob
+  body: json
+  auth: none
+}

@@ -182,23 +182,27 @@ endpoint:
     update-student-credential:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s&activityCode=%s
     user-req-dis-run:
-      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/userrequest/%s
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/userrequest/%s
     user-req-dis-run-for-not-yet-distributed:
-      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/userrequest/notyetdistributed/%s
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/userrequest/notyetdistributed/%s
     get-district-data-yearly:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/districtdataearly
     get-certificate-types:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/certificatetype/%s
     get-school-reports-lite-by-report-type:
-      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreport/type/%s
-    update-school-report:
-      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/updateschoolreports?mincode=%s&reportTypeCode=%s
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreports/search?reportTypeCode=%s&isLight=true
+    delete-school-report:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports/%s/%s
+    delete-school-report-by-report-type-only:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/schoolreports?reportTypeCode=%s
+    delete-district-report:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report/%s/%s
+    delete-district-report-by-report-type-only:
+      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/graduationreports/district-report?reportTypeCode=%s
     update-student-report:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/studentreports?reportTypeCode=%s
     delete-student-report:
       url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/delete?batchId=%s&reportType=%s
-    get-school-report-list:
-      url: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/schoolreportdistributionrun
     check-sccp-certificate-exists: https://educ-grad-graduation-report-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/graduationreports/check-sccp-certificate-exists
   grad-distribution-api:
     merge-n-upload:
@@ -220,20 +224,24 @@ endpoint:
   grad-trax-api:
     get-psi-student-list:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
-    school-by-min-code:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/%s
-    school-by-district-code:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/search?district=%s
+    school-by-school-id:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school/%s
+    school-clob-by-school-id:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school-clob/%s
+    search-school-clob-by-min-code:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school-clob/search?mincode=%s
+    search-schools-by-district-id:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school/search?districtId=%s
+    search-schools-by-district-number:
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school/search?distNo=%s
     district-by-school-category:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/district/schoolCategories?schoolCategory=%s
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/district/schoolCategories?schoolCategoryCode=%s
     school-by-school-category:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/schoolCategories?schoolCategory=%s
+      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v2/trax/school/schoolCategories?schoolCategoryCode=%s
     get-edw-snapshot-schools:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/edw/get-schools/snapshot/%s
     get-edw-snapshot-students-by-min-code:
       url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/edw/get-students/snapshot/%s/%s
-    commonschool-by-mincode:
-      url: https://educ-grad-trax-api-77c02f-dev.apps.silver.devops.gov.bc.ca/api/v1/trax/school/common/%s
 
 #Splunk LogHelper
 splunk:

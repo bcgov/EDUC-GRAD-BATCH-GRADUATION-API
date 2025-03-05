@@ -15,7 +15,7 @@ spring:
     password: ${PASSWORD}
     driver-class-name: oracle.jdbc.driver.OracleDriver
   jpa:
-    show-sql: false
+    show-sql: ${SHOW_SQL_LOGS}
     database-platform: org.hibernate.dialect.OracleDialect
     hibernate:
       ddl-auto: none
@@ -98,6 +98,11 @@ server:
       io: 16
   #port: ${HTTP_PORT}
   max-http-request-header-size: 20000
+  compression:
+    enabled: ${ENABLE_COMPRESSION}
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,text/css,text/javascript,application/javascript
+    min-response-size: 2048
+    excluded-user-agents: MSIE 6.0,UCBrowser
 
 #API Documentation
 springdoc:
@@ -203,11 +208,11 @@ endpoint:
     get-deceased-student-id-list: ${GRAD_STUDENT_API}api/v1/student/deceasedstudentid
   grad-graduation-report-api:
     get-school-reports-count:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/count?reportType=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/count?reportType=%s
     get-student-reports-guid:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreportsbystudentid?reportType=%s&rowCount=%s
     archive-school-reports:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/archive?batchId=%s&reportType=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/archive?batchId=%s&reportType=%s
     get-transcript-list:
       yearly:
         url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/gettranscriptsfordistributionyearly
@@ -217,23 +222,27 @@ endpoint:
     update-student-credential:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s&activityCode=%s
     user-req-dis-run:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/userrequest/%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/userrequest/%s
     user-req-dis-run-for-not-yet-distributed:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/userrequest/notyetdistributed/%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/userrequest/notyetdistributed/%s
     get-district-data-yearly:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/districtdataearly
     get-certificate-types:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/certificatetype/%s
     get-school-reports-lite-by-report-type:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreport/type/%s
-    update-school-report:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/updateschoolreport?mincode=%s&reportTypeCode=%s
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports/search?reportTypeCode=%s&isLight=true
+    delete-school-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports/%s/%s
+    delete-school-report-by-report-type-only:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/schoolreports?reportTypeCode=%s
+    delete-district-report:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report/%s/%s
+    delete-district-report-by-report-type-only:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/district-report?reportTypeCode=%s
     update-student-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentreports?reportTypeCode=%s
     delete-student-report:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/delete?batchId=%s&reportType=%s
-    get-school-report-list:
-      url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/schoolreportdistribution
     check-sccp-certificate-exists: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/check-sccp-certificate-exists
   grad-distribution-api:
     merge-n-upload:
@@ -255,20 +264,24 @@ endpoint:
   grad-trax-api:
     get-psi-student-list:
       url: ${GRAD_TRAX_API}api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
-    school-by-min-code:
-      url: ${GRAD_TRAX_API}api/v1/trax/school/%s
-    school-by-district-code:
-      url: ${GRAD_TRAX_API}api/v1/trax/school/search?district=%s
+    school-clob-by-school-id:
+      url: ${GRAD_TRAX_API}api/v2/trax/school-clob/%s
+    search-school-clob-by-min-code:
+      url: ${GRAD_TRAX_API}api/v2/trax/school-clob/search?mincode=%s
+    school-by-school-id:
+      url: ${GRAD_TRAX_API}api/v2/trax/school/%s
+    search-schools-by-district-id:
+      url: ${GRAD_TRAX_API}api/v2/trax/school/search?districtId=%s
+    search-schools-by-district-number:
+      url: ${GRAD_TRAX_API}api/v2/trax/school/search?distNo=%s
     district-by-school-category:
-      url: ${GRAD_TRAX_API}api/v1/trax/district/schoolCategories?schoolCategory=%s
+      url: ${GRAD_TRAX_API}api/v2/trax/district/schoolCategories?schoolCategoryCode=%s
     school-by-school-category:
-      url: ${GRAD_TRAX_API}api/v1/trax/school/schoolCategories?schoolCategory=%s
+      url: ${GRAD_TRAX_API}api/v2/trax/school/schoolCategories?schoolCategoryCode=%s
     get-edw-snapshot-schools:
       url: ${GRAD_TRAX_API}api/v1/trax/edw/get-schools/snapshot/%s
     get-edw-snapshot-students-by-min-code:
       url: ${GRAD_TRAX_API}api/v1/trax/edw/get-students/snapshot/%s/%s
-    commonschool-by-mincode:
-        url: ${GRAD_TRAX_API}api/v1/trax/school/common/%s
 
 
 #Splunk LogHelper

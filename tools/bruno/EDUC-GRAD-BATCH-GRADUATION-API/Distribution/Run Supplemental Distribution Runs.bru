@@ -1,0 +1,11 @@
+meta {
+  name: Run Supplemental Distribution Runs
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/v1/batch/executesuppdisrunbatchjob
+  body: json
+  auth: none
+}

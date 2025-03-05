@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -50,7 +51,7 @@ public class DistributionService extends GradService {
     }
 
     @Transactional(readOnly = true)
-    public List<String> getSchoolListForDistribution(Long batchId) {
+    public List<UUID> getSchoolListForDistribution(Long batchId) {
         return studentCredentialDistributionRepository.getSchoolList(batchId);
     }
 
@@ -60,7 +61,7 @@ public class DistributionService extends GradService {
         entity.setJobExecutionId(batchId);
         entity.setJobType(jobType);
         entity.setStudentID(scd.getStudentID());
-        entity.setSchoolOfRecord(scd.getSchoolOfRecord());
+        entity.setSchoolId(scd.getSchoolId());
         try {
             String payload = jsonUtil.getJsonStringFromObject(scd);
             entity.setPayload(payload);

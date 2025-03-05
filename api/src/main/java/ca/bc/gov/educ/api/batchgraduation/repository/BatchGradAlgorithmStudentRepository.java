@@ -26,8 +26,8 @@ public interface BatchGradAlgorithmStudentRepository extends JpaRepository<Batch
 
     Page<BatchGradAlgorithmStudentEntity> findByJobExecutionIdAndStatusIn(Long batchId, List<String> statuses, Pageable paging);
 
-    @Query(value="select distinct e.schoolOfRecord from BatchGradAlgorithmStudentEntity e where e.jobExecutionId = :batchId and e.status = 'COMPLETED'")
-    List<String> getSchoolList(Long batchId);
+    @Query(value="select distinct e.schoolOfRecordId from BatchGradAlgorithmStudentEntity e where e.jobExecutionId = :batchId and e.status = 'COMPLETED'")
+    List<UUID> getSchoolList(Long batchId);
 
     long countAllByJobExecutionIdAndStatus(Long batchId, String status);
 
@@ -36,8 +36,8 @@ public interface BatchGradAlgorithmStudentRepository extends JpaRepository<Batch
     long countAllByJobExecutionId(Long batchId);
 
     @Modifying
-    @Query(value="insert into BATCH_GRAD_ALG_STUDENT(graduation_student_record_id, job_execution_id, graduation_program_code, school_of_record, status, create_user, create_date, update_user, update_date)\n"
-            + "select graduation_student_record_id, :newBatchId, graduation_program_code, school_of_record, 'STARTED', :userName, :currentTime, :userName, :currentTime\n"
+    @Query(value="insert into BATCH_GRAD_ALG_STUDENT(graduation_student_record_id, job_execution_id, graduation_program_code, school_of_record_id, status, create_user, create_date, update_user, update_date)\n"
+            + "select graduation_student_record_id, :newBatchId, graduation_program_code, school_of_record_id, 'STARTED', :userName, :currentTime, :userName, :currentTime\n"
             + "from BATCH_GRAD_ALG_STUDENT where job_execution_id = :batchId and status <> 'COMPLETED'", nativeQuery=true)
     void copyGradAlgorithmErroredStudents(
             @Param("newBatchId") Long newBatchId,
@@ -46,8 +46,8 @@ public interface BatchGradAlgorithmStudentRepository extends JpaRepository<Batch
             @Param("currentTime") Date currentTime);
 
     @Modifying
-    @Query(value="insert into BATCH_GRAD_ALG_STUDENT(graduation_student_record_id, job_execution_id, graduation_program_code, school_of_record, status, create_user, create_date, update_user, update_date)\n"
-            + "select graduation_student_record_id, :newBatchId, graduation_program_code, school_of_record, 'STARTED', :userName, :currentTime, :userName, :currentTime\n"
+    @Query(value="insert into BATCH_GRAD_ALG_STUDENT(graduation_student_record_id, job_execution_id, graduation_program_code, school_of_record_id, status, create_user, create_date, update_user, update_date)\n"
+            + "select graduation_student_record_id, :newBatchId, graduation_program_code, school_of_record_id, 'STARTED', :userName, :currentTime, :userName, :currentTime\n"
             + "from BATCH_GRAD_ALG_STUDENT where job_execution_id = :batchId", nativeQuery=true)
     void copyAllGradAlgorithmStudents(
             @Param("newBatchId") Long newBatchId,

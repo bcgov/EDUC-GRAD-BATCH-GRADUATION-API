@@ -85,7 +85,9 @@ public class DistributionRunCompletionNotificationListenerTest {
         jobExecution.setId(121L);
         ExecutionContext jobContext = new ExecutionContext();
 
-        Map<String,DistributionPrintRequest> mapDist = new HashMap<>();
+        UUID schoolId = UUID.randomUUID();
+
+        Map<UUID,DistributionPrintRequest> mapDist = new HashMap<>();
         DistributionPrintRequest dpR = new DistributionPrintRequest();
 
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
@@ -94,6 +96,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         scd.setStudentID(new UUID(2,2));
         scd.setCredentialTypeCode("E");
         scd.setPaperType("YED2");
+        scd.setSchoolId(schoolId);
         scd.setSchoolOfRecord("05005001");
         scdList.add(scd);
 
@@ -149,7 +152,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         schoolDistributionRequest.setStudentList(scdList);
         dpR.setSchoolDistributionRequest(schoolDistributionRequest);
 
-        mapDist.put("05005001",dpR);
+        mapDist.put(schoolId,dpR);
         DistributionDataParallelDTO dp = new DistributionDataParallelDTO(tList,cList);
 
         when(this.restService.get(constants.getTranscriptDistributionList(), List.class, "accessToken")).thenReturn(tList);
@@ -160,7 +163,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         reportGradStudentData.setFirstName(scd.getLegalFirstName());
         reportGradStudentData.setLastName(scd.getLegalLastName());
 
-        when(this.restService.get(constants.getStudentDataNonGradEarlyByMincode(), List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
+        when(this.restService.get(constants.getStudentDataNonGradEarlyBySchoolId(), List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
         when(this.restService.get(constants.getCertificateDistributionList(), List.class, "accessToken")).thenReturn(cList);
 
         ResponseObj obj = new ResponseObj();

@@ -15,5 +15,6 @@ public class SnapshotResponse {
     private BigDecimal gpa;
     private String honourFlag;
     private String schoolOfRecord;
+    private String schoolOfRecordId;
     private String studentGrade;
 }

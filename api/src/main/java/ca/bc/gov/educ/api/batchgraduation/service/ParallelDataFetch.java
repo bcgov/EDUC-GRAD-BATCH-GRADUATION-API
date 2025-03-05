@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ParallelDataFetch {
@@ -41,12 +42,12 @@ public class ParallelDataFetch {
         return restUtils.fetchDistributionRequiredDataStudentsNonGradYearly();
     }
 
-    public List<String> fetchDistributionRequiredDataSchoolsNonGradYearly() {
+    public List<UUID> fetchDistributionRequiredDataSchoolsNonGradYearly() {
         String accessToken = restUtils.getAccessToken();
         return graduationReportService.getSchoolsNonGradYearly(accessToken);
     }
 
-    public List<String> fetchDistributionRequiredDataDistrictsNonGradYearly() {
+    public List<UUID> fetchDistributionRequiredDataDistrictsNonGradYearly() {
         String accessToken = restUtils.getAccessToken();
         return graduationReportService.getDistrictsNonGradYearly(accessToken);
     }

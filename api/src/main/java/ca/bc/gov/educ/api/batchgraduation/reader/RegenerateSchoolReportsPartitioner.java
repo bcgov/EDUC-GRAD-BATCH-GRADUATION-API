@@ -42,10 +42,9 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
         log.debug("Filter Schools for school reports regeneration");
         boolean processAllReports = "ALL".equalsIgnoreCase(searchRequest.getActivityCode());
 
-        List<String> eligibleStudentSchoolDistricts = gradSchoolOfRecordFilter.filterSchoolOfRecords(searchRequest);
-        List<String> schoolDistricts = eligibleStudentSchoolDistricts.stream().sorted().toList();
+        List<UUID> schoolDistricts = gradSchoolOfRecordFilter.filterSchoolsByStudentSearch(searchRequest);
         if(log.isDebugEnabled()) {
-            log.debug("Final list of eligible District / School codes {}", String.join(", ", schoolDistricts));
+            log.debug("Final list of eligible District / School codes {}", String.join(", ", schoolDistricts.toString()));
         }
 
         summaryDTO.setBatchId(jobExecution.getId());
@@ -54,7 +53,7 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
         Long totalSchoolReportsCount = 0L;
         Long schoolReportsCount = 0L;
 
-        List<String> finalSchoolDistricts = new ArrayList<>();
+        List<UUID> finalSchoolDistricts = new ArrayList<>();
         List<SchoolReport> schoolReportsLite;
 
         if(processAllReports) {
@@ -65,7 +64,7 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
             }
 
             if (schoolReportsLite != null && !schoolReportsLite.isEmpty()) {
-                finalSchoolDistricts = schoolReportsLite.stream().map(SchoolReport::getSchoolOfRecord)
+                finalSchoolDistricts = schoolReportsLite.stream().map(SchoolReport::getSchoolOfRecordId)
                         .collect(Collectors.toList());
                 schoolReportsCount = (long)finalSchoolDistricts.size();
             }
@@ -75,15 +74,15 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
             summaryDTO.getSchools().add(school);
             totalSchoolReportsCount += finalSchoolDistricts.size();
         } else {
-            for (String schoolOfRecord : schoolDistricts) {
+            for (UUID schoolId : schoolDistricts) {
                 if ("TVRRUN".compareToIgnoreCase(summaryDTO.getReportBatchType()) == 0) {
-                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "NONGRADPRJ", summaryDTO);
+                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolId), "NONGRADPRJ", summaryDTO);
                 } else {
-                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolOfRecord), "GRADREG", summaryDTO);
+                    schoolReportsCount += restUtils.getTotalReportsForProcessing(List.of(schoolId), "GRADREG", summaryDTO);
                 }
                 if (schoolReportsCount > 0) {
-                    finalSchoolDistricts.add(schoolOfRecord);
-                    School school = new School(schoolOfRecord);
+                    finalSchoolDistricts.add(schoolId);
+                    School school = new School(schoolId);
                     school.setNumberOfSchoolReports(schoolReportsCount);
                     summaryDTO.getSchools().add(school);
                     totalSchoolReportsCount += schoolReportsCount;
@@ -102,7 +101,7 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
         if (!finalSchoolDistricts.isEmpty()) {
             updateBatchJobHistory(createBatchJobHistory(), totalSchoolReportsCount);
             int partitionSize = finalSchoolDistricts.size()/gridSize + 1;
-            List<List<String>> partitions = new LinkedList<>();
+            List<List<UUID>> partitions = new LinkedList<>();
             for (int i = 0; i < finalSchoolDistricts.size(); i += partitionSize) {
                 partitions.add(finalSchoolDistricts.subList(i, Math.min(i + partitionSize, finalSchoolDistricts.size())));
             }
@@ -111,7 +110,7 @@ public class RegenerateSchoolReportsPartitioner extends BasePartitioner {
                 ExecutionContext executionContext = new ExecutionContext();
                 SchoolReportsRegenSummaryDTO partitionSummaryDTO = new SchoolReportsRegenSummaryDTO();
                 partitionSummaryDTO.setReportBatchType(summaryDTO.getReportBatchType());
-                List<String> data = partitions.get(i);
+                List<UUID> data = partitions.get(i);
                 executionContext.put("data", data);
                 partitionSummaryDTO.setReadCount(data.size());
                 executionContext.put("summary", partitionSummaryDTO);

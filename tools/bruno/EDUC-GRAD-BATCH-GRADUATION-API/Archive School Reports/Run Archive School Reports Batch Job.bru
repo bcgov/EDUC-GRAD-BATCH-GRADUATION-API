@@ -1,0 +1,11 @@
+meta {
+  name: Run Archive School Reports Batch Job
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/batch/report/school/archive
+  body: json
+  auth: none
+}

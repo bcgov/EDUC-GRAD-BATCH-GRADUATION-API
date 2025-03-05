@@ -1,0 +1,19 @@
+meta {
+  name: Run User Req EDW Snapshot Job
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/v1/batch/executeedwsnapshotbatchjob
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "gradYear": "",
+    "option": "",
+    "schoolOfRecords": []
+  }
+}

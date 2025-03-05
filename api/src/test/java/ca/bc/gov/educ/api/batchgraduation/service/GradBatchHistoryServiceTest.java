@@ -202,18 +202,14 @@ public class GradBatchHistoryServiceTest {
     public void testSaveBatchAlgorithmStudent_when_creatingNew() {
         Long batchId = 3001L;
         UUID studentId = UUID.randomUUID();
-        BatchGradAlgorithmStudentEntity batchGradAlgorithmStudentEntity = new BatchGradAlgorithmStudentEntity();
-        batchGradAlgorithmStudentEntity.setJobExecutionId(batchId);
-        batchGradAlgorithmStudentEntity.setStudentID(studentId);
-        batchGradAlgorithmStudentEntity.setStatus("STARTED");
-        batchGradAlgorithmStudentEntity.setProgram("Test Program");
-        batchGradAlgorithmStudentEntity.setSchoolOfRecord("12345678");
+        UUID schoolId = UUID.randomUUID();
+        BatchGradAlgorithmStudentEntity batchGradAlgorithmStudentEntity = getBatchGradAlgorithmStudentEntity(batchId, studentId, schoolId);
 
         when(batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(studentId, batchId)).thenReturn(Optional.empty());
         when(batchGradAlgorithmStudentRepository.save(batchGradAlgorithmStudentEntity)).thenReturn(batchGradAlgorithmStudentEntity);
         boolean isExceptionThrown = false;
         try {
-            gradBatchHistoryService.saveBatchAlgorithmStudent(batchId, studentId, batchGradAlgorithmStudentEntity.getProgram(), batchGradAlgorithmStudentEntity.getSchoolOfRecord());
+            gradBatchHistoryService.saveBatchAlgorithmStudent(batchId, studentId, batchGradAlgorithmStudentEntity.getProgram(), schoolId);
         } catch (Exception e) {
             isExceptionThrown = true;
         }
@@ -224,41 +220,48 @@ public class GradBatchHistoryServiceTest {
     public void testSaveBatchAlgorithmStudent_when_updatingTheExistingOne() {
         Long batchId = 3001L;
         UUID studentId = UUID.randomUUID();
-        BatchGradAlgorithmStudentEntity batchGradAlgorithmStudentEntity = new BatchGradAlgorithmStudentEntity();
-        batchGradAlgorithmStudentEntity.setJobExecutionId(batchId);
-        batchGradAlgorithmStudentEntity.setStudentID(studentId);
-        batchGradAlgorithmStudentEntity.setStatus("STARTED");
-        batchGradAlgorithmStudentEntity.setProgram("Test Program");
-        batchGradAlgorithmStudentEntity.setSchoolOfRecord("12345678");
+        UUID schoolId = UUID.randomUUID();
+        BatchGradAlgorithmStudentEntity batchGradAlgorithmStudentEntity = getBatchGradAlgorithmStudentEntity(batchId, studentId, schoolId);
 
         when(batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(studentId, batchId)).thenReturn(Optional.of(batchGradAlgorithmStudentEntity));
         when(batchGradAlgorithmStudentRepository.save(batchGradAlgorithmStudentEntity)).thenReturn(batchGradAlgorithmStudentEntity);
         boolean isExceptionThrown = false;
         try {
-            gradBatchHistoryService.saveBatchAlgorithmStudent(batchId, studentId, batchGradAlgorithmStudentEntity.getProgram(), batchGradAlgorithmStudentEntity.getSchoolOfRecord());
+            gradBatchHistoryService.saveBatchAlgorithmStudent(batchId, studentId, batchGradAlgorithmStudentEntity.getProgram(), schoolId);
         } catch (Exception e) {
             isExceptionThrown = true;
         }
         assertThat(isExceptionThrown).isFalse();
     }
 
+    private static BatchGradAlgorithmStudentEntity getBatchGradAlgorithmStudentEntity(Long batchId, UUID studentId, UUID schoolId) {
+        BatchGradAlgorithmStudentEntity batchGradAlgorithmStudentEntity = new BatchGradAlgorithmStudentEntity();
+        batchGradAlgorithmStudentEntity.setJobExecutionId(batchId);
+        batchGradAlgorithmStudentEntity.setStudentID(studentId);
+        batchGradAlgorithmStudentEntity.setStatus("STARTED");
+        batchGradAlgorithmStudentEntity.setProgram("Test Program");
+        batchGradAlgorithmStudentEntity.setSchoolOfRecordId(schoolId);
+        return batchGradAlgorithmStudentEntity;
+    }
+
     @Test
     public void testUpdateBatchStatusForStudent() {
         Long batchId = 3001L;
         UUID studentId = UUID.randomUUID();
+        UUID schoolId = UUID.randomUUID();
         BatchGradAlgorithmStudentEntity batchGradAlgorithmStudentEntity = new BatchGradAlgorithmStudentEntity();
         batchGradAlgorithmStudentEntity.setJobExecutionId(batchId);
         batchGradAlgorithmStudentEntity.setStudentID(studentId);
         batchGradAlgorithmStudentEntity.setStatus(BatchStatusEnum.STARTED.name());
         batchGradAlgorithmStudentEntity.setProgram("Test Program");
-        batchGradAlgorithmStudentEntity.setSchoolOfRecord("12345678");
+        batchGradAlgorithmStudentEntity.setSchoolOfRecordId(schoolId);
 
         BatchGradAlgorithmStudentEntity savedEntity = new BatchGradAlgorithmStudentEntity();
         batchGradAlgorithmStudentEntity.setJobExecutionId(batchId);
         batchGradAlgorithmStudentEntity.setStudentID(studentId);
         batchGradAlgorithmStudentEntity.setStatus(BatchStatusEnum.FAILED.name());
         batchGradAlgorithmStudentEntity.setProgram("Test Program");
-        batchGradAlgorithmStudentEntity.setSchoolOfRecord("12345678");
+        batchGradAlgorithmStudentEntity.setSchoolOfRecordId(schoolId);
         batchGradAlgorithmStudentEntity.setError("Unexpected Error");
 
         when(batchGradAlgorithmStudentRepository.findByStudentIDAndJobExecutionId(studentId, batchId)).thenReturn(Optional.of(batchGradAlgorithmStudentEntity));
@@ -299,8 +302,10 @@ public class GradBatchHistoryServiceTest {
     @Test
     public void testGetSchoolListForReport() {
         Long batchId = 3001L;
-        when(batchGradAlgorithmStudentRepository.getSchoolList(batchId)).thenReturn(Arrays.asList("12345678", "87654321"));
-        List<String> list = gradBatchHistoryService.getSchoolListForReport(batchId);
+        UUID schoolId1 = UUID.randomUUID();
+        UUID schoolId2 = UUID.randomUUID();
+        when(batchGradAlgorithmStudentRepository.getSchoolList(batchId)).thenReturn(Arrays.asList(schoolId1, schoolId2));
+        List<UUID> list = gradBatchHistoryService.getSchoolListForReport(batchId);
         assertThat(list).hasSize(2);
     }
 

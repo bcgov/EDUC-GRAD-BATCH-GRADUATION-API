@@ -224,7 +224,7 @@ public class EducGradBatchGraduationApiConstants {
     private String updateStudentRecordHistory;
 
     @Value("${endpoint.grad-student-api.get-student-data-nongrad-yearly}")
-    private String studentDataNonGradEarlyByMincode;
+    private String studentDataNonGradEarlyBySchoolId;
 
     @Value("${endpoint.grad-student-api.get-school-data-nongrad-yearly}")
     private String schoolDataNonGradEarly;
@@ -277,11 +277,17 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-student-api.read-grad-student-record-batch}")
     private String readGradStudentRecordBatch;
 
-    @Value("${endpoint.grad-graduation-report-api.get-school-report-list.url}")
-    private String schoolReportPostingList;
+    @Value("${endpoint.grad-graduation-report-api.delete-school-report-by-report-type-only.url}")
+    private String deleteSchoolReportsByReportType;
 
-    @Value("${endpoint.grad-graduation-report-api.update-school-report.url}")
-    private String updateSchoolReport;
+    @Value("${endpoint.grad-graduation-report-api.delete-school-report.url}")
+    private String deleteSchoolReportsBySchoolIdAndReportType;
+
+    @Value("${endpoint.grad-graduation-report-api.delete-district-report-by-report-type-only.url}")
+    private String deleteDistrictReportsByReportType;
+
+    @Value("${endpoint.grad-graduation-report-api.delete-district-report.url}")
+    private String deleteDistrictReportsByDistrictIdAndReportType;
 
     @Value("${endpoint.grad-graduation-report-api.update-student-report.url}")
     private String updateStudentReport;
@@ -298,20 +304,26 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-api.student-certificate-regeneration.url}")
     private String studentCertificateRegeneration;
 
-    @Value("${endpoint.grad-trax-api.commonschool-by-mincode.url}")
-    private String commonSchoolByMincode;
+    @Value("${endpoint.grad-trax-api.school-clob-by-school-id.url}")
+    private String schoolClobBySchoolId;
 
-    @Value("${endpoint.grad-trax-api.school-by-min-code.url}")
-    private String traxSchoolByMincode;
+    @Value("${endpoint.grad-trax-api.search-school-clob-by-min-code.url}")
+    private String searchSchoolClobByMinCode;
+
+    @Value("${endpoint.grad-trax-api.school-by-school-id.url}")
+    private String schoolBySchoolId;
+
+    @Value("${endpoint.grad-trax-api.search-schools-by-district-id.url}")
+    private String searchSchoolsByDistrictId;
+
+    @Value("${endpoint.grad-trax-api.search-schools-by-district-number.url}")
+    private String searchSchoolsByDistrictNumber;
 
     @Value("${endpoint.grad-trax-api.district-by-school-category.url}")
-    private String traxDistrictBySchoolCategory;
+    private String districstBySchoolCategory;
 
     @Value("${endpoint.grad-trax-api.school-by-school-category.url}")
-    private String traxSchoolBySchoolCategory;
-
-    @Value("${endpoint.grad-trax-api.school-by-district-code.url}")
-    private String traxSchoolByDistrict;
+    private String schoolsBySchoolCategory;
 
     @Value("${endpoint.grad-student-api.get-deceased-student-id-list}")
     private String deceasedStudentIDList;

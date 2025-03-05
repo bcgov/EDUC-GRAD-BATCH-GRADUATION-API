@@ -43,18 +43,19 @@ public class DistributionServiceTest {
     @Test
     public void testGetStudentCredentialDistributions() throws Exception {
         Long batchId = 3001L;
+        UUID schoolId = UUID.randomUUID();
         StudentCredentialDistributionEntity entity = new StudentCredentialDistributionEntity();
         entity.setId(UUID.randomUUID());
         entity.setJobExecutionId(batchId);
         entity.setStudentID(UUID.randomUUID());
         entity.setJobType("DISTRUN");
-        entity.setSchoolOfRecord("12345678");
+        entity.setSchoolId(schoolId);
 
         StudentCredentialDistribution dto = new StudentCredentialDistribution();
         dto.setId(entity.getId());
         dto.setStudentID(entity.getStudentID());
         dto.setPen("123456789");
-        dto.setSchoolOfRecord(entity.getSchoolOfRecord());
+        dto.setSchoolId(entity.getSchoolId());
 
         entity.setPayload(jsonUtil.getJsonStringFromObject(dto));
 
@@ -69,29 +70,31 @@ public class DistributionServiceTest {
     @Test
     public void testGetSchoolListForDistribution() {
         Long batchId = 3001L;
-        String schoolOfRecord = "12345678";
+        UUID schoolId = UUID.randomUUID();
 
-        when(studentCredentialDistributionRepository.getSchoolList(batchId)).thenReturn(Arrays.asList(schoolOfRecord));
+        when(studentCredentialDistributionRepository.getSchoolList(batchId)).thenReturn(Arrays.asList(schoolId));
 
-        List<String> response = distributionService.getSchoolListForDistribution(batchId);
+        List<UUID> response = distributionService.getSchoolListForDistribution(batchId);
         assertThat(response).hasSize(1);
-        assertThat(response.get(0)).isEqualTo(schoolOfRecord);
+        assertThat(response.get(0)).isEqualTo(schoolId);
     }
 
     @Test
     public void testSaveStudentCredentialDistribution() throws Exception {
         Long batchId = 3001L;
+        UUID schoolId = UUID.randomUUID();
+
         StudentCredentialDistributionEntity entity = new StudentCredentialDistributionEntity();
         entity.setId(UUID.randomUUID());
         entity.setJobExecutionId(batchId);
         entity.setJobType("DISTRUN");
-        entity.setSchoolOfRecord("12345678");
+        entity.setSchoolId(schoolId);
 
         StudentCredentialDistribution dto = new StudentCredentialDistribution();
         dto.setId(entity.getId());
         dto.setStudentID(entity.getStudentID());
         dto.setPen("123456789");
-        dto.setSchoolOfRecord(entity.getSchoolOfRecord());
+        dto.setSchoolId(entity.getSchoolId());
 
         entity.setPayload(jsonUtil.getJsonStringFromObject(dto));
 

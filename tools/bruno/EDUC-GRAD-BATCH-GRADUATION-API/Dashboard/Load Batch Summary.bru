@@ -1,0 +1,16 @@
+meta {
+  name: Load Batch Summary
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/v1/batch/dashboard/summary
+  body: none
+  auth: none
+}
+
+params:query {
+  ~pageNumber: 
+  ~pageSize: 
+}

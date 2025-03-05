@@ -1,0 +1,11 @@
+meta {
+  name: Run Manual Cert Regen Job
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/batch/executecertregenbatchjob
+  body: none
+  auth: none
+}

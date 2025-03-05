@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -82,11 +83,12 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		LOGGER.info(LOG_SEPARATION);
     }
 
-	private void processGlobalList(List<PsiCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken,String transmissionType) {
+	private void processGlobalList(List<PsiCredentialDistribution> cList, Long batchId, Map<UUID, DistributionPrintRequest> mapDist, String accessToken, String transmissionType) {
 		List<String> uniquePSIList = cList.stream().map(PsiCredentialDistribution::getPsiCode).distinct().toList();
 		uniquePSIList.forEach(upl->{
 			List<PsiCredentialDistribution> yed4List = cList.stream().filter(scd -> scd.getPsiCode().compareTo(upl) == 0).collect(Collectors.toList());
-			supportListener.psiPrintFile(yed4List,batchId,upl,mapDist);
+			UUID psiId = UUID.randomUUID(); // TODO: PSI GUID will be populated from STS
+			supportListener.psiPrintFile(yed4List,batchId,upl,psiId,mapDist);
 		});
 		if(!cList.isEmpty()) {
 			String localDownload = StringUtils.equalsIgnoreCase(transmissionType, "FTP") ? "Y" : "N";
@@ -103,7 +105,6 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 	private void updateBackStudentRecords(List<PsiCredentialDistribution> cList, Long batchId,String activityCode) {
 		cList.forEach(scd->	{
 			LOGGER.debug("Update back Student Record {}", scd.getStudentID());
-			String accessToken = restUtils.fetchAccessToken();
 			restUtils.updateStudentGradRecord(scd.getStudentID(),batchId,activityCode);
 		});
 	}

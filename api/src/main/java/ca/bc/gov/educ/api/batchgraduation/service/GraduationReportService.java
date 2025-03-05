@@ -80,8 +80,8 @@ public class GraduationReportService {
 	}
 
 	// Year-end NonGrad distribution
-	public List<StudentCredentialDistribution> getStudentsNonGradForYearlyDistribution(String mincode, String accessToken) {
-		var response = restService.get(String.format(constants.getStudentDataNonGradEarlyByMincode(), mincode), List.class, accessToken);
+	public List<StudentCredentialDistribution> getStudentsNonGradForYearlyDistribution(UUID schoolId, String accessToken) {
+		var response = restService.get(String.format(constants.getStudentDataNonGradEarlyBySchoolId(), schoolId), List.class, accessToken);
 		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
@@ -93,19 +93,19 @@ public class GraduationReportService {
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
-	public List<String> getSchoolsNonGradYearly(String accessToken) {
+	public List<UUID> getSchoolsNonGradYearly(String accessToken) {
 		var response = restService.get(constants.getSchoolDataNonGradEarly(), List.class, accessToken);
-		return jsonTransformer.convertValue(response, new TypeReference<List<String>>(){});
+		return jsonTransformer.convertValue(response, new TypeReference<>(){});
 	}
 
-	public List<String> getDistrictsNonGradYearly(String accessToken) {
+	public List<UUID> getDistrictsNonGradYearly(String accessToken) {
 		var response = restService.get(constants.getDistrictDataNonGradEarly(), List.class, accessToken);
-		return jsonTransformer.convertValue(response, new TypeReference<List<String>>(){});
+		return jsonTransformer.convertValue(response, new TypeReference<>(){});
 	}
 
-	public List<String> getDistrictsYearly(String accessToken) {
+	public List<UUID> getDistrictsYearly(String accessToken) {
 		var response = restService.get(constants.getDistrictDataYearly(), List.class, accessToken);
-		return jsonTransformer.convertValue(response, new TypeReference<List<String>>(){});
+		return jsonTransformer.convertValue(response, new TypeReference<>(){});
 	}
 
 	private List<StudentCredentialDistribution> populateStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
@@ -130,11 +130,12 @@ public class GraduationReportService {
 		dist.setStudentID(data.getGraduationStudentRecordId());
 		dist.setPaperType(paperType);
 		//--> Revert code back to school of record GRAD2-2758
-		/** dist.setSchoolOfRecord(StringUtils.isBlank(data.getMincodeAtGrad()) ? data.getMincode() : data.getMincodeAtGrad()); **/
-		dist.setSchoolOfRecord(data.getMincode());
+		/** dist.setSchoolId(StringUtils.isBlank(data.getMincodeAtGrad()) ? data.getMincode() : data.getMincodeAtGrad()); **/
+		dist.setSchoolId(data.getSchoolOfRecordId());
 		//<--
-		dist.setSchoolAtGrad(data.getMincodeAtGrad());
-		dist.setSchoolOfRecordOrigin(data.getMincode());
+		dist.setSchoolAtGradId(data.getSchoolAtGradId());
+		dist.setSchoolOfRecordOriginId(data.getSchoolOfRecordId());
+		dist.setDistrictId(data.getDistrictId());
 		dist.setDocumentStatusCode("COMPL");
 		dist.setPen(data.getPen());
 		dist.setLegalFirstName(data.getFirstName());
@@ -146,7 +147,7 @@ public class GraduationReportService {
 		dist.setStudentGrade(data.getStudentGrade());
 		dist.setNonGradReasons(data.getNonGradReasons());
 		dist.setLastUpdateDate(data.lastUpdateDateAsString());
-		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOrigin(), dist.getSchoolAtGrad(), dist.getSchoolOfRecord());
+		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOriginId(), dist.getSchoolAtGradId(), dist.getSchoolId());
 		return dist;
 	}
 }

@@ -40,4 +40,5 @@ public class EdwGraduationSnapshot {
     private String runDate;
     private String sessionDate;
     private String schoolOfRecord;
+    private UUID schoolOfRecordId;
 }

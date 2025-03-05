@@ -1,0 +1,11 @@
+meta {
+  name: Run Distribution Runs
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/v1/batch/executedisrunbatchjob
+  body: json
+  auth: none
+}
