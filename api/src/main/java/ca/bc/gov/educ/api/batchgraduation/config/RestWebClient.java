@@ -1,5 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import io.netty.handler.logging.LogLevel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +9,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.oauth2.client.*;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
+import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
@@ -27,7 +31,9 @@ public class RestWebClient {
 
     @Bean
     public WebClient webClient() {
-        return WebClient.builder().exchangeStrategies(ExchangeStrategies.builder()
+        return WebClient.builder()
+                .filter(setRequestHeaders())
+                .exchangeStrategies(ExchangeStrategies.builder()
                 .codecs(configurer -> configurer
                         .defaultCodecs()
                         .maxInMemorySize(300 * 1024 * 1024))  // 300 MB
@@ -39,6 +45,7 @@ public class RestWebClient {
         ServletOAuth2AuthorizedClientExchangeFilterFunction filter = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
         filter.setDefaultClientRegistrationId("batch-client");
         return WebClient.builder()
+                .filter(setRequestHeaders())
                 .exchangeStrategies(ExchangeStrategies
                         .builder()
                         .codecs(codecs -> codecs
@@ -63,5 +70,16 @@ public class RestWebClient {
         authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
 
         return authorizedClientManager;
+    }
+
+    private ExchangeFilterFunction setRequestHeaders() {
+        return (clientRequest, next) -> {
+            ClientRequest modifiedRequest = ClientRequest.from(clientRequest)
+                    .header(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID())
+                    .header(EducGradBatchGraduationApiConstants.USER_NAME, ThreadLocalStateUtil.getCurrentUser())
+                    .header(EducGradBatchGraduationApiConstants.REQUEST_SOURCE, EducGradBatchGraduationApiConstants.API_NAME)
+                    .build();
+            return next.exchange(modifiedRequest);
+        };
     }
 }
