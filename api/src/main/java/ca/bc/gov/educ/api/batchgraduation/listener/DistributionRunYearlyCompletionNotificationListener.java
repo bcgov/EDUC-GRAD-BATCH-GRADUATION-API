@@ -19,8 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.COMPLETED;
-import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.STARTED;
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.*;
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecordId;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
@@ -76,8 +75,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 		}
     }
 
-	protected boolean processGlobalList(DistributionSummaryDTO summaryDTO, String searchRequest, String activityCode) {
-		boolean callDistribution = false;
+	protected Boolean processGlobalList(DistributionSummaryDTO summaryDTO, String searchRequest, String activityCode) {
     	Long batchId = summaryDTO.getBatchId();
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
 		filterStudentCredentialDistribution(cList, activityCode);
@@ -105,12 +103,12 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
 		if (!cList.isEmpty()) {
-			callDistribution = true;
 			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
 			distributionRequest.setSchools(summaryDTO.getSchools());
-			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
+			DistributionResponse response = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
+			return response != null && FAILED.name().equalsIgnoreCase(response.getMergeProcessResponse()) ? false : true;
 		}
-		return callDistribution;
+		return false;
 	}
 
 	protected void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, UUID usl, Map<UUID,DistributionPrintRequest> mapDist) {

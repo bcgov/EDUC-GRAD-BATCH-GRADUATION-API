@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.*;
+
 @Component
 public class UserReqPsiDistributionRunCompletionNotificationListener extends BaseDistributionRunCompletionNotificationListener {
 
@@ -42,7 +44,6 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		String jobType = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TYPE);
 		LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
 
-		String status = jobExecution.getStatus().toString();
 		Date startTime = DateUtils.toDate(jobExecution.getStartTime());
 		Date endTime = DateUtils.toDate(jobExecution.getEndTime());
 		String jobTrigger = jobParameters.getString(EducGradBatchGraduationApiConstants.JOB_TRIGGER);
@@ -72,18 +73,13 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 
 		ResponseObj obj = restUtils.getTokenResponseObject();
 		LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-		try {
-			processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),transmissionType);
-		} catch (Exception e) {
-			LOGGER.error(e.getLocalizedMessage());
-			status = "FAILED";
-		}
+		String status  = processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),transmissionType) ? FAILED.name() : COMPLETED.name();
 		// save batch job & error history
 		processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 		LOGGER.info(LOG_SEPARATION);
     }
 
-	private void processGlobalList(List<PsiCredentialDistribution> cList, Long batchId, Map<UUID, DistributionPrintRequest> mapDist, String accessToken, String transmissionType) {
+	private Boolean processGlobalList(List<PsiCredentialDistribution> cList, Long batchId, Map<UUID, DistributionPrintRequest> mapDist, String accessToken, String transmissionType) {
 		List<String> uniquePSIList = cList.stream().map(PsiCredentialDistribution::getPsiCode).distinct().toList();
 		uniquePSIList.forEach(upl->{
 			List<PsiCredentialDistribution> yed4List = cList.stream().filter(scd -> scd.getPsiCode().compareTo(upl) == 0).collect(Collectors.toList());
@@ -96,10 +92,12 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 			String activityCode = StringUtils.equalsIgnoreCase(transmissionType, "PAPER") ? "USERDISTPSIP" : "USERDISTPSIF";
 			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
 			DistributionResponse disres = restUtils.mergePsiAndUpload(batchId, accessToken, distributionRequest, localDownload, transmissionType);
-			if (disres != null) {
+			if (disres != null && !FAILED.name().equalsIgnoreCase(disres.getMergeProcessResponse())) {
 				updateBackStudentRecords(cList, batchId, activityCode);
+				return true;
 			}
 		}
+		return false;
 	}
 
 	private void updateBackStudentRecords(List<PsiCredentialDistribution> cList, Long batchId,String activityCode) {
