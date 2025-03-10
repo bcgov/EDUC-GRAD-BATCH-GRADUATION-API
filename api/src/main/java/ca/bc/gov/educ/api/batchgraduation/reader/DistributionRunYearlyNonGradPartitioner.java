@@ -59,7 +59,7 @@ public class DistributionRunYearlyNonGradPartitioner extends BasePartitioner {
             logger.debug("Final list of eligible District / School codes {}", String.join(", ", finalSchoolDistricts.toString()));
         }
         if(!finalSchoolDistricts.isEmpty()) {
-            updateBatchJobHistory(createBatchJobHistory(), (long) finalSchoolDistricts.size());
+            //updateBatchJobHistory(createBatchJobHistory(), (long) finalSchoolDistricts.size()); TODO calculate this correctly. Removing for now
             int partitionSize = finalSchoolDistricts.size()/gridSize + 1;
             List<List<UUID>> partitions = new LinkedList<>();
             for (int i = 0; i < finalSchoolDistricts.size(); i += partitionSize) {
