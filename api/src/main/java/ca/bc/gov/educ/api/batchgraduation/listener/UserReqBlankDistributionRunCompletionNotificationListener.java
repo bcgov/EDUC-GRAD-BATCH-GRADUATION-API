@@ -70,7 +70,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			String status = processGlobalList(studentSearchRequestObject, credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser())) ? FAILED.name() : COMPLETED.name();;
+			String status = processGlobalList(studentSearchRequestObject, credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser())) ? COMPLETED.name() : FAILED.name();
 
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);

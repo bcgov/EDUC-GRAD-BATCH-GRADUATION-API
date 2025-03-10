@@ -71,7 +71,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 
 			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
 			summaryDTO.setStudentSearchRequest(studentSearchRequestObject);
-			String status =  processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser())) ? FAILED.name() : COMPLETED.name();
+			String status =  processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser())) ? COMPLETED.name() : FAILED.name() ;
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 
@@ -144,15 +144,16 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 					disres = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, localDownload);
 				}
 				if(disres != null) {
-					LOGGER.info("Merge and Upload Status {}",disres.getMergeProcessResponse());
 					 if(!FAILED.name().equals(disres.getMergeProcessResponse())) {
 						 updateBackStudentRecords(studentCredentialDistributionControlList.stream().distinct().toList(),batchId,activityCode);
 						 return true;
 					 }
+					 LOGGER.info("Merge and Upload Status {}", disres.getMergeProcessResponse());
+					 return false;
 				}
 			}
 		}
-		return false;
+		return true;
 	}
 
 	private void addTranscriptsToDistributionRequest(List<StudentCredentialDistribution> controlList, List<StudentCredentialDistribution> cList, DistributionSummaryDTO summaryDTO, Long batchId, String properName) {

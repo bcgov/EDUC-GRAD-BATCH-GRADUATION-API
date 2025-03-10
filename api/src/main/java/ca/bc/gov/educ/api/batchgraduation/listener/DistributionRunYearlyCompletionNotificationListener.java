@@ -108,7 +108,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 			DistributionResponse response = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
 			return response != null && FAILED.name().equalsIgnoreCase(response.getMergeProcessResponse()) ? false : true;
 		}
-		return false;
+		return true;
 	}
 
 	protected void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, UUID usl, Map<UUID,DistributionPrintRequest> mapDist) {

@@ -73,7 +73,7 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 
 		ResponseObj obj = restUtils.getTokenResponseObject();
 		LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-		String status  = processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),transmissionType) ? FAILED.name() : COMPLETED.name();
+		String status  = processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),transmissionType) ? COMPLETED.name(): FAILED.name();
 		// save batch job & error history
 		processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 		LOGGER.info(LOG_SEPARATION);
@@ -92,12 +92,16 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 			String activityCode = StringUtils.equalsIgnoreCase(transmissionType, "PAPER") ? "USERDISTPSIP" : "USERDISTPSIF";
 			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
 			DistributionResponse disres = restUtils.mergePsiAndUpload(batchId, accessToken, distributionRequest, localDownload, transmissionType);
-			if (disres != null && !FAILED.name().equalsIgnoreCase(disres.getMergeProcessResponse())) {
-				updateBackStudentRecords(cList, batchId, activityCode);
-				return true;
+			if (disres != null) {
+				if(!FAILED.name().equalsIgnoreCase(disres.getMergeProcessResponse())) {
+					updateBackStudentRecords(cList, batchId, activityCode);
+					return true;
+				}
+				LOGGER.info("Merge and Upload Status {}",disres.getMergeProcessResponse());
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	private void updateBackStudentRecords(List<PsiCredentialDistribution> cList, Long batchId,String activityCode) {
