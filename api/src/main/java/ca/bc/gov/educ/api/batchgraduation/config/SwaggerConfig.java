@@ -24,13 +24,13 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info().title("OAuth 2.0 API").version("1.0"))
                 .addSecurityItem(new SecurityRequirement().addList("OAUTH2"))
-                .schemaRequirement("OAuth2", new SecurityScheme()
+                .schemaRequirement("OAUTH2", new SecurityScheme()
                         .type(SecurityScheme.Type.OAUTH2)
                         .scheme("bearer")
                         .bearerFormat("JWT")
                         .flows(new OAuthFlows()
                                 .clientCredentials( new OAuthFlow()
-                                        .tokenUrl(constants.getTokenUrl())
-                                )));
+                                        .tokenUrl(constants.getTokenUrl()))
+                                ));
     }
 }
