@@ -44,7 +44,6 @@ public class RequestInterceptor implements AsyncHandlerInterceptor {
 
 		val correlationID = request.getHeader(EducGradBatchGraduationApiConstants.CORRELATION_ID);
 		if (correlationID != null) {
-			ThreadLocalStateUtil.setCorrelationID(correlationID);
 			ThreadLocalStateUtil.setCorrelationID(correlationID != null ? correlationID : UUID.randomUUID().toString());
 		}
 			

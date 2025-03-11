@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
+import ca.bc.gov.educ.api.batchgraduation.util.LogHelper;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import io.netty.handler.logging.LogLevel;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,10 @@ import java.time.Duration;
 @Configuration
 @Profile("!test")
 public class RestWebClient {
+
     private final HttpClient httpClient;
+    LogHelper logHelper;
+    EducGradBatchGraduationApiConstants constants;
 
     public RestWebClient() {
         this.httpClient = HttpClient.create(ConnectionProvider.create("batch-api")).compress(true)
@@ -53,6 +57,7 @@ public class RestWebClient {
                                 .maxInMemorySize(300 * 1024 * 1024)) // 300 MB
                         .build())
                 .apply(filter.oauth2Configuration())
+                .filter(this.log())
                 .build();
     }
 
@@ -81,5 +86,18 @@ public class RestWebClient {
                     .build();
             return next.exchange(modifiedRequest);
         };
+    }
+
+    private ExchangeFilterFunction log() {
+        return (clientRequest, next) -> next
+                .exchange(clientRequest)
+                .doOnNext((clientResponse -> logHelper.logClientHttpReqResponseDetails(
+                        clientRequest.method(),
+                        clientRequest.url().toString(),
+                        clientResponse.statusCode().value(),
+                        clientRequest.headers().get(EducGradBatchGraduationApiConstants.CORRELATION_ID),
+                        clientRequest.headers().get(EducGradBatchGraduationApiConstants.REQUEST_SOURCE),
+                        constants.isSplunkLogHelperEnabled())
+                ));
     }
 }
