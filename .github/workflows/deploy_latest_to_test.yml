@@ -17,6 +17,7 @@ env:
   NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}
   TAG: "latest"
   BRANCH: "grad-release"
+  
   MIN_CPU: "50m"
   MAX_CPU: "300m"
   MIN_MEM: "1024Mi"
