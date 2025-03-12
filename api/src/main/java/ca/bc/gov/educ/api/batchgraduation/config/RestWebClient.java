@@ -41,7 +41,9 @@ public class RestWebClient {
                 .codecs(configurer -> configurer
                         .defaultCodecs()
                         .maxInMemorySize(300 * 1024 * 1024))  // 300 MB
-                      .build()).build();
+                      .build())
+                .filter(this.log())
+                .build();
     }
 
     @Bean("batchClient")
