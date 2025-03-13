@@ -56,7 +56,8 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 				summaryDTO.initializeCredentialCountMap();
 			}
 
-			String processGlobalListStatus = processGlobalList(summaryDTO, searchRequest, "YEARENDDIST") ? STARTED.name() : COMPLETED.name();
+			DistributionResponse distResponse = processGlobalList(summaryDTO, searchRequest, "YEARENDDIST");
+			String processGlobalListStatus = distResponse != null ? (FAILED.name().equalsIgnoreCase(distResponse.getMergeProcessResponse()) ? FAILED.name(): STARTED.name()) : COMPLETED.name();
 
 			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 			// display Summary Details
@@ -75,7 +76,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 		}
     }
 
-	protected Boolean processGlobalList(DistributionSummaryDTO summaryDTO, String searchRequest, String activityCode) {
+	protected DistributionResponse processGlobalList(DistributionSummaryDTO summaryDTO, String searchRequest, String activityCode) {
     	Long batchId = summaryDTO.getBatchId();
     	List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
 		filterStudentCredentialDistribution(cList, activityCode);
@@ -106,9 +107,9 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
 			distributionRequest.setSchools(summaryDTO.getSchools());
 			DistributionResponse response = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
-			return response != null && FAILED.name().equalsIgnoreCase(response.getMergeProcessResponse()) ? false : true;
+			return response;
 		}
-		return true;
+		return null;
 	}
 
 	protected void schoolDistributionPrintFile(List<StudentCredentialDistribution> studentList, Long batchId, UUID usl, Map<UUID,DistributionPrintRequest> mapDist) {

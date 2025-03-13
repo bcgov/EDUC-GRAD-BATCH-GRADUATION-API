@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
@@ -18,8 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.COMPLETED;
-import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.FAILED;
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.*;
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecordId;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
@@ -71,7 +69,13 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 
 			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
 			summaryDTO.setStudentSearchRequest(studentSearchRequestObject);
-			String status =  processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser())) ? COMPLETED.name() : FAILED.name() ;
+			DistributionResponse distResponse = processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser()));
+			String status;
+			if(distResponse != null) {
+				status  = FAILED.name().equalsIgnoreCase(distResponse.getMergeProcessResponse()) ? FAILED.name(): credentialType.equalsIgnoreCase("RC") ? COMPLETED.name() : STARTED.name();
+			} else {
+				status = COMPLETED.name();
+			}
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 
@@ -89,7 +93,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		}
     }
 
-	private Boolean processGlobalList(DistributionSummaryDTO summaryDTO, Long batchId, String credentialType, String accessToken,String localDownload,String properName) {
+	private DistributionResponse processGlobalList(DistributionSummaryDTO summaryDTO, Long batchId, String credentialType, String accessToken,String localDownload,String properName) {
 		List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
 		Map<UUID, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
@@ -146,14 +150,13 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				if(disres != null) {
 					 if(!FAILED.name().equals(disres.getMergeProcessResponse())) {
 						 updateBackStudentRecords(studentCredentialDistributionControlList.stream().distinct().toList(),batchId,activityCode);
-						 return true;
 					 }
 					 LOGGER.info("Merge and Upload Status {}", disres.getMergeProcessResponse());
-					 return false;
 				}
+				return disres;
 			}
 		}
-		return true;
+		return null;
 	}
 
 	private void addTranscriptsToDistributionRequest(List<StudentCredentialDistribution> controlList, List<StudentCredentialDistribution> cList, DistributionSummaryDTO summaryDTO, Long batchId, String properName) {
