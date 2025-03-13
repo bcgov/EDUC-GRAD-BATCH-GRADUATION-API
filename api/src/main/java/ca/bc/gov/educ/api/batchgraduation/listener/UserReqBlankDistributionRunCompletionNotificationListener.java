@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.COMPLETED;
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.FAILED;
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 
 @Component
@@ -38,7 +40,6 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			String jobType = jobParameters.getString("jobType");
 			LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
 
-			String status = jobExecution.getStatus().toString();
 			Date startTime = DateUtils.toDate(jobExecution.getStartTime());
 			Date endTime = DateUtils.toDate(jobExecution.getEndTime());
 			String jobTrigger = jobParameters.getString("jobTrigger");
@@ -61,22 +62,23 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.BDBJ, credentialType);
 
-			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(LOG_SEPARATION_SINGLE);
 			BlankDistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
-			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest) jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
 
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			processGlobalList(studentSearchRequestObject, credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser()));
+			String status = processGlobalList(studentSearchRequestObject, credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser())) ? COMPLETED.name() : FAILED.name();
+
+			// save batch job & error history
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 			LOGGER.info(LOG_SEPARATION);
 		}
     }
 
-	private void processGlobalList(StudentSearchRequest studentSearchRequest , String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<UUID, DistributionPrintRequest> mapDist, String accessToken,String localDownload,String properName) {
+	private Boolean processGlobalList(StudentSearchRequest studentSearchRequest , String credentialType, List<BlankCredentialDistribution> cList, Long batchId, Map<UUID, DistributionPrintRequest> mapDist, String accessToken,String localDownload,String properName) {
 		List<UUID> uniqueSchoolList = cList.stream().map(BlankCredentialDistribution::getSchoolId).distinct().collect(Collectors.toList());
 		uniqueSchoolList.forEach(usl->{
 			List<BlankCredentialDistribution> yed4List = new ArrayList<>();
@@ -102,7 +104,8 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			supportListener.blankCertificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
 		});
 		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).studentSearchRequest(studentSearchRequest).build();
-		restUtils.createBlankCredentialsAndUpload(batchId, accessToken, distributionRequest,localDownload);
+		DistributionResponse disres = restUtils.createBlankCredentialsAndUpload(batchId, accessToken, distributionRequest,localDownload);
+		return disres != null && disres.getMergeProcessResponse().equalsIgnoreCase(FAILED.name()) ? false : true;
 	}
 
 }
