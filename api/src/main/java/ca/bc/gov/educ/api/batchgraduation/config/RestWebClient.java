@@ -4,6 +4,7 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstan
 import ca.bc.gov.educ.api.batchgraduation.util.LogHelper;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import io.netty.handler.logging.LogLevel;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -27,7 +28,10 @@ public class RestWebClient {
     LogHelper logHelper;
     EducGradBatchGraduationApiConstants constants;
 
-    public RestWebClient() {
+    @Autowired
+    public RestWebClient(LogHelper logHelper, EducGradBatchGraduationApiConstants constants) {
+        this.logHelper = logHelper;
+        this.constants = constants;
         this.httpClient = HttpClient.create(ConnectionProvider.create("batch-api")).compress(true)
                 .resolver(spec -> spec.queryTimeout(Duration.ofSeconds(5)).trace("DNS", LogLevel.TRACE));
         this.httpClient.warmup().block();
