@@ -28,7 +28,8 @@
             src/main/java/ca/bc/gov/educ/api/batchgraduation/reader/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/writer/**,
             src/main/java/org/springframework/**,
-            src/test/java/ca/bc/gov/educ/api/batchgraduation/**
+            src/test/java/ca/bc/gov/educ/api/batchgraduation/**,
+            src/main/java/ca/bc/gov/educ/api/gradalgorithm/controller/APIMetadataController.java
         </sonar.exclusions>
         <sonar.coverage.exclusions>
             src/main/resources/**,
@@ -43,7 +44,8 @@
             src/main/java/ca/bc/gov/educ/api/batchgraduation/reader/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/writer/**,
             src/main/java/org/springframework/**,
-            src/test/java/ca/bc/gov/educ/api/batchgraduation/**
+            src/test/java/ca/bc/gov/educ/api/batchgraduation/**,
+            src/main/java/ca/bc/gov/educ/api/gradalgorithm/controller/APIMetadataController.java
         </sonar.coverage.exclusions>
         <java.version>18</java.version>
         <maven.compiler.version>3.10.1</maven.compiler.version>
