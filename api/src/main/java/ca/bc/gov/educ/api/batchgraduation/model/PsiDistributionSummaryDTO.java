@@ -3,12 +3,12 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
 
 @Data
 @NoArgsConstructor
-public class PsiDistributionSummaryDTO extends BaseDistributionSummaryDTO {
+public class PsiDistributionSummaryDTO extends BaseDistributionSummaryDTO<String> {
 
   private List<PsiCredentialDistribution> globalList = new ArrayList<>();
 

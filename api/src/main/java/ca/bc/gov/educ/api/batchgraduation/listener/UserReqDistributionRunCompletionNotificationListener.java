@@ -141,7 +141,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			}
 			if(!studentCredentialDistributionControlList.isEmpty()) {
 				DistributionResponse disres = null;
-				DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(summaryDTO.getStudentSearchRequest()).build();
+				DistributionRequest<UUID> distributionRequest = DistributionRequest.<UUID>builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(summaryDTO.getStudentSearchRequest()).build();
 				if (credentialType.equalsIgnoreCase("RC")) {
 					disres = restUtils.createReprintAndUpload(batchId, accessToken, distributionRequest, activityCode, localDownload);
 				} else {

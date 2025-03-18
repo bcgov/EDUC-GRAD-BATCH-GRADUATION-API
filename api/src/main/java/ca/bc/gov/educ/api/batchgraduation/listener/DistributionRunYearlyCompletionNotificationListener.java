@@ -104,7 +104,7 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
 		if (!cList.isEmpty()) {
-			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
+			DistributionRequest<UUID> distributionRequest = DistributionRequest.<UUID>builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
 			distributionRequest.setSchools(summaryDTO.getSchools());
 			DistributionResponse response = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
 			return response;

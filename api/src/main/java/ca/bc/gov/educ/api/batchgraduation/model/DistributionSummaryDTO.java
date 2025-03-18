@@ -6,10 +6,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-public class DistributionSummaryDTO extends BaseDistributionSummaryDTO {
+public class DistributionSummaryDTO extends BaseDistributionSummaryDTO<UUID> {
 
     private List<StudentCredentialDistribution> globalList = new ArrayList<>();
     private List<School> schools = new ArrayList<>();

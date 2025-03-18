@@ -5,10 +5,11 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-public class BlankDistributionSummaryDTO extends BaseDistributionSummaryDTO {
+public class BlankDistributionSummaryDTO extends BaseDistributionSummaryDTO<UUID> {
 
   private List<BlankCredentialDistribution> globalList = new ArrayList<>();
 

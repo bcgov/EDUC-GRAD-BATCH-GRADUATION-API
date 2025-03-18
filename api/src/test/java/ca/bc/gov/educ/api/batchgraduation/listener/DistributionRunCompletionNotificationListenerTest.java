@@ -169,7 +169,7 @@ public class DistributionRunCompletionNotificationListenerTest {
         ResponseObj obj = new ResponseObj();
         obj.setAccess_token("asdasd");
 
-        DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode("YEARENDDIST").build();
+        DistributionRequest<UUID> distributionRequest = DistributionRequest.<UUID>builder().mapDist(mapDist).activityCode("YEARENDDIST").build();
         Mockito.when(restUtils.getAccessToken()).thenReturn(obj.getAccess_token());
         Mockito.when(graduationReportService.getTranscriptList()).thenReturn(Mono.just(tList));
         Mockito.when(graduationReportService.getCertificateList()).thenReturn(Mono.just(cList));

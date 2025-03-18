@@ -42,7 +42,7 @@ public abstract class BaseDistributionRunCompletionNotificationListener implemen
     @Autowired
     RestUtils restUtils;
 
-    protected void processBatchJobHistory(BaseDistributionSummaryDTO summaryDTO, Long jobExecutionId, String status, String jobTrigger, String jobType, Date startTime, Date endTime, String jobParameters) {
+    protected <T extends Comparable<T>>void processBatchJobHistory(BaseDistributionSummaryDTO<T> summaryDTO, Long jobExecutionId, String status, String jobTrigger, String jobType, Date startTime, Date endTime, String jobParameters) {
         int failedRecords = summaryDTO.getErrors().size();
         Long processedStudents = summaryDTO.getProcessedCount();
         Long expectedStudents = summaryDTO.getReadCount();

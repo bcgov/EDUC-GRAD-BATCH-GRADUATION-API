@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @Component
@@ -17,7 +16,6 @@ import java.util.UUID;
 @Builder
 public class PsiCredentialRequest implements Serializable {
     private List<String> psiCodes;
-    private List<UUID> psiIds; // TODO: PSI GUID will be populated from STS
     private String psiYear;
 
 }
