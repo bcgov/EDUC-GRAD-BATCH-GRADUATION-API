@@ -4,15 +4,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
-public class DistributionSummaryDTO extends BaseDistributionSummaryDTO<UUID> {
+public class DistributionSummaryDTO extends BaseDistributionSummaryDTO {
 
     private List<StudentCredentialDistribution> globalList = new ArrayList<>();
+    private Map<UUID, DistributionPrintRequest> mapDist = new TreeMap<>();
     private List<School> schools = new ArrayList<>();
     private StudentSearchRequest studentSearchRequest;
 

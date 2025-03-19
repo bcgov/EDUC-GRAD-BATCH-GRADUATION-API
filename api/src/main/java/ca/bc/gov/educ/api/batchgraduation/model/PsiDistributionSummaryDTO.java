@@ -8,9 +8,10 @@ import java.util.*;
 
 @Data
 @NoArgsConstructor
-public class PsiDistributionSummaryDTO extends BaseDistributionSummaryDTO<String> {
+public class PsiDistributionSummaryDTO extends BaseDistributionSummaryDTO {
 
   private List<PsiCredentialDistribution> globalList = new ArrayList<>();
+  private Map<String, DistributionPrintRequest> mapDist = new TreeMap<>();
 
   @Override
   public void initializeCredentialCountMap() {

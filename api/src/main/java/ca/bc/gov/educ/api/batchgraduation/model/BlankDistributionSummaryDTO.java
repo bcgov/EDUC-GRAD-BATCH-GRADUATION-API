@@ -3,15 +3,14 @@ package ca.bc.gov.educ.api.batchgraduation.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 @NoArgsConstructor
-public class BlankDistributionSummaryDTO extends BaseDistributionSummaryDTO<UUID> {
+public class BlankDistributionSummaryDTO extends BaseDistributionSummaryDTO {
 
   private List<BlankCredentialDistribution> globalList = new ArrayList<>();
+  private Map<UUID, DistributionPrintRequest> mapDist = new TreeMap<>();
 
   @Override
   public void initializeCredentialCountMap() {

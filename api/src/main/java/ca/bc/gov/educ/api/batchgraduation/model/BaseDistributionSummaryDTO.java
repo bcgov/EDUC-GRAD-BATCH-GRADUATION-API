@@ -5,14 +5,12 @@ import lombok.Data;
 import java.util.*;
 
 @Data
-public abstract class BaseDistributionSummaryDTO<T extends Comparable<T>> extends BaseSummaryDTO {
+public abstract class BaseDistributionSummaryDTO extends BaseSummaryDTO {
     private List<ProcessError> errors = new ArrayList<>();
     private String credentialType;
 
     // stats
     protected Map<String, Long> credentialCountMap = new HashMap<>();
-
-    private Map<T, DistributionPrintRequest> mapDist = new TreeMap<>();
 
     public abstract void initializeCredentialCountMap();
 
