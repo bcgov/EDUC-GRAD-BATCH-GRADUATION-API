@@ -100,7 +100,7 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 		});
 		if (!cList.isEmpty()) {
 			callDistribution = true;
-			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
+			DistributionRequest<UUID> distributionRequest = DistributionRequest.<UUID>builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(getStudentSearchRequest(searchRequest)).build();
 			distributionRequest.setSchools(summaryDTO.getSchools());
 			restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
 		}

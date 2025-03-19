@@ -79,18 +79,17 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		LOGGER.info(LOG_SEPARATION);
     }
 
-	private Boolean processGlobalList(List<PsiCredentialDistribution> cList, Long batchId, Map<UUID, DistributionPrintRequest> mapDist, String accessToken, String transmissionType) {
+	private Boolean processGlobalList(List<PsiCredentialDistribution> cList, Long batchId, Map<String, DistributionPrintRequest> mapDist, String accessToken, String transmissionType) {
 		List<String> uniquePSIList = cList.stream().map(PsiCredentialDistribution::getPsiCode).distinct().toList();
-		uniquePSIList.forEach(upl->{
-			List<PsiCredentialDistribution> yed4List = cList.stream().filter(scd -> scd.getPsiCode().compareTo(upl) == 0).collect(Collectors.toList());
-			UUID psiId = UUID.randomUUID(); // TODO: PSI GUID will be populated from STS
-			supportListener.psiPrintFile(yed4List,batchId,upl,psiId,mapDist);
+		uniquePSIList.forEach(psiCode->{
+			List<PsiCredentialDistribution> yed4List = cList.stream().filter(scd -> scd.getPsiCode().compareTo(psiCode) == 0).toList();
+			supportListener.psiPrintFile(yed4List,batchId,psiCode,mapDist);
 		});
 		if(!cList.isEmpty()) {
 			String localDownload = StringUtils.equalsIgnoreCase(transmissionType, "FTP") ? "Y" : "N";
 			//Grad2-1931 added transmissionType
 			String activityCode = StringUtils.equalsIgnoreCase(transmissionType, "PAPER") ? "USERDISTPSIP" : "USERDISTPSIF";
-			DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
+			DistributionRequest<String> distributionRequest = DistributionRequest.<String>builder().mapDist(mapDist).activityCode(activityCode).build();
 			DistributionResponse disres = restUtils.mergePsiAndUpload(batchId, accessToken, distributionRequest, localDownload, transmissionType);
 			if (disres != null) {
 				if(!FAILED.name().equalsIgnoreCase(disres.getMergeProcessResponse())) {

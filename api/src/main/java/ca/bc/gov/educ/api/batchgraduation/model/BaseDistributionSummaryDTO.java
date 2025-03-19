@@ -12,8 +12,6 @@ public abstract class BaseDistributionSummaryDTO extends BaseSummaryDTO {
     // stats
     protected Map<String, Long> credentialCountMap = new HashMap<>();
 
-    private Map<UUID, DistributionPrintRequest> mapDist = new TreeMap<>();
-
     public abstract void initializeCredentialCountMap();
 
     public void increment(String programCode) {

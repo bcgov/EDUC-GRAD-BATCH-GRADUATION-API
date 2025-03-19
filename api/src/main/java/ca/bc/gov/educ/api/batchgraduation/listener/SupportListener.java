@@ -10,17 +10,17 @@ import java.util.UUID;
 @Component
 public class SupportListener {
 
-    public void psiPrintFile(List<PsiCredentialDistribution> yed4List, Long batchId, String usl, UUID psiId, Map<UUID, DistributionPrintRequest> mapDist) {
+    public void psiPrintFile(List<PsiCredentialDistribution> yed4List, Long batchId, String psiCode, Map<String, DistributionPrintRequest> mapDist) {
         if(!yed4List.isEmpty()) {
             PsiCredentialPrintRequest tpReq = new PsiCredentialPrintRequest();
             tpReq.setBatchId(batchId);
-            tpReq.setPsId(usl +" " +batchId);
+            tpReq.setPsId(psiCode +" " +batchId);
             tpReq.setCount(yed4List.size());
             tpReq.setPsiList(yed4List);
             DistributionPrintRequest dist = new DistributionPrintRequest();
             dist.setPsiCredentialPrintRequest(tpReq);
             dist.setTotal(dist.getTotal()+1);
-            mapDist.put(psiId,dist);
+            mapDist.put(psiCode,dist);
         }
     }
 

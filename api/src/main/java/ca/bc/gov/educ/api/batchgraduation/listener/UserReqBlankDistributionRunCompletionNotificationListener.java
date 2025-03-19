@@ -103,7 +103,7 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			supportListener.blankCertificatePrintFile(yedrList,batchId,usl,mapDist,"YEDR",properName);
 			supportListener.blankCertificatePrintFile(yedbList,batchId,usl,mapDist,"YEDB",properName);
 		});
-		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).studentSearchRequest(studentSearchRequest).build();
+		DistributionRequest<UUID> distributionRequest = DistributionRequest.<UUID>builder().mapDist(mapDist).studentSearchRequest(studentSearchRequest).build();
 		DistributionResponse disres = restUtils.createBlankCredentialsAndUpload(batchId, accessToken, distributionRequest,localDownload);
 		return disres != null && disres.getMergeProcessResponse().equalsIgnoreCase(FAILED.name()) ? false : true;
 	}
