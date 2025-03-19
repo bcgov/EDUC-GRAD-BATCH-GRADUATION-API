@@ -57,8 +57,12 @@ public class DistributionRunYearlyCompletionNotificationListener extends BaseDis
 			}
 
 			DistributionResponse distResponse = processGlobalList(summaryDTO, searchRequest, "YEARENDDIST");
-			String processGlobalListStatus = distResponse != null ? (FAILED.name().equalsIgnoreCase(distResponse.getMergeProcessResponse()) ? FAILED.name(): STARTED.name()) : COMPLETED.name();
-
+			String processGlobalListStatus = STARTED.name();
+			if(distResponse != null && FAILED.name().equalsIgnoreCase(distResponse.getMergeProcessResponse())) {
+				processGlobalListStatus = FAILED.name();
+			} else {
+				processGlobalListStatus = COMPLETED.name();
+			}
 			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 			// display Summary Details
 			LOGGER.info("Records read   : {}", summaryDTO.getReadCount());
