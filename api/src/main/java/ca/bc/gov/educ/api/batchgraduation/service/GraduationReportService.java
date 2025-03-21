@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_AT_GRAD;
+
 @Service
 public class GraduationReportService {
 
@@ -129,9 +131,11 @@ public class GraduationReportService {
 		}
 		dist.setStudentID(data.getGraduationStudentRecordId());
 		dist.setPaperType(paperType);
-		//--> Revert code back to school of record GRAD2-2758
-		/** dist.setSchoolId(StringUtils.isBlank(data.getMincodeAtGrad()) ? data.getMincode() : data.getMincodeAtGrad()); **/
-		dist.setSchoolId(data.getSchoolOfRecordId());
+		if(data.getReportingSchoolTypeCode().equalsIgnoreCase(SCHOOL_AT_GRAD.name())) {
+			dist.setSchoolId(data.getSchoolAtGradId());
+		} else {
+			dist.setSchoolId(data.getSchoolOfRecordId());
+		}
 		//<--
 		dist.setSchoolAtGradId(data.getSchoolAtGradId());
 		dist.setSchoolOfRecordOriginId(data.getSchoolOfRecordId());
