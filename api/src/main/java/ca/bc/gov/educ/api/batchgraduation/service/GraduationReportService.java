@@ -131,7 +131,7 @@ public class GraduationReportService {
 		}
 		dist.setStudentID(data.getGraduationStudentRecordId());
 		dist.setPaperType(paperType);
-		if(data.getReportingSchoolTypeCode().equalsIgnoreCase(SCHOOL_AT_GRAD.name())) {
+		if(data.getReportingSchoolTypeCode() != null && data.getReportingSchoolTypeCode().equalsIgnoreCase(SCHOOL_AT_GRAD.name())) {
 			dist.setSchoolId(data.getSchoolAtGradId());
 		} else {
 			dist.setSchoolId(data.getSchoolOfRecordId());
