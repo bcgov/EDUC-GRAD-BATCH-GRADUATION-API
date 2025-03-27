@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.ReportGradStudentData;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
 import ca.bc.gov.educ.api.batchgraduation.rest.RESTService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
@@ -95,6 +96,12 @@ public class GraduationReportService {
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
+	public List<StudentCredentialDistribution> getStudentsForYearlyDistributionBySearchCriteria(String accessToken, StudentSearchRequest searchRequest) {
+		var response = restService.post(String.format(constants.getStudentReportDataYearly()), searchRequest, List.class, accessToken);
+		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
+		return populateStudentCredentialDistributions(reportGradStudentDataList);
+	}
+
 	public List<UUID> getSchoolsNonGradYearly(String accessToken) {
 		var response = restService.get(constants.getSchoolDataNonGradEarly(), List.class, accessToken);
 		return jsonTransformer.convertValue(response, new TypeReference<>(){});
@@ -133,13 +140,14 @@ public class GraduationReportService {
 		dist.setPaperType(paperType);
 		if(data.getReportingSchoolTypeCode() != null && data.getReportingSchoolTypeCode().equalsIgnoreCase(SCHOOL_AT_GRAD.name())) {
 			dist.setSchoolId(data.getSchoolAtGradId());
+			dist.setDistrictId(data.getDistrictAtGradId());
 		} else {
 			dist.setSchoolId(data.getSchoolOfRecordId());
+			dist.setDistrictId(data.getDistrictId());
 		}
 		//<--
 		dist.setSchoolAtGradId(data.getSchoolAtGradId());
 		dist.setSchoolOfRecordOriginId(data.getSchoolOfRecordId());
-		dist.setDistrictId(data.getDistrictId());
 		dist.setDocumentStatusCode("COMPL");
 		dist.setPen(data.getPen());
 		dist.setLegalFirstName(data.getFirstName());

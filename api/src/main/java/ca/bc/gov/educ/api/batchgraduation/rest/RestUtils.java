@@ -104,6 +104,10 @@ public class RestUtils {
         return graduationReportService.getStudentsForYearlyDistribution(fetchAccessToken());
     }
 
+    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearlyBySearchCriteria(StudentSearchRequest searchRequest) {
+        return graduationReportService.getStudentsForYearlyDistributionBySearchCriteria(fetchAccessToken(), searchRequest);
+    }
+
 
     public Integer runRegenerateStudentCertificate(String pen) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
