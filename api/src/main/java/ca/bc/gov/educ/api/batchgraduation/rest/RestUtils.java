@@ -227,7 +227,7 @@ public class RestUtils {
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
     }
 
-    public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary, boolean useSchoolAtGrad) {
+    public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary) {
         LOGGER.info(STUDENT_PROCESS,item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         StudentCredentialDistribution scObj = summary.getGlobalList().stream().filter(pr -> pr.getStudentID().compareTo(item.getStudentID()) == 0)
@@ -246,9 +246,7 @@ public class RestUtils {
             if (stuRec != null) {
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
-                if(useSchoolAtGrad) {
-                    item.setSchoolId(stuRec.getSchoolAtGradId() == null? stuRec.getSchoolOfRecordId() : stuRec.getSchoolAtGradId());
-                } else {
+                if(item.getSchoolId() == null) {  //if null use old default
                     item.setSchoolId(stuRec.getSchoolOfRecordId());
                 }
                 ca.bc.gov.educ.api.batchgraduation.model.institute.School school  = getSchool(item.getSchoolId());
