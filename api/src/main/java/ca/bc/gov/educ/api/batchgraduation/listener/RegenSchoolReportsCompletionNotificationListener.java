@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.BaseSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.SchoolReportsRegenSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;

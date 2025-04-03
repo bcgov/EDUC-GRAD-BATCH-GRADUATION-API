@@ -99,7 +99,7 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
         ent.setExpectedStudentsProcessed(expectedStudents);
         ent.setFailedStudentsProcessed(failedRecords != null? failedRecords.intValue() : 0);
         ent.setJobExecutionId(jobExecutionId);
-        ent.setStartTime(DateUtils.toLocalDateTime(startTime));        
+        ent.setStartTime(DateUtils.toLocalDateTime(startTime));
         ent.setEndTime(DateUtils.toLocalDateTime(endTime));
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
