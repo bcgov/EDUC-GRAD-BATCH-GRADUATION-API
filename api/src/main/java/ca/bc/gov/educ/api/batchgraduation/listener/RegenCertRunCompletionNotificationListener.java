@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
@@ -60,9 +59,7 @@ public class RegenCertRunCompletionNotificationListener implements JobExecutionL
 		if (ent != null) {
 			ent.setActualStudentsProcessed(summaryDTO.getProcessedCount());
 			ent.setFailedStudentsProcessed((int) summaryDTO.getErroredCount());
-			if(BatchStatusEnum.COMPLETED.name().equalsIgnoreCase(status) || BatchStatusEnum.FAILED.name().equalsIgnoreCase(status) || BatchStatusEnum.STOPPED.name().equalsIgnoreCase(status)) {
-				ent.setEndTime(DateUtils.toLocalDateTime(endTime));
-			}
+			ent.setEndTime(DateUtils.toLocalDateTime(endTime));
 			ent.setStatus(status);
 
 			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);

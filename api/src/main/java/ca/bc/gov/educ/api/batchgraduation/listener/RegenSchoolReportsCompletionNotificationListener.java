@@ -50,9 +50,7 @@ public class RegenSchoolReportsCompletionNotificationListener extends BaseRegenS
 		if (ent != null) {
 			ent.setActualStudentsProcessed(summaryDTO.getProcessedCount());
 			ent.setFailedStudentsProcessed((int) summaryDTO.getErroredCount());
-			if(BatchStatusEnum.COMPLETED.name().equalsIgnoreCase(status) || BatchStatusEnum.FAILED.name().equalsIgnoreCase(status) || BatchStatusEnum.STOPPED.name().equalsIgnoreCase(status)) {
-				ent.setEndTime(DateUtils.toLocalDateTime(endTime));
-			}
+			ent.setEndTime(DateUtils.toLocalDateTime(endTime));
 			ent.setStatus(status);
 
 			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);
