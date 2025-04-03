@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.AlgorithmSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.ProcessError;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
@@ -99,8 +100,10 @@ public abstract class BaseRunCompletionNotificationListener implements JobExecut
         ent.setExpectedStudentsProcessed(expectedStudents);
         ent.setFailedStudentsProcessed(failedRecords != null? failedRecords.intValue() : 0);
         ent.setJobExecutionId(jobExecutionId);
-        ent.setStartTime(DateUtils.toLocalDateTime(startTime));
-        ent.setEndTime(DateUtils.toLocalDateTime(endTime));
+        ent.setStartTime(DateUtils.toLocalDateTime(startTime));        
+        if(BatchStatusEnum.COMPLETED.name().equalsIgnoreCase(status) || BatchStatusEnum.FAILED.name().equalsIgnoreCase(status) || BatchStatusEnum.STOPPED.name().equalsIgnoreCase(status)) {
+            ent.setEndTime(DateUtils.toLocalDateTime(endTime));
+        }
         ent.setStatus(status);
         ent.setTriggerBy(jobTrigger);
         ent.setJobType(jobType);

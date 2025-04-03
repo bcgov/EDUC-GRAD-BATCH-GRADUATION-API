@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.listener;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
+import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.model.BaseSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.SchoolReportsRegenSummaryDTO;
 import ca.bc.gov.educ.api.batchgraduation.util.DateUtils;
@@ -49,7 +50,9 @@ public class RegenSchoolReportsCompletionNotificationListener extends BaseRegenS
 		if (ent != null) {
 			ent.setActualStudentsProcessed(summaryDTO.getProcessedCount());
 			ent.setFailedStudentsProcessed((int) summaryDTO.getErroredCount());
-			ent.setEndTime(DateUtils.toLocalDateTime(endTime));
+			if(BatchStatusEnum.COMPLETED.name().equalsIgnoreCase(status) || BatchStatusEnum.FAILED.name().equalsIgnoreCase(status) || BatchStatusEnum.STOPPED.name().equalsIgnoreCase(status)) {
+				ent.setEndTime(DateUtils.toLocalDateTime(endTime));
+			}
 			ent.setStatus(status);
 
 			gradBatchHistoryService.saveGradAlgorithmJobHistory(ent);

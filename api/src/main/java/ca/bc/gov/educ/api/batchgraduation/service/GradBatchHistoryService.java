@@ -34,7 +34,9 @@ public class GradBatchHistoryService {
             // update
             BatchGradAlgorithmJobHistoryEntity current = optional.get();
             current.setStatus(ent.getStatus());
-            current.setEndTime(ent.getEndTime());
+            if(BatchStatusEnum.COMPLETED.name().equalsIgnoreCase(ent.getStatus()) || BatchStatusEnum.FAILED.name().equalsIgnoreCase(ent.getStatus()) || BatchStatusEnum.STOPPED.name().equalsIgnoreCase(ent.getStatus())) {
+                current.setEndTime(ent.getEndTime());
+            }
             current.setExpectedStudentsProcessed(ent.getExpectedStudentsProcessed());
             current.setActualStudentsProcessed(ent.getActualStudentsProcessed());
             current.setFailedStudentsProcessed(ent.getFailedStudentsProcessed());
