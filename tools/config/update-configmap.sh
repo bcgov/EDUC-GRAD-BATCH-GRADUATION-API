@@ -69,11 +69,8 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
  --from-literal=KEYCLOAK_TOKEN_URL="https://soam-$envValue.apps.silver.devops.gov.bc.ca/" \
  --from-literal=REG_ALG_CRON="0 30 18 * * *" \
  --from-literal=RECORDS_STALE_IN_DAYS="1095" \
- --from-literal=CONNECTION_TIMEOUT='30000' \
  --from-literal=MAXIMUM_POOL_SIZE='25' \
- --from-literal=MIN_IDLE='25' \
- --from-literal=IDLE_TIMEOUT='300000' \
- --from-literal=MAX_LIFETIME='1500000' \
+ --from-literal=MAX_LIFETIME='300000' \
  --from-literal=ENABLE_COMPRESSION="true" \
  --dry-run=client -o yaml | oc apply -f -
 
