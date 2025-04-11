@@ -1,5 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ReportGradStudentData implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -16,6 +18,7 @@ public class ReportGradStudentData implements Serializable {
     private UUID graduationStudentRecordId;
     private UUID schoolOfRecordId;
     private UUID schoolAtGradId;
+    private String reportingSchoolTypeCode;
     private UUID districtId;
     private UUID districtAtGradId;
     private String pen;

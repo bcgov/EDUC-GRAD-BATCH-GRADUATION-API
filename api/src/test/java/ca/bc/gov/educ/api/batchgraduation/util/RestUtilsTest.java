@@ -25,6 +25,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.math.BigDecimal;
 import java.util.*;
 
+import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_AT_GRAD;
+import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_OF_RECORD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
@@ -350,7 +352,7 @@ public class RestUtilsTest {
         summary.setBatchId(batchId);
         summary.setGlobalList(globalList);
 
-        StudentCredentialDistribution res = this.restUtils.processDistribution(scd,summary, false);
+        StudentCredentialDistribution res = this.restUtils.processDistribution(scd,summary);
         assertNotNull(res);
     }
 
@@ -393,7 +395,7 @@ public class RestUtilsTest {
         summary.setBatchId(batchId);
         summary.setGlobalList(globalList);
 
-        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary, false);
+        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary);
         assertNotNull(res);
     }
 
@@ -436,7 +438,7 @@ public class RestUtilsTest {
         summary.setBatchId(batchId);
         summary.setGlobalList(globalList);
 
-        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary, false);
+        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary);
         assertNotNull(res);
     }
 
@@ -1458,6 +1460,7 @@ public class RestUtilsTest {
     @Test
     public void testFetchDistributionRequiredDataStudentsNonGradYearly() {
         ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+        reportGradStudentData.setReportingSchoolTypeCode(SCHOOL_AT_GRAD.name());
 
         mockTokenResponseObject();
 
@@ -1471,6 +1474,7 @@ public class RestUtilsTest {
     public void testFetchDistributionRequiredDataStudentsNonGradYearlyBySchoolId() {
         UUID schoolId = UUID.randomUUID();
         ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+        reportGradStudentData.setReportingSchoolTypeCode(SCHOOL_OF_RECORD.name());
 
         mockTokenResponseObject();
 
@@ -1483,6 +1487,7 @@ public class RestUtilsTest {
     @Test
     public void testFetchDistributionRequiredDataStudentsYearly() {
         ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+        reportGradStudentData.setReportingSchoolTypeCode(SCHOOL_AT_GRAD.name());
 
         mockTokenResponseObject();
 

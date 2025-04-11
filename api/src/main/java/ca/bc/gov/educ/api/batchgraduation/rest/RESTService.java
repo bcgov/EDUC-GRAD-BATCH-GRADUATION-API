@@ -10,9 +10,11 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.time.Duration;
 
 @Component
@@ -26,6 +28,7 @@ public class RESTService {
     private final WebClient webClient;
 
     private final WebClient batchWebClient;
+
 
     @Autowired
     public RESTService(@Qualifier("batchClient") WebClient batchWebClient, WebClient webClient, final EducGradBatchGraduationApiConstants constants) {
@@ -50,7 +53,7 @@ public class RESTService {
             obj = this.webClient
                     .get()
                     .uri(url)
-                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
+                    .headers(h -> h.setBearerAuth(accessToken))
                     .retrieve()
                     // if 5xx errors, throw Service error
                     .onStatus(HttpStatusCode::is5xxServerError,
@@ -61,7 +64,7 @@ public class RESTService {
                       - do not retry if 4xx errors happens like 404, 401, 403 etc.
                      */
                     .retryWhen(reactor.util.retry.Retry.backoff(constants.getDefaultRetryMaxAttempts(), Duration.ofSeconds(constants.getDefaultRetryWaitDurationSeconds()))
-                            .filter(ServiceException.class::isInstance)
+                            .filter(ex -> ex instanceof ServiceException || ex instanceof IOException || ex instanceof WebClientRequestException)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                                 throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))
@@ -83,10 +86,6 @@ public class RESTService {
             obj = this.batchWebClient
                     .get()
                     .uri(url)
-                    .headers(h -> {
-                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
-                        h.set(EducGradBatchGraduationApiConstants.USERNAME, ThreadLocalStateUtil.getCurrentUser());
-                    })
                     .retrieve()
                     // if 5xx errors, throw Service error
                     .onStatus(HttpStatusCode::is5xxServerError,
@@ -97,7 +96,7 @@ public class RESTService {
                       - do not retry if 4xx errors happens like 404, 401, 403 etc.
                      */
                     .retryWhen(reactor.util.retry.Retry.backoff(constants.getDefaultRetryMaxAttempts(), Duration.ofSeconds(constants.getDefaultRetryWaitDurationSeconds()))
-                            .filter(ServiceException.class::isInstance)
+                            .filter(ex -> ex instanceof ServiceException || ex instanceof IOException || ex instanceof WebClientRequestException)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                                 throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))
@@ -129,14 +128,14 @@ public class RESTService {
         try {
             obj = this.webClient.post()
                     .uri(url)
-                    .headers(h -> { h.setBearerAuth(accessToken); h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID()); })
+                    .headers(h -> h.setBearerAuth(accessToken))
                     .body(BodyInserters.fromValue(body))
                     .retrieve()
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
                     .retryWhen(reactor.util.retry.Retry.backoff(constants.getDefaultRetryMaxAttempts(), Duration.ofSeconds(constants.getDefaultRetryWaitDurationSeconds()))
-                            .filter(ServiceException.class::isInstance)
+                            .filter(ex -> ex instanceof ServiceException || ex instanceof IOException || ex instanceof WebClientRequestException)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                                 throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))
@@ -157,17 +156,13 @@ public class RESTService {
         try {
             obj = this.batchWebClient.post()
                     .uri(url)
-                    .headers(h -> {
-                        h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
-                        h.set(EducGradBatchGraduationApiConstants.USERNAME, ThreadLocalStateUtil.getCurrentUser());
-                    })
                     .body(BodyInserters.fromValue(body))
                     .retrieve()
                     .onStatus(HttpStatusCode::is5xxServerError,
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
                     .retryWhen(reactor.util.retry.Retry.backoff(constants.getDefaultRetryMaxAttempts(), Duration.ofSeconds(constants.getDefaultRetryWaitDurationSeconds()))
-                            .filter(ServiceException.class::isInstance)
+                            .filter(ex -> ex instanceof ServiceException || ex instanceof IOException || ex instanceof WebClientRequestException)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                                 throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))
@@ -208,7 +203,7 @@ public class RESTService {
                             clientResponse -> Mono.error(new ServiceException(getErrorMessage(url, ERROR_MESSAGE1), clientResponse.statusCode().value())))
                     .bodyToMono(clazz)
                     .retryWhen(reactor.util.retry.Retry.backoff(constants.getDefaultRetryMaxAttempts(), Duration.ofSeconds(constants.getDefaultRetryWaitDurationSeconds()))
-                            .filter(ServiceException.class::isInstance)
+                            .filter(ex -> ex instanceof ServiceException || ex instanceof IOException || ex instanceof WebClientRequestException)
                             .onRetryExhaustedThrow((retryBackoffSpec, retrySignal) -> {
                                 throw new ServiceException(getErrorMessage(url, ERROR_MESSAGE2), HttpStatus.SERVICE_UNAVAILABLE.value());
                             }))

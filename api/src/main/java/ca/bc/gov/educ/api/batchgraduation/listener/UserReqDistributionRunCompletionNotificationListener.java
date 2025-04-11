@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.*;
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecordId;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
@@ -46,7 +47,6 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			String jobType = jobParameters.getString("jobType");
 	    	LOGGER.info("{} Distribution Job {} completed in {} s with jobExecution status {}", jobType, jobExecutionId, elapsedTimeMillis/1000, jobExecution.getStatus());
 
-			String status = jobExecution.getStatus().toString();
 			Date startTime = DateUtils.toDate(jobExecution.getStartTime());
 			Date endTime = DateUtils.toDate(jobExecution.getEndTime());
 			String jobTrigger = jobParameters.getString("jobTrigger");
@@ -64,16 +64,15 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.URDBJ, credentialType);
 
-			// save batch job & error history
-			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
-
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process " + LOG_SEPARATION_SINGLE);
 
 			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
 			summaryDTO.setStudentSearchRequest(studentSearchRequestObject);
-
-			processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser()));
+			DistributionResponse distResponse = processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser()));
+			String status = distResponse != null && FAILED.name().equalsIgnoreCase(distResponse.getMergeProcessResponse()) ? FAILED.name() : COMPLETED.name();
+			// save batch job & error history
+			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 
 			DistributionSummaryDTO finalSummaryDTO = summaryDTO;
 			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
@@ -89,7 +88,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 		}
     }
 
-	private void processGlobalList(DistributionSummaryDTO summaryDTO, Long batchId, String credentialType, String accessToken,String localDownload,String properName) {
+	private DistributionResponse processGlobalList(DistributionSummaryDTO summaryDTO, Long batchId, String credentialType, String accessToken,String localDownload,String properName) {
 		List<StudentCredentialDistribution> cList = summaryDTO.getGlobalList();
 		sortStudentCredentialDistributionBySchoolAndNames(cList);
 		Map<UUID, DistributionPrintRequest> mapDist = summaryDTO.getMapDist();
@@ -123,7 +122,6 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			studentCredentialDistributionControlList.addAll(yedbList);
 
 		});
-		DistributionResponse disres;
 		String activityCode;
 		if(credentialType != null) {
 			if("OC".equalsIgnoreCase(credentialType)) {
@@ -137,17 +135,23 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 				activityCode = "OT".equalsIgnoreCase(credentialType) ? "USERDISTOT" : "USERDISTRC";
 			}
 			if(!studentCredentialDistributionControlList.isEmpty()) {
-				DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(summaryDTO.getStudentSearchRequest()).build();
+				DistributionResponse disres = null;
+				DistributionRequest<UUID> distributionRequest = DistributionRequest.<UUID>builder().mapDist(mapDist).activityCode(activityCode).studentSearchRequest(summaryDTO.getStudentSearchRequest()).build();
 				if (credentialType.equalsIgnoreCase("RC")) {
 					disres = restUtils.createReprintAndUpload(batchId, accessToken, distributionRequest, activityCode, localDownload);
 				} else {
 					disres = restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, localDownload);
 				}
 				if(disres != null) {
-					updateBackStudentRecords(studentCredentialDistributionControlList.stream().distinct().toList(),batchId,activityCode);
+					 if(!FAILED.name().equals(disres.getMergeProcessResponse())) {
+						 updateBackStudentRecords(studentCredentialDistributionControlList.stream().distinct().toList(),batchId,activityCode);
+					 }
+					 LOGGER.info("Merge and Upload Status {}", disres.getMergeProcessResponse());
 				}
+				return disres;
 			}
 		}
+		return null;
 	}
 
 	private void addTranscriptsToDistributionRequest(List<StudentCredentialDistribution> controlList, List<StudentCredentialDistribution> cList, DistributionSummaryDTO summaryDTO, Long batchId, String properName) {
@@ -195,9 +199,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
 		});
 		List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList();
-		studentIDs.forEach(sid-> {
-			restUtils.updateStudentGradRecord(sid,batchId,activityCode);
-		});
+		studentIDs.forEach(sid-> restUtils.updateStudentGradRecord(sid,batchId,activityCode));
 	}
 
 }

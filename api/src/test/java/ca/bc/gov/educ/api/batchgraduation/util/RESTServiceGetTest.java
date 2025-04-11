@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.util;
 
 import ca.bc.gov.educ.api.batchgraduation.exception.ServiceException;
 import ca.bc.gov.educ.api.batchgraduation.rest.RESTService;
+import io.netty.channel.ConnectTimeoutException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,11 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
@@ -111,5 +115,36 @@ public class RESTServiceGetTest {
         when(this.responseMock.bodyToMono(ServiceException.class)).thenReturn(Mono.just(new ServiceException()));
         this.restService.get(TEST_URL_403, String.class);
     }
+
+    @Test(expected = ServiceException.class)
+    public void testGet_Given5xxErrorFromService_ExpectConnectionError(){
+        when(requestBodyUriMock.uri(TEST_URL_503)).thenReturn(requestBodyMock);
+        when(requestBodyMock.retrieve()).thenReturn(responseMock);
+
+        Throwable cause = new RuntimeException("Simulated cause");
+        when(responseMock.bodyToMono(String.class)).thenReturn(Mono.error(new ConnectTimeoutException("Connection closed")));
+        restService.get(TEST_URL_503, String.class);
+    }
+
+    @Test(expected = ServiceException.class)
+    public void testGet_Given5xxErrorFromService_ExpectWebClientRequestError(){
+        when(requestBodyUriMock.uri(TEST_URL_503)).thenReturn(requestBodyMock);
+        when(requestBodyMock.retrieve()).thenReturn(responseMock);
+
+        Throwable cause = new RuntimeException("Simulated cause");
+        when(responseMock.bodyToMono(String.class)).thenReturn(Mono.error(new WebClientRequestException(cause, HttpMethod.GET, null, new HttpHeaders())));
+        restService.get(TEST_URL_503, String.class);
+    }
+
+    @Test(expected = ServiceException.class)
+    public void testGetWithToken_Given5xxErrorFromService_ExpectWebClientRequestError(){
+        when(requestBodyUriMock.uri(TEST_URL_503)).thenReturn(requestBodyMock);
+        when(requestBodyMock.retrieve()).thenReturn(responseMock);
+
+        Throwable cause = new RuntimeException("Simulated cause");
+        when(responseMock.bodyToMono(String.class)).thenReturn(Mono.error(new WebClientRequestException(cause, HttpMethod.GET, null, new HttpHeaders())));
+        restService.get(TEST_URL_503, String.class, "ABC");
+    }
+
 
 }

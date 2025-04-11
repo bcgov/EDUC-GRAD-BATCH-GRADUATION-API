@@ -27,7 +27,7 @@ public class RestUtils {
     private static final String GRADUATION_API_IS_DOWN = "GRAD-GRADUATION-API IS DOWN";
     private static final String GRADUATION_API_DOWN_MSG = "Graduation API is unavailable at this moment";
     private static final String FAILED_STUDENT_ERROR_MSG = "Failed STU-ID:{} Errors:{}";
-    private static final String MERGE_MSG="Merge and Upload Success {}";
+    private static final String MERGE_MSG="Merge and Upload Status {}";
     private static final String YEARENDDIST = "YEARENDDIST";
     private static final String SUPPDIST = "SUPPDIST";
     private static final String NONGRADYERUN = "NONGRADYERUN";
@@ -102,6 +102,10 @@ public class RestUtils {
 
     public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearly() {
         return graduationReportService.getStudentsForYearlyDistribution(fetchAccessToken());
+    }
+
+    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearlyBySearchCriteria(StudentSearchRequest searchRequest) {
+        return graduationReportService.getStudentsForYearlyDistributionBySearchCriteria(fetchAccessToken(), searchRequest);
     }
 
 
@@ -223,7 +227,7 @@ public class RestUtils {
         return jsonTransformer.convertValue(response, new TypeReference<>(){});
     }
 
-    public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary, boolean useSchoolAtGrad) {
+    public StudentCredentialDistribution processDistribution(StudentCredentialDistribution item, DistributionSummaryDTO summary) {
         LOGGER.info(STUDENT_PROCESS,item.getStudentID());
         summary.setProcessedCount(summary.getProcessedCount() + 1L);
         StudentCredentialDistribution scObj = summary.getGlobalList().stream().filter(pr -> pr.getStudentID().compareTo(item.getStudentID()) == 0)
@@ -242,9 +246,7 @@ public class RestUtils {
             if (stuRec != null) {
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
-                if(useSchoolAtGrad) {
-                    item.setSchoolId(stuRec.getSchoolAtGradId() == null? stuRec.getSchoolOfRecordId() : stuRec.getSchoolAtGradId());
-                } else {
+                if(item.getSchoolId() == null) {  //if null use old default
                     item.setSchoolId(stuRec.getSchoolOfRecordId());
                 }
                 ca.bc.gov.educ.api.batchgraduation.model.institute.School school  = getSchool(item.getSchoolId());
@@ -423,11 +425,12 @@ public class RestUtils {
         return restService.post(constants.getPostingDistribution(), distributionResponse, Boolean.class, getAccessToken());
     }
 
-    public void createBlankCredentialsAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest, String localDownload) {
+    public DistributionResponse createBlankCredentialsAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest, String localDownload) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         var result = restService.post(String.format(constants.getCreateBlanksAndUpload(),batchId,localDownload), distributionRequest, DistributionResponse.class, accessToken);
         if(result != null)
             LOGGER.info("Create and Upload Success {}",result.getMergeProcessResponse());
+        return result;
     }
 
     public DistributionResponse createReprintAndUpload(Long batchId, String accessToken, DistributionRequest distributionRequest, String activityCode,String localDownload) {
@@ -439,10 +442,10 @@ public class RestUtils {
         return  result;
     }
 
-    public void updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String documentStatusCode,String activityCode,String accessToken) {
+    public Boolean updateStudentCredentialRecord(UUID studentID, String credentialTypeCode, String paperType,String documentStatusCode,String activityCode,String accessToken) {
         String url = String.format(constants.getUpdateStudentCredential(),studentID,
                 credentialTypeCode != null? credentialTypeCode : "",paperType,documentStatusCode,activityCode);
-        restService.get(url, Boolean.class, accessToken);
+        return restService.get(url, Boolean.class, accessToken);
     }
 
     public void deleteSchoolReportRecord(UUID schoolId, String reportTypeCode) {

@@ -6,7 +6,7 @@
 
     <groupId>ca.bc.gov.educ</groupId>
     <artifactId>educ-grad-batch-graduation-api</artifactId>
-    <version>1.8.73</version>
+    <version>1.8.74</version>
     <name>educ-grad-batch-graduation-api</name>
     <description>Ministry of Education GRAD BATCH GRADUATION API</description>
 
@@ -28,7 +28,8 @@
             src/main/java/ca/bc/gov/educ/api/batchgraduation/reader/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/writer/**,
             src/main/java/org/springframework/**,
-            src/test/java/ca/bc/gov/educ/api/batchgraduation/**
+            src/test/java/ca/bc/gov/educ/api/batchgraduation/**,
+            src/main/java/ca/bc/gov/educ/api/gradalgorithm/controller/APIMetadataController.java
         </sonar.exclusions>
         <sonar.coverage.exclusions>
             src/main/resources/**,
@@ -43,7 +44,8 @@
             src/main/java/ca/bc/gov/educ/api/batchgraduation/reader/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/writer/**,
             src/main/java/org/springframework/**,
-            src/test/java/ca/bc/gov/educ/api/batchgraduation/**
+            src/test/java/ca/bc/gov/educ/api/batchgraduation/**,
+            src/main/java/ca/bc/gov/educ/api/gradalgorithm/controller/APIMetadataController.java
         </sonar.coverage.exclusions>
         <java.version>18</java.version>
         <maven.compiler.version>3.10.1</maven.compiler.version>
@@ -51,6 +53,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <org.mapstruct.version>1.3.1.Final</org.mapstruct.version>
         <springdoc.version>2.0.2</springdoc.version>
+        <guava.version>33.4.0-jre</guava.version>
         <log4j.version>2.18.0</log4j.version>
         <shedlock.version>4.38.0</shedlock.version>
     </properties>
@@ -106,6 +109,11 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>2.15.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -172,6 +180,11 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.vintage</groupId>

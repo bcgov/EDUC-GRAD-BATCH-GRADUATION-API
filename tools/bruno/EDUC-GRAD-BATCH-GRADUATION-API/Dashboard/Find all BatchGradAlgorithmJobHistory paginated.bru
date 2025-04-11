@@ -1,0 +1,18 @@
+meta {
+  name: Find all BatchGradAlgorithmJobHistory paginated
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/v2/batch/dashboard?pageNumber&pageSize&sort&searchParams=%5B%7B%22condition%22%3Anull%2C%22searchCriteriaList%22%3A%5B%7B%22key%22%3A%22createUser%22%2C%22operation%22%3A%22eq%22%2C%22value%22%3A%22KGray%22%2C%22valueType%22%3A%22STRING%22%2C%22condition%22%3A%22AND%22%7D%2C%7B%22key%22%3A%22endTime%22%2C%22operation%22%3A%22lt%22%2C%22value%22%3A%222023-02-25T13%3A28%3A27.241198800%22%2C%22valueType%22%3A%22DATE_TIME%22%2C%22condition%22%3A%22AND%22%7D%5D%7D%5D
+  body: none
+  auth: none
+}
+
+params:query {
+  pageNumber: 
+  pageSize: 
+  sort: 
+  searchParams: %5B%7B%22condition%22%3Anull%2C%22searchCriteriaList%22%3A%5B%7B%22key%22%3A%22createUser%22%2C%22operation%22%3A%22eq%22%2C%22value%22%3A%22KGray%22%2C%22valueType%22%3A%22STRING%22%2C%22condition%22%3A%22AND%22%7D%2C%7B%22key%22%3A%22endTime%22%2C%22operation%22%3A%22lt%22%2C%22value%22%3A%222023-02-25T13%3A28%3A27.241198800%22%2C%22valueType%22%3A%22DATE_TIME%22%2C%22condition%22%3A%22AND%22%7D%5D%7D%5D
+}

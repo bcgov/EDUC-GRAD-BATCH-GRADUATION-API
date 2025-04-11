@@ -19,6 +19,13 @@ public class EducGradBatchGraduationApiConstants {
     public static final String USERNAME = "username";
     public static final String GRAD_BATCH_API_ROOT_MAPPING = "/api/" + API_VERSION + "/batch";
 
+    public static final String USER_NAME = "User-Name";
+    public static final String REQUEST_SOURCE = "Request-Source";
+    public static final String API_NAME = "EDUC-GRAD-BATCH-GRADUATION-API";
+
+    public static final String GRAD_BATCH_API_V2_ROOT_MAPPING = "/api/v2/batch";
+
+
     // Manual Run
     public static final String EXECUTE_REG_GRAD_BATCH_JOB = "/executereggradbatchjob";
     public static final String EXECUTE_TVR_RUN_BATCH_JOB = "/executetvrrunbatchjob";

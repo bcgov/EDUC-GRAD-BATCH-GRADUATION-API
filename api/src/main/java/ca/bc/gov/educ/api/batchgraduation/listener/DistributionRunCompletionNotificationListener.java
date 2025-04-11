@@ -93,7 +93,7 @@ public class DistributionRunCompletionNotificationListener extends BaseDistribut
 			List<StudentCredentialDistribution> studentList = cList.stream().filter(scd->!"NONGRADYERUN".equalsIgnoreCase(activityCode) && scd.getSchoolId().compareTo(usl)==0 && StringUtils.isNotBlank(scd.getPen())).collect(Collectors.toList());
 			schoolDistributionPrintFile(studentList,batchId,usl,mapDist);
 		});
-		DistributionRequest distributionRequest = DistributionRequest.builder().mapDist(mapDist).activityCode(activityCode).build();
+		DistributionRequest<UUID> distributionRequest = DistributionRequest.<UUID>builder().mapDist(mapDist).activityCode(activityCode).build();
 		distributionRequest.setSchools(new ArrayList<>());
 		restUtils.mergeAndUpload(batchId, distributionRequest, activityCode, "N");
 	}
