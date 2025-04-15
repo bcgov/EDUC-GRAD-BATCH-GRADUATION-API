@@ -27,7 +27,6 @@ public class DistributionRunProcessor implements ItemProcessor<StudentCredential
 	public StudentCredentialDistribution process(StudentCredentialDistribution item) throws Exception {
 		LOGGER.info("Processing partitionData = {}", item.getCredentialTypeCode());
 		summaryDTO.setBatchId(batchId);
-		boolean useSchoolAtGrad = false;
 		//--> Revert code back to school of record GRAD2-2758
 		/**
 		String credentialType = summaryDTO.getCredentialType();
@@ -35,7 +34,7 @@ public class DistributionRunProcessor implements ItemProcessor<StudentCredential
 			useSchoolAtGrad = true;
 		} **/
 		//<--
-		return restUtils.processDistribution(item, summaryDTO, useSchoolAtGrad);
+		return restUtils.processDistribution(item, summaryDTO);
 		
 	}
 

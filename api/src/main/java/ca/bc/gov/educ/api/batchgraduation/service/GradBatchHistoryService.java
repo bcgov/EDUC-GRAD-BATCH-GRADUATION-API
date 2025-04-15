@@ -5,6 +5,8 @@ import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +16,8 @@ import java.util.*;
 
 @Service
 public class GradBatchHistoryService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GradBatchHistoryService.class);
 
     @Autowired
     private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
@@ -31,10 +35,12 @@ public class GradBatchHistoryService {
     public BatchGradAlgorithmJobHistoryEntity saveGradAlgorithmJobHistory(BatchGradAlgorithmJobHistoryEntity ent) {
         Optional<BatchGradAlgorithmJobHistoryEntity> optional = batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(ent.getJobExecutionId());
         if (optional.isPresent()) {
-            // update
+            LOGGER.info("Updating BatchGradAlgorithmJobHistoryEntity for Id :{} Status: {}, EndTime: {} ", ent.getJobExecutionId(), ent.getStatus(), ent.getEndTime());
             BatchGradAlgorithmJobHistoryEntity current = optional.get();
             current.setStatus(ent.getStatus());
-            current.setEndTime(ent.getEndTime());
+            if(BatchStatusEnum.COMPLETED.name().equalsIgnoreCase(ent.getStatus()) || BatchStatusEnum.FAILED.name().equalsIgnoreCase(ent.getStatus()) || BatchStatusEnum.STOPPED.name().equalsIgnoreCase(ent.getStatus())) {
+                current.setEndTime(ent.getEndTime());
+            }
             current.setExpectedStudentsProcessed(ent.getExpectedStudentsProcessed());
             current.setActualStudentsProcessed(ent.getActualStudentsProcessed());
             current.setFailedStudentsProcessed(ent.getFailedStudentsProcessed());

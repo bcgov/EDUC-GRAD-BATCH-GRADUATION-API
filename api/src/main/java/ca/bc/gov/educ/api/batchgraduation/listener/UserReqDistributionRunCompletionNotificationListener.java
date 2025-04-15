@@ -70,12 +70,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
 			summaryDTO.setStudentSearchRequest(studentSearchRequestObject);
 			DistributionResponse distResponse = processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser()));
-			String status;
-			if(distResponse != null) {
-				status  = FAILED.name().equalsIgnoreCase(distResponse.getMergeProcessResponse()) ? FAILED.name(): credentialType.equalsIgnoreCase("RC") ? COMPLETED.name() : STARTED.name();
-			} else {
-				status = COMPLETED.name();
-			}
+			String status = distResponse != null && FAILED.name().equalsIgnoreCase(distResponse.getMergeProcessResponse()) ? FAILED.name() : COMPLETED.name();
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 
@@ -204,9 +199,7 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),scd.getDocumentStatusCode(),activityCode,accessToken);
 		});
 		List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList();
-		studentIDs.forEach(sid-> {
-			restUtils.updateStudentGradRecord(sid,batchId,activityCode);
-		});
+		studentIDs.forEach(sid-> restUtils.updateStudentGradRecord(sid,batchId,activityCode));
 	}
 
 }

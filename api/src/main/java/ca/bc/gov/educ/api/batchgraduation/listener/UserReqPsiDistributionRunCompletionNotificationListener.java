@@ -92,12 +92,12 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 			DistributionRequest<String> distributionRequest = DistributionRequest.<String>builder().mapDist(mapDist).activityCode(activityCode).build();
 			DistributionResponse disres = restUtils.mergePsiAndUpload(batchId, accessToken, distributionRequest, localDownload, transmissionType);
 			if (disres != null) {
-				if(!FAILED.name().equalsIgnoreCase(disres.getMergeProcessResponse())) {
-					updateBackStudentRecords(cList, batchId, activityCode);
-					return true;
-				}
 				LOGGER.info("Merge and Upload Status {}",disres.getMergeProcessResponse());
-				return false;
+				if(FAILED.name().equalsIgnoreCase(disres.getMergeProcessResponse())) {
+					return false;
+				}
+				updateBackStudentRecords(cList, batchId, activityCode);
+				return true;
 			}
 		}
 		return true;

@@ -1050,7 +1050,7 @@ public class JobLauncherController {
 
     @PostMapping(EducGradBatchGraduationApiConstants.NOTIFY_DISTRIBUTION_JOB_IS_COMPLETED)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
-    @Operation(summary = "Run Monthly Distribution Runs", description = "Run Monthly Distribution Runs", tags = { "Distribution" })
+    @Operation(summary = "Run Callback once Async Distribution process is completed", description = "Run Callback once Async Distribution process is completed", tags = { "Distribution" })
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK"),@ApiResponse(responseCode = "500", description = "Internal Server Error")})
     public ResponseEntity<Void> notifyDistributionJobIsCompleted(
             @RequestParam(name = "batchId", defaultValue = "0") Long batchId,
