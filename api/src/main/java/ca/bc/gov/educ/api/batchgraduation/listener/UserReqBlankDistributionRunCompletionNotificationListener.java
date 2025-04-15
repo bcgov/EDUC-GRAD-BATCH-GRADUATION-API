@@ -61,16 +61,19 @@ public class UserReqBlankDistributionRunCompletionNotificationListener extends B
 			LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
 			String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.BDBJ, credentialType);
+			String status = jobExecution.getStatus().toString();
 
-			LOGGER.info(LOG_SEPARATION_SINGLE);
-			BlankDistributionSummaryDTO finalSummaryDTO = summaryDTO;
-			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
+			if(!status.equals(FAILED.name())) {
+				LOGGER.info(LOG_SEPARATION_SINGLE);
+				BlankDistributionSummaryDTO finalSummaryDTO = summaryDTO;
+				summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
-			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest) jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+				StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest) jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
 
-			ResponseObj obj = restUtils.getTokenResponseObject();
-			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-			String status = processGlobalList(studentSearchRequestObject, credentialType,summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser())) ? COMPLETED.name() : FAILED.name();
+				ResponseObj obj = restUtils.getTokenResponseObject();
+				LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
+				status = processGlobalList(studentSearchRequestObject, credentialType, summaryDTO.getGlobalList(), jobExecutionId, summaryDTO.getMapDist(), obj.getAccess_token(), localDownLoad, StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser())) ? COMPLETED.name() : FAILED.name();
+			}
 
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
