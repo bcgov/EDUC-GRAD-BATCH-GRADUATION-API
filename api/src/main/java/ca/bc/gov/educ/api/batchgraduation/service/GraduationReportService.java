@@ -1,9 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.model.ReportGradStudentData;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RESTService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
@@ -96,10 +93,10 @@ public class GraduationReportService {
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
-	public List<StudentCredentialDistribution> getStudentsForYearlyDistributionBySearchCriteria(String accessToken, StudentSearchRequest searchRequest) {
+	public List<YearEndStudentCredentialDistribution> getStudentsForYearlyDistributionBySearchCriteria(String accessToken, StudentSearchRequest searchRequest) {
 		var response = restService.post(String.format(constants.getStudentReportDataYearly()), searchRequest, List.class, accessToken);
 		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
-		return populateStudentCredentialDistributions(reportGradStudentDataList);
+		return populateYearEndStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
 	public List<UUID> getSchoolsNonGradYearly(String accessToken) {
@@ -115,6 +112,16 @@ public class GraduationReportService {
 	public List<UUID> getDistrictsYearly(String accessToken) {
 		var response = restService.get(constants.getDistrictDataYearly(), List.class, accessToken);
 		return jsonTransformer.convertValue(response, new TypeReference<>(){});
+	}
+
+	private List<YearEndStudentCredentialDistribution> populateYearEndStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
+		List<YearEndStudentCredentialDistribution> result = new ArrayList<>();
+		for(ReportGradStudentData data: reportGradStudentDataList) {
+			if (!"DEC".equalsIgnoreCase(data.getStudentStatus())) {
+				result.add(populateYearEndStudentCredentialDistribution(data));
+			}
+		}
+		return result;
 	}
 
 	private List<StudentCredentialDistribution> populateStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
@@ -159,6 +166,47 @@ public class GraduationReportService {
 		dist.setStudentGrade(data.getStudentGrade());
 		dist.setNonGradReasons(data.getNonGradReasons());
 		dist.setLastUpdateDate(data.lastUpdateDateAsString());
+		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOriginId(), dist.getSchoolAtGradId(), dist.getSchoolId());
+		return dist;
+	}
+
+	private YearEndStudentCredentialDistribution populateYearEndStudentCredentialDistribution(ReportGradStudentData data) {
+		YearEndStudentCredentialDistribution dist = new YearEndStudentCredentialDistribution();
+		dist.setId(data.getGraduationStudentRecordId());
+		String paperType = StringUtils.trimToNull(data.getPaperType()) == null ? "YED4" : data.getPaperType();
+		if("YED4".equalsIgnoreCase(paperType)) {
+			dist.setCredentialTypeCode(data.getTranscriptTypeCode());
+		} else {
+			dist.setCredentialTypeCode(data.getCertificateTypeCode());
+		}
+		dist.setStudentID(data.getGraduationStudentRecordId());
+		dist.setPaperType(paperType);
+		if(data.getReportingSchoolTypeCode() != null && data.getReportingSchoolTypeCode().equalsIgnoreCase(SCHOOL_AT_GRAD.name())) {
+			dist.setSchoolId(data.getSchoolAtGradId());
+			dist.setDistrictId(data.getDistrictAtGradId());
+		} else {
+			dist.setSchoolId(data.getSchoolOfRecordId());
+			dist.setDistrictId(data.getDistrictId());
+		}
+		dist.setSchoolAtGradId(data.getSchoolAtGradId());
+		dist.setSchoolOfRecordOriginId(data.getSchoolOfRecordId());
+		dist.setDocumentStatusCode("COMPL");
+		dist.setPen(data.getPen());
+		dist.setLegalFirstName(data.getFirstName());
+		dist.setLegalMiddleNames(data.getMiddleName());
+		dist.setLegalLastName(data.getLastName());
+		dist.setProgramCompletionDate(data.getProgramCompletionDate());
+		dist.setHonoursStanding(data.getHonorsStanding());
+		dist.setProgram(data.getProgramCode());
+		dist.setStudentGrade(data.getStudentGrade());
+		dist.setNonGradReasons(data.getNonGradReasons());
+		dist.setLastUpdateDate(data.lastUpdateDateAsString());
+		dist.setSchoolOfRecordId(data.getSchoolOfRecordId());
+		dist.setReportingSchoolTypeCode(data.getReportingSchoolTypeCode());
+		dist.setDistrictId(data.getDistrictId());
+		dist.setDistrictAtGradId(data.getSchoolAtGradId());
+		dist.setCertificateTypeCode(data.getCertificateTypeCode());
+		dist.setTranscriptTypeCode(data.getTranscriptTypeCode());
 		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOriginId(), dist.getSchoolAtGradId(), dist.getSchoolId());
 		return dist;
 	}

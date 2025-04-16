@@ -104,7 +104,7 @@ public class RestUtils {
         return graduationReportService.getStudentsForYearlyDistribution(fetchAccessToken());
     }
 
-    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearlyBySearchCriteria(StudentSearchRequest searchRequest) {
+    public List<YearEndStudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearlyBySearchCriteria(StudentSearchRequest searchRequest) {
         return graduationReportService.getStudentsForYearlyDistributionBySearchCriteria(fetchAccessToken(), searchRequest);
     }
 
@@ -448,6 +448,11 @@ public class RestUtils {
         return restService.get(url, Boolean.class, accessToken);
     }
 
+    public Integer updateStudentCredentialRecords(List<StudentCredentialDistribution> studentCredentialDistributions, String activityCode, String accessToken) {
+        String url = String.format(constants.getUpdateStudentCredentialByBatch(), activityCode);
+        return restService.post(url, studentCredentialDistributions, Integer.class, accessToken);
+    }
+
     public void deleteSchoolReportRecord(UUID schoolId, String reportTypeCode) {
         ThreadLocalStateUtil.setCorrelationID(UUID.randomUUID().toString());
         restService.delete(String.format(constants.getDeleteSchoolReportsBySchoolIdAndReportType(),schoolId, reportTypeCode), Boolean.class);
@@ -496,15 +501,16 @@ public class RestUtils {
         }
     }
 
-    public void updateStudentGradRecordHistory(List<UUID> studentIDs, Long batchId, String userName, String activityCode) {
+    public Integer updateStudentGradRecordHistory(List<UUID> studentIDs, Long batchId, String userName, String activityCode) {
         try {
             if (batchId != null) {
                 String url = String.format(constants.getUpdateStudentRecordHistory(), batchId, userName, activityCode);
-                restService.put(url,studentIDs, GraduationStudentRecord.class);
+                return restService.put(url, studentIDs, Integer.class);
             }
         } catch (Exception e) {
             LOGGER.error("Unable to update student record history {}", e.getLocalizedMessage());
         }
+        return 0;
     }
 
     public String updateStudentFlagReadyForBatch(List<UUID> studentIds, String batchJobType) {

@@ -2,6 +2,7 @@ package ca.bc.gov.educ.api.batchgraduation.reader;
 
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.YearEndStudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.service.ParallelDataFetch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class DistributionRunYearlyPartitioner extends BasePartitioner {
         startTime = System.currentTimeMillis();
         logger.debug("Retrieve students for Yearly Distribution");
         StudentSearchRequest studentSearchRequest = getStudentSearchRequest();
-        List<StudentCredentialDistribution> eligibleStudentSchoolDistricts = parallelDataFetch.fetchYearEndStudentCredentials(studentSearchRequest);
+        List<YearEndStudentCredentialDistribution> eligibleStudentSchoolDistricts = parallelDataFetch.fetchYearEndStudentCredentials(studentSearchRequest);
         endTime = System.currentTimeMillis();
         diff = (endTime - startTime)/1000;
         logger.debug("Total {} eligible StudentCredentialDistributions found in {} sec", eligibleStudentSchoolDistricts.size(), diff);
