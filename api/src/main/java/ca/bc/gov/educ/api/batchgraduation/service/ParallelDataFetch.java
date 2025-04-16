@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.model.DistributionDataParallelDTO;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.YearEndStudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class ParallelDataFetch {
     public List<StudentCredentialDistribution> fetchStudentCredentialsDistributionDataYearly() {
         return restUtils.fetchDistributionRequiredDataStudentsYearly();
     }
-    public List<StudentCredentialDistribution> fetchYearEndStudentCredentials(StudentSearchRequest studentSearchRequest) {
+    public List<YearEndStudentCredentialDistribution> fetchYearEndStudentCredentials(StudentSearchRequest studentSearchRequest) {
         return restUtils.fetchDistributionRequiredDataStudentsYearlyBySearchCriteria(studentSearchRequest);
     }
 

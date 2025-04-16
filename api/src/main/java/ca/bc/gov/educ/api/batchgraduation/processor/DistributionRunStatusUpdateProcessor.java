@@ -6,6 +6,8 @@ import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.DistributionService;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
+import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,38 +73,41 @@ public class DistributionRunStatusUpdateProcessor {
         final int totalCredentialCount = cList.size();
         List<UUID> studentIDs = cList.stream().map(StudentCredentialDistribution::getStudentID).distinct().toList();
         final int totalStudentCount = studentIDs.size();
+        final int partitionSize = 999;
 
         final int[] processedCount = {1};
         // Credential Records
-        cList.forEach(scd-> {
-            try {
+        if(!cList.isEmpty()) {
+            List<List<StudentCredentialDistribution>> studentCredPartitions = Lists.partition(cList, partitionSize);
+            studentCredPartitions.forEach(studentCredPartition -> {
+                if ("NONGRADYERUN".equalsIgnoreCase(activityCode)) { studentCredPartition.forEach(entry -> entry.setDocumentStatusCode("IP")); }
                 final String accessToken = restUtils.getAccessToken();
-                restUtils.updateStudentCredentialRecord(scd.getStudentID(),scd.getCredentialTypeCode(),scd.getPaperType(),
-                        "NONGRADYERUN".equalsIgnoreCase(activityCode)? "IP" : scd.getDocumentStatusCode(),activityCode,accessToken);
-                LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student credential record: studentID, credentials, document status [{}, {}, {}]", batchId, activityCode, processedCount[0], totalCredentialCount, scd.getStudentID(), scd.getCredentialTypeCode(), scd.getDocumentStatusCode());
-                processedCount[0]++;
-            } catch (Exception e) {
-                unprocessedStudents.put(scd.getStudentID().toString(), new ServiceException(e));
-                LOGGER.error("Unexpected Error on update {} of {} student credential record: studentID [{}] \n {}",
-                        processedCount[0], totalCredentialCount, scd.getStudentID(), e.getMessage());
-            }
-        });
-
-        processedCount[0] = 1;
-        // Unique Students
-        studentIDs.forEach(uuid-> {
-            try {
-                if(!StringUtils.equalsAnyIgnoreCase(jobType, "REGALG", "TVRRUN")) {
-                    restUtils.updateStudentGradRecord(uuid, batchId, activityCode);
-                    LOGGER.debug("Dist Job [{}] / [{}] - update {} of {} student grad record: studentID [{}]", batchId, activityCode, processedCount[0], totalStudentCount, uuid);
+                Integer processed = restUtils.updateStudentCredentialRecords(studentCredPartition, activityCode, accessToken);
+                if(studentCredPartition.size() != processed) {
+                    studentCredPartition.stream().forEach(scd -> unprocessedStudents.put(scd.getStudentID().toString(), new ServiceException("Updating student credential failed.")));
                 }
-                processedCount[0]++;
-            } catch (Exception e) {
-                unprocessedStudents.put(uuid.toString(), new ServiceException(e));
-                LOGGER.error("Unexpected Error on create {} of {} audit history: studentID [{}] \n {}",
-                        processedCount[0], totalStudentCount, uuid, e.getMessage());
+                processedCount[0] = processedCount[0] + processed;
+            });
+            LOGGER.debug("Dist Job [{}] / [{}] - updated {} of {} student credential record", batchId, activityCode, processedCount[0], totalCredentialCount);
+            if (cList.size() != processedCount[0]) {
+                LOGGER.error("Dist Job [{}] / [{}] - Unexpected Error on updating student credential record {} of {} ",
+                        batchId, activityCode, (totalCredentialCount - processedCount[0]), totalCredentialCount);
             }
-        });
+        }
+
+        // Unique Students
+        processedCount[0] = 1;
+        if(!StringUtils.equalsAnyIgnoreCase(jobType, "REGALG", "TVRRUN") && !studentIDs.isEmpty()) {
+            List<List<UUID>> studentIDPartitions = Lists.partition(studentIDs, partitionSize);
+            studentIDPartitions.forEach(studentIDPartition -> {
+                processedCount[0]  = processedCount[0] + restUtils.updateStudentGradRecordHistory(studentIDPartition, batchId, ThreadLocalStateUtil.getCurrentUser(), activityCode);
+            });
+            LOGGER.debug("Dist Job [{}] / [{}] - updated {} of {} student grad record & history", batchId, activityCode, processedCount[0], totalStudentCount);
+            if(studentIDs.size() != processedCount[0]) {
+                LOGGER.error("Dist Job [{}] / [{}] - Unexpected Error on updating {} of {} student grad record & history",
+                        batchId, activityCode, (totalStudentCount - processedCount[0]), totalStudentCount);
+            }
+        }
         return unprocessedStudents;
     }
 
