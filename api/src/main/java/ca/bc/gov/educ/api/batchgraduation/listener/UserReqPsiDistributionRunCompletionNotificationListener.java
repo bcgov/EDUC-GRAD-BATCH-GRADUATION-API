@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstan
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.item.ExecutionContext;
@@ -15,8 +16,6 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.*;
 
@@ -65,15 +64,18 @@ public class UserReqPsiDistributionRunCompletionNotificationListener extends Bas
 		LOGGER.info("Errors:{}", summaryDTO.getErrors().size());
 
 		String jobParametersDTO = buildJobParametersDTO(jobType, studentSearchRequest, TaskSelection.URPDBJ, transmissionType);
+		String status = jobExecution.getStatus().toString();
 
+		if(!status.equals(BatchStatus.FAILED.name())) {
+			LOGGER.info(LOG_SEPARATION_SINGLE);
+			PsiDistributionSummaryDTO finalSummaryDTO = summaryDTO;
+			summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
 
-		LOGGER.info(LOG_SEPARATION_SINGLE);
-		PsiDistributionSummaryDTO finalSummaryDTO = summaryDTO;
-		summaryDTO.getCredentialCountMap().forEach((key, value) -> LOGGER.info(" {} count   : {}", key, finalSummaryDTO.getCredentialCountMap().get(key)));
+			ResponseObj obj = restUtils.getTokenResponseObject();
+			LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
+			status  = processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),transmissionType) ? COMPLETED.name(): FAILED.name();
+		}
 
-		ResponseObj obj = restUtils.getTokenResponseObject();
-		LOGGER.info("Starting Report Process --------------------------------------------------------------------------");
-		String status  = processGlobalList(summaryDTO.getGlobalList(),jobExecutionId,summaryDTO.getMapDist(),obj.getAccess_token(),transmissionType) ? COMPLETED.name(): FAILED.name();
 		// save batch job & error history
 		processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 		LOGGER.info(LOG_SEPARATION);
