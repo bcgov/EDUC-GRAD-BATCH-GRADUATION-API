@@ -6,14 +6,10 @@ spring:
     hikari:
       pool-name: educ-grad-batch-graduation-api-cp
       maximum-pool-size: ${MAXIMUM_POOL_SIZE}
-      connection-timeout: ${CONNECTION_TIMEOUT}
       max-lifetime: ${MAX_LIFETIME}
-      minimum-idle: ${MIN_IDLE}
-      idle-timeout: ${IDLE_TIMEOUT}
     url: ${CONNECTION_STRING}
     username: ${USERNAME}
     password: ${PASSWORD}
-    driver-class-name: oracle.jdbc.driver.OracleDriver
   jpa:
     show-sql: ${SHOW_SQL_LOGS}
     database-platform: org.hibernate.dialect.OracleDialect

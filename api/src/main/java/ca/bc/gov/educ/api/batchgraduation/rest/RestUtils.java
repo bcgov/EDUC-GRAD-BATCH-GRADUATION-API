@@ -246,8 +246,12 @@ public class RestUtils {
             if (stuRec != null) {
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
-                if(item.getSchoolId() == null) {  //if null use old default
-                    item.setSchoolId(stuRec.getSchoolOfRecordId());
+                if(item.getSchoolId() == null) {
+                    if(List.of("RC", "OC").contains(summary.getCredentialType())) { // use school at grad for certs
+                        item.setSchoolId(stuRec.getSchoolAtGradId());
+                    } else {
+                        item.setSchoolId(stuRec.getSchoolOfRecordId());
+                    }
                 }
                 ca.bc.gov.educ.api.batchgraduation.model.institute.School school  = getSchool(item.getSchoolId());
                 if (school != null) {
@@ -276,7 +280,6 @@ public class RestUtils {
             if(!stuDataList.isEmpty()) {
                 item.setStudentID(UUID.fromString(stuDataList.get(0).getStudentID()));
             }
-            // item.setPsiId(UUID.randomUUID()); // TODO: PSI GUID will be populated from STS
             summary.getGlobalList().add(item);
         } catch (Exception e) {
             LOGGER.error("Error processing student with id {} due to {}", item.getStudentID(), e.getLocalizedMessage());
