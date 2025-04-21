@@ -17,11 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_AT_GRAD;
 
@@ -121,8 +119,7 @@ public class GraduationReportService {
 			Function<ReportGradStudentData, T> mapper) {
 		return dataList.stream()
 				.filter(data -> !"DEC".equalsIgnoreCase(data.getStudentStatus()))
-				.map(mapper)
-				.collect(Collectors.toList());
+				.map(mapper).toList();
 	}
 
 
