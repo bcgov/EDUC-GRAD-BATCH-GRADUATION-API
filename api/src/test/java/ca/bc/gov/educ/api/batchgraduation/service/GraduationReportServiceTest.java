@@ -1,7 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RESTService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.junit.Test;
@@ -21,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_AT_GRAD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -131,6 +131,32 @@ public class GraduationReportServiceTest {
 
     }
 
+    @Test
+    public void testGeYearEndStudentsForRun() {
 
+        UUID schoolId = UUID.randomUUID();
+        YearEndStudentCredentialDistribution scd = new YearEndStudentCredentialDistribution();
+        scd.setId(new UUID(1,1));
+        scd.setStudentID(new UUID(2,2));
+        scd.setCredentialTypeCode("E");
+        scd.setPaperType("YED2");
+        scd.setSchoolOfRecord("05005001");
+        scd.setSchoolId(schoolId);
+        scd.setReportingSchoolTypeCode(SCHOOL_AT_GRAD.name());
+
+        ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
+        reportGradStudentData.setGraduationStudentRecordId(scd.getStudentID());
+        reportGradStudentData.setFirstName(scd.getLegalFirstName());
+        reportGradStudentData.setLastName(scd.getLegalLastName());
+
+        StudentSearchRequest searchRequest = new StudentSearchRequest();
+        searchRequest.setSchoolIds(List.of(schoolId));
+
+        when(restService.post(String.format(constants.getStudentReportDataYearly()), searchRequest, List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
+
+        List<YearEndStudentCredentialDistribution> res = graduationReportService.getStudentsForYearlyDistributionBySearchCriteria("accessToken", searchRequest);
+        assertThat(res).isNotNull().hasSize(1);
+
+    }
 
 }
