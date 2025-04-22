@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_AT_GRAD;
 
@@ -119,7 +120,7 @@ public class GraduationReportService {
 			Function<ReportGradStudentData, T> mapper) {
 		return dataList.stream()
 				.filter(data -> !"DEC".equalsIgnoreCase(data.getStudentStatus()))
-				.map(mapper).toList();
+				.map(mapper).collect(Collectors.toList());
 	}
 
 
