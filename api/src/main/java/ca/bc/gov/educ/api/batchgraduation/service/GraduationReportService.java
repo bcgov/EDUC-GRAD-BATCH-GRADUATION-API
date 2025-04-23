@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -87,14 +88,13 @@ public class GraduationReportService {
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
-	// Year-end distribution
 	public List<StudentCredentialDistribution> getStudentsForYearlyDistribution(String accessToken) {
 		var response = restService.get(String.format(constants.getStudentReportDataYearly()), List.class, accessToken);
 		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
-	public List<YearEndStudentCredentialDistribution> getStudentsForYearlyDistributionBySearchCriteria(String accessToken, StudentSearchRequest searchRequest) {
+	public List<StudentCredentialDistribution> getStudentsForYearlyDistributionBySearchCriteria(String accessToken, StudentSearchRequest searchRequest) {
 		var response = restService.post(String.format(constants.getStudentReportDataYearly()), searchRequest, List.class, accessToken);
 		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
 		return populateYearEndStudentCredentialDistributions(reportGradStudentDataList);
@@ -115,39 +115,39 @@ public class GraduationReportService {
 		return jsonTransformer.convertValue(response, new TypeReference<>(){});
 	}
 
-	private <T extends StudentCredentialDistribution> List<T> populateStudentCredentialDistributions(
+	private List<StudentCredentialDistribution> populateStudentCredentialDistributions(
 			List<ReportGradStudentData> dataList,
-			Function<ReportGradStudentData, T> mapper) {
+			Function<ReportGradStudentData, StudentCredentialDistribution> mapper) {
 		return dataList.stream()
 				.filter(data -> !"DEC".equalsIgnoreCase(data.getStudentStatus()))
 				.map(mapper).collect(Collectors.toList());
 	}
 
-
 	private List<StudentCredentialDistribution> populateStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
 		return populateStudentCredentialDistributions(reportGradStudentDataList,  this::populateStudentCredentialDistribution);
 	}
 
-	private List<YearEndStudentCredentialDistribution> populateYearEndStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
-		return populateStudentCredentialDistributions(reportGradStudentDataList,  this::populateYearEndStudentCredentialDistribution);
+	private List<StudentCredentialDistribution> populateYearEndStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
+		List<StudentCredentialDistribution> result = new ArrayList<>();
+		for(ReportGradStudentData data: reportGradStudentDataList) {
+			if (!"DEC".equalsIgnoreCase(data.getStudentStatus())) {
+				result.add(populateYearEndStudentCredentialDistribution(data));
+			}
+		}
+		return result;
 	}
 
-	private StudentCredentialDistribution populateStudentCredentialDistribution(ReportGradStudentData data) {
-		return populateStudentCredentialDistribution(data, new StudentCredentialDistribution());
-	}
-
-	private YearEndStudentCredentialDistribution populateYearEndStudentCredentialDistribution(ReportGradStudentData data) {
-		YearEndStudentCredentialDistribution dist = populateStudentCredentialDistribution(data, new YearEndStudentCredentialDistribution());
-		dist.setSchoolOfRecordId(data.getSchoolOfRecordId());
+	private StudentCredentialDistribution populateYearEndStudentCredentialDistribution(ReportGradStudentData data) {
+		StudentCredentialDistribution dist = populateStudentCredentialDistribution(data);
 		dist.setReportingSchoolTypeCode(data.getReportingSchoolTypeCode());
-		dist.setDistrictAtGradId(data.getSchoolAtGradId());
 		dist.setCertificateTypeCode(data.getCertificateTypeCode());
 		dist.setTranscriptTypeCode(data.getTranscriptTypeCode());
 		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOriginId(), dist.getSchoolAtGradId(), dist.getSchoolId());
 		return dist;
 	}
 
-	private <T extends StudentCredentialDistribution> T populateStudentCredentialDistribution(ReportGradStudentData data, T dist) {
+	private StudentCredentialDistribution populateStudentCredentialDistribution(ReportGradStudentData data) {
+		StudentCredentialDistribution dist = new StudentCredentialDistribution();
 		dist.setId(data.getGraduationStudentRecordId());
 		String paperType = StringUtils.trimToNull(data.getPaperType()) == null ? "YED4" : data.getPaperType();
 		if("YED4".equalsIgnoreCase(paperType)) {
@@ -164,6 +164,7 @@ public class GraduationReportService {
 			dist.setSchoolId(data.getSchoolOfRecordId());
 			dist.setDistrictId(data.getDistrictId());
 		}
+		//<--
 		dist.setSchoolAtGradId(data.getSchoolAtGradId());
 		dist.setSchoolOfRecordOriginId(data.getSchoolOfRecordId());
 		dist.setDocumentStatusCode("COMPL");
@@ -177,7 +178,6 @@ public class GraduationReportService {
 		dist.setStudentGrade(data.getStudentGrade());
 		dist.setNonGradReasons(data.getNonGradReasons());
 		dist.setLastUpdateDate(data.lastUpdateDateAsString());
-		dist.setDistrictId(data.getDistrictId());
 		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOriginId(), dist.getSchoolAtGradId(), dist.getSchoolId());
 		return dist;
 	}

@@ -75,7 +75,7 @@ public class DistributionRunStatusUpdateProcessor {
         final int totalStudentCount = studentIDs.size();
         final int partitionSize = 999;
 
-        final int[] processedCount = {1};
+        final int[] processedCount = {0};
         // Credential Records
         if(!cList.isEmpty()) {
             List<List<StudentCredentialDistribution>> studentCredPartitions = Lists.partition(cList, partitionSize);
@@ -96,7 +96,7 @@ public class DistributionRunStatusUpdateProcessor {
         }
 
         // Unique Students
-        processedCount[0] = 1;
+        processedCount[0] = 0;
         if(!StringUtils.equalsAnyIgnoreCase(jobType, "REGALG", "TVRRUN") && !studentIDs.isEmpty()) {
             List<List<UUID>> studentIDPartitions = Lists.partition(studentIDs, partitionSize);
             studentIDPartitions.forEach(studentIDPartition -> {

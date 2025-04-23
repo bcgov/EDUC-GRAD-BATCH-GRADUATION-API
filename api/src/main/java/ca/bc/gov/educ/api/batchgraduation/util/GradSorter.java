@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class GradSorter {
 
-    public static synchronized void sortStudentCredentialDistributionByNames(List<? extends StudentCredentialDistribution> students) {
+    public static synchronized void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
         students.sort(Comparator
                 .comparing(StudentCredentialDistribution::getLegalLastName, Comparator.nullsLast(Comparator.naturalOrder()))
                 .thenComparing(StudentCredentialDistribution::getLegalFirstName, Comparator.nullsLast(Comparator.naturalOrder()))

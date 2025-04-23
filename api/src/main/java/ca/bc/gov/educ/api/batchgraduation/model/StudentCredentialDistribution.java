@@ -39,4 +39,10 @@ public class StudentCredentialDistribution implements Serializable {
 	@JsonIgnore
 	private String schoolOfRecord; // minCode is required for the print file name
 
+	//Start of YE specific properties
+	private String reportingSchoolTypeCode;
+	private String transcriptTypeCode;
+	private String certificateTypeCode;
+	//End of YE specific properties
+
 }

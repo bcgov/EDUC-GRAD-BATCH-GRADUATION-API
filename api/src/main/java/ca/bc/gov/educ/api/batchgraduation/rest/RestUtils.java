@@ -104,7 +104,7 @@ public class RestUtils {
         return graduationReportService.getStudentsForYearlyDistribution(fetchAccessToken());
     }
 
-    public List<YearEndStudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearlyBySearchCriteria(StudentSearchRequest searchRequest) {
+    public List<StudentCredentialDistribution> fetchDistributionRequiredDataStudentsYearlyBySearchCriteria(StudentSearchRequest searchRequest) {
         return graduationReportService.getStudentsForYearlyDistributionBySearchCriteria(fetchAccessToken(), searchRequest);
     }
 

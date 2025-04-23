@@ -162,7 +162,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
         gradBatchHistoryService.copyErroredStudentsIntoNewBatch(batchId, fromBatchId, username);
     }
 
-    void filterStudentCredentialDistribution(List<? extends StudentCredentialDistribution> credentialList) {
+    void filterStudentCredentialDistribution(List<StudentCredentialDistribution> credentialList) {
         LOGGER.debug("Filter Student Credential Distribution for {} student credentials", credentialList.size());
         StudentSearchRequest request = getStudentSearchRequest();
         Iterator scdIt = credentialList.iterator();
@@ -180,11 +180,11 @@ public abstract class BasePartitioner extends SimplePartitioner {
         LOGGER.debug("Total {} Student Credentials selected after filter", credentialList.size());
     }
 
-    Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<? extends StudentCredentialDistribution> credentialList, String credentialType) {
+    Map<String, ExecutionContext> getStringExecutionContextMap(int gridSize, List<StudentCredentialDistribution> credentialList, String credentialType) {
         filterStudentCredentialDistribution(credentialList);
         sortStudentCredentialDistributionByNames(credentialList);
         int partitionSize = credentialList.size()/gridSize + 1;
-        List<List<? extends StudentCredentialDistribution>> partitions = new LinkedList<>();
+        List<List<StudentCredentialDistribution>> partitions = new LinkedList<>();
         for (int i = 0; i < credentialList.size(); i += partitionSize) {
             partitions.add(credentialList.subList(i, Math.min(i + partitionSize, credentialList.size())));
         }
@@ -193,7 +193,7 @@ public abstract class BasePartitioner extends SimplePartitioner {
             ExecutionContext executionContext = new ExecutionContext();
             DistributionSummaryDTO summaryDTO = new DistributionSummaryDTO();
             summaryDTO.initializeCredentialCountMap();
-            List<? extends StudentCredentialDistribution> data = partitions.get(i);
+            List<StudentCredentialDistribution> data = partitions.get(i);
             executionContext.put("data", data);
             summaryDTO.setReadCount(data.size());
             if(credentialType != null){
@@ -213,11 +213,11 @@ public abstract class BasePartitioner extends SimplePartitioner {
         return (StudentSearchRequest)jsonTransformer.unmarshall(jobParameters.getString(SEARCH_REQUEST, "{}"), StudentSearchRequest.class);
     }
 
-    void sortStudentCredentialDistributionByNames(List<? extends StudentCredentialDistribution> students) {
+    void sortStudentCredentialDistributionByNames(List<StudentCredentialDistribution> students) {
         GradSorter.sortStudentCredentialDistributionByNames(students);
     }
 
-    void filterByStudentSearchRequest(List<? extends StudentCredentialDistribution> eligibleStudentSchoolDistricts) {
+    void filterByStudentSearchRequest(List<StudentCredentialDistribution> eligibleStudentSchoolDistricts) {
         StudentSearchRequest searchRequest = getStudentSearchRequest();
         if(searchRequest != null && searchRequest.getSchoolCategoryCodes() != null && !searchRequest.getSchoolCategoryCodes().isEmpty()) {
             List<UUID> useFilterSchoolDistricts = new ArrayList<>();

@@ -135,7 +135,7 @@ public class GraduationReportServiceTest {
     public void testGeYearEndStudentsForRun() {
 
         UUID schoolId = UUID.randomUUID();
-        YearEndStudentCredentialDistribution scd = new YearEndStudentCredentialDistribution();
+        StudentCredentialDistribution scd = new StudentCredentialDistribution();
         scd.setId(new UUID(1,1));
         scd.setStudentID(new UUID(2,2));
         scd.setCredentialTypeCode("E");
@@ -154,7 +154,7 @@ public class GraduationReportServiceTest {
 
         when(restService.post(String.format(constants.getStudentReportDataYearly()), searchRequest, List.class, "accessToken")).thenReturn(List.of(reportGradStudentData));
 
-        List<YearEndStudentCredentialDistribution> res = graduationReportService.getStudentsForYearlyDistributionBySearchCriteria("accessToken", searchRequest);
+        List<StudentCredentialDistribution> res = graduationReportService.getStudentsForYearlyDistributionBySearchCriteria("accessToken", searchRequest);
         assertThat(res).isNotNull().hasSize(1);
 
     }
