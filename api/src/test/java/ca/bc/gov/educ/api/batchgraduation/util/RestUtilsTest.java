@@ -9,6 +9,8 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.slf4j.Logger;
@@ -331,87 +333,25 @@ public class RestUtilsTest {
         assertThat(resList).hasSize(1);
     }
 
-    @Test
-    public void testProcessDistribution() {
-
-        final UUID studentID = UUID.randomUUID();
-        final String pen = "123456789";
-        final Long batchId = 9879L;
-        final String mincode = "123121111";
-        List<StudentCredentialDistribution> globalList = new ArrayList<>();
-
-        StudentCredentialDistribution scd = new StudentCredentialDistribution();
-        scd.setStudentGrade("12");
-        scd.setId(UUID.randomUUID());
-        scd.setPaperType("YED4");
-        scd.setSchoolOfRecord(mincode);
-        scd.setStudentID(studentID);
-        globalList.add(scd);
-
-        DistributionSummaryDTO summary = new DistributionSummaryDTO();
-        summary.setBatchId(batchId);
-        summary.setGlobalList(globalList);
-
-        StudentCredentialDistribution res = this.restUtils.processDistribution(scd,summary);
-        assertNotNull(res);
-    }
-
-    @Test
-    public void testProcessDistribution_elsecase() {
-
-        final UUID studentID = UUID.randomUUID();
-        final UUID studentID2 = UUID.randomUUID();
-        final Long batchId = 9879L;
-        final UUID schoolId = UUID.randomUUID();
-        List<StudentCredentialDistribution> globalList = new ArrayList<>();
-
-        StudentCredentialDistribution scd = new StudentCredentialDistribution();
-        scd.setStudentGrade("12");
-        scd.setId(UUID.randomUUID());
-        scd.setPaperType("YED4");
-        scd.setSchoolId(schoolId);
-        scd.setStudentID(studentID);
-        globalList.add(scd);
-
-        StudentCredentialDistribution scd2 = new StudentCredentialDistribution();
-        scd2.setStudentGrade("12");
-        scd2.setId(UUID.randomUUID());
-        scd2.setPaperType("YED4");
-        scd2.setSchoolId(schoolId);
-        scd2.setStudentID(studentID2);
-
-
-        GraduationStudentRecordDistribution grd = new GraduationStudentRecordDistribution();
-        grd.setStudentID(studentID2);
-        grd.setProgram("2018-EN");
-        grd.setStudentGrade("12");
-        grd.setSchoolOfRecordId(schoolId);
-
-        mockTokenResponseObject();
-
-        when(this.restService.get(String.format(constants.getStudentInfo(),studentID2), GraduationStudentRecordDistribution.class)).thenReturn(grd);
-
-        DistributionSummaryDTO summary = new DistributionSummaryDTO();
-        summary.setBatchId(batchId);
-        summary.setGlobalList(globalList);
-
-        StudentCredentialDistribution res = this.restUtils.processDistribution(scd2,summary);
-        assertNotNull(res);
-    }
-
-    @Test
-    public void testProcessDistribution_schoolIdIsNullAndReportingSchoolType_addsCorrectSchool() {
+    @ParameterizedTest
+    @CsvSource({
+        "SCHOOL_AT_GRAD, , schoolAtGrad",
+        ", RC, schoolAtGrad",
+        ", , schoolOfRecord"
+    })
+    void testProcessDistribution_schoolIdIsNullAndReportingSchoolType_addsCorrectSchool(String reportingSchoolTypeCode, String credentialType, String expectedSchoolType) {
 
         final UUID studentID = UUID.randomUUID();
         final Long batchId = 9879L;
         final UUID schoolId = UUID.randomUUID();
+        final UUID schoolOfRecordId = UUID.randomUUID();
         List<StudentCredentialDistribution> globalList = new ArrayList<>();
 
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
         scd.setStudentGrade("12");
         scd.setId(UUID.randomUUID());
         scd.setPaperType("YED4");
-        scd.setReportingSchoolTypeCode(SCHOOL_AT_GRAD.toString());
+        scd.setReportingSchoolTypeCode(reportingSchoolTypeCode);
         scd.setStudentID(studentID);
 
         GraduationStudentRecordDistribution grd = new GraduationStudentRecordDistribution();
@@ -419,7 +359,7 @@ public class RestUtilsTest {
         grd.setProgram("2018-EN");
         grd.setStudentGrade("12");
         grd.setSchoolAtGradId(schoolId);
-        grd.setSchoolOfRecordId(UUID.randomUUID());
+        grd.setSchoolOfRecordId(schoolOfRecordId);
 
         mockTokenResponseObject();
 
@@ -428,10 +368,15 @@ public class RestUtilsTest {
         DistributionSummaryDTO summary = new DistributionSummaryDTO();
         summary.setBatchId(batchId);
         summary.setGlobalList(globalList);
+        summary.setCredentialType(credentialType);
 
         StudentCredentialDistribution res = this.restUtils.processDistribution(scd,summary);
         assertNotNull(res);
-        assertEquals(schoolId, res.getSchoolId());
+        if(expectedSchoolType.equals("schoolAtGrad")) {
+            assertEquals(schoolId, res.getSchoolId());
+        } else {
+            assertEquals(schoolOfRecordId, res.getSchoolId());
+        }
     }
 
     @Test
@@ -467,6 +412,41 @@ public class RestUtilsTest {
         StudentCredentialDistribution res = this.restUtils.processDistribution(scd,summary);
         assertNotNull(res);
         assertEquals(schoolId, res.getSchoolId());
+    }
+
+    @Test
+    public void testProcessDistribution_schoolIdIsNull_addsCorrectSchool() {
+
+        final UUID studentID = UUID.randomUUID();
+        final Long batchId = 9879L;
+        final UUID schoolId = UUID.randomUUID();
+        final UUID schoolOfRecordId = UUID.randomUUID();
+        List<StudentCredentialDistribution> globalList = new ArrayList<>();
+
+        StudentCredentialDistribution scd = new StudentCredentialDistribution();
+        scd.setStudentGrade("12");
+        scd.setId(UUID.randomUUID());
+        scd.setPaperType("YED4");
+        scd.setStudentID(studentID);
+
+        GraduationStudentRecordDistribution grd = new GraduationStudentRecordDistribution();
+        grd.setStudentID(studentID);
+        grd.setProgram("2018-EN");
+        grd.setStudentGrade("12");
+        grd.setSchoolAtGradId(schoolId);
+        grd.setSchoolOfRecordId(schoolOfRecordId);
+
+        mockTokenResponseObject();
+
+        when(this.restService.get(String.format(constants.getStudentInfo(),studentID), GraduationStudentRecordDistribution.class)).thenReturn(grd);
+
+        DistributionSummaryDTO summary = new DistributionSummaryDTO();
+        summary.setBatchId(batchId);
+        summary.setGlobalList(globalList);
+
+        StudentCredentialDistribution res = this.restUtils.processDistribution(scd,summary);
+        assertNotNull(res);
+        assertEquals(schoolOfRecordId, res.getSchoolId());
     }
 
 
