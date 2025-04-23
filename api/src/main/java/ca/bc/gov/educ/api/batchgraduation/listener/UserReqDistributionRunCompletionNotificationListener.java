@@ -67,10 +67,11 @@ public class UserReqDistributionRunCompletionNotificationListener extends BaseDi
 			ResponseObj obj = restUtils.getTokenResponseObject();
 			LOGGER.info("Starting Report Process " + LOG_SEPARATION_SINGLE);
 
-			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest)jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
+			StudentSearchRequest studentSearchRequestObject = (StudentSearchRequest) jsonTransformer.unmarshall(studentSearchRequest, StudentSearchRequest.class);
 			summaryDTO.setStudentSearchRequest(studentSearchRequestObject);
-			DistributionResponse distResponse = processGlobalList(summaryDTO,jobExecutionId,credentialType,obj.getAccess_token(),localDownLoad,StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser()));
+			DistributionResponse distResponse = processGlobalList(summaryDTO, jobExecutionId, credentialType, obj.getAccess_token(), localDownLoad, StringUtils.defaultIfBlank(properName, studentSearchRequestObject.getUser()));
 			String status = distResponse != null && FAILED.name().equalsIgnoreCase(distResponse.getMergeProcessResponse()) ? FAILED.name() : COMPLETED.name();
+
 			// save batch job & error history
 			processBatchJobHistory(summaryDTO, jobExecutionId, status, jobTrigger, jobType, startTime, endTime, jobParametersDTO);
 
