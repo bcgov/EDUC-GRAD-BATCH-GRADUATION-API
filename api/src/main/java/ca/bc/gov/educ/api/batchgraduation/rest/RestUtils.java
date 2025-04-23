@@ -249,11 +249,7 @@ public class RestUtils {
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
                 if(item.getSchoolId() == null) {
-                    if(StringUtils.equalsAnyIgnoreCase(summary.getCredentialType(), "RC", "OC") || StringUtils.equalsIgnoreCase(item.getReportingSchoolTypeCode(), SCHOOL_AT_GRAD.toString())) { // use school at grad for certs and monthly distribution
-                        item.setSchoolId(stuRec.getSchoolAtGradId());
-                    } else {
-                        item.setSchoolId(stuRec.getSchoolOfRecordId());
-                    }
+                    setSchoolId(item, summary, stuRec);
                 }
                 ca.bc.gov.educ.api.batchgraduation.model.institute.School school  = getSchool(item.getSchoolId());
                 if (school != null) {
@@ -273,6 +269,14 @@ public class RestUtils {
         summary.getGlobalList().add(item);
         LOGGER.info(STUDENT_PROCESSED, item.getStudentID(), summary.getProcessedCount(), summary.getReadCount(), summary.getBatchId());
         return item;
+    }
+
+    private void setSchoolId(StudentCredentialDistribution item, DistributionSummaryDTO summary, GraduationStudentRecordDistribution studentRecord) {
+        if(StringUtils.equalsAnyIgnoreCase(summary.getCredentialType(), "RC", "OC") || StringUtils.equalsIgnoreCase(item.getReportingSchoolTypeCode(), SCHOOL_AT_GRAD.toString())) { // use school at grad for certs and monthly distribution
+            item.setSchoolId(studentRecord.getSchoolAtGradId());
+        } else {
+            item.setSchoolId(studentRecord.getSchoolOfRecordId());
+        }
     }
 
     public PsiCredentialDistribution processPsiDistribution(PsiCredentialDistribution item, PsiDistributionSummaryDTO summary) {
