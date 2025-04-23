@@ -15,6 +15,8 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_AT_GRAD;
+
 @Component
 public class RestUtils {
 
@@ -247,7 +249,7 @@ public class RestUtils {
                 item.setProgram(stuRec.getProgram());
                 item.setHonoursStanding(stuRec.getHonoursStanding());
                 if(item.getSchoolId() == null) {
-                    if(List.of("RC", "OC").contains(summary.getCredentialType())) { // use school at grad for certs
+                    if(StringUtils.equalsAnyIgnoreCase(summary.getCredentialType(), "RC", "OC") || StringUtils.equalsIgnoreCase(item.getReportingSchoolTypeCode(), SCHOOL_AT_GRAD.toString())) { // use school at grad for certs and monthly distribution
                         item.setSchoolId(stuRec.getSchoolAtGradId());
                     } else {
                         item.setSchoolId(stuRec.getSchoolOfRecordId());

@@ -259,4 +259,8 @@ public abstract class BasePartitioner extends SimplePartitioner {
             LOGGER.debug("Revised size of credential list: {}", credentialList.size());
         }
     }
+
+    protected void setReportingType(List<StudentCredentialDistribution> credentialList, String reportingSchoolType) {
+        credentialList.forEach(credential -> credential.setReportingSchoolTypeCode(reportingSchoolType));
+    }
 }
