@@ -19,7 +19,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.*;
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.COMPLETED;
+import static ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum.STARTED;
 import static ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants.SEARCH_REQUEST;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortSchoolBySchoolOfRecordId;
 import static ca.bc.gov.educ.api.batchgraduation.util.GradSorter.sortStudentCredentialDistributionBySchoolAndNames;
@@ -59,11 +60,8 @@ public class DistributionRunYearlyNonGradCompletionNotificationListener extends 
 
 			summaryDTO.setReadCount(summaryDTO.getGlobalList().size());
 			summaryDTO.setProcessedCount(0);
-			String processGlobalListStatus = jobExecution.getStatus().toString();
 
-			if(!status.equals(FAILED.name())) {
-				processGlobalListStatus = processGlobalList(summaryDTO, searchRequest, "NONGRADYERUN") ? STARTED.name() : COMPLETED.name();
-			}
+			String processGlobalListStatus = processGlobalList(summaryDTO, searchRequest, "NONGRADYERUN") ? STARTED.name() : COMPLETED.name();
 
 			String studentSearchRequest = jobParameters.getString(SEARCH_REQUEST, "{}");
 			// display Summary Details
