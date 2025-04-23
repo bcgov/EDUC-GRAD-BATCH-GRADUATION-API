@@ -217,6 +217,8 @@ endpoint:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/getcertificatesfordistribution
     update-student-credential:
       url: ${GRAD_GRADUATION_REPORT_API}api/v1/graduationreports/studentcredential?studentID=%s&credentialTypeCode=%s&paperType=%s&documentStatusCode=%s&activityCode=%s
+    update-student-credential-by-batch:
+      url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/studentcredential?activityCode=%s
     user-req-dis-run:
       url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/userrequest/%s
     user-req-dis-run-for-not-yet-distributed:

@@ -1,9 +1,6 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
-import ca.bc.gov.educ.api.batchgraduation.model.PsiCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.model.ReportGradStudentData;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentCredentialDistribution;
-import ca.bc.gov.educ.api.batchgraduation.model.StudentSearchRequest;
+import ca.bc.gov.educ.api.batchgraduation.model.*;
 import ca.bc.gov.educ.api.batchgraduation.rest.RESTService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
@@ -23,6 +20,8 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_AT_GRAD;
 
@@ -89,7 +88,6 @@ public class GraduationReportService {
 		return populateStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
-	// Year-end distribution
 	public List<StudentCredentialDistribution> getStudentsForYearlyDistribution(String accessToken) {
 		var response = restService.get(String.format(constants.getStudentReportDataYearly()), List.class, accessToken);
 		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
@@ -99,7 +97,7 @@ public class GraduationReportService {
 	public List<StudentCredentialDistribution> getStudentsForYearlyDistributionBySearchCriteria(String accessToken, StudentSearchRequest searchRequest) {
 		var response = restService.post(String.format(constants.getStudentReportDataYearly()), searchRequest, List.class, accessToken);
 		List<ReportGradStudentData> reportGradStudentDataList = jsonTransformer.convertValue(response, new TypeReference<>(){});
-		return populateStudentCredentialDistributions(reportGradStudentDataList);
+		return populateYearEndStudentCredentialDistributions(reportGradStudentDataList);
 	}
 
 	public List<UUID> getSchoolsNonGradYearly(String accessToken) {
@@ -117,14 +115,35 @@ public class GraduationReportService {
 		return jsonTransformer.convertValue(response, new TypeReference<>(){});
 	}
 
+	private List<StudentCredentialDistribution> populateStudentCredentialDistributions(
+			List<ReportGradStudentData> dataList,
+			Function<ReportGradStudentData, StudentCredentialDistribution> mapper) {
+		return dataList.stream()
+				.filter(data -> !"DEC".equalsIgnoreCase(data.getStudentStatus()))
+				.map(mapper).collect(Collectors.toList());
+	}
+
 	private List<StudentCredentialDistribution> populateStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
+		return populateStudentCredentialDistributions(reportGradStudentDataList,  this::populateStudentCredentialDistribution);
+	}
+
+	private List<StudentCredentialDistribution> populateYearEndStudentCredentialDistributions(List<ReportGradStudentData> reportGradStudentDataList) {
 		List<StudentCredentialDistribution> result = new ArrayList<>();
 		for(ReportGradStudentData data: reportGradStudentDataList) {
 			if (!"DEC".equalsIgnoreCase(data.getStudentStatus())) {
-				result.add(populateStudentCredentialDistribution(data));
+				result.add(populateYearEndStudentCredentialDistribution(data));
 			}
 		}
 		return result;
+	}
+
+	private StudentCredentialDistribution populateYearEndStudentCredentialDistribution(ReportGradStudentData data) {
+		StudentCredentialDistribution dist = populateStudentCredentialDistribution(data);
+		dist.setReportingSchoolTypeCode(data.getReportingSchoolTypeCode());
+		dist.setCertificateTypeCode(data.getCertificateTypeCode());
+		dist.setTranscriptTypeCode(data.getTranscriptTypeCode());
+		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOriginId(), dist.getSchoolAtGradId(), dist.getSchoolId());
+		return dist;
 	}
 
 	private StudentCredentialDistribution populateStudentCredentialDistribution(ReportGradStudentData data) {
@@ -162,4 +181,5 @@ public class GraduationReportService {
 		LOGGER.info("Populate Student Credential Distribution for pen {}: SchoolOfRecordOrigin->{}, SchoolAtGrad->{}, SchoolOfRecord->{}", dist.getPen(), dist.getSchoolOfRecordOriginId(), dist.getSchoolAtGradId(), dist.getSchoolId());
 		return dist;
 	}
+
 }

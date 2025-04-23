@@ -966,6 +966,31 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testUpdateStudentCredentialRecords() {
+        String activityCode="USERDISTOC";
+        UUID schoolId = UUID.randomUUID();
+        StudentSearchRequest req = new StudentSearchRequest();
+        List<UUID> sch = List.of(schoolId);
+        req.setSchoolIds(sch);
+        List<StudentCredentialDistribution> scdList = new ArrayList<>();
+        StudentCredentialDistribution scd = new StudentCredentialDistribution();
+        scd.setSchoolId(schoolId);
+        scd.setPaperType("YED2");
+        scd.setCredentialTypeCode("E");
+        scd.setId(new UUID(1,1));
+        scdList.add(scd);
+        GraduationStudentRecord grd = new GraduationStudentRecord();
+        grd.setStudentID(new UUID(1,1));
+        grd.setProgram("2018-EN");
+        mockTokenResponseObject();
+
+        when(this.restService.post(String.format(constants.getUpdateStudentCredentialByBatch(),activityCode), req, Integer.class, "accessToken")).thenReturn(1);
+        this.restUtils.updateStudentCredentialRecords(scdList, activityCode, "accessToken");
+        assertThat(grd).isNotNull();
+    }
+
+
+    @Test
     public void testGetStudentsForUserReqDisRun() {
         String credentialType = "OT";
         UUID schoolId = UUID.randomUUID();
