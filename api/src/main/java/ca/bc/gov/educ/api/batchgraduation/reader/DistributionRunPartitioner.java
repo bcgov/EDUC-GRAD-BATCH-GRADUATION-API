@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_AT_GRAD;
+
 /**
  * Monthly Distribution Partitioner
  */
@@ -55,6 +57,7 @@ public class DistributionRunPartitioner extends BasePartitioner {
         filterByStudentSearchRequest(credentialList);
         if(!credentialList.isEmpty()) {
             filterOutDeceasedStudents(credentialList);
+            setReportingType(credentialList, SCHOOL_AT_GRAD.toString());
             updateBatchJobHistory(createBatchJobHistory(), (long) credentialList.size());
             return getStringExecutionContextMap(gridSize, credentialList, null);
         }
