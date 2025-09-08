@@ -235,6 +235,7 @@ public class JobLauncherController {
         response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
         validateInput(response, studentSearchRequest);
+        studentSearchRequest.setActivityCode("GRADALG");
         if(response.getException() != null) {
             return ResponseEntity.status(400).body(response);
         }
