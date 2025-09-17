@@ -142,6 +142,7 @@ jobs:
           ${{ env.NAMESPACE }} \
           ${{ env.COMMON_NAMESPACE }} \
           ${{ env.BUSINESS_NAMESPACE }} \
+          ${{ env.PSI_SELECTION_NAMESPACE }} \
           ${{ secrets.SPLUNK_TOKEN }} \
           ${{ vars.APP_LOG_LEVEL }}
 
