@@ -259,9 +259,10 @@ endpoint:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSR?batchId=%s
     merge-psi-n-upload:
       url: ${GRAD_DISTRIBUTION_API}api/v1/distribute/run/PSPR?batchId=%s&localDownload=%s&transmissionType=%s
-  grad-trax-api:
+  psi-selection-api:
     get-psi-student-list:
-      url: ${GRAD_TRAX_API}api/v1/trax/psi/student?transmissionMode=%s&psiCode=%s&psiYear=%s
+      url: ${PSI_SELECTION_API}api/v1/psi-selection/student/search?transmissionMode=%s&psiCode=%s&psiYear=%s
+  grad-trax-api:
     school-clob-by-school-id:
       url: ${GRAD_TRAX_API}api/v2/trax/school-clob/%s
     search-school-clob-by-min-code:
