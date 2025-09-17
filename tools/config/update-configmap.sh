@@ -49,7 +49,7 @@ PARSER_CONFIG="
     Format      json
 "
 ###########################################################
-#Setup for config-maps
+#Setup for config-maps base & FB
 ###########################################################
 echo Creating config map "$APP_NAME"-config-map
 oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map \
