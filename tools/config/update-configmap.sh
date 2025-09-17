@@ -51,6 +51,7 @@ PARSER_CONFIG="
 ###########################################################
 #Setup for config-maps base & FB
 ###########################################################
+echo Showing PSI selection namespace: "$PSI_SELECTION_NAMESPACE"
 echo Creating config map "$APP_NAME"-config-map
 oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map \
  --from-literal=GRAD_TRAX_API="http://educ-grad-trax-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
