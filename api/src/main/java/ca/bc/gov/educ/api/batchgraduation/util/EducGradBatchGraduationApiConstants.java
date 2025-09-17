@@ -305,7 +305,7 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-report-api.delete-student-report.url}")
     private String deleteStudentReportsUrl;
 
-    @Value("${endpoint.grad-trax-api.get-psi-student-list.url}")
+    @Value("${endpoint.psi-selection-api.get-psi-student-list.url}")
     private String psiStudentList;
 
     @Value("${endpoint.grad-student-api.update-flag-ready-for-batch}")

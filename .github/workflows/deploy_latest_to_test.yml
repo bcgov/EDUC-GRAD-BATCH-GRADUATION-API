@@ -7,6 +7,7 @@ env:
   OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
   OPENSHIFT_NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}-test
+  PSI_SELECTION_NAMESPACE: ${{ secrets.PSI_SELECTION_NAMESPACE }}
   COMMON_NAMESPACE: ${{ secrets.COMMON_NAMESPACE }}
   BUSINESS_NAMESPACE: ${{ secrets.GRAD_BUSINESS_NAMESPACE }}
 
@@ -81,6 +82,7 @@ jobs:
           ${{ env.NAMESPACE }} \
           ${{ env.COMMON_NAMESPACE }} \
           ${{ env.BUSINESS_NAMESPACE }} \
+          ${{ env.PSI_SELECTION_NAMESPACE }} \
           ${{ secrets.SPLUNK_TOKEN }} \
           ${{ vars.APP_LOG_LEVEL }}
           

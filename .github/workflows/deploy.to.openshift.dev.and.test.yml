@@ -5,6 +5,7 @@ env:
   OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
   COMMON_NAMESPACE: ${{ secrets.COMMON_NAMESPACE }}
   GRAD_NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}
+  PSI_SELECTION_NAMESPACE: ${{ secrets.PSI_SELECTION_NAMESPACE }}
   BUSINESS_NAMESPACE: ${{ secrets.GRAD_BUSINESS_NAMESPACE }}
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
   IMAGE_REGISTRY_USER: ${{ github.actor }}
@@ -147,6 +148,7 @@ jobs:
           ${{ env.GRAD_NAMESPACE }} \
           ${{ env.COMMON_NAMESPACE }} \
           ${{ env.BUSINESS_NAMESPACE }} \
+          ${{ env.PSI_SELECTION_NAMESPACE }} \
           ${{ secrets.SPLUNK_TOKEN }} \
           ${{ vars.APP_LOG_LEVEL }}
 
@@ -233,6 +235,7 @@ jobs:
           ${{ env.GRAD_NAMESPACE }} \
           ${{ env.COMMON_NAMESPACE }} \
           ${{ env.BUSINESS_NAMESPACE }} \
+          ${{ env.PSI_SELECTION_NAMESPACE }} \
           ${{ secrets.SPLUNK_TOKEN }} \
           ${{ vars.APP_LOG_LEVEL }}
 
