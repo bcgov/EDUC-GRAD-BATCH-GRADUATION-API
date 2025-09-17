@@ -75,7 +75,7 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
  --from-literal=MAXIMUM_POOL_SIZE='25' \
  --from-literal=MAX_LIFETIME='300000' \
  --from-literal=ENABLE_COMPRESSION="true" \
- --dry-run=client -o yaml | oc apply -f -
+ --dry-run -o yaml | oc apply -f -
 
 echo Creating config map "$APP_NAME"-flb-sc-config-map
 oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-flb-sc-config-map \
