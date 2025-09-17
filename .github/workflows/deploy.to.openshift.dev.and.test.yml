@@ -129,7 +129,7 @@ jobs:
           -p MIN_MEM=${{ env.MIN_MEM }} \
           -p MAX_MEM=${{ env.MAX_MEM }} | oc apply -f -
           
-          echo Calling good config map
+          echo Calling good config map statement
           # UPDATE Configmaps
           curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ github.ref }}/tools/config/update-configmap.sh \
           | bash /dev/stdin \
