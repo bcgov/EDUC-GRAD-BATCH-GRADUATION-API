@@ -142,6 +142,7 @@ jobs:
           ${{ secrets.SPLUNK_TOKEN }} \
           ${{ vars.APP_LOG_LEVEL }}
           
+          echo Completed map
           # OVERRIDE Configmaps
           curl -s https://raw.githubusercontent.com/bcgov/${{ env.REPO_NAME }}/${{ github.ref }}/tools/config/override-configmap-dev.sh \
           | bash /dev/stdin \
