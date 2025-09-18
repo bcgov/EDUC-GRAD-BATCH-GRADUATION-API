@@ -134,7 +134,7 @@ jobs:
           | bash /dev/stdin \
           dev \
           ${{ env.REPO_NAME }} \
-          ${{ env.NAMESPACE }} \
+          ${{ env.GRAD_NAMESPACE }} \
           ${{ env.COMMON_NAMESPACE }} \
           ${{ env.BUSINESS_NAMESPACE }} \
           ${{ env.PSI_SELECTION_NAMESPACE }} \
