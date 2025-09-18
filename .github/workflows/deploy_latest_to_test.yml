@@ -79,7 +79,7 @@ jobs:
           | bash /dev/stdin \
           test \
           ${{ env.REPO_NAME }} \
-          ${{ env.OPENSHIFT_NAMESPACE }} \
+          ${{ env.NAMESPACE }} \
           ${{ env.COMMON_NAMESPACE }} \
           ${{ env.BUSINESS_NAMESPACE }} \
           ${{ env.PSI_SELECTION_NAMESPACE }} \
