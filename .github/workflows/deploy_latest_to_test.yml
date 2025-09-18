@@ -17,7 +17,7 @@ env:
   APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
   NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}
   TAG: "latest"
-  BRANCH: "grad-release"
+  BRANCH: "main"
   
   MIN_CPU: "50m"
   MAX_CPU: "300m"
