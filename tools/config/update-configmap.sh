@@ -75,6 +75,10 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
  --from-literal=MAXIMUM_POOL_SIZE='25' \
  --from-literal=MAX_LIFETIME='300000' \
  --from-literal=ENABLE_COMPRESSION="true" \
+ --from-literal=CRON_SYSTEM_SCHEDULED_ROUTINES_LOCK_AT_LEAST_FOR="PT1M" \
+ --from-literal=CRON_SYSTEM_SCHEDULED_ROUTINES_LOCK_AT_MOST_FOR="PT600M" \
+ --from-literal=CRON_USER_SCHEDULED_JOBS_LOCK_AT_LEAST_FOR="10" \
+ --from-literal=CRON_USER_SCHEDULED_JOBS_LOCK_AT_MOST_FOR="180" \
  --dry-run=client -o yaml | oc apply -f -
 
 echo Creating config map "$APP_NAME"-flb-sc-config-map
