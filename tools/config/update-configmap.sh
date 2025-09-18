@@ -55,7 +55,30 @@ echo Showing PSI selection namespace: "$PSI_SELECTION_NAMESPACE"
 echo Creating config map "$APP_NAME"-config-map
 oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map \
  --from-literal=GRAD_TRAX_API="http://educ-grad-trax-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
+ --from-literal=PSI_SELECTION_API="http://psi-selection-api-master.$PSI_SELECTION_NAMESPACE-$envValue.svc.cluster.local:8080/" \
+ --from-literal=GRAD_STUDENT_API="http://educ-grad-student-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
+ --from-literal=APP_LOG_LEVEL="$APP_LOG_LEVEL" \
+ --from-literal=GRAD_GRADUATION_REPORT_API="http://educ-grad-graduation-report-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
+ --from-literal=GRAD_DISTRIBUTION_API="http://educ-grad-distribution-api.$BUSINESS_NAMESPACE-$envValue.svc.cluster.local:8080/" \
+ --from-literal=TVR_RUN_CRON="0 0 02 * * *" \
+ --from-literal=PEN_API="http://student-api-master.$COMMON_NAMESPACE-$envValue.svc.cluster.local:8080/" \
+ --from-literal=MAX_RETRY_ATTEMPTS="5" \
+ --from-literal=ENABLE_FLYWAY="true" \
+ --from-literal=TOKEN_EXPIRY_OFFSET="30" \
+ --from-literal=GRAD_GRADUATION_API="http://educ-grad-graduation-api.$OPENSHIFT_NAMESPACE-$envValue.svc.cluster.local:8080/" \
+ --from-literal=DIST_RUN_CRON="0 0 02 1 * *" \
+ --from-literal=TRANSACTION_CHUNK_SIZE="1" \
+ --from-literal=NUMBER_OF_PARTITIONS="10" \
+ --from-literal=KEYCLOAK_TOKEN_URL="https://soam-$envValue.apps.silver.devops.gov.bc.ca/" \
+ --from-literal=REG_ALG_CRON="0 30 18 * * *" \
+ --from-literal=RECORDS_STALE_IN_DAYS="1095" \
+ --from-literal=MAXIMUM_POOL_SIZE='25' \
+ --from-literal=MAX_LIFETIME='300000' \
+ --from-literal=ENABLE_COMPRESSION="true" \
  --dry-run=client -o yaml | oc apply -f -
+ 
+oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap test-marco-config-map --from-literal=TZ=$TZVALUE --from-literal=JDBC_URL="$DB_JDBC_CONNECT_STRING" --from-literal=DB_USERNAME="$DB_USER" --from-literal=DB_PASSWORD="$DB_PWD" --from-literal=INSTITUTE_API_URL="http://institute-api-master.$COMMON_NAMESPACE-$envValue.svc.cluster.local:8080/api/v1/institute" --from-literal=TOKEN_URL="https://$SOAM_KC/auth/realms/$SOAM_KC_REALM_ID/protocol/openid-connect/token" --from-literal=CLIENT_ID="psi-selection-api-service" --from-literal=CLIENT_SECRET="$PSI_SELECTION_APIServiceClientSecret" --from-literal=TOKEN_ISSUER_URL="https://$SOAM_KC/auth/realms/$SOAM_KC_REALM_ID" --from-literal=CRON_SCHEDULED_PROCESS_EVENTS_STAN="0 0/5 * * * *" --from-literal=CRON_SCHEDULED_PROCESS_EVENTS_STAN_LOCK_AT_LEAST_FOR="PT4M" --from-literal=CRON_SCHEDULED_PROCESS_EVENTS_STAN_LOCK_AT_MOST_FOR="PT4M" --from-literal=SPRING_SECURITY_LOG_LEVEL=INFO --from-literal=SPRING_WEB_LOG_LEVEL=INFO --from-literal=APP_LOG_LEVEL=INFO --from-literal=SPRING_BOOT_AUTOCONFIG_LOG_LEVEL=INFO --from-literal=SPRING_SHOW_REQUEST_DETAILS=false --from-literal=SPRING_JPA_SHOW_SQL="false" --from-literal=NATS_MAX_RECONNECT=60 --from-literal=NATS_URL=$NATS_URL --dry-run -o yaml | oc apply -f -
+
 
 echo Creating config map "$APP_NAME"-flb-sc-config-map
 oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-flb-sc-config-map \
