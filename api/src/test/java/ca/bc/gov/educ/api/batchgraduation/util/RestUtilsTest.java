@@ -1506,6 +1506,34 @@ public class RestUtilsTest {
     }
 
     @Test
+    public void testIsReportOnly_when_programCompletionDate_isInFutureYear_thenReturns_GS() {
+        final UUID studentID = UUID.randomUUID();
+        final String gradProgram = "SCCP";
+        final String programCompletionDate = "2099/01";
+
+        String url = constants.getCheckSccpCertificateExists() + "?studentID=%s";
+
+        when(this.restService.get(String.format(url, studentID), Boolean.class)).thenReturn(true);
+
+        val result = this.restUtils.isReportOnly(studentID, gradProgram, programCompletionDate);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsReportOnly_when_programCompletionDate_isInFutureYearWithDashFormat_thenReturns_GS() {
+        final UUID studentID = UUID.randomUUID();
+        final String gradProgram = "SCCP";
+        final String programCompletionDate = "2099-01";
+
+        String url = constants.getCheckSccpCertificateExists() + "?studentID=%s";
+
+        when(this.restService.get(String.format(url, studentID), Boolean.class)).thenReturn(true);
+
+        val result = this.restUtils.isReportOnly(studentID, gradProgram, programCompletionDate);
+        assertThat(result).isFalse();
+    }
+
+    @Test
     public void testIsReportOnly_when_programCompletionDate_isNotInFuture_and_SCCPcertificateExists_thenReturns_FMR() {
         final UUID studentID = UUID.randomUUID();
         final String gradProgram = "SCCP";
