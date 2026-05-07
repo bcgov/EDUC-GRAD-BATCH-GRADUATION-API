@@ -37,7 +37,7 @@ import static org.mockito.MockitoAnnotations.openMocks;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class RestUtilsTest {
+class RestUtilsTest {
 
     @Autowired
     GraduationReportService graduationReportService;
