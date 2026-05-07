@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -172,8 +173,8 @@ public class RestUtils {
         if ("SCCP".equalsIgnoreCase(gradProgram)) {
             if (programCompletionDate != null) {
                 Date pCD = EducGradBatchGraduationApiUtils.parsingTraxDate(programCompletionDate);
-                int diff = EducGradBatchGraduationApiUtils.getDifferenceInDays(EducGradBatchGraduationApiUtils.getProgramCompletionDate(pCD), EducGradBatchGraduationApiUtils.getCurrentDate());
-                if (diff >= 0) {
+                LocalDate completionDate = pCD == null ? null : LocalDate.parse(EducGradBatchGraduationApiUtils.getProgramCompletionDate(pCD));
+                if (completionDate != null && !completionDate.isAfter(LocalDate.now())) {
                     isFMR = checkSccpCertificateExists(studentID);
                 } else {
                     isFMR = false;

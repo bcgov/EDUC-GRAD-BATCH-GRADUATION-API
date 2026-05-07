@@ -8,8 +8,6 @@ import org.springframework.http.MediaType;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -57,7 +55,7 @@ public class EducGradBatchGraduationApiUtils {
     }
 
     public static Date parsingTraxDate(String sessionDate) {
-        String actualSessionDate = sessionDate + "/01";
+        String actualSessionDate = normalizeProgramCompletionMonth(sessionDate) + "/01";
         Date temp;
         Date sDate = null;
         try {
@@ -70,11 +68,8 @@ public class EducGradBatchGraduationApiUtils {
         return sDate;
     }
 
-    public static int getDifferenceInDays(String date1, String date2) {
-        Period diff = Period.between(
-                LocalDate.parse(date1),
-                LocalDate.parse(date2));
-        return diff.getDays() + diff.getMonths()*30;
+    private static String normalizeProgramCompletionMonth(String sessionDate) {
+        return sessionDate == null ? null : sessionDate.replace('-', '/');
     }
 
     public static String getCurrentDate() {
