@@ -8,8 +8,6 @@ import org.springframework.http.MediaType;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -72,12 +70,6 @@ public class EducGradBatchGraduationApiUtils {
 
     private static String normalizeProgramCompletionMonth(String sessionDate) {
         return sessionDate == null ? null : sessionDate.replace('-', '/');
-    }
-
-    public static int getDifferenceInDays(String date1, String date2) {
-        return Math.toIntExact(ChronoUnit.DAYS.between(
-                LocalDate.parse(date1),
-                LocalDate.parse(date2)));
     }
 
     public static String getCurrentDate() {
