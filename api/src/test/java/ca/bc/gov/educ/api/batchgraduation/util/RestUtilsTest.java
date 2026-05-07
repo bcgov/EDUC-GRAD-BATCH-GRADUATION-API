@@ -37,7 +37,7 @@ import static org.mockito.MockitoAnnotations.openMocks;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-class RestUtilsTest {
+public class RestUtilsTest {
 
     @Autowired
     GraduationReportService graduationReportService;
@@ -1545,6 +1545,34 @@ class RestUtilsTest {
 
         val result = this.restUtils.isReportOnly(studentID, gradProgram, programCompletionDate);
         assertThat(result).isTrue();
+    }
+
+    @Test
+    public void testIsReportOnly_when_programIsNotSccp_and_programCompletionDateExists_thenReturns_FMR() {
+        final UUID studentID = UUID.randomUUID();
+        final String gradProgram = "2023-EN";
+        final String programCompletionDate = "2023/01";
+
+        val result = this.restUtils.isReportOnly(studentID, gradProgram, programCompletionDate);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void testIsReportOnly_when_programIsNotSccp_and_programCompletionDateIsNull_thenReturns_GS() {
+        final UUID studentID = UUID.randomUUID();
+        final String gradProgram = "2023-EN";
+
+        val result = this.restUtils.isReportOnly(studentID, gradProgram, null);
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void testIsReportOnly_when_sccpProgramCompletionDateIsNull_thenReturns_GS() {
+        final UUID studentID = UUID.randomUUID();
+        final String gradProgram = "SCCP";
+
+        val result = this.restUtils.isReportOnly(studentID, gradProgram, null);
+        assertThat(result).isFalse();
     }
 
     @Test
