@@ -6,12 +6,11 @@ import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GraduationReportService;
 import lombok.val;
 import org.apache.commons.lang3.time.DateUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.math.BigDecimal;
@@ -30,17 +29,14 @@ import java.util.*;
 import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_AT_GRAD;
 import static ca.bc.gov.educ.api.batchgraduation.constants.ReportingSchoolTypesEnum.SCHOOL_OF_RECORD;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("test")
-public class RestUtilsTest {
-
-    @Autowired
-    GraduationReportService graduationReportService;
+class RestUtilsTest {
 
     @Autowired
     RestUtils restUtils;
@@ -65,20 +61,15 @@ public class RestUtilsTest {
     @Autowired
     private EducGradBatchGraduationApiConstants constants;
     @Mock
-    Logger LOGGER = LoggerFactory.getLogger(RestUtils.class);
+    Logger logger = LoggerFactory.getLogger(RestUtils.class);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         openMocks(this);
     }
 
-    @After
-    public void tearDown() {
-
-    }
-
     @Test
-    public void testGetTokenResponseObject_returnsToken_with_APICallSuccess() {
+    void testGetTokenResponseObject_returnsToken_with_APICallSuccess() {
         String mockToken = mockTokenResponseObject();
 
         val result = this.restUtils.getTokenResponseObject();
@@ -88,7 +79,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentByPen_givenValues_returnsStudent_with_APICallSuccess() {
+    void testGetStudentByPen_givenValues_returnsStudent_with_APICallSuccess() {
         final String studentID = UUID.randomUUID().toString();
         final Student student = new Student();
         final String pen = "123456789";
@@ -108,7 +99,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testSaveGraduationStatus_givenValues_returnsGraduationStatus_with_APICallSuccess() {
+    void testSaveGraduationStatus_givenValues_returnsGraduationStatus_with_APICallSuccess() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
 
@@ -124,7 +115,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentsForSpecialGradRun_with_APICallSuccess() {
+    void testGetStudentsForSpecialGradRun_with_APICallSuccess() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
 
@@ -148,7 +139,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentsForSpecialGradRun_with_APICallSuccess_null() {
+    void testGetStudentsForSpecialGradRun_with_APICallSuccess_null() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
 
@@ -164,7 +155,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessStudent() {
+    void testProcessStudent() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
         final Long batchId = 9879L;
@@ -187,7 +178,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessStudent_witherrors() {
+    void testProcessStudent_witherrors() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
         final Long batchId = 9879L;
@@ -209,7 +200,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessStudent_witherrors2() {
+    void testProcessStudent_witherrors2() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
         final Long batchId = 9879L;
@@ -236,7 +227,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessProjectedStudent() {
+    void testProcessProjectedStudent() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
         final Long batchId = 9879L;
@@ -259,7 +250,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessProjectedStudent_witherrors() {
+    void testProcessProjectedStudent_witherrors() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
         final Long batchId = 9879L;
@@ -281,7 +272,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessProjectedStudent_witherrors2() {
+    void testProcessProjectedStudent_witherrors2() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
         final Long batchId = 9879L;
@@ -310,7 +301,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentData_withlist() {
+    void testGetStudentData_withlist() {
 
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
@@ -380,7 +371,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessDistribution_schoolIdIsNullAndRC_addsCorrectSchool() {
+    void testProcessDistribution_schoolIdIsNullAndRC_addsCorrectSchool() {
 
         final UUID studentID = UUID.randomUUID();
         final Long batchId = 9879L;
@@ -415,7 +406,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessDistribution_schoolIdIsNull_addsCorrectSchool() {
+    void testProcessDistribution_schoolIdIsNull_addsCorrectSchool() {
 
         final UUID studentID = UUID.randomUUID();
         final Long batchId = 9879L;
@@ -451,7 +442,7 @@ public class RestUtilsTest {
 
 
     @Test
-    public void testProcessDistribution_elsecase_null() {
+    void testProcessDistribution_elsecase_null() {
 
         final UUID studentID = UUID.randomUUID();
         final UUID studentID2 = UUID.randomUUID();
@@ -494,8 +485,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessBlankDistribution() {
-        final String credentialType = "OT";
+    void testProcessBlankDistribution() {
         BlankDistributionSummaryDTO summary = new BlankDistributionSummaryDTO();
         summary.setCredentialType("OT");
         summary.setBatchId(4564L);
@@ -508,8 +498,7 @@ public class RestUtilsTest {
         assertNotNull(res);
     }
     @Test
-    public void testProcessBlankDistribution_null() {
-        final String credentialType = null;
+    void testProcessBlankDistribution_null() {
         BlankDistributionSummaryDTO summary = new BlankDistributionSummaryDTO();
         summary.setCredentialType(null);
         summary.setBatchId(4564L);
@@ -524,8 +513,7 @@ public class RestUtilsTest {
 
 
     @Test
-    public void testProcessBlankDistribution_OC() {
-        final String credentialType = "OC";
+    void testProcessBlankDistribution_OC() {
         BlankDistributionSummaryDTO summary = new BlankDistributionSummaryDTO();
         summary.setCredentialType("OC");
         summary.setBatchId(4564L);
@@ -547,8 +535,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessBlankDistribution_OC_null() {
-        final String credentialType = "OC";
+    void testProcessBlankDistribution_OC_null() {
         BlankDistributionSummaryDTO summary = new BlankDistributionSummaryDTO();
         summary.setCredentialType("OC");
         summary.setBatchId(4564L);
@@ -570,7 +557,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessPsiDistribution() {
+    void testProcessPsiDistribution() {
         final Long batchId = 9879L;
         List<PsiCredentialDistribution> globalList = new ArrayList<>();
 
@@ -596,7 +583,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessPsiDistribution_else() {
+    void testProcessPsiDistribution_else() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "1232131231";
         final String pen2 = "12321312";
@@ -629,7 +616,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessPsiDistribution_else_2() {
+    void testProcessPsiDistribution_else_2() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "1232131231";
         final String pen2 = "12321312";
@@ -658,7 +645,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessPsiDistribution_Exception() {
+    void testProcessPsiDistribution_Exception() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "1232131231";
         final String pen2 = "12321312";
@@ -693,7 +680,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testCreateBlankCredentialsAndUpload() {
+    void testCreateBlankCredentialsAndUpload() {
         final Long batchId = 9879L;
 
         DistributionResponse res = new DistributionResponse();
@@ -708,7 +695,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testCreateBlankCredentialsAndUpload_null() {
+    void testCreateBlankCredentialsAndUpload_null() {
         final Long batchId = 9879L;
 
         DistributionResponse res = new DistributionResponse();
@@ -723,7 +710,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testcreateAndStoreSchoolReports_null() {
+    void testcreateAndStoreSchoolReports_null() {
         final String type = "NONGRADPRJ";
 
         when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), new ArrayList<>(), Integer.class)).thenReturn(null);
@@ -736,7 +723,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testcreateAndStoreSchoolReports() {
+    void testcreateAndStoreSchoolReports() {
         final String type = "NONGRADPRJ";
 
         when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), new ArrayList<>(), Integer.class)).thenReturn(1);
@@ -749,7 +736,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessStudentReports() {
+    void testProcessStudentReports() {
         final String studentReportType = "TVRRUN";
         UUID studentID = UUID.randomUUID();
 
@@ -763,7 +750,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testCreateAndStoreSchoolReports_0() {
+    void testCreateAndStoreSchoolReports_0() {
         final String type = "NONGRADPRJ";
 
         when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), new ArrayList<>(), Integer.class)).thenReturn(0);
@@ -776,12 +763,12 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
+    void testCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
         final String type = "NONGRADPRJ";
         final UUID schoolId = UUID.randomUUID();
 
         when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of(schoolId), Integer.class)).thenReturn(2);
-        when(LOGGER.isDebugEnabled()).thenReturn(true);
+        when(logger.isDebugEnabled()).thenReturn(true);
 
         mockTokenResponseObject();
 
@@ -791,12 +778,12 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void whenCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
+    void whenCreateAndStoreSchoolReports_WithParams_ThenReturnResult() {
         final String type = "TVRRUN";
         final UUID schoolId = UUID.randomUUID();
 
         when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of(schoolId), Integer.class)).thenReturn(2);
-        when(LOGGER.isDebugEnabled()).thenReturn(true);
+        when(logger.isDebugEnabled()).thenReturn(true);
 
         mockTokenResponseObject();
 
@@ -806,31 +793,31 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void whenCreateAndStoreSchoolReports_WithParams_ThenReturnsEmptyList() {
+    void whenCreateAndStoreSchoolReports_WithParams_ThenReturnsEmptyList() {
         final String type = "TVRRUN";
 
-        when(LOGGER.isDebugEnabled()).thenReturn(true);
+        when(logger.isDebugEnabled()).thenReturn(true);
 
         var result = this.restUtils.createAndStoreSchoolReports(null, type, new SchoolReportsRegenSummaryDTO());
         assertThat(result).isZero();
     }
 
     @Test
-    public void whenCreateAndStoreSchoolReports_WithParams_ThenThrowException() {
+    void whenCreateAndStoreSchoolReports_WithParams_ThenThrowException() {
         final String type = "TVRRUN";
         final UUID schoolId = UUID.randomUUID();
 
         SchoolReportsRegenSummaryDTO summaryDTO = new SchoolReportsRegenSummaryDTO();
 
         when(this.restService.post(String.format(constants.getCreateAndStoreSchoolReports(),type), List.of(schoolId), Integer.class)).thenThrow(RuntimeException.class);
-        when(LOGGER.isDebugEnabled()).thenReturn(true);
+        when(logger.isDebugEnabled()).thenReturn(true);
 
         val result = this.restUtils.createAndStoreSchoolReports(schoolId, type, summaryDTO);
         assertThat(result).isZero();
     }
 
     @Test
-    public void testGetSchoolReportsLiteByReportType() {
+    void testGetSchoolReportsLiteByReportType() {
 
         UUID uuid = UUID.randomUUID();
         SchoolReport sr = new SchoolReport();
@@ -841,34 +828,31 @@ public class RestUtilsTest {
 
         mockTokenResponseObject();
         when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class)).thenReturn(schoolReportsLite);
-        when(LOGGER.isDebugEnabled()).thenReturn(true);
+        when(logger.isDebugEnabled()).thenReturn(true);
 
         val result = this.restUtils.getSchoolReportsLiteByReportType("GRADREG", new SchoolReportsRegenSummaryDTO());
         assertThat(result).hasSize(1);
     }
 
     @Test
-    public void whenGetSchoolReportsLiteByReportType_ThenThrowException() {
+    void whenGetSchoolReportsLiteByReportType_ThenThrowException() {
         UUID uuid = UUID.randomUUID();
         SchoolReport sr = new SchoolReport();
         sr.setId(uuid);
         sr.setReportTypeCode("GRADREG");
-        List<SchoolReport> schoolReportsLite = new ArrayList<>();
-        schoolReportsLite.add(sr);
 
         mockTokenResponseObject();
 
         when(this.restService.get(String.format(constants.getSchoolReportsLiteByReportTypeUrl(), "GRADREG"), List.class)).thenThrow(new RuntimeException("Test Exception"));
-        when(LOGGER.isDebugEnabled()).thenReturn(true);
+        when(logger.isDebugEnabled()).thenReturn(true);
 
         val result = this.restUtils.getSchoolReportsLiteByReportType("GRADREG", new SchoolReportsRegenSummaryDTO());
         assertThat(result).isEmpty();
     }
 
     @Test
-    public void testRunGradAlgorithm() {
+    void testRunGradAlgorithm() {
         final String studentID = UUID.randomUUID().toString();
-        final Student student = new Student();
         String programCompletionDate = "2020/01";
 
         GraduationStudentRecord grd = new GraduationStudentRecord();
@@ -886,10 +870,8 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testRunGradAlgorithm_programCompletionDateNull() {
+    void testRunGradAlgorithm_programCompletionDateNull() {
         final String studentID = UUID.randomUUID().toString();
-        final Student student = new Student();
-        String programCompletionDate = "2020/01";
 
         GraduationStudentRecord grd = new GraduationStudentRecord();
         grd.setStudentID(new UUID(1,1));
@@ -906,7 +888,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testRunProjectedGradAlgorithm() {
+    void testRunProjectedGradAlgorithm() {
         final String studentID = UUID.randomUUID().toString();
         GraduationStudentRecord grd = new GraduationStudentRecord();
         grd.setStudentID(new UUID(1,1));
@@ -922,8 +904,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentsForAlgorithm() {
-        final String studentID = UUID.randomUUID().toString();
+    void testGetStudentsForAlgorithm() {
         GraduationStudentRecord grd = new GraduationStudentRecord();
         grd.setStudentID(new UUID(1,1));
         grd.setProgram("2018-EN");
@@ -938,8 +919,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentsForProjectedAlgorithm() {
-        final String studentID = UUID.randomUUID().toString();
+    void testGetStudentsForProjectedAlgorithm() {
         GraduationStudentRecord grd = new GraduationStudentRecord();
         grd.setStudentID(new UUID(1,1));
         grd.setProgram("2018-EN");
@@ -954,7 +934,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentForBatchInput() {
+    void testGetStudentForBatchInput() {
         final UUID schoolId = UUID.randomUUID();
         final UUID studentID = UUID.randomUUID();
         BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, schoolId);
@@ -969,7 +949,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentForBatchInput_When_APIisDown_returns_null() {
+    void testGetStudentForBatchInput_When_APIisDown_returns_null() {
         final UUID studentID = UUID.randomUUID();
         final UUID schoolId = UUID.randomUUID();
         BatchGraduationStudentRecord grd = new BatchGraduationStudentRecord(studentID, "2018-EN", null, schoolId);
@@ -986,7 +966,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentDataForBatch() {
+    void testGetStudentDataForBatch() {
         final UUID studentID = UUID.randomUUID();
         GraduationStudentRecord grd = new GraduationStudentRecord();
         grd.setStudentID(studentID);
@@ -1000,7 +980,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testUpdateStudentCredentialRecord() {
+    void testUpdateStudentCredentialRecord() {
         final String studentID = UUID.randomUUID().toString();
         String credentialTypeCode = "E";
         String paperType="YED2";
@@ -1017,7 +997,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testUpdateStudentCredentialRecords() {
+    void testUpdateStudentCredentialRecords() {
         String activityCode="USERDISTOC";
         UUID schoolId = UUID.randomUUID();
         StudentSearchRequest req = new StudentSearchRequest();
@@ -1042,7 +1022,7 @@ public class RestUtilsTest {
 
 
     @Test
-    public void testGetStudentsForUserReqDisRun() {
+    void testGetStudentsForUserReqDisRun() {
         String credentialType = "OT";
         UUID schoolId = UUID.randomUUID();
         StudentSearchRequest req = new StudentSearchRequest();
@@ -1066,11 +1046,10 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentsForUserReqDisRunWithNullDistributionDate() {
+    void testGetStudentsForUserReqDisRunWithNullDistributionDate() {
         String activityCode = "USERDISTRC";
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
-        Long batchId = 3344L;
 
         List<StudentCredentialDistribution> scdList = new ArrayList<>();
         StudentCredentialDistribution scd = new StudentCredentialDistribution();
@@ -1092,7 +1071,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testCreateReprintAndUpload() {
+    void testCreateReprintAndUpload() {
         String activityCode = "USERDISTRC";
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
@@ -1107,7 +1086,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testCreateReprintAndUpload_null() {
+    void testCreateReprintAndUpload_null() {
         String activityCode = "USERDISTRC";
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
@@ -1121,7 +1100,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testMergeAndUpload() {
+    void testMergeAndUpload() {
         String activityCode = "USERDISTOC";
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
@@ -1140,7 +1119,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testMergeAndUpload_null() {
+    void testMergeAndUpload_null() {
         String activityCode = "USERDISTOC";
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
@@ -1158,7 +1137,7 @@ public class RestUtilsTest {
 
 
     @Test
-    public void testMergePSIAndUpload() {
+    void testMergePSIAndUpload() {
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
         Long batchId = 3344L;
@@ -1175,7 +1154,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testMergePSIAndUpload_null() {
+    void testMergePSIAndUpload_null() {
         DistributionResponse req = new DistributionResponse();
         req.setMergeProcessResponse("Merged");
         Long batchId = 3344L;
@@ -1189,7 +1168,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentData() {
+    void testGetStudentData() {
         final UUID studentID = UUID.randomUUID();
         GraduationStudentRecordDistribution grd = new GraduationStudentRecordDistribution();
         grd.setStudentID(studentID);
@@ -1204,7 +1183,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetDistrictsBySchoolCategoryCode() {
+    void testGetDistrictsBySchoolCategoryCode() {
         ca.bc.gov.educ.api.batchgraduation.model.institute.District district = new ca.bc.gov.educ.api.batchgraduation.model.institute.District();
         district.setDistrictId(UUID.randomUUID().toString());
         district.setDistrictNumber("042");
@@ -1216,7 +1195,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetDistrictsBySchoolCategoryCode_whenException_isThrown() {
+    void testGetDistrictsBySchoolCategoryCode_whenException_isThrown() {
         when(this.restService.get(String.format(constants.getDistricstBySchoolCategory(), "02"), List.class)).thenThrow(new RuntimeException("Test Exception"));
 
         List<ca.bc.gov.educ.api.batchgraduation.model.institute.District> res = this.restUtils.getDistrictsBySchoolCategoryCode("02");
@@ -1224,7 +1203,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetSchoolsBySchoolCategoryCode() {
+    void testGetSchoolsBySchoolCategoryCode() {
         ca.bc.gov.educ.api.batchgraduation.model.institute.School school = new ca.bc.gov.educ.api.batchgraduation.model.institute.School();
         school.setSchoolId(UUID.randomUUID().toString());
         school.setDistrictId(UUID.randomUUID().toString());
@@ -1237,7 +1216,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetSchoolsBySchoolCategoryCode_whenException_isThrown() {
+    void testGetSchoolsBySchoolCategoryCode_whenException_isThrown() {
         when(this.restService.get(String.format(constants.getSchoolsBySchoolCategory(), "02"), List.class)).thenThrow(new RuntimeException("Test Exception"));
 
         List<ca.bc.gov.educ.api.batchgraduation.model.institute.School> res = this.restUtils.getSchoolsBySchoolCategoryCode("02");
@@ -1245,7 +1224,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testSearchSchoolsByDistrictId() {
+    void testSearchSchoolsByDistrictId() {
         UUID schoolId = UUID.randomUUID();
         UUID districtId = UUID.randomUUID();
 
@@ -1261,7 +1240,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testSearchSchoolsByDistrictId_whenException_isThrown() {
+    void testSearchSchoolsByDistrictId_whenException_isThrown() {
         UUID districtId = UUID.randomUUID();
         when(this.restService.get(String.format(constants.getSearchSchoolsByDistrictId(), districtId), List.class)).thenThrow(new RuntimeException("Test Exception"));
 
@@ -1270,7 +1249,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testSearchSchoolsByDistrictNumber() {
+    void testSearchSchoolsByDistrictNumber() {
         UUID schoolId = UUID.randomUUID();
         UUID districtId = UUID.randomUUID();
         String districtNumber = "039";
@@ -1287,7 +1266,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testSearchSchoolsByDistrictNumber_whenException_isThrown() {
+    void testSearchSchoolsByDistrictNumber_whenException_isThrown() {
         String districtNumber = "039";
         when(this.restService.get(String.format(constants.getSearchSchoolsByDistrictNumber(), districtNumber), List.class)).thenThrow(new RuntimeException("Test Exception"));
 
@@ -1296,7 +1275,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetSchoolClob() {
+    void testGetSchoolClob() {
         UUID schoolId = UUID.randomUUID();
 
         SchoolClob school = new SchoolClob();
@@ -1311,7 +1290,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testSearchSchoolClob() {
+    void testSearchSchoolClob() {
         UUID schoolId = UUID.randomUUID();
         String mincode = "12345678";
 
@@ -1329,7 +1308,7 @@ public class RestUtilsTest {
 
 
     @Test
-    public void testExecutePostDistribution() {
+    void testExecutePostDistribution() {
         DistributionResponse distributionResponse = new DistributionResponse();
 
         mockTokenResponseObject();
@@ -1340,7 +1319,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testupdateStudentGradRecord() {
+    void testupdateStudentGradRecord() {
         final UUID studentID = UUID.randomUUID();
         final String activityCode = "USERDISOC";
         final Long batchId = 4567L;
@@ -1358,7 +1337,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testUpdateStudentGradRecordHistory() {
+    void testUpdateStudentGradRecordHistory() {
         final UUID studentID = UUID.randomUUID();
         final String userName = "abc";
         final String accessToken = "xyz";
@@ -1381,7 +1360,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testDeleteSchoolReportRecordByReportType() {
+    void testDeleteSchoolReportRecordByReportType() {
         String reportTypeCode = "E";
 
         when(this.restService.delete(String.format(constants.getDeleteSchoolReportsByReportType(),reportTypeCode), Boolean.class)).thenReturn(true);
@@ -1391,7 +1370,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testDeleteSchoolReportRecord() {
+    void testDeleteSchoolReportRecord() {
         final UUID schoolId = UUID.randomUUID();
         String reportTypeCode = "E";
 
@@ -1404,7 +1383,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testDeleteDistrictReportRecordByReportType() {
+    void testDeleteDistrictReportRecordByReportType() {
         String reportTypeCode = "E";
 
         when(this.restService.delete(String.format(constants.getDeleteDistrictReportsByReportType(),reportTypeCode), Boolean.class)).thenReturn(true);
@@ -1414,7 +1393,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testDeleteDistrictReportRecord() {
+    void testDeleteDistrictReportRecord() {
         final UUID districtId = UUID.randomUUID();
         String reportTypeCode = "E";
 
@@ -1427,7 +1406,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentByPenFromStudentAPI() {
+    void testGetStudentByPenFromStudentAPI() {
         final UUID studentID = UUID.randomUUID();
         final UUID schoolId = UUID.randomUUID();
 
@@ -1468,7 +1447,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testUpdateStudentFlagReadyForBatch() {
+    void testUpdateStudentFlagReadyForBatch() {
         final UUID studentID = UUID.randomUUID();
         final String pen = "123456789";
         final String batchJobType = "REGALG";
@@ -1490,7 +1469,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testIsReportOnly_when_programCompletionDate_isInFuture_thenReturns_GS() {
+    void testIsReportOnly_when_programCompletionDate_isInFuture_thenReturns_GS() {
         final UUID studentID = UUID.randomUUID();
         final String gradProgram = "SCCP";
 
@@ -1506,7 +1485,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testIsReportOnly_when_programCompletionDate_isInFutureYear_thenReturns_GS() {
+    void testIsReportOnly_when_programCompletionDate_isInFutureYear_thenReturns_GS() {
         final UUID studentID = UUID.randomUUID();
         final String gradProgram = "SCCP";
         final String programCompletionDate = "2099/01";
@@ -1520,7 +1499,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testIsReportOnly_when_programCompletionDate_isInFutureYearWithDashFormat_thenReturns_GS() {
+    void testIsReportOnly_when_programCompletionDate_isInFutureYearWithDashFormat_thenReturns_GS() {
         final UUID studentID = UUID.randomUUID();
         final String gradProgram = "SCCP";
         final String programCompletionDate = "2099-01";
@@ -1534,7 +1513,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testIsReportOnly_when_programCompletionDate_isNotInFuture_and_SCCPcertificateExists_thenReturns_FMR() {
+    void testIsReportOnly_when_programCompletionDate_isNotInFuture_and_SCCPcertificateExists_thenReturns_FMR() {
         final UUID studentID = UUID.randomUUID();
         final String gradProgram = "SCCP";
         final String programCompletionDate = "2023/01";
@@ -1548,7 +1527,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testIsReportOnly_when_programIsNotSccp_and_programCompletionDateExists_thenReturns_FMR() {
+    void testIsReportOnly_when_programIsNotSccp_and_programCompletionDateExists_thenReturns_FMR() {
         final UUID studentID = UUID.randomUUID();
         final String gradProgram = "2023-EN";
         final String programCompletionDate = "2023/01";
@@ -1558,7 +1537,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testIsReportOnly_when_programIsNotSccp_and_programCompletionDateIsNull_thenReturns_GS() {
+    void testIsReportOnly_when_programIsNotSccp_and_programCompletionDateIsNull_thenReturns_GS() {
         final UUID studentID = UUID.randomUUID();
         final String gradProgram = "2023-EN";
 
@@ -1567,7 +1546,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testIsReportOnly_when_sccpProgramCompletionDateIsNull_thenReturns_GS() {
+    void testIsReportOnly_when_sccpProgramCompletionDateIsNull_thenReturns_GS() {
         final UUID studentID = UUID.randomUUID();
         final String gradProgram = "SCCP";
 
@@ -1576,7 +1555,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testRunRegenerateStudentCertificates() {
+    void testRunRegenerateStudentCertificates() {
         final String pen = "123456789";
 
         mockTokenResponseObject();
@@ -1590,7 +1569,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testFetchDistributionRequiredDataStudentsNonGradYearly() {
+    void testFetchDistributionRequiredDataStudentsNonGradYearly() {
         ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
         reportGradStudentData.setReportingSchoolTypeCode(SCHOOL_AT_GRAD.name());
 
@@ -1603,7 +1582,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testFetchDistributionRequiredDataStudentsNonGradYearlyBySchoolId() {
+    void testFetchDistributionRequiredDataStudentsNonGradYearlyBySchoolId() {
         UUID schoolId = UUID.randomUUID();
         ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
         reportGradStudentData.setReportingSchoolTypeCode(SCHOOL_OF_RECORD.name());
@@ -1617,7 +1596,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testFetchDistributionRequiredDataStudentsYearly() {
+    void testFetchDistributionRequiredDataStudentsYearly() {
         ReportGradStudentData reportGradStudentData = new ReportGradStudentData();
         reportGradStudentData.setReportingSchoolTypeCode(SCHOOL_AT_GRAD.name());
 
@@ -1630,7 +1609,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetEDWSnapshotSchools() {
+    void testGetEDWSnapshotSchools() {
         final Integer gradYear = Integer.parseInt("2023");
 
         List<String> schools = Arrays.asList("12345678","11223344");
@@ -1644,7 +1623,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetTotalSchoolReportsForArchiving() {
+    void testGetTotalSchoolReportsForArchiving() {
         UUID schoolId1 = UUID.randomUUID();
         UUID schoolId2 = UUID.randomUUID();
         List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
@@ -1660,7 +1639,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetTotalSchoolReportsRegeneration() {
+    void testGetTotalSchoolReportsRegeneration() {
         UUID schoolId1 = UUID.randomUUID();
         UUID schoolId2 = UUID.randomUUID();
         List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
@@ -1676,7 +1655,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetReportStudentIDsByStudentIDsAndReportType() {
+    void testGetReportStudentIDsByStudentIDsAndReportType() {
         UUID uuid = UUID.randomUUID();
         List<UUID> studentIDsIn = Arrays.asList(uuid);
         List<UUID> studentIDsOut = Arrays.asList(uuid);
@@ -1692,7 +1671,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetReportStudentIDsByStudentIDsAndReportTypeError() {
+    void testGetReportStudentIDsByStudentIDsAndReportTypeError() {
         UUID uuid = UUID.randomUUID();
         List<UUID> studentIDsIn = Arrays.asList(uuid);
 
@@ -1708,7 +1687,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentIDsBySearchCriteriaOrAll() {
+    void testGetStudentIDsBySearchCriteriaOrAll() {
         List<UUID> studentIDs = Arrays.asList(UUID.randomUUID());
 
         mockTokenResponseObject();
@@ -1725,7 +1704,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetStudentIDsBySearchCriteriaOrAllError() {
+    void testGetStudentIDsBySearchCriteriaOrAllError() {
         List<UUID> studentIDs = Arrays.asList(UUID.randomUUID());
 
         mockTokenResponseObject();
@@ -1743,7 +1722,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetTotalSchoolReportsForArchivingError() {
+    void testGetTotalSchoolReportsForArchivingError() {
         UUID schoolId1 = UUID.randomUUID();
         UUID schoolId2 = UUID.randomUUID();
         List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
@@ -1760,7 +1739,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetTotalSchoolReportsRegenerationError() {
+    void testGetTotalSchoolReportsRegenerationError() {
         UUID schoolId1 = UUID.randomUUID();
         UUID schoolId2 = UUID.randomUUID();
         List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
@@ -1777,7 +1756,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testDeleteStudentReports() {
+    void testDeleteStudentReports() {
         List<UUID> studentIDs = Arrays.asList(UUID.randomUUID());
 
         mockTokenResponseObject();
@@ -1791,7 +1770,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testDeleteStudentReportsError() {
+    void testDeleteStudentReportsError() {
         List<UUID> studentIDs = Arrays.asList(UUID.randomUUID());
 
         mockTokenResponseObject();
@@ -1807,7 +1786,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testArchiveSchoolReports() {
+    void testArchiveSchoolReports() {
         UUID schoolId1 = UUID.randomUUID();
         UUID schoolId2 = UUID.randomUUID();
         List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
@@ -1823,7 +1802,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testArchiveSchoolReportsError() {
+    void testArchiveSchoolReportsError() {
         UUID schoolId1 = UUID.randomUUID();
         UUID schoolId2 = UUID.randomUUID();
         List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
@@ -1840,7 +1819,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetTotalStudentsForArchiving() {
+    void testGetTotalStudentsForArchiving() {
         UUID schoolId1 = UUID.randomUUID();
         UUID schoolId2 = UUID.randomUUID();
         List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
@@ -1856,7 +1835,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetTotalStudentsForArchivingError() {
+    void testGetTotalStudentsForArchivingError() {
         UUID schoolId1 = UUID.randomUUID();
         UUID schoolId2 = UUID.randomUUID();
         List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
@@ -1873,7 +1852,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testArchiveStudents() {
+    void testArchiveStudents() {
         UUID schoolId1 = UUID.randomUUID();
         UUID schoolId2 = UUID.randomUUID();
         List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
@@ -1890,7 +1869,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testArchiveStudentsError() {
+    void testArchiveStudentsError() {
         UUID schoolId1 = UUID.randomUUID();
         UUID schoolId2 = UUID.randomUUID();
         List<UUID> schools = Arrays.asList(schoolId1, schoolId2);
@@ -1908,7 +1887,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testGetEDWSnapshotStudents() {
+    void testGetEDWSnapshotStudents() {
         final Integer gradYear = Integer.parseInt("2023");
         final String mincode = "12345678";
 
@@ -1927,7 +1906,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessSnapshot() {
+    void testProcessSnapshot() {
         final Integer gradYear = Integer.parseInt("2023");
         final String mincode = "12345678";
 
@@ -1945,7 +1924,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testProcessSnapshotException() {
+    void testProcessSnapshotException() {
         final Integer gradYear = Integer.parseInt("2023");
         final String mincode = "12345678";
 
@@ -1966,7 +1945,7 @@ public class RestUtilsTest {
 
 
     @Test
-    public void testGetDeceasedStudentIDs() {
+    void testGetDeceasedStudentIDs() {
         final UUID studentID1 = UUID.randomUUID();
         final UUID studentID2 = UUID.randomUUID();
 
@@ -1981,7 +1960,7 @@ public class RestUtilsTest {
     }
 
     @Test
-    public void testFetchAccessToken() {
+    void testFetchAccessToken() {
         mockTokenResponseObject();
         String result = this.restUtils.fetchAccessToken();
         assertThat(result).isNotNull();
