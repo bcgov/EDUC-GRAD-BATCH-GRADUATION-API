@@ -202,6 +202,10 @@ endpoint:
     get-school-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/schoolnongradreportdata
     get-district-data-nongrad-yearly: ${GRAD_STUDENT_API}api/v1/student/districtnongradreportdata
     get-deceased-student-id-list: ${GRAD_STUDENT_API}api/v1/student/deceasedstudentid
+    get-edw-snapshot-schools:
+      url: ${GRAD_STUDENT_API}api/v1/student/edw/snapshot/schools/%s
+    get-edw-snapshot-students-by-min-code:
+      url: ${GRAD_STUDENT_API}api/v1/student/edw/snapshot/students/%s/%s
   grad-graduation-report-api:
     get-school-reports-count:
       url: ${GRAD_GRADUATION_REPORT_API}api/v2/graduationreports/count?reportType=%s
@@ -277,12 +281,6 @@ endpoint:
       url: ${GRAD_TRAX_API}api/v2/trax/district/schoolCategories?schoolCategoryCode=%s
     school-by-school-category:
       url: ${GRAD_TRAX_API}api/v2/trax/school/schoolCategories?schoolCategoryCode=%s
-    get-edw-snapshot-schools:
-      url: ${GRAD_TRAX_API}api/v1/trax/edw/get-schools/snapshot/%s
-    get-edw-snapshot-students-by-min-code:
-      url: ${GRAD_TRAX_API}api/v1/trax/edw/get-students/snapshot/%s/%s
-
-
 #Splunk LogHelper
 splunk:
   log-helper:

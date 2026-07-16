@@ -16,7 +16,6 @@ public class EducGradBatchGraduationApiConstants {
 	public static final String API_ROOT_MAPPING = "";
     public static final String API_VERSION = "v1";
     public static final String CORRELATION_ID = "correlationID";
-    public static final String USERNAME = "username";
     public static final String GRAD_BATCH_API_ROOT_MAPPING = "/api/" + API_VERSION + "/batch";
 
     public static final String USER_NAME = "User-Name";
@@ -161,10 +160,10 @@ public class EducGradBatchGraduationApiConstants {
     @Value("${endpoint.grad-graduation-report-api.check-sccp-certificate-exists}")
     private String checkSccpCertificateExists;
 
-    @Value("${endpoint.grad-trax-api.get-edw-snapshot-schools.url}")
+    @Value("${endpoint.grad-student-api.get-edw-snapshot-schools.url}")
     private String edwSnapshotSchoolsUrl;
 
-    @Value("${endpoint.grad-trax-api.get-edw-snapshot-students-by-min-code.url}")
+    @Value("${endpoint.grad-student-api.get-edw-snapshot-students-by-min-code.url}")
     private String edwSnapshotStudentsByMincodeUrl;
 
     @Value("${endpoint.grad-graduation-api.snapshot-graduation-status-for-edw.url}")

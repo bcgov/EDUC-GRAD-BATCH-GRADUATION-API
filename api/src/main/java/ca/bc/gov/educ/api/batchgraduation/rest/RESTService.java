@@ -195,7 +195,7 @@ public class RESTService {
                     .uri(url)
                     .headers(h -> {
                         h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
-                        h.set(EducGradBatchGraduationApiConstants.USERNAME, ThreadLocalStateUtil.getCurrentUser());
+                        h.set(EducGradBatchGraduationApiConstants.USER_NAME, ThreadLocalStateUtil.getCurrentUser());
                     })
                     .body(BodyInserters.fromValue(body))
                     .retrieve()
@@ -233,7 +233,7 @@ public class RESTService {
             obj = this.batchWebClient.delete().uri(url)
                     .headers(h -> {
                         h.set(EducGradBatchGraduationApiConstants.CORRELATION_ID, ThreadLocalStateUtil.getCorrelationID());
-                        h.set(EducGradBatchGraduationApiConstants.USERNAME, ThreadLocalStateUtil.getCurrentUser());
+                        h.set(EducGradBatchGraduationApiConstants.USER_NAME, ThreadLocalStateUtil.getCurrentUser());
                     })
                     .retrieve().bodyToMono(boundClass).block();
         } catch(Exception e) {
