@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
 import org.junit.Test;
@@ -15,10 +16,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -97,6 +100,84 @@ public class GradBatchHistoryServiceTest {
         when(batchGradAlgorithmJobHistoryRepository.save(batchGradAlgorithmJobHistoryEntity)).thenReturn(batchGradAlgorithmJobHistoryEntity);
         BatchGradAlgorithmJobHistoryEntity response = gradBatchHistoryService.saveGradAlgorithmJobHistory(batchGradAlgorithmJobHistoryEntity);
         assertThat(response).isNotNull();
+    }
+
+    @Test
+    public void testGetBatchPipelineStatus_when_noRuns() {
+        when(batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(anyList(), any(LocalDateTime.class))).thenReturn(Collections.emptyList());
+
+        BatchPipelineStatus response = gradBatchHistoryService.getBatchPipelineStatus();
+
+        assertThat(response.isRunning()).isFalse();
+        assertThat(response.getActiveRuns()).isEmpty();
+        assertThat(response.getStaleRuns()).isEmpty();
+        assertThat(response.getMessage()).isNull();
+    }
+
+    @Test
+    public void testGetBatchPipelineStatus_when_activeRunIsHealthy() {
+        Long batchId = 3001L;
+        LocalDateTime now = LocalDateTime.now();
+        BatchGradAlgorithmJobHistoryEntity history = createJobHistory(batchId, "REGALG", BatchStatusEnum.STARTED.name(), now.minusMinutes(5), now.minusSeconds(10));
+
+        when(batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(anyList(), any(LocalDateTime.class))).thenReturn(List.of(history));
+
+        BatchPipelineStatus response = gradBatchHistoryService.getBatchPipelineStatus();
+
+        assertThat(response.isRunning()).isTrue();
+        assertThat(response.getActiveRuns()).hasSize(1);
+        assertThat(response.getActiveRuns().get(0).getJobExecutionId()).isEqualTo(batchId);
+        assertThat(response.getActiveRuns().get(0).getHealthStatus()).isEqualTo("ok");
+        assertThat(response.getStaleRuns()).isEmpty();
+    }
+
+    @Test
+    public void testGetBatchPipelineStatus_when_activeRunIsWarning() {
+        LocalDateTime now = LocalDateTime.now();
+        BatchGradAlgorithmJobHistoryEntity history = createJobHistory(3002L, "TVRRUN", BatchStatusEnum.STARTED.name(), now.minusMinutes(15), now.minusMinutes(11));
+
+        when(batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(anyList(), any(LocalDateTime.class))).thenReturn(List.of(history));
+
+        BatchPipelineStatus response = gradBatchHistoryService.getBatchPipelineStatus();
+
+        assertThat(response.isRunning()).isTrue();
+        assertThat(response.getActiveRuns()).hasSize(1);
+        assertThat(response.getActiveRuns().get(0).getHealthStatus()).isEqualTo("warning");
+        assertThat(response.getStaleRuns()).isEmpty();
+    }
+
+    @Test
+    public void testGetBatchPipelineStatus_when_runIsStale() {
+        Long batchId = 3003L;
+        LocalDateTime now = LocalDateTime.now();
+        BatchGradAlgorithmJobHistoryEntity history = createJobHistory(batchId, "REGALG", BatchStatusEnum.STARTED.name(), now.minusHours(1), now.minusMinutes(21));
+
+        when(batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(anyList(), any(LocalDateTime.class))).thenReturn(List.of(history));
+
+        BatchPipelineStatus response = gradBatchHistoryService.getBatchPipelineStatus();
+
+        assertThat(response.isRunning()).isFalse();
+        assertThat(response.getActiveRuns()).isEmpty();
+        assertThat(response.getStaleRuns()).hasSize(1);
+        assertThat(response.getStaleRuns().get(0).getJobExecutionId()).isEqualTo(batchId);
+        assertThat(response.getStaleRuns().get(0).getHealthStatus()).isEqualTo("please_inspect");
+        assertThat(response.getMessage()).isEqualTo("A stale batch was found. Please inspect batch history.");
+    }
+
+    @Test
+    public void testGetBatchPipelineStatus_when_mixedActiveAndStaleRuns() {
+        LocalDateTime now = LocalDateTime.now();
+        BatchGradAlgorithmJobHistoryEntity active = createJobHistory(3004L, "REGALG", BatchStatusEnum.STARTED.name(), now.minusMinutes(20), now.minusSeconds(20));
+        BatchGradAlgorithmJobHistoryEntity stale = createJobHistory(3005L, "TVRRUN", BatchStatusEnum.STARTED.name(), now.minusHours(2), now.minusMinutes(25));
+
+        when(batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(anyList(), any(LocalDateTime.class))).thenReturn(List.of(active, stale));
+
+        BatchPipelineStatus response = gradBatchHistoryService.getBatchPipelineStatus();
+
+        assertThat(response.isRunning()).isTrue();
+        assertThat(response.getActiveRuns()).hasSize(1);
+        assertThat(response.getStaleRuns()).hasSize(1);
+        assertThat(response.getMessage()).isEqualTo("A stale batch was found. Please inspect batch history.");
     }
 
     @Test
@@ -355,6 +436,17 @@ public class GradBatchHistoryServiceTest {
         when(batchGradAlgorithmStudentRepository.getGraduationProgramCounts(batchId)).thenReturn(gradCounts);
         Map<String, Integer> response = gradBatchHistoryService.getGraduationProgramCountsForBatchRunSummary(batchId);
         assertThat(response).hasSize(4).containsEntry("2018-EN", Integer.valueOf(10));
+    }
+
+    private static BatchGradAlgorithmJobHistoryEntity createJobHistory(Long batchId, String jobType, String status, LocalDateTime startTime, LocalDateTime lastHeartbeatTime) {
+        BatchGradAlgorithmJobHistoryEntity history = new BatchGradAlgorithmJobHistoryEntity();
+        history.setId(UUID.randomUUID());
+        history.setJobExecutionId(batchId);
+        history.setJobType(jobType);
+        history.setStatus(status);
+        history.setStartTime(startTime);
+        history.setLastHeartbeatTime(lastHeartbeatTime);
+        return history;
     }
 
 }

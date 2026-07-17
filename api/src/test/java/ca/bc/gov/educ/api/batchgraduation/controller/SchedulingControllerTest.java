@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessing;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
@@ -41,7 +42,7 @@ public class SchedulingControllerTest {
     @Mock
     GradDashboardService gradDashboardService;
 
-    @MockBean
+    @Mock
     GradBatchHistoryService gradBatchHistoryService;
 
     @Mock
@@ -164,5 +165,18 @@ public class SchedulingControllerTest {
         Mockito.when(gradDashboardService.toggleProcess("TVRRUN")).thenReturn(null);
         ResponseEntity<BatchProcessing> res = schedulingController.toggleProcess("TVRRUN");
         assertThat(res.getBody()).isNull();
+    }
+
+    @Test
+    public void testGetBatchPipelineStatus() {
+        BatchPipelineStatus batchPipelineStatus = new BatchPipelineStatus();
+        batchPipelineStatus.setRunning(true);
+        Mockito.when(gradBatchHistoryService.getBatchPipelineStatus()).thenReturn(batchPipelineStatus);
+
+        ResponseEntity<BatchPipelineStatus> res = schedulingController.getBatchPipelineStatus();
+
+        assertThat(res.getStatusCodeValue()).isEqualTo(200);
+        assertThat(res.getBody()).isNotNull();
+        assertThat(res.getBody().isRunning()).isTrue();
     }
 }
