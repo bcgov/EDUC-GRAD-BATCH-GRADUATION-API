@@ -3,6 +3,8 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmJobHistoryEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchGradAlgorithmStudentEntity;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchStatusEnum;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineRunStatus;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
 import org.slf4j.Logger;
@@ -12,18 +14,36 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class GradBatchHistoryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GradBatchHistoryService.class);
+    private static final List<String> PIPELINE_JOB_TYPES = List.of("REGALG", "TVRRUN");
+    private static final Set<String> ACTIVE_STATUSES = Set.of(
+            BatchStatusEnum.STARTING.name(),
+            BatchStatusEnum.STARTED.name(),
+            BatchStatusEnum.STOPPING.name()
+    );
+    private static final Duration ACTIVE_WINDOW = Duration.ofHours(12);
+    private static final Duration HEARTBEAT_THROTTLE = Duration.ofSeconds(5);
+    private static final Duration WARNING_THRESHOLD = Duration.ofMinutes(10);
+    private static final Duration INSPECT_THRESHOLD = Duration.ofMinutes(20);
+    private static final String HEALTH_OK = "ok";
+    private static final String HEALTH_WARNING = "warning";
+    private static final String HEALTH_INSPECT = "please_inspect";
 
     @Autowired
     private BatchGradAlgorithmJobHistoryRepository batchGradAlgorithmJobHistoryRepository;
 
     @Autowired
     private BatchGradAlgorithmStudentRepository batchGradAlgorithmStudentRepository;
+
+    private final Map<Long, LocalDateTime> heartbeatThrottleMap = new ConcurrentHashMap<>();
 
     @Transactional(readOnly = true)
     public BatchGradAlgorithmJobHistoryEntity getGradAlgorithmJobHistory(Long batchId) {
@@ -46,11 +66,90 @@ public class GradBatchHistoryService {
             current.setFailedStudentsProcessed(ent.getFailedStudentsProcessed());
             current.setLocalDownload(ent.getLocalDownload());
             current.setJobParameters(ent.getJobParameters());
+            if (ent.getLastHeartbeatTime() != null) {
+                current.setLastHeartbeatTime(ent.getLastHeartbeatTime());
+            } else if (current.getLastHeartbeatTime() == null) {
+                current.setLastHeartbeatTime(LocalDateTime.now());
+            }
             return batchGradAlgorithmJobHistoryRepository.save(current);
         } else {
+            if (ent.getLastHeartbeatTime() == null) {
+                ent.setLastHeartbeatTime(LocalDateTime.now());
+            }
             // create
             return batchGradAlgorithmJobHistoryRepository.save(ent);
         }
+    }
+
+    @Transactional
+    public void touchHeartbeat(Long batchId) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastHeartbeat = heartbeatThrottleMap.get(batchId);
+        if (lastHeartbeat != null && lastHeartbeat.plus(HEARTBEAT_THROTTLE).isAfter(now)) {
+            return;
+        }
+        BatchGradAlgorithmJobHistoryEntity history = getGradAlgorithmJobHistory(batchId);
+        if (history != null) {
+            history.setLastHeartbeatTime(now);
+            batchGradAlgorithmJobHistoryRepository.save(history);
+            heartbeatThrottleMap.put(batchId, now);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public BatchPipelineStatus getBatchPipelineStatus() {
+        BatchPipelineStatus response = new BatchPipelineStatus();
+        response.setRunning(false);
+        LocalDateTime startTimeCutoff = LocalDateTime.now().minus(ACTIVE_WINDOW);
+        List<BatchGradAlgorithmJobHistoryEntity> recentRuns =
+                batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(PIPELINE_JOB_TYPES, startTimeCutoff);
+
+        for (BatchGradAlgorithmJobHistoryEntity run : recentRuns) {
+            if (!ACTIVE_STATUSES.contains(run.getStatus())) {
+                continue;
+            }
+            String healthStatus = determineHealthStatus(run.getLastHeartbeatTime(), run.getStartTime());
+            BatchPipelineRunStatus runStatus = toRunStatus(run, healthStatus);
+            if (HEALTH_INSPECT.equals(healthStatus)) {
+                response.getStaleRuns().add(runStatus);
+                continue;
+            }
+            response.getActiveRuns().add(runStatus);
+        }
+
+        if (!response.getActiveRuns().isEmpty()) {
+            response.setRunning(true);
+        }
+        if (!response.getStaleRuns().isEmpty()) {
+            response.setMessage("A stale batch was found. Please inspect batch history.");
+        }
+        return response;
+    }
+
+    private BatchPipelineRunStatus toRunStatus(BatchGradAlgorithmJobHistoryEntity history, String healthStatus) {
+        BatchPipelineRunStatus runStatus = new BatchPipelineRunStatus();
+        runStatus.setJobExecutionId(history.getJobExecutionId());
+        runStatus.setJobType(history.getJobType());
+        runStatus.setStatus(history.getStatus());
+        runStatus.setStartTime(history.getStartTime());
+        runStatus.setLastHeartbeat(history.getLastHeartbeatTime());
+        runStatus.setHealthStatus(healthStatus);
+        return runStatus;
+    }
+
+    private String determineHealthStatus(LocalDateTime lastHeartbeat, LocalDateTime startTime) {
+        LocalDateTime effectiveHeartbeat = lastHeartbeat != null ? lastHeartbeat : startTime;
+        if (effectiveHeartbeat == null) {
+            return HEALTH_INSPECT;
+        }
+        Duration staleness = Duration.between(effectiveHeartbeat, LocalDateTime.now());
+        if (staleness.compareTo(INSPECT_THRESHOLD) > 0) {
+            return HEALTH_INSPECT;
+        }
+        if (staleness.compareTo(WARNING_THRESHOLD) > 0) {
+            return HEALTH_WARNING;
+        }
+        return HEALTH_OK;
     }
 
     @Transactional
