@@ -88,7 +88,7 @@ public class GradBatchHistoryService {
         if (lastHeartbeat != null && lastHeartbeat.plus(HEARTBEAT_THROTTLE).isAfter(now)) {
             return;
         }
-        BatchGradAlgorithmJobHistoryEntity history = getGradAlgorithmJobHistory(batchId);
+        BatchGradAlgorithmJobHistoryEntity history = batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId).orElse(null);
         if (history != null) {
             history.setLastHeartbeatTime(now);
             batchGradAlgorithmJobHistoryRepository.save(history);

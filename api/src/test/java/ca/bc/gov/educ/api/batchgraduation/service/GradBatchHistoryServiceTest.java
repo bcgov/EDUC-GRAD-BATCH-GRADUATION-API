@@ -23,6 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -178,6 +181,56 @@ public class GradBatchHistoryServiceTest {
         assertThat(response.getActiveRuns()).hasSize(1);
         assertThat(response.getStaleRuns()).hasSize(1);
         assertThat(response.getMessage()).isEqualTo("A stale batch was found. Please inspect batch history.");
+    }
+
+    @Test
+    public void testTouchHeartbeat_when_historyExists_updatesHeartbeat() {
+        Long batchId = 3001L;
+        BatchGradAlgorithmJobHistoryEntity history = createJobHistory(
+                batchId,
+                "REGALG",
+                BatchStatusEnum.STARTED.name(),
+                LocalDateTime.now().minusMinutes(5),
+                LocalDateTime.now().minusMinutes(1)
+        );
+
+        when(batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId)).thenReturn(Optional.of(history));
+        when(batchGradAlgorithmJobHistoryRepository.save(any(BatchGradAlgorithmJobHistoryEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        gradBatchHistoryService.touchHeartbeat(batchId);
+
+        verify(batchGradAlgorithmJobHistoryRepository, times(1)).save(history);
+        assertThat(history.getLastHeartbeatTime()).isNotNull();
+    }
+
+    @Test
+    public void testTouchHeartbeat_when_calledTwiceQuickly_throttlesSecondUpdate() {
+        Long batchId = 3002L;
+        BatchGradAlgorithmJobHistoryEntity history = createJobHistory(
+                batchId,
+                "TVRRUN",
+                BatchStatusEnum.STARTED.name(),
+                LocalDateTime.now().minusMinutes(5),
+                LocalDateTime.now().minusMinutes(1)
+        );
+
+        when(batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId)).thenReturn(Optional.of(history));
+        when(batchGradAlgorithmJobHistoryRepository.save(any(BatchGradAlgorithmJobHistoryEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        gradBatchHistoryService.touchHeartbeat(batchId);
+        gradBatchHistoryService.touchHeartbeat(batchId);
+
+        verify(batchGradAlgorithmJobHistoryRepository, times(1)).save(history);
+    }
+
+    @Test
+    public void testTouchHeartbeat_when_historyDoesNotExist_doesNothing() {
+        Long batchId = 3003L;
+        when(batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId)).thenReturn(Optional.empty());
+
+        gradBatchHistoryService.touchHeartbeat(batchId);
+
+        verify(batchGradAlgorithmJobHistoryRepository, never()).save(any(BatchGradAlgorithmJobHistoryEntity.class));
     }
 
     @Test
