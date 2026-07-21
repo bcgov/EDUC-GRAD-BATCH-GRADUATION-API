@@ -25,6 +25,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+import static org.mockito.Mockito.*;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
@@ -58,7 +60,7 @@ public class GradRunCompletionNotificationListenerTest {
 
         gradRunCompletionNotificationListener.afterJob(jobExecution);
 
-        Mockito.verify(tvrLaunchService).launchTVRReportProcess();
+        verify(tvrLaunchService).launchTVRReportProcess();
     }
 
     @Test
@@ -67,7 +69,7 @@ public class GradRunCompletionNotificationListenerTest {
 
         gradRunCompletionNotificationListener.afterJob(jobExecution);
 
-        Mockito.verify(tvrLaunchService, Mockito.never()).launchTVRReportProcess();
+        verify(tvrLaunchService, never()).launchTVRReportProcess();
     }
 
     @Test
@@ -76,7 +78,7 @@ public class GradRunCompletionNotificationListenerTest {
 
         gradRunCompletionNotificationListener.afterJob(jobExecution);
 
-        Mockito.verify(tvrLaunchService, Mockito.never()).launchTVRReportProcess();
+        verify(tvrLaunchService, never()).launchTVRReportProcess();
     }
 
     private JobExecution createJobExecution(String trigger, BatchStatus status) {
@@ -98,12 +100,12 @@ public class GradRunCompletionNotificationListenerTest {
         jobContext.put("regGradAlgSummaryDTO", new AlgorithmSummaryDTO());
         jobExecution.setExecutionContext(jobContext);
 
-        Mockito.when(jsonTransformer.unmarshall("{}", StudentSearchRequest.class)).thenReturn(new StudentSearchRequest());
-        Mockito.when(gradBatchHistoryService.getCountForReadStudent(121L)).thenReturn(0L);
-        Mockito.when(gradBatchHistoryService.getCountForProcessedStudent(121L)).thenReturn(0L);
-        Mockito.when(gradBatchHistoryService.getCountForErroredStudent(121L)).thenReturn(0L);
-        Mockito.when(gradBatchHistoryService.getSchoolListForReport(121L)).thenReturn(Collections.emptyList());
-        Mockito.when(gradBatchHistoryService.saveGradAlgorithmJobHistory(Mockito.any(BatchGradAlgorithmJobHistoryEntity.class)))
+        when(jsonTransformer.unmarshall("{}", StudentSearchRequest.class)).thenReturn(new StudentSearchRequest());
+        when(gradBatchHistoryService.getCountForReadStudent(121L)).thenReturn(0L);
+        when(gradBatchHistoryService.getCountForProcessedStudent(121L)).thenReturn(0L);
+        when(gradBatchHistoryService.getCountForErroredStudent(121L)).thenReturn(0L);
+        when(gradBatchHistoryService.getSchoolListForReport(121L)).thenReturn(Collections.emptyList());
+        when(gradBatchHistoryService.saveGradAlgorithmJobHistory(Mockito.any(BatchGradAlgorithmJobHistoryEntity.class)))
                 .thenReturn(new BatchGradAlgorithmJobHistoryEntity());
 
         return jobExecution;
