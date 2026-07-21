@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,6 +35,7 @@ public class GradBatchHistoryService {
     private static final Duration HEARTBEAT_THROTTLE = Duration.ofSeconds(5);
     private static final Duration WARNING_THRESHOLD = Duration.ofMinutes(10);
     private static final Duration INSPECT_THRESHOLD = Duration.ofMinutes(20);
+    private static final ZoneId SYSTEM_ZONE = ZoneId.systemDefault();
     private static final String HEALTH_OK = "ok";
     private static final String HEALTH_WARNING = "warning";
     private static final String HEALTH_INSPECT = "please_inspect";
@@ -142,7 +145,10 @@ public class GradBatchHistoryService {
         if (effectiveHeartbeat == null) {
             return HEALTH_INSPECT;
         }
-        Duration staleness = Duration.between(effectiveHeartbeat, LocalDateTime.now());
+        Duration staleness = Duration.between(
+                effectiveHeartbeat.atZone(SYSTEM_ZONE),
+                ZonedDateTime.now(SYSTEM_ZONE)
+        );
         if (staleness.compareTo(INSPECT_THRESHOLD) > 0) {
             return HEALTH_INSPECT;
         }
