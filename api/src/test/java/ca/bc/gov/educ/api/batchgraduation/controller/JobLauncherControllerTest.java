@@ -5,14 +5,17 @@ import ca.bc.gov.educ.api.batchgraduation.processor.DistributionRunStatusUpdateP
 import ca.bc.gov.educ.api.batchgraduation.rest.RestUtils;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
+import ca.bc.gov.educ.api.batchgraduation.util.GradSchoolOfRecordFilter;
+import ca.bc.gov.educ.api.batchgraduation.util.GradValidation;
 import ca.bc.gov.educ.api.batchgraduation.util.JsonTransformer;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.DuplicateJobException;
@@ -39,6 +42,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -49,6 +54,7 @@ public class JobLauncherControllerTest {
     private static final String JOB_TRIGGER="jobTrigger";
     private static final String JOB_TYPE="jobType";
     private static final String SEARCH_REQUEST = "searchRequest";
+    private static final String BATCH = "BATCH";
     private static final String MANUAL = "MANUAL";
     private static final String TVRRUN = "TVRRUN";
     private static final String REGALG = "REGALG";
@@ -97,7 +103,12 @@ public class JobLauncherControllerTest {
     @Mock
     private JobParametersBuilder jobParametersBuilder;
 
-    @InjectMocks
+    @Mock
+    private GradSchoolOfRecordFilter gradSchoolOfRecordFilter;
+
+    @Mock
+    private GradValidation gradValidation;
+
     private JobLauncherController jobLauncherController;
 
     @Mock
@@ -110,22 +121,46 @@ public class JobLauncherControllerTest {
     @MockBean
     RestUtils restUtils;
 
+    @Before
+    public void setUp() {
+        jobLauncherController = new JobLauncherController(
+                jobLauncher,
+                asyncJobLauncher,
+                jobRegistry,
+                restUtils,
+                gradDashboardService,
+                gradBatchHistoryService,
+                distributionRunStatusUpdateProcessor,
+                jsonTransformer,
+                gradSchoolOfRecordFilter,
+                gradValidation
+        );
+    }
+
     @Test
     public void testRegGradJob() {
-        boolean exceptionIsThrown = false;
-        JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, MANUAL);
-        builder.addString(JOB_TYPE, REGALG);
+        Job job = org.mockito.Mockito.mock(Job.class);
+        JobExecution jobExecution = new JobExecution(210L);
 
         try {
-            org.mockito.Mockito.when(asyncJobLauncher.run(jobRegistry.getJob("GraduationBatchJob"), builder.toJobParameters())).thenReturn(new JobExecution(210L));
-            jobLauncherController.launchRegGradJob();
-        } catch (Exception e) {
-            exceptionIsThrown = true;
-        }
+            ThreadLocalStateUtil.setCurrentUser("test-user");
+            org.mockito.Mockito.when(jobRegistry.getJob("GraduationBatchJob")).thenReturn(job);
+            org.mockito.Mockito.when(asyncJobLauncher.run(any(Job.class), any(JobParameters.class))).thenReturn(jobExecution);
+            ResponseEntity<BatchJobResponse> response = jobLauncherController.launchRegGradJob();
 
-        assertThat(builder).isNotNull();
+            ArgumentCaptor<JobParameters> jobParametersCaptor = ArgumentCaptor.forClass(JobParameters.class);
+            org.mockito.Mockito.verify(asyncJobLauncher).run(any(Job.class), jobParametersCaptor.capture());
+
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getTriggerBy()).isEqualTo(BATCH);
+            assertThat(jobParametersCaptor.getValue().getString(JOB_TRIGGER)).isEqualTo(BATCH);
+            assertThat(jobParametersCaptor.getValue().getString(JOB_TYPE)).isEqualTo(REGALG);
+            assertThat(jobParametersCaptor.getValue().getString(RUN_BY)).isEqualTo("test-user");
+        } catch (Exception e) {
+            assertThat(e).isNull();
+        } finally {
+            ThreadLocalStateUtil.setCurrentUser(null);
+        }
     }
 
     @Test
@@ -148,21 +183,17 @@ public class JobLauncherControllerTest {
 
     @Test
     public void testLoadStudentIDs() {
-        // ID
-        UUID studentID = UUID.randomUUID();
         String pen = "123456789";
 
         LoadStudentData loadStudentData = new LoadStudentData();
         loadStudentData.setPen(pen);
 
-        boolean exceptionIsThrown = false;
-        try {
-            jobLauncherController.loadStudentIDs(Arrays.asList(loadStudentData));
-        } catch (Exception e) {
-            exceptionIsThrown = true;
-        }
+        org.mockito.Mockito.when(restUtils.getStudentByPenFromStudentAPI(Arrays.asList(loadStudentData))).thenReturn(1);
 
-        assertThat(exceptionIsThrown).isTrue();
+        ResponseEntity<String> response = jobLauncherController.loadStudentIDs(Arrays.asList(loadStudentData));
+
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        assertThat(response.getBody()).isEqualTo("Record Added Successfully");
 
     }
 
