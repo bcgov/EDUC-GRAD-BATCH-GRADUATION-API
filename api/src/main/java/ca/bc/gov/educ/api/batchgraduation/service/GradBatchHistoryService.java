@@ -32,9 +32,9 @@ public class GradBatchHistoryService {
             BatchStatusEnum.STOPPING.name()
     );
     private static final Duration ACTIVE_WINDOW = Duration.ofHours(12);
-    private static final Duration HEARTBEAT_THROTTLE = Duration.ofSeconds(5);
-    private static final Duration WARNING_THRESHOLD = Duration.ofMinutes(10);
-    private static final Duration INSPECT_THRESHOLD = Duration.ofMinutes(20);
+    private static final Duration HEARTBEAT_THROTTLE = Duration.ofSeconds(15);
+    private static final Duration WARNING_THRESHOLD = Duration.ofMinutes(5);
+    private static final Duration INSPECT_THRESHOLD = Duration.ofMinutes(15);
     private static final ZoneId SYSTEM_ZONE = ZoneId.systemDefault();
     private static final String HEALTH_OK = "ok";
     private static final String HEALTH_WARNING = "warning";
