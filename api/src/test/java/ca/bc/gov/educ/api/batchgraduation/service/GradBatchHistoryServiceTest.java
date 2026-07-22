@@ -106,6 +106,37 @@ public class GradBatchHistoryServiceTest {
     }
 
     @Test
+    public void testSaveGradAlgorithmJobHistory_when_terminalStatus_removesHeartbeatThrottleEntry() {
+        Long batchId = 3010L;
+        BatchGradAlgorithmJobHistoryEntity startedHistory = new BatchGradAlgorithmJobHistoryEntity();
+        startedHistory.setId(UUID.randomUUID());
+        startedHistory.setJobExecutionId(batchId);
+        startedHistory.setStatus(BatchStatusEnum.STARTED.name());
+        startedHistory.setJobType("REGALG");
+        startedHistory.setTriggerBy("MANUAL");
+
+        when(batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId))
+                .thenReturn(Optional.of(startedHistory));
+        when(batchGradAlgorithmJobHistoryRepository.save(any(BatchGradAlgorithmJobHistoryEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        gradBatchHistoryService.touchHeartbeat(batchId);
+
+        BatchGradAlgorithmJobHistoryEntity completedHistory = new BatchGradAlgorithmJobHistoryEntity();
+        completedHistory.setId(startedHistory.getId());
+        completedHistory.setJobExecutionId(batchId);
+        completedHistory.setStatus(BatchStatusEnum.COMPLETED.name());
+        completedHistory.setJobType("REGALG");
+        completedHistory.setTriggerBy("MANUAL");
+        completedHistory.setEndTime(LocalDateTime.now());
+
+        gradBatchHistoryService.saveGradAlgorithmJobHistory(completedHistory);
+        gradBatchHistoryService.touchHeartbeat(batchId);
+
+        verify(batchGradAlgorithmJobHistoryRepository, times(2)).save(any(BatchGradAlgorithmJobHistoryEntity.class));
+    }
+
+    @Test
     public void testGetBatchPipelineStatus_when_noRuns() {
         when(batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(anyList(), any(LocalDateTime.class))).thenReturn(Collections.emptyList());
 
@@ -231,6 +262,30 @@ public class GradBatchHistoryServiceTest {
         gradBatchHistoryService.touchHeartbeat(batchId);
 
         verify(batchGradAlgorithmJobHistoryRepository, never()).save(any(BatchGradAlgorithmJobHistoryEntity.class));
+    }
+
+    @Test
+    public void testTouchHeartbeat_when_historyRemoved_thenSubsequentCallStillDoesNothing() {
+        Long batchId = 3004L;
+        BatchGradAlgorithmJobHistoryEntity history = createJobHistory(
+                batchId,
+                "REGALG",
+                BatchStatusEnum.STARTED.name(),
+                LocalDateTime.now().minusMinutes(5),
+                LocalDateTime.now().minusMinutes(1)
+        );
+
+        when(batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId))
+                .thenReturn(Optional.of(history))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.empty());
+        when(batchGradAlgorithmJobHistoryRepository.save(any(BatchGradAlgorithmJobHistoryEntity.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        gradBatchHistoryService.touchHeartbeat(batchId);
+        gradBatchHistoryService.touchHeartbeat(batchId);
+
+        verify(batchGradAlgorithmJobHistoryRepository, times(1)).save(any(BatchGradAlgorithmJobHistoryEntity.class));
     }
 
     @Test

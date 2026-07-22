@@ -31,6 +31,11 @@ public class GradBatchHistoryService {
             BatchStatusEnum.STARTED.name(),
             BatchStatusEnum.STOPPING.name()
     );
+    private static final Set<String> TERMINAL_STATUSES = Set.of(
+            BatchStatusEnum.COMPLETED.name(),
+            BatchStatusEnum.FAILED.name(),
+            BatchStatusEnum.STOPPED.name()
+    );
     private static final Duration ACTIVE_WINDOW = Duration.ofHours(12);
     private static final Duration HEARTBEAT_THROTTLE = Duration.ofSeconds(15);
     private static final Duration WARNING_THRESHOLD = Duration.ofMinutes(5);
@@ -61,8 +66,9 @@ public class GradBatchHistoryService {
             LOGGER.info("Updating BatchGradAlgorithmJobHistoryEntity for Id :{} Status: {}, EndTime: {} ", ent.getJobExecutionId(), ent.getStatus(), ent.getEndTime());
             BatchGradAlgorithmJobHistoryEntity current = optional.get();
             current.setStatus(ent.getStatus());
-            if(BatchStatusEnum.COMPLETED.name().equalsIgnoreCase(ent.getStatus()) || BatchStatusEnum.FAILED.name().equalsIgnoreCase(ent.getStatus()) || BatchStatusEnum.STOPPED.name().equalsIgnoreCase(ent.getStatus())) {
+            if (isTerminalStatus(ent.getStatus())) {
                 current.setEndTime(ent.getEndTime());
+                heartbeatThrottleMap.remove(ent.getJobExecutionId());
             }
             current.setExpectedStudentsProcessed(ent.getExpectedStudentsProcessed());
             current.setActualStudentsProcessed(ent.getActualStudentsProcessed());
@@ -93,9 +99,15 @@ public class GradBatchHistoryService {
         }
         BatchGradAlgorithmJobHistoryEntity history = batchGradAlgorithmJobHistoryRepository.findByJobExecutionId(batchId).orElse(null);
         if (history != null) {
+            if (isTerminalStatus(history.getStatus())) {
+                heartbeatThrottleMap.remove(batchId);
+                return;
+            }
             history.setLastHeartbeatTime(now);
             batchGradAlgorithmJobHistoryRepository.save(history);
             heartbeatThrottleMap.put(batchId, now);
+        } else {
+            heartbeatThrottleMap.remove(batchId);
         }
     }
 
@@ -156,6 +168,10 @@ public class GradBatchHistoryService {
             return HEALTH_WARNING;
         }
         return HEALTH_OK;
+    }
+
+    private boolean isTerminalStatus(String status) {
+        return status != null && TERMINAL_STATUSES.contains(status.toUpperCase(Locale.ROOT));
     }
 
     @Transactional
