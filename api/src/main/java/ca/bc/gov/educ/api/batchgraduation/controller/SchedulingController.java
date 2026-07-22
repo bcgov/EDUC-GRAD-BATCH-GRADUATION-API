@@ -1,8 +1,10 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessing;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
+import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskDefinition;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
@@ -31,6 +33,7 @@ public class SchedulingController {
     @Autowired TaskSchedulingService taskSchedulingService;
     @Autowired TaskDefinition taskDefinition;
     @Autowired GradDashboardService gradDashboardService;
+    @Autowired GradBatchHistoryService gradBatchHistoryService;
 
 
     @PostMapping(EducGradBatchGraduationApiConstants.SCHEDULE_JOBS)
@@ -72,6 +75,13 @@ public class SchedulingController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.PIPELINE_STATUS)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Get REGALG/TVRRUN pipeline status", description = "Get REGALG/TVRRUN pipeline status", tags = { "Schedule" })
+    public ResponseEntity<BatchPipelineStatus> getBatchPipelineStatus() {
+        return new ResponseEntity<>(gradBatchHistoryService.getBatchPipelineStatus(), HttpStatus.OK);
     }
 
     @PutMapping(EducGradBatchGraduationApiConstants.UPDATE_ENABLED)

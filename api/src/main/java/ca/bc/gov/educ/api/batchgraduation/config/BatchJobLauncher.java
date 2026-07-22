@@ -1,16 +1,15 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
+import ca.bc.gov.educ.api.batchgraduation.service.BatchLaunchService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
+import ca.bc.gov.educ.api.batchgraduation.service.TvrLaunchService;
+import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.core.LockAssert;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.configuration.JobRegistry;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -20,120 +19,61 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 /**
  * This bean schedules and runs our Spring Batch job.
  */
+@Slf4j
 @Component
 public class BatchJobLauncher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BatchJobLauncher.class);
+    private final Job userScheduledBatchJobRefresher;
+    private final JobLauncher jobLauncher;
+    private final GradDashboardService gradDashboardService;
+    private final BatchLaunchService batchLaunchService;
+    private final TvrLaunchService tvrLaunchService;
 
     @Autowired
-    @Qualifier("GraduationBatchJob")
-    private Job graduationBatchJob;
-
-    @Autowired
-    @Qualifier("tvrBatchJob")
-    private Job tvrBatchJob;
-
-    @Autowired
-    @Qualifier("DistributionBatchJob")
-    private Job distributionBatchJob;
-
-    @Autowired
-    @Qualifier("userScheduledBatchJobRefresher")
-    private Job userScheduledBatchJobRefresher;
-
-    @Autowired
-    @Qualifier("asyncJobLauncher")
-    private JobLauncher jobLauncher;
-
-    @Autowired
-    private JobRegistry jobRegistry;
-
-    @Autowired
-    private JobExplorer jobExplorer;
-
-    @Autowired
-    private GradDashboardService gradDashboardService;
+    public BatchJobLauncher(
+            @Qualifier("userScheduledBatchJobRefresher") Job userScheduledBatchJobRefresher,
+            @Qualifier("asyncJobLauncher") JobLauncher jobLauncher,
+            GradDashboardService gradDashboardService,
+            BatchLaunchService batchLaunchService,
+            TvrLaunchService tvrLaunchService
+    ) {
+        this.userScheduledBatchJobRefresher = userScheduledBatchJobRefresher;
+        this.jobLauncher = jobLauncher;
+        this.gradDashboardService = gradDashboardService;
+        this.batchLaunchService = batchLaunchService;
+        this.tvrLaunchService = tvrLaunchService;
+    }
 
     private static final String TIME="time";
-    private static final String JOB_TRIGGER="jobTrigger";
-    private static final String BATCH_TRIGGER = "BATCH";
-    private static final String JOB_TYPE="jobType";
-    private static final String BATCH_STARTED = "Batch Job was started";
-    private static final String BATCH_ENDED = "Batch Job was stopped";
+    private static final String BATCH_STARTED = "job was started";
+    private static final String BATCH_ENDED = "job was stopped";
     private static final String ERROR_MSG = "Error {}";
 
     @Scheduled(cron = "${batch.regalg.cron}")
     @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "${batch.system.scheduled.routines.lockAtLeastFor}", lockAtMostFor = "${batch.system.scheduled.routines.lockAtMostFor}")
     public void runRegularGradAlgorithm() {
-        LOGGER.info(BATCH_STARTED);
+        log.info("scheduled REGALG {}", BATCH_STARTED);
         LockAssert.assertLocked();
-        JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
-        builder.addString(JOB_TYPE, "REGALG");
-        Optional<BatchProcessingEntity> bPresent = gradDashboardService.findBatchProcessing("REGALG");
-        if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
-            try {
-                jobLauncher.run(graduationBatchJob, builder.toJobParameters());
-            } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                    | JobParametersInvalidException | IllegalArgumentException e) {
-                LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
-            }
-        }
-        LOGGER.info(BATCH_ENDED);
-    }
-
-    @Scheduled(cron = "${batch.tvrrun.cron}")
-    @SchedulerLock(name = "tvrBatchJob", lockAtLeastFor = "${batch.system.scheduled.routines.lockAtLeastFor}", lockAtMostFor = "${batch.system.scheduled.routines.lockAtMostFor}")
-    public void runTranscriptVerificationReportProcess() {
-        LOGGER.info(BATCH_STARTED);
-        LockAssert.assertLocked();
-        JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
-        builder.addString(JOB_TYPE, "TVRRUN");
-        Optional<BatchProcessingEntity> bPresent = gradDashboardService.findBatchProcessing("TVRRUN");
-        if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
-            try {
-                jobLauncher.run(tvrBatchJob, builder.toJobParameters());
-            } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                    | JobParametersInvalidException | IllegalArgumentException e) {
-                LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
-            }
-        }
-        LOGGER.info(BATCH_ENDED);
+        batchLaunchService.launchRegularGradAlgorithm();
+        log.info("scheduled REGALG {}", BATCH_ENDED);
     }
 
     @Scheduled(cron = "${batch.distrun.cron}")
     @SchedulerLock(name = "DistributionBatchJob", lockAtLeastFor = "PT10S", lockAtMostFor = "PT120M")
     public void runMonthlyDistributionProcess() {
-        LOGGER.info(BATCH_STARTED);
+        log.info("scheduled monthly distribution {}", BATCH_STARTED);
         LockAssert.assertLocked();
-        JobParametersBuilder builder = new JobParametersBuilder();
-        builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
-        builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
-        builder.addString(JOB_TYPE, "DISTRUN");
-        Optional<BatchProcessingEntity> bPresent = gradDashboardService.findBatchProcessing("DISTRUN");
-        if(bPresent.isPresent() && bPresent.get().getEnabled().equalsIgnoreCase("Y")) {
-            try {
-                jobLauncher.run(distributionBatchJob, builder.toJobParameters());
-            } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-                    | JobParametersInvalidException | IllegalArgumentException e) {
-                LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
-            }
-        }
-        LOGGER.info(BATCH_ENDED);
+        batchLaunchService.launchDistributionRunBatchJob();
+        log.info("scheduled monthly distribution {}", BATCH_ENDED);
     }
 
     @Scheduled(fixedDelayString = "PT30M")
     @SchedulerLock(name = "userScheduledBatchJobRefresher", lockAtLeastFor = "PT10S", lockAtMostFor = "PT5M")
     public void refreshUserScheduledQueue() {
-        LOGGER.info(BATCH_STARTED);
+        log.info("user scheduled queue {}", BATCH_STARTED);
         LockAssert.assertLocked();
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
@@ -141,10 +81,10 @@ public class BatchJobLauncher {
             jobLauncher.run(userScheduledBatchJobRefresher, builder.toJobParameters());
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
                 | JobParametersInvalidException | IllegalArgumentException e) {
-            LOGGER.debug(ERROR_MSG, e.getLocalizedMessage());
+            log.debug(ERROR_MSG, e.getLocalizedMessage());
         }
 
-        LOGGER.info(BATCH_ENDED);
+        log.info("user scheduled queue {}", BATCH_ENDED);
     }
 
     @Scheduled(cron = "${batch.purge-old-records.cron}")
@@ -152,11 +92,12 @@ public class BatchJobLauncher {
             lockAtLeastFor = "PT1H", lockAtMostFor = "PT1H") //midnight job so lock for an hour
     public void purgeOldRecords() {
         LockAssert.assertLocked();
+        log.info("purging old batch records {}", BATCH_STARTED);
         try {
             this.gradDashboardService.purgeOldBatchHistoryRecords();
             this.gradDashboardService.purgeOldSpringMetaDataRecords();
         } catch (Exception e) {
-            LOGGER.error(ERROR_MSG, e.getLocalizedMessage());
+            log.error(ERROR_MSG, e.getLocalizedMessage());
         }
     }
 }

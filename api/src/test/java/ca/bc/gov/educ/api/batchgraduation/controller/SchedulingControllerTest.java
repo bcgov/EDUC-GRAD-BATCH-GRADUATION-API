@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessing;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.ScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
@@ -29,6 +30,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -41,7 +44,7 @@ public class SchedulingControllerTest {
     @Mock
     GradDashboardService gradDashboardService;
 
-    @MockBean
+    @Mock
     GradBatchHistoryService gradBatchHistoryService;
 
     @Mock
@@ -77,7 +80,7 @@ public class SchedulingControllerTest {
         task.setJobIdReference(jobId);
         Mockito.doNothing().when(taskSchedulingService).scheduleATask(jobId,taskDefinition,"0 34 4 5 6 *");
         schedulingController.scheduleATask(task, "TVRRUN");
-        Mockito.verify(taskSchedulingService).scheduleATask(jobId,taskDefinition,"0 34 4 5 6 *");
+        verify(taskSchedulingService).scheduleATask(jobId,taskDefinition,"0 34 4 5 6 *");
     }
     @Test
     public void testscheduleATask_2() {
@@ -90,7 +93,7 @@ public class SchedulingControllerTest {
         task.setJobIdReference(jobId);
         Mockito.doNothing().when(taskSchedulingService).scheduleATask(jobId,taskDefinition,"0 34 4 5 6 *");
         schedulingController.scheduleATask(task, "TVRRUN");
-        Mockito.verify(taskSchedulingService).scheduleATask(jobId,taskDefinition,"0 34 4 5 6 *");
+        verify(taskSchedulingService).scheduleATask(jobId,taskDefinition,"0 34 4 5 6 *");
     }
 
     @Test
@@ -98,7 +101,7 @@ public class SchedulingControllerTest {
         UUID jobId = UUID.randomUUID();
         Mockito.doNothing().when(taskSchedulingService).removeScheduledTask(jobId);
         schedulingController.removeJob(jobId.toString());
-        Mockito.verify(taskSchedulingService).removeScheduledTask(jobId);
+        verify(taskSchedulingService).removeScheduledTask(jobId);
     }
 
     @Test
@@ -109,7 +112,7 @@ public class SchedulingControllerTest {
         sJobs.setJobName("SRBJ");
         sJobs.setId(UUID.randomUUID());
         sJobs.setCronExpression("0 34 4 5 6 *");
-        Mockito.when(taskSchedulingService.listScheduledJobs()).thenReturn(List.of(sJobs));
+        when(taskSchedulingService.listScheduledJobs()).thenReturn(List.of(sJobs));
         ResponseEntity<List<UserScheduledJobs>> res = schedulingController.listJobs();
         assertThat(res.getBody()).hasSize(1);
     }
@@ -122,7 +125,7 @@ public class SchedulingControllerTest {
         sJobs.setJobName("SRBJ");
         sJobs.setRowId("1231123_SRBJ_SKS");
         sJobs.setCronExpression("0 34 4 5 6 *");
-        Mockito.when(taskSchedulingService.listScheduledJobs()).thenReturn(new ArrayList<>());
+        when(taskSchedulingService.listScheduledJobs()).thenReturn(new ArrayList<>());
         ResponseEntity<List<UserScheduledJobs>> res = schedulingController.listJobs();
         assertThat(res.getBody()).isNull();
     }
@@ -134,14 +137,14 @@ public class SchedulingControllerTest {
         sJobs.setId(UUID.randomUUID());
         sJobs.setEnabled("Y");
         sJobs.setCronExpression("0 34 4 5 6 *");
-        Mockito.when(gradDashboardService.getProcessingList()).thenReturn(List.of(sJobs));
+        when(gradDashboardService.getProcessingList()).thenReturn(List.of(sJobs));
         ResponseEntity<List<BatchProcessing>> res = schedulingController.processingList();
         assertThat(res.getBody()).hasSize(1);
     }
 
     @Test
     public void testprocessingList_empty() {
-        Mockito.when(taskSchedulingService.listScheduledJobs()).thenReturn(new ArrayList<>());
+        when(taskSchedulingService.listScheduledJobs()).thenReturn(new ArrayList<>());
         ResponseEntity<List<UserScheduledJobs>> res = schedulingController.listJobs();
         assertThat(res.getBody()).isNull();
     }
@@ -154,15 +157,28 @@ public class SchedulingControllerTest {
         sJobs.setId(UUID.randomUUID());
         sJobs.setEnabled("Y");
         sJobs.setCronExpression("0 34 4 5 6 *");
-        Mockito.when(gradDashboardService.toggleProcess(jobType)).thenReturn(sJobs);
+        when(gradDashboardService.toggleProcess(jobType)).thenReturn(sJobs);
         ResponseEntity<BatchProcessing> res = schedulingController.toggleProcess(jobType);
         assertThat(res.getBody()).isNotNull();
     }
 
     @Test
     public void testprocessingList_3() {
-        Mockito.when(gradDashboardService.toggleProcess("TVRRUN")).thenReturn(null);
+        when(gradDashboardService.toggleProcess("TVRRUN")).thenReturn(null);
         ResponseEntity<BatchProcessing> res = schedulingController.toggleProcess("TVRRUN");
         assertThat(res.getBody()).isNull();
+    }
+
+    @Test
+    public void testGetBatchPipelineStatus() {
+        BatchPipelineStatus batchPipelineStatus = new BatchPipelineStatus();
+        batchPipelineStatus.setRunning(true);
+        when(gradBatchHistoryService.getBatchPipelineStatus()).thenReturn(batchPipelineStatus);
+
+        ResponseEntity<BatchPipelineStatus> res = schedulingController.getBatchPipelineStatus();
+
+        assertThat(res.getStatusCodeValue()).isEqualTo(200);
+        assertThat(res.getBody()).isNotNull();
+        assertThat(res.getBody().isRunning()).isTrue();
     }
 }

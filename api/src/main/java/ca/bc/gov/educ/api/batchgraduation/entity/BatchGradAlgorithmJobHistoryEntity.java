@@ -33,6 +33,10 @@ public class BatchGradAlgorithmJobHistoryEntity  extends BaseEntity {
 	@Column(name = "END_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private LocalDateTime endTime;
+
+	@Column(name = "LAST_HEARTBEAT_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private LocalDateTime lastHeartbeatTime;
 	
 	@Column(name = "EXPECTED_STUDENTS_PROCESSED", nullable = true)
     private Long expectedStudentsProcessed;
