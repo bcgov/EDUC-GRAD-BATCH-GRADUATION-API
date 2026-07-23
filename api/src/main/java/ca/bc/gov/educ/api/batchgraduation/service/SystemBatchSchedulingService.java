@@ -49,11 +49,6 @@ public class SystemBatchSchedulingService {
             return;
         }
         Optional<BatchProcessingEntity> scheduleOpt = batchProcessingRepository.findByJobType(REGALG);
-        if (scheduleOpt == null) {
-            log.info("No {} schedule found to initialize", REGALG);
-            cancelScheduledJob(REGALG);
-            return;
-        }
         cancelScheduledJob(REGALG);
         if (scheduleOpt.isEmpty()) {
             log.info("No {} schedule found to initialize", REGALG);
