@@ -13,7 +13,7 @@ import java.util.Date;
 public class EducGradBatchGraduationApiConstants {
 
     // **** API Mappings
-	public static final String API_ROOT_MAPPING = "";
+    public static final String API_ROOT_MAPPING = "";
     public static final String API_VERSION = "v1";
     public static final String CORRELATION_ID = "correlationID";
     public static final String GRAD_BATCH_API_ROOT_MAPPING = "/api/" + API_VERSION + "/batch";
@@ -75,7 +75,7 @@ public class EducGradBatchGraduationApiConstants {
 
     // **** Notify the distribution job is completed, and update its status(batch job & student) back
     public static final String NOTIFY_DISTRIBUTION_JOB_IS_COMPLETED = "/notifyDistributionJobCompleted";
-       
+
     // **** Default Date format constants
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
     public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -113,7 +113,7 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${endpoint.grad-graduation-api.graduatestudent.url}")
     private String graduationApiUrl;
-    
+
     @Value("${endpoint.grad-graduation-api.reportonlyrun.url}")
     private String graduationApiReportOnlyUrl;
 
@@ -358,5 +358,17 @@ public class EducGradBatchGraduationApiConstants {
 
     @Value("${batch.purge-old-records.staleInDays}")
     private int recordsStaleInDays;
+
+    @Value("${nats.server-url}")
+    private String natsServer;
+
+    @Value("${nats.maxReconnect}")
+    private int maxReconnect;
+
+    @Value("${nats.connectionName}")
+    private String connectionName;
+
+    @Value("${nats.subjects.batch-schedule-updated}")
+    private String batchScheduleUpdatedSubject;
 
 }

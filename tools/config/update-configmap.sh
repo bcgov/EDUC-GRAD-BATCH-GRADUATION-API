@@ -10,6 +10,8 @@ PSI_SELECTION_NAMESPACE=$6
 SPLUNK_TOKEN=$7
 APP_LOG_LEVEL=$8
 
+NATS_URL="nats://nats.${COMMON_NAMESPACE}-${envValue}.svc.cluster.local:4222"
+
 SPLUNK_URL="gww.splunk.educ.gov.bc.ca"
 FLB_CONFIG="[SERVICE]
    Flush        1
@@ -79,6 +81,9 @@ oc create -n "$OPENSHIFT_NAMESPACE"-"$envValue" configmap "$APP_NAME"-config-map
  --from-literal=CRON_SYSTEM_SCHEDULED_ROUTINES_LOCK_AT_MOST_FOR="PT600M" \
  --from-literal=CRON_USER_SCHEDULED_JOBS_LOCK_AT_LEAST_FOR="10" \
  --from-literal=CRON_USER_SCHEDULED_JOBS_LOCK_AT_MOST_FOR="180" \
+ --from-literal=NATS_SERVER_URL="$NATS_URL" \
+ --from-literal=NATS_CONNECTION_NAME="GRAD-BATCH-GRADUATION-API" \
+ --from-literal=NATS_MAX_RECONNECT="60" \
  --dry-run=client -o yaml | oc apply -f -
 
 echo Creating config map "$APP_NAME"-flb-sc-config-map

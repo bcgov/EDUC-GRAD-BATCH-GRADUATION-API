@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
+import ca.bc.gov.educ.api.batchgraduation.messaging.BatchScheduleUpdatePublisher;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingSchedule;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingScheduleUpdateRequest;
@@ -22,13 +23,16 @@ public class BatchProcessingScheduleService {
     private final BatchProcessingRepository batchProcessingRepository;
     private final SystemBatchSchedulingService systemBatchSchedulingService;
     private final GradBatchHistoryService gradBatchHistoryService;
+    private final BatchScheduleUpdatePublisher batchScheduleUpdatePublisher;
 
     public BatchProcessingScheduleService(BatchProcessingRepository batchProcessingRepository,
                                          SystemBatchSchedulingService systemBatchSchedulingService,
-                                         GradBatchHistoryService gradBatchHistoryService) {
+                                         GradBatchHistoryService gradBatchHistoryService,
+                                         BatchScheduleUpdatePublisher batchScheduleUpdatePublisher) {
         this.batchProcessingRepository = batchProcessingRepository;
         this.systemBatchSchedulingService = systemBatchSchedulingService;
         this.gradBatchHistoryService = gradBatchHistoryService;
+        this.batchScheduleUpdatePublisher = batchScheduleUpdatePublisher;
     }
 
     @Transactional(readOnly = true)
@@ -55,6 +59,7 @@ public class BatchProcessingScheduleService {
         entity.setCronExpression(toDailyCron(scheduledDateTime.toLocalTime()));
         BatchProcessingEntity updated = batchProcessingRepository.save(entity);
         systemBatchSchedulingService.refreshScheduledJob(normalizedJobType);
+        batchScheduleUpdatePublisher.publishScheduleUpdated(normalizedJobType);
         return toScheduleResponse(updated, zoneId);
     }
 

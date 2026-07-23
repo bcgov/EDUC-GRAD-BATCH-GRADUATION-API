@@ -1,6 +1,7 @@
 package ca.bc.gov.educ.api.batchgraduation.service;
 
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
+import ca.bc.gov.educ.api.batchgraduation.messaging.BatchScheduleUpdatePublisher;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingSchedule;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingScheduleUpdateRequest;
@@ -34,6 +35,9 @@ public class BatchProcessingScheduleServiceTest {
 
     @Mock
     private GradBatchHistoryService gradBatchHistoryService;
+
+    @Mock
+    private BatchScheduleUpdatePublisher batchScheduleUpdatePublisher;
 
     @InjectMocks
     private BatchProcessingScheduleService batchProcessingScheduleService;
@@ -77,6 +81,7 @@ public class BatchProcessingScheduleServiceTest {
         assertThat(response.getCronExpression()).isEqualTo("0 0 23 * * *");
         assertThat(response.getStartTime()).isEqualTo("23:00");
         verify(systemBatchSchedulingService).refreshScheduledJob("REGALG");
+        verify(batchScheduleUpdatePublisher).publishScheduleUpdated("REGALG");
     }
 
     @Test
