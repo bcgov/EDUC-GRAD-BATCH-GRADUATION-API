@@ -1,6 +1,5 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
-import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
 import ca.bc.gov.educ.api.batchgraduation.service.BatchLaunchService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
 import ca.bc.gov.educ.api.batchgraduation.service.TvrLaunchService;
@@ -30,21 +29,18 @@ public class BatchJobLauncher {
     private final JobLauncher jobLauncher;
     private final GradDashboardService gradDashboardService;
     private final BatchLaunchService batchLaunchService;
-    private final TvrLaunchService tvrLaunchService;
 
     @Autowired
     public BatchJobLauncher(
             @Qualifier("userScheduledBatchJobRefresher") Job userScheduledBatchJobRefresher,
             @Qualifier("asyncJobLauncher") JobLauncher jobLauncher,
             GradDashboardService gradDashboardService,
-            BatchLaunchService batchLaunchService,
-            TvrLaunchService tvrLaunchService
+            BatchLaunchService batchLaunchService
     ) {
         this.userScheduledBatchJobRefresher = userScheduledBatchJobRefresher;
         this.jobLauncher = jobLauncher;
         this.gradDashboardService = gradDashboardService;
         this.batchLaunchService = batchLaunchService;
-        this.tvrLaunchService = tvrLaunchService;
     }
 
     private static final String TIME="time";
@@ -52,7 +48,6 @@ public class BatchJobLauncher {
     private static final String BATCH_ENDED = "job was stopped";
     private static final String ERROR_MSG = "Error {}";
 
-    @Scheduled(cron = "${batch.regalg.cron}")
     @SchedulerLock(name = "GraduationBatchJob", lockAtLeastFor = "${batch.system.scheduled.routines.lockAtLeastFor}", lockAtMostFor = "${batch.system.scheduled.routines.lockAtMostFor}")
     public void runRegularGradAlgorithm() {
         log.info("scheduled REGALG {}", BATCH_STARTED);

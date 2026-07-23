@@ -1,11 +1,15 @@
 package ca.bc.gov.educ.api.batchgraduation.controller;
 
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessing;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingSchedule;
+import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingScheduleUpdateRequest;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.Task;
 import ca.bc.gov.educ.api.batchgraduation.model.UserScheduledJobs;
 import ca.bc.gov.educ.api.batchgraduation.service.GradBatchHistoryService;
+import ca.bc.gov.educ.api.batchgraduation.service.BatchProcessingScheduleService;
 import ca.bc.gov.educ.api.batchgraduation.service.GradDashboardService;
+import ca.bc.gov.educ.api.batchgraduation.service.SystemBatchSchedulingService;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskDefinition;
 import ca.bc.gov.educ.api.batchgraduation.service.TaskSchedulingService;
 import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
@@ -30,11 +34,22 @@ import java.util.UUID;
 @OpenAPIDefinition(info = @Info(title = "API for Manual Triggering of batch process.", description = "This API is for Manual Triggering of batch process.", version = "1"), security = {@SecurityRequirement(name = "OAUTH2", scopes = {"LOAD_STUDENT_IDS","LOAD_BATCH_DASHBOARD","RUN_GRAD_ALGORITHM"})})
 public class SchedulingController {
 
-    @Autowired TaskSchedulingService taskSchedulingService;
-    @Autowired TaskDefinition taskDefinition;
-    @Autowired GradDashboardService gradDashboardService;
-    @Autowired GradBatchHistoryService gradBatchHistoryService;
+    TaskSchedulingService taskSchedulingService;
+    TaskDefinition taskDefinition;
+    GradDashboardService gradDashboardService;
+    GradBatchHistoryService gradBatchHistoryService;
+    BatchProcessingScheduleService batchProcessingScheduleService;
+    SystemBatchSchedulingService systemBatchSchedulingService;
 
+    @Autowired
+    public SchedulingController(TaskSchedulingService taskSchedulingService, TaskDefinition taskDefinition, GradDashboardService gradDashboardService, GradBatchHistoryService gradBatchHistoryService, BatchProcessingScheduleService batchProcessingScheduleService, SystemBatchSchedulingService systemBatchSchedulingService) {
+        this.taskSchedulingService = taskSchedulingService;
+        this.taskDefinition = taskDefinition;
+        this.gradDashboardService = gradDashboardService;
+        this.gradBatchHistoryService = gradBatchHistoryService;
+        this.batchProcessingScheduleService = batchProcessingScheduleService;
+        this.systemBatchSchedulingService = systemBatchSchedulingService;
+    }
 
     @PostMapping(EducGradBatchGraduationApiConstants.SCHEDULE_JOBS)
     @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
@@ -92,6 +107,22 @@ public class SchedulingController {
         if(res == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        systemBatchSchedulingService.refreshScheduledJob(jobType);
         return new ResponseEntity<>(res, HttpStatus.OK);
+    }
+
+    @GetMapping(EducGradBatchGraduationApiConstants.PROCESSING_SCHEDULE)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Get scheduled batch start time", description = "Get scheduled batch start time", tags = { "Schedule" })
+    public ResponseEntity<BatchProcessingSchedule> getProcessingSchedule(@PathVariable String jobType) {
+        return new ResponseEntity<>(batchProcessingScheduleService.getBatchProcessingSchedule(jobType), HttpStatus.OK);
+    }
+
+    @PutMapping(EducGradBatchGraduationApiConstants.PROCESSING_SCHEDULE)
+    @PreAuthorize(PermissionsConstants.RUN_GRAD_ALGORITHM)
+    @Operation(summary = "Update scheduled batch start time", description = "Update scheduled batch start time", tags = { "Schedule" })
+    public ResponseEntity<BatchProcessingSchedule> updateProcessingSchedule(@PathVariable String jobType,
+                                                                           @RequestBody BatchProcessingScheduleUpdateRequest request) {
+        return new ResponseEntity<>(batchProcessingScheduleService.updateBatchProcessingSchedule(jobType, request), HttpStatus.OK);
     }
 }

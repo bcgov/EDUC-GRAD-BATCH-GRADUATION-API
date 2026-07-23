@@ -66,6 +66,7 @@ public class EducGradBatchGraduationApiConstants {
 
     public static final String PROCESSING_LIST = "/processing/all";
     public static final String UPDATE_ENABLED = "/processing/toggle/{jobType}";
+    public static final String PROCESSING_SCHEDULE = "/processing/schedule/{jobType}";
     public static final String PIPELINE_STATUS = "/status";
 
     public static final String LOAD_STUDENT_IDS = "/loadstudentIds";
