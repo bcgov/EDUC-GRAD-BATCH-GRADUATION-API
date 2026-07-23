@@ -1,11 +1,17 @@
 package ca.bc.gov.educ.api.batchgraduation.config;
 
+import ca.bc.gov.educ.api.batchgraduation.messaging.BatchScheduleUpdatePublisher;
+import ca.bc.gov.educ.api.batchgraduation.messaging.BatchScheduleUpdateSubscriber;
+import ca.bc.gov.educ.api.batchgraduation.messaging.NatsConnection;
+import io.nats.client.Connection;
+import org.mockito.Mockito;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.SyncTaskExecutor;
@@ -42,6 +48,31 @@ public class BatchConfig {
         threadPoolTaskScheduler.setPoolSize(5);
         threadPoolTaskScheduler.setThreadNamePrefix(
                 "ThreadPoolTaskScheduler");
+        threadPoolTaskScheduler.initialize();
         return threadPoolTaskScheduler;
+    }
+
+    @Bean
+    @Primary
+    public Connection connection() {
+        return Mockito.mock(Connection.class);
+    }
+
+    @Bean
+    @Primary
+    public NatsConnection natsConnection() {
+        return Mockito.mock(NatsConnection.class);
+    }
+
+    @Bean
+    @Primary
+    public BatchScheduleUpdatePublisher batchScheduleUpdatePublisher() {
+        return Mockito.mock(BatchScheduleUpdatePublisher.class);
+    }
+
+    @Bean
+    @Primary
+    public BatchScheduleUpdateSubscriber batchScheduleUpdateSubscriber() {
+        return Mockito.mock(BatchScheduleUpdateSubscriber.class);
     }
 }

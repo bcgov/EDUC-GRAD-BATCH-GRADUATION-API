@@ -53,6 +53,7 @@ public class JobLauncherController {
     private static final String RERUN_TYPE = "reRunType";
     private static final String RUN_BY = "runBy";
     private static final String PREV_BATCH_ID = "previousBatchId";
+    private static final String BATCH = "BATCH";
     private static final String MANUAL = "MANUAL";
     private static final String TVRRUN = "TVRRUN";
     private static final String REGALG = "REGALG";
@@ -132,10 +133,10 @@ public class JobLauncherController {
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(RUN_BY, ThreadLocalStateUtil.getCurrentUser());
-        builder.addString(JOB_TRIGGER, MANUAL);
+        builder.addString(JOB_TRIGGER, BATCH);
         builder.addString(JOB_TYPE, REGALG);
         response.setJobType(REGALG);
-        response.setTriggerBy(MANUAL);
+        response.setTriggerBy(BATCH);
         response.setStartTime(LocalDateTime.now());
         response.setStatus(BatchStatusEnum.STARTED.name());
 
