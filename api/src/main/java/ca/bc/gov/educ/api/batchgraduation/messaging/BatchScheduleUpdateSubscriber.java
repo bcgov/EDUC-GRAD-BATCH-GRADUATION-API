@@ -8,6 +8,7 @@ import io.nats.client.Dispatcher;
 import io.nats.client.Message;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Component
+@Profile("!test")
 @Slf4j
 public class BatchScheduleUpdateSubscriber {
   private final Connection connection;

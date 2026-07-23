@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.nats.client.Connection;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -12,6 +13,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Component
+@Profile("!test")
 @Slf4j
 public class BatchScheduleUpdatePublisher {
   private final Connection connection;

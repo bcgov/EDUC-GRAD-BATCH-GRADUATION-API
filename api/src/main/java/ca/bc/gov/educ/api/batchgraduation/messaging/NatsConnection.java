@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.threads.EnhancedQueueExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.io.Closeable;
@@ -20,6 +21,7 @@ import java.time.Duration;
  * The type Nats connection.
  */
 @Component
+@Profile("!test")
 @Slf4j
 public class NatsConnection implements Closeable {
   /**

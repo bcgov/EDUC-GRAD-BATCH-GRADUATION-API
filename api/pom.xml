@@ -18,6 +18,7 @@
             src/main/java/ca/bc/gov/educ/api/batchgraduation/config/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/controller/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/model/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/messaging/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/entity/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/repository/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/exception/**,
@@ -34,6 +35,7 @@
         <sonar.coverage.exclusions>
             src/main/resources/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/config/**,
+            src/main/java/ca/bc/gov/educ/api/batchgraduation/messaging/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/model/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/entity/**,
             src/main/java/ca/bc/gov/educ/api/batchgraduation/repository/**,
