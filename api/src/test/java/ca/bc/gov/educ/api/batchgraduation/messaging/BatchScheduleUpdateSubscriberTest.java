@@ -14,6 +14,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDateTime;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -58,6 +60,16 @@ public class BatchScheduleUpdateSubscriberTest {
   }
 
   @Test
+  public void testSubscribe_whenAlreadySubscribed_doesNothing() {
+    when(connection.createDispatcher(any())).thenReturn(dispatcher);
+
+    subscriber.subscribe();
+    subscriber.subscribe();
+
+    verify(connection).createDispatcher(any());
+  }
+
+  @Test
   public void testHandleMessage_refreshesScheduleForOtherPodEvent() throws Exception {
     BatchScheduleUpdateEvent event = new BatchScheduleUpdateEvent();
     event.setJobType("REGALG");
@@ -80,6 +92,49 @@ public class BatchScheduleUpdateSubscriberTest {
 
     subscriber.handleMessage(message);
 
+    verify(systemBatchSchedulingService).refreshScheduledJob("REGALG");
+  }
+
+  @Test
+  public void testHandleMessage_whenPayloadInvalid_doesNotRefresh() {
+    when(message.getData()).thenReturn("not-json".getBytes());
+
+    subscriber.handleMessage(message);
+
     verify(systemBatchSchedulingService, never()).refreshScheduledJob("REGALG");
+  }
+
+  @Test
+  public void testHandleMessage_whenRefreshThrows_doesNotBubbleException() throws Exception {
+    BatchScheduleUpdateEvent event = new BatchScheduleUpdateEvent();
+    event.setJobType("REGALG");
+    event.setOrigin("batch-api-pod-b");
+    event.setUpdatedAt(LocalDateTime.now());
+    when(message.getData()).thenReturn(objectMapper.writeValueAsBytes(event));
+    org.mockito.Mockito.doThrow(new RuntimeException("boom"))
+        .when(systemBatchSchedulingService).refreshScheduledJob("REGALG");
+
+    subscriber.handleMessage(message);
+
+    verify(systemBatchSchedulingService).refreshScheduledJob("REGALG");
+  }
+
+  @Test
+  public void testShutdown_unsubscribesDispatcher() {
+    when(connection.createDispatcher(any())).thenReturn(dispatcher);
+    subscriber.subscribe();
+
+    subscriber.shutdown();
+
+    verify(dispatcher).unsubscribe("batch.schedule.updated");
+  }
+
+  @Test
+  public void testShutdown_withoutSubscription_isSafe() {
+    try {
+      subscriber.shutdown();
+    } catch (Exception ex) {
+      fail("Shutdown should be safe when no dispatcher exists");
+    }
   }
 }

@@ -14,8 +14,10 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,5 +57,31 @@ public class BatchScheduleUpdatePublisherTest {
     assertThat(event.getJobType()).isEqualTo("REGALG");
     assertThat(event.getOrigin()).isEqualTo("batch-api-pod-a");
     assertThat(event.getUpdatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
+  }
+
+  @Test
+  public void testPublishScheduleUpdated_whenInterrupted_restoresInterruptAndThrows() throws Exception {
+    doThrow(new InterruptedException("interrupted")).when(connection).flush(any(java.time.Duration.class));
+
+    try {
+      publisher.publishScheduleUpdated("REGALG");
+      fail("Expected IllegalStateException");
+    } catch (IllegalStateException ex) {
+      assertThat(ex.getMessage()).isEqualTo("Interrupted while publishing batch schedule update event.");
+      assertThat(Thread.currentThread().isInterrupted()).isTrue();
+      Thread.interrupted();
+    }
+  }
+
+  @Test
+  public void testPublishScheduleUpdated_whenPublishFails_throws() {
+    doThrow(new RuntimeException("publish failed")).when(connection).publish(eq("batch.schedule.updated"), any(byte[].class));
+
+    try {
+      publisher.publishScheduleUpdated("REGALG");
+      fail("Expected IllegalStateException");
+    } catch (IllegalStateException ex) {
+      assertThat(ex.getMessage()).isEqualTo("Failed to publish batch schedule update event.");
+    }
   }
 }
