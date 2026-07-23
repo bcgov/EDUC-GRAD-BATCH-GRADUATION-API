@@ -249,3 +249,10 @@ endpoint:
 splunk:
   log-helper:
     enabled: false
+
+nats:
+  server-url: nats://localhost:4222
+  connectionName: test-batch-api
+  maxReconnect: 1
+  subjects:
+    batch-schedule-updated: grad.batch.schedule.updated

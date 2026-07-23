@@ -14,7 +14,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.time.LocalDateTime;
 
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -46,8 +45,7 @@ public class BatchScheduleUpdateSubscriberTest {
   public void setUp() {
     objectMapper = new ObjectMapper().findAndRegisterModules();
     subscriber = new BatchScheduleUpdateSubscriber(connection, objectMapper, constants, systemBatchSchedulingService);
-    when(constants.getBatchScheduleUpdatedSubject()).thenReturn("batch.schedule.updated");
-    when(constants.getConnectionName()).thenReturn("batch-api-pod-a");
+    when(constants.getBatchScheduleUpdatedSubject()).thenReturn("grad.batch.schedule.updated");
   }
 
   @Test
@@ -56,7 +54,7 @@ public class BatchScheduleUpdateSubscriberTest {
 
     subscriber.subscribe();
 
-    verify(dispatcher).subscribe("batch.schedule.updated");
+    verify(dispatcher).subscribe("grad.batch.schedule.updated");
   }
 
   @Test
@@ -126,7 +124,7 @@ public class BatchScheduleUpdateSubscriberTest {
 
     subscriber.shutdown();
 
-    verify(dispatcher).unsubscribe("batch.schedule.updated");
+    verify(dispatcher).unsubscribe("grad.batch.schedule.updated");
   }
 
   @Test
