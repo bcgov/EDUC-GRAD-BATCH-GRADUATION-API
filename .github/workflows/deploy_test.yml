@@ -18,7 +18,7 @@ env:
 
   REPO_NAME: "educ-grad-batch-graduation-api"
   APP_DOMAIN: ${{ secrets.APP_DOMAIN }}
-  NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}
+  GRAD_NAMESPACE: ${{ secrets.GRAD_NAMESPACE }}
   TAG: "latest"
   BRANCH: "main"
   MIN_CPU: "50m"
@@ -78,8 +78,8 @@ jobs:
           oc rollout cancel deployment/${{ env.SPRING_BOOT_IMAGE_NAME }} 2> /dev/null \
           || true && echo "No rollout in progress"
           
-          oc tag ${{ env.NAMESPACE }}-dev/${{ env.REPO_NAME }}:${{ steps.get-latest-tag.outputs.tag }} \
-          ${{ env.NAMESPACE }}-test/${{ env.REPO_NAME }}:${{ steps.get-latest-tag.outputs.tag }}
+          oc tag ${{ env.GRAD_NAMESPACE }}-dev/${{ env.REPO_NAME }}:${{ steps.get-latest-tag.outputs.tag }} \
+          ${{ env.GRAD_NAMESPACE }}-test/${{ env.REPO_NAME }}:${{ steps.get-latest-tag.outputs.tag }}
           
           # Process and apply deployment template
           oc process -f tools/openshift/api.dc.yaml \
@@ -99,7 +99,7 @@ jobs:
           | bash /dev/stdin \
           test \
           ${{ env.REPO_NAME }} \
-          ${{ env.NAMESPACE }} \
+          ${{ env.GRAD_NAMESPACE }} \
           ${{ env.COMMON_NAMESPACE }} \
           ${{ env.BUSINESS_NAMESPACE }} \
           ${{ env.PSI_SELECTION_NAMESPACE }} \
