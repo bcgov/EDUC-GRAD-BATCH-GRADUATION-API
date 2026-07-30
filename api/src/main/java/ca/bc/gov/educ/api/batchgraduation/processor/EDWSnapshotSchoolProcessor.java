@@ -11,6 +11,8 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import java.util.List;
 
 public class EDWSnapshotSchoolProcessor implements ItemProcessor<String, List<Pair<String, List<SnapshotResponse>>>> {
@@ -27,15 +29,13 @@ public class EDWSnapshotSchoolProcessor implements ItemProcessor<String, List<Pa
 	Long batchId;
 
 	@Override
-	public List<Pair<String, List<SnapshotResponse>>> process(String mincode) throws Exception {
+	public @Nullable List<Pair<String, List<SnapshotResponse>>> process(@NonNull String mincode) throws Exception {
 		summaryDTO.setBatchId(batchId);
 		LOGGER.debug("Processing partitionData for School: {} ", mincode);
 		List<SnapshotResponse> edwStudents = restUtils.getEDWSnapshotStudents(summaryDTO.getGradYear(), mincode);
-		if ("L".equals(summaryDTO.getOption())) {
-			List<SnapshotResponse> list = edwStudents.stream().filter(s -> StringUtils.isNotBlank(s.getGraduatedDate()) ||
-					("12".equals(s.getStudentGrade()) || "AD".equals(s.getStudentGrade()))).toList();
-			return List.of(Pair.of(mincode, list));
-		}
-		return List.of(Pair.of(mincode, edwStudents));
+		List<SnapshotResponse> list = edwStudents.stream()
+				.filter(s -> StringUtils.isBlank(s.getGraduatedDate()))
+				.toList();
+		return List.of(Pair.of(mincode, list));
 	}
 }
