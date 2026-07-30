@@ -37,6 +37,7 @@ public abstract class BaseProcessor implements ItemProcessor<UUID, GraduationStu
     protected GraduationStudentRecord getItem(UUID key) {
         if (key == null)
             return null;
+        gradBatchHistoryService.touchHeartbeat(batchId);
         BatchGraduationStudentRecord item = restUtils.getStudentForBatchInput(key, summaryDTO);
         if (item != null) {
             GraduationStudentRecord inputRecord = new GraduationStudentRecord();

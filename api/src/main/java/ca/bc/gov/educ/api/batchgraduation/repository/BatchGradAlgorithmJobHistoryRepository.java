@@ -21,6 +21,15 @@ public interface BatchGradAlgorithmJobHistoryRepository extends JpaRepository<Ba
 
     Optional<BatchGradAlgorithmJobHistoryEntity> findByJobExecutionId(Long batchId);
 
+    @Query("""
+        select history
+        from BatchGradAlgorithmJobHistoryEntity history
+        where history.jobType in :jobTypes
+          and history.startTime >= :startTime
+        order by history.startTime desc
+        """)
+    List<BatchGradAlgorithmJobHistoryEntity> findRecentByJobTypesAndStartTimeAfter(List<String> jobTypes, LocalDateTime startTime);
+
     @Transactional
     @Modifying
     @Query("delete from BatchGradAlgorithmJobHistoryEntity where createDate <= :createDate")

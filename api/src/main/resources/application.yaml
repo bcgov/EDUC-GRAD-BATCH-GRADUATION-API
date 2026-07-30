@@ -285,3 +285,10 @@ endpoint:
 splunk:
   log-helper:
     enabled: ${ENABLE_SPLUNK_LOG_HELPER}
+
+nats:
+  server-url: ${NATS_SERVER_URL}
+  connectionName: ${NATS_CONNECTION_NAME}
+  maxReconnect: ${NATS_MAX_RECONNECT}
+  subjects:
+    batch-schedule-updated: ${NATS_BATCH_SCHEDULE_UPDATED_SUBJECT:grad.batch.schedule.updated}

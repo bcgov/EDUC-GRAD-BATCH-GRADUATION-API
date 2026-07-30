@@ -18,8 +18,12 @@ import java.util.Optional;
 @Configuration
 public class TaskSchedulerConfig {
 
+    private final LockProvider lockProvider;
+
     @Autowired
-    LockProvider lockProvider;
+    public TaskSchedulerConfig(LockProvider lockProvider) {
+        this.lockProvider = lockProvider;
+    }
 
     // Shedlock configuration for user scheduled jobs
     @Value("${batch.user.scheduled.jobs.lockAtLeastFor}")
@@ -40,5 +44,14 @@ public class TaskSchedulerConfig {
         scheduler.setThreadNamePrefix("UserScheduledTask-");
         scheduler.initialize();
         return new LockableTaskScheduler(scheduler, lockManager);
+    }
+
+    @Bean(name = "systemTaskScheduler")
+    public ThreadPoolTaskScheduler systemTaskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(5);
+        scheduler.setThreadNamePrefix("SystemBatchTask-");
+        scheduler.initialize();
+        return scheduler;
     }
 }
