@@ -215,6 +215,48 @@ public class GradBatchHistoryServiceTest {
     }
 
     @Test
+    public void testIsScheduledBatchPipelineRunActive_whenBatchTriggeredRunExists_returnsTrue() {
+        LocalDateTime now = LocalDateTime.now();
+        BatchGradAlgorithmJobHistoryEntity history = createJobHistory(3011L, "REGALG", BatchStatusEnum.STARTED.name(), now.minusMinutes(10), now.minusSeconds(30));
+        history.setTriggerBy("BATCH");
+
+        when(batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(anyList(), any(LocalDateTime.class)))
+                .thenReturn(List.of(history));
+
+        boolean response = gradBatchHistoryService.isScheduledBatchPipelineRunActive();
+
+        assertThat(response).isTrue();
+    }
+
+    @Test
+    public void testIsScheduledBatchPipelineRunActive_whenOnlyManualRunExists_returnsFalse() {
+        LocalDateTime now = LocalDateTime.now();
+        BatchGradAlgorithmJobHistoryEntity history = createJobHistory(3012L, "REGALG", BatchStatusEnum.STARTED.name(), now.minusMinutes(10), now.minusSeconds(30));
+        history.setTriggerBy("MANUAL");
+
+        when(batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(anyList(), any(LocalDateTime.class)))
+                .thenReturn(List.of(history));
+
+        boolean response = gradBatchHistoryService.isScheduledBatchPipelineRunActive();
+
+        assertThat(response).isFalse();
+    }
+
+    @Test
+    public void testIsScheduledBatchPipelineRunActive_whenBatchTriggeredRunIsStale_returnsFalse() {
+        LocalDateTime now = LocalDateTime.now();
+        BatchGradAlgorithmJobHistoryEntity history = createJobHistory(3013L, "REGALG", BatchStatusEnum.STARTED.name(), now.minusHours(1), now.minusMinutes(20));
+        history.setTriggerBy("BATCH");
+
+        when(batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(anyList(), any(LocalDateTime.class)))
+                .thenReturn(List.of(history));
+
+        boolean response = gradBatchHistoryService.isScheduledBatchPipelineRunActive();
+
+        assertThat(response).isFalse();
+    }
+
+    @Test
     public void testTouchHeartbeat_when_historyExists_updatesHeartbeat() {
         Long batchId = 3001L;
         BatchGradAlgorithmJobHistoryEntity history = createJobHistory(

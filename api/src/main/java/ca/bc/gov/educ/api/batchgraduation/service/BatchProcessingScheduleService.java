@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingSchedule;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingScheduleUpdateRequest;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
+import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +58,7 @@ public class BatchProcessingScheduleService {
         validateScheduledDateTime(scheduledDateTime, zoneId);
 
         entity.setCronExpression(toDailyCron(scheduledDateTime.toLocalTime()));
+        entity.setUpdateUser(ThreadLocalStateUtil.getCurrentUser());
         BatchProcessingEntity updated = batchProcessingRepository.save(entity);
         systemBatchSchedulingService.refreshScheduledJob(normalizedJobType);
         batchScheduleUpdatePublisher.publishScheduleUpdated(normalizedJobType);

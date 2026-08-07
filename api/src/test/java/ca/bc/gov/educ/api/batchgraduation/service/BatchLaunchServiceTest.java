@@ -35,6 +35,9 @@ public class BatchLaunchServiceTest {
     @Mock
     private GradDashboardService gradDashboardService;
 
+    @Mock
+    private GradBatchHistoryService gradBatchHistoryService;
+
     @InjectMocks
     private BatchLaunchService batchLaunchService;
 
@@ -42,6 +45,7 @@ public class BatchLaunchServiceTest {
     public void testLaunchRegularGradAlgorithm_whenEnabled_launchesBatch() throws Exception {
         BatchProcessingEntity batchProcessingEntity = new BatchProcessingEntity();
         batchProcessingEntity.setEnabled("Y");
+        when(gradBatchHistoryService.isScheduledBatchPipelineRunActive()).thenReturn(false);
         when(gradDashboardService.findBatchProcessing("REGALG")).thenReturn(Optional.of(batchProcessingEntity));
         when(jobLauncher.run(any(Job.class), any(JobParameters.class))).thenReturn(new JobExecution(210L));
 
@@ -57,11 +61,22 @@ public class BatchLaunchServiceTest {
     public void testLaunchRegularGradAlgorithm_whenDisabled_doesNotLaunchBatch() throws Exception {
         BatchProcessingEntity batchProcessingEntity = new BatchProcessingEntity();
         batchProcessingEntity.setEnabled("N");
+        when(gradBatchHistoryService.isScheduledBatchPipelineRunActive()).thenReturn(false);
         when(gradDashboardService.findBatchProcessing("REGALG")).thenReturn(Optional.of(batchProcessingEntity));
 
         batchLaunchService.launchRegularGradAlgorithm();
 
         verify(jobLauncher, never()).run(any(Job.class), any(JobParameters.class));
+    }
+
+    @Test
+    public void testLaunchRegularGradAlgorithm_whenScheduledBatchPipelineIsAlreadyRunning_doesNotLaunchBatch() throws Exception {
+        when(gradBatchHistoryService.isScheduledBatchPipelineRunActive()).thenReturn(true);
+
+        batchLaunchService.launchRegularGradAlgorithm();
+
+        verify(jobLauncher, never()).run(any(Job.class), any(JobParameters.class));
+        verify(gradDashboardService, never()).findBatchProcessing("REGALG");
     }
 
     @Test
