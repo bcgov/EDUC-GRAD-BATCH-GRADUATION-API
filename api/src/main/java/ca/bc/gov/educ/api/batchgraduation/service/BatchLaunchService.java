@@ -29,8 +29,8 @@ public class BatchLaunchService {
     private final GradBatchHistoryService gradBatchHistoryService;
 
     public BatchLaunchService(
-            @Qualifier("GraduationBatchJob") Job graduationBatchJob,
-            @Qualifier("DistributionBatchJob") Job distributionBatchJob,
+            @Qualifier("graduationBatchJob") Job graduationBatchJob,
+            @Qualifier("distributionBatchJob") Job distributionBatchJob,
             @Qualifier("asyncJobLauncher") JobLauncher jobLauncher,
             GradDashboardService gradDashboardService,
             GradBatchHistoryService gradBatchHistoryService) {
