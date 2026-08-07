@@ -6,6 +6,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingSchedule;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingScheduleUpdateRequest;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,7 +75,7 @@ public class BatchProcessingScheduleService {
 
     private ZoneId resolveZoneId(String timeZone) {
         if (timeZone == null || timeZone.isBlank()) {
-            return ZoneId.systemDefault();
+            return EducGradBatchGraduationApiConstants.SYSTEM_ZONE;
         }
         try {
             return ZoneId.of(timeZone);

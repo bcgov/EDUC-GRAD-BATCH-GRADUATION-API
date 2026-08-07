@@ -7,6 +7,7 @@ import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineRunStatus;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmJobHistoryRepository;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchGradAlgorithmStudentRepository;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,7 +40,6 @@ public class GradBatchHistoryService {
     private static final Duration HEARTBEAT_THROTTLE = Duration.ofSeconds(15);
     private static final Duration WARNING_THRESHOLD = Duration.ofMinutes(5);
     private static final Duration INSPECT_THRESHOLD = Duration.ofMinutes(15);
-    private static final ZoneId SYSTEM_ZONE = ZoneId.systemDefault();
     private static final String HEALTH_OK = "ok";
     private static final String HEALTH_WARNING = "warning";
     private static final String HEALTH_INSPECT = "please_inspect";
@@ -81,12 +80,12 @@ public class GradBatchHistoryService {
             if (ent.getLastHeartbeatTime() != null) {
                 current.setLastHeartbeatTime(ent.getLastHeartbeatTime());
             } else if (current.getLastHeartbeatTime() == null) {
-                current.setLastHeartbeatTime(LocalDateTime.now());
+                current.setLastHeartbeatTime(currentLocalDateTime());
             }
             return batchGradAlgorithmJobHistoryRepository.save(current);
         } else {
             if (ent.getLastHeartbeatTime() == null) {
-                ent.setLastHeartbeatTime(LocalDateTime.now());
+                ent.setLastHeartbeatTime(currentLocalDateTime());
             }
             // create
             return batchGradAlgorithmJobHistoryRepository.save(ent);
@@ -95,7 +94,7 @@ public class GradBatchHistoryService {
 
     @Transactional
     public void touchHeartbeat(Long batchId) {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = currentLocalDateTime();
         LocalDateTime lastHeartbeat = heartbeatThrottleMap.get(batchId);
         if (lastHeartbeat != null && lastHeartbeat.plus(HEARTBEAT_THROTTLE).isAfter(now)) {
             return;
@@ -118,7 +117,7 @@ public class GradBatchHistoryService {
     public BatchPipelineStatus getBatchPipelineStatus() {
         BatchPipelineStatus response = new BatchPipelineStatus();
         response.setRunning(false);
-        LocalDateTime startTimeCutoff = LocalDateTime.now().minus(ACTIVE_WINDOW);
+        LocalDateTime startTimeCutoff = currentLocalDateTime().minus(ACTIVE_WINDOW);
         List<BatchGradAlgorithmJobHistoryEntity> recentRuns =
                 batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(PIPELINE_JOB_TYPES, startTimeCutoff);
 
@@ -146,7 +145,7 @@ public class GradBatchHistoryService {
 
     @Transactional(readOnly = true)
     public boolean isScheduledBatchPipelineRunActive() {
-        LocalDateTime startTimeCutoff = LocalDateTime.now().minus(ACTIVE_WINDOW);
+        LocalDateTime startTimeCutoff = currentLocalDateTime().minus(ACTIVE_WINDOW);
         List<BatchGradAlgorithmJobHistoryEntity> recentRuns =
                 batchGradAlgorithmJobHistoryRepository.findRecentByJobTypesAndStartTimeAfter(PIPELINE_JOB_TYPES, startTimeCutoff);
 
@@ -173,8 +172,8 @@ public class GradBatchHistoryService {
             return HEALTH_INSPECT;
         }
         Duration staleness = Duration.between(
-                effectiveHeartbeat.atZone(SYSTEM_ZONE),
-                ZonedDateTime.now(SYSTEM_ZONE)
+                effectiveHeartbeat.atZone(EducGradBatchGraduationApiConstants.SYSTEM_ZONE),
+                ZonedDateTime.now(EducGradBatchGraduationApiConstants.SYSTEM_ZONE)
         );
         if (staleness.compareTo(INSPECT_THRESHOLD) > 0) {
             return HEALTH_INSPECT;
@@ -183,6 +182,10 @@ public class GradBatchHistoryService {
             return HEALTH_WARNING;
         }
         return HEALTH_OK;
+    }
+
+    private LocalDateTime currentLocalDateTime() {
+        return LocalDateTime.now(EducGradBatchGraduationApiConstants.SYSTEM_ZONE);
     }
 
     private boolean isTerminalStatus(String status) {

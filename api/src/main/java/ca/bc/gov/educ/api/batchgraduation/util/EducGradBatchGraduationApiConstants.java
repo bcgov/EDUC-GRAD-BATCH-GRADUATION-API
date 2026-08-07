@@ -5,7 +5,9 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Component
 @Getter
@@ -83,6 +85,8 @@ public class EducGradBatchGraduationApiConstants {
     public static final String SECOND_DEFAULT_DATE_TIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
     public static final String DATE_FORMAT = SECOND_DEFAULT_DATE_FORMAT;
     public static final String TRAX_DATE_FORMAT = "yyyyMM";
+    public static final ZoneId SYSTEM_ZONE = ZoneId.of("America/Vancouver");
+    public static final TimeZone SYSTEM_TIME_ZONE = TimeZone.getTimeZone(SYSTEM_ZONE);
 
     // **** Model defaults
     public static final String DEFAULT_CREATED_BY = "API_GRAD_BATCH";
