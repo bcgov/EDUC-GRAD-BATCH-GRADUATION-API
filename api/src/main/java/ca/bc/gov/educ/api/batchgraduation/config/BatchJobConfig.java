@@ -278,7 +278,7 @@ public class BatchJobConfig {
                 .build();
     }
 
-    @Bean(name="GraduationBatchJob")
+    @Bean(name="graduationBatchJob")
     public Job graduationBatchJob(JobRepository jobRepository, PlatformTransactionManager transactionManager, GradRunCompletionNotificationListener listener, EducGradBatchGraduationApiConstants constants) {
         return new JobBuilder("GraduationBatchJob", jobRepository)
                 .incrementer(new RunIdIncrementer())
@@ -734,7 +734,7 @@ public class BatchJobConfig {
                 .build();
     }
 
-    @Bean(name="DistributionBatchJob")
+    @Bean(name="distributionBatchJob")
     public Job distributionBatchJob(JobRepository jobRepository, PlatformTransactionManager transactionManager, DistributionRunCompletionNotificationListener listener, EducGradBatchGraduationApiConstants constants) {
         return new JobBuilder("DistributionBatchJob", jobRepository)
                 .incrementer(new RunIdIncrementer())

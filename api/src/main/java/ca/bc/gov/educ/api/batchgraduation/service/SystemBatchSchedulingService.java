@@ -3,6 +3,7 @@ package ca.bc.gov.educ.api.batchgraduation.service;
 import ca.bc.gov.educ.api.batchgraduation.config.BatchJobLauncher;
 import ca.bc.gov.educ.api.batchgraduation.entity.BatchProcessingEntity;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
+import ca.bc.gov.educ.api.batchgraduation.util.EducGradBatchGraduationApiConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
@@ -63,7 +63,7 @@ public class SystemBatchSchedulingService {
 
         ScheduledFuture<?> future = systemTaskScheduler.schedule(
                 batchJobLauncher::runRegularGradAlgorithm,
-                new CronTrigger(schedule.getCronExpression(), TimeZone.getTimeZone(TimeZone.getDefault().getID()))
+                new CronTrigger(schedule.getCronExpression(), EducGradBatchGraduationApiConstants.SYSTEM_TIME_ZONE)
         );
         scheduledJobs.put(REGALG, future);
         log.info("{} schedule refreshed with cron {}", REGALG, schedule.getCronExpression());

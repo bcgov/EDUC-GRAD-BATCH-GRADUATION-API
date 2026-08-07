@@ -6,9 +6,11 @@ import ca.bc.gov.educ.api.batchgraduation.model.BatchPipelineStatus;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingSchedule;
 import ca.bc.gov.educ.api.batchgraduation.model.BatchProcessingScheduleUpdateRequest;
 import ca.bc.gov.educ.api.batchgraduation.repository.BatchProcessingRepository;
+import ca.bc.gov.educ.api.batchgraduation.util.ThreadLocalStateUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -46,6 +48,7 @@ public class BatchProcessingScheduleServiceTest {
 
     @Before
     public void setUp() {
+        ThreadLocalStateUtil.clear();
         regalgSchedule = new BatchProcessingEntity();
         regalgSchedule.setJobType("REGALG");
         regalgSchedule.setEnabled("Y");
@@ -82,6 +85,29 @@ public class BatchProcessingScheduleServiceTest {
         assertThat(response.getStartTime()).isEqualTo("23:00");
         verify(systemBatchSchedulingService).refreshScheduledJob("REGALG");
         verify(batchScheduleUpdatePublisher).publishScheduleUpdated("REGALG");
+    }
+
+    @Test
+    public void testUpdateBatchProcessingSchedule_updatesAuditUser() {
+        String today = LocalDate.now(ZoneId.systemDefault()).toString();
+        BatchProcessingScheduleUpdateRequest request = new BatchProcessingScheduleUpdateRequest();
+        request.setScheduledDateTime(today + "T22:00:00");
+        request.setTimeZone(ZoneId.systemDefault().getId());
+
+        regalgSchedule.setUpdateUser("API_GRAD_BATCH");
+        ThreadLocalStateUtil.setCurrentUser("GRAD_System_Coordinator");
+
+        BatchPipelineStatus pipelineStatus = new BatchPipelineStatus();
+        pipelineStatus.setRunning(false);
+        when(batchProcessingRepository.findByJobType("REGALG")).thenReturn(Optional.of(regalgSchedule));
+        when(gradBatchHistoryService.getBatchPipelineStatus()).thenReturn(pipelineStatus);
+        when(batchProcessingRepository.save(any(BatchProcessingEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        batchProcessingScheduleService.updateBatchProcessingSchedule("REGALG", request);
+
+        ArgumentCaptor<BatchProcessingEntity> entityCaptor = ArgumentCaptor.forClass(BatchProcessingEntity.class);
+        verify(batchProcessingRepository).save(entityCaptor.capture());
+        assertThat(entityCaptor.getValue().getUpdateUser()).isEqualTo("GRAD_System_Coordinator");
     }
 
     @Test

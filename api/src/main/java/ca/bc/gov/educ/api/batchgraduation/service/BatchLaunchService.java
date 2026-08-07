@@ -26,19 +26,26 @@ public class BatchLaunchService {
     private final Job distributionBatchJob;
     private final JobLauncher jobLauncher;
     private final GradDashboardService gradDashboardService;
+    private final GradBatchHistoryService gradBatchHistoryService;
 
     public BatchLaunchService(
-            @Qualifier("GraduationBatchJob") Job graduationBatchJob,
-            @Qualifier("DistributionBatchJob") Job distributionBatchJob,
+            @Qualifier("graduationBatchJob") Job graduationBatchJob,
+            @Qualifier("distributionBatchJob") Job distributionBatchJob,
             @Qualifier("asyncJobLauncher") JobLauncher jobLauncher,
-            GradDashboardService gradDashboardService) {
+            GradDashboardService gradDashboardService,
+            GradBatchHistoryService gradBatchHistoryService) {
         this.graduationBatchJob = graduationBatchJob;
         this.distributionBatchJob = distributionBatchJob;
         this.jobLauncher = jobLauncher;
         this.gradDashboardService = gradDashboardService;
+        this.gradBatchHistoryService = gradBatchHistoryService;
     }
 
     public void launchRegularGradAlgorithm(){
+        if (gradBatchHistoryService.isScheduledBatchPipelineRunActive()) {
+            log.info("Skipping scheduled REGALG launch because another BATCH pipeline run is active.");
+            return;
+        }
         JobParametersBuilder builder = new JobParametersBuilder();
         builder.addLong(TIME, System.currentTimeMillis()).toJobParameters();
         builder.addString(JOB_TRIGGER, BATCH_TRIGGER);
