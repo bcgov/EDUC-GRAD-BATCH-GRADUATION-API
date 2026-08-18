@@ -29,6 +29,7 @@ public class EDWSnapshotProcessor implements ItemProcessor<SnapshotResponse, Edw
 		summaryDTO.setBatchId(batchId);
 		LOGGER.debug("Processing partitionData for Snapshot - pen# {} ", snapshot.getPen());
 		EdwGraduationSnapshot item = new EdwGraduationSnapshot();
+		item.setStudentID(snapshot.getStudentID());
 		item.setPen(snapshot.getPen());
 		item.setSchoolOfRecord(snapshot.getSchoolOfRecord());
 		if (StringUtils.isNotBlank(snapshot.getSchoolOfRecordId())) {
